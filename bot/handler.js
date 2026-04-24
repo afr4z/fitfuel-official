@@ -1,3 +1,9 @@
+import { getSession, setSession } from "./session.js";
+import { STATES } from "./states.js";
+import { handleGreeting } from "./handlers/greeting.js";
+import { handleMainMenu } from "./handlers/menu.js";
+import { handleOrderAction, handleMealChange } from "./handlers/orders.js";
+
 export async function handleIncoming(phone, message) {
   const session = await getSession(phone);
 
