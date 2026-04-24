@@ -239,7 +239,6 @@ export async function handleAddress(phone, session, addressText, setSession) {
       area_name: location?.areaName ?? location?.locationName ?? null,
       amount: totalPrice,
       status: "pending_payment",
-      created_at: new Date().toISOString(),
     })
     .select()
     .single();

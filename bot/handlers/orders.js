@@ -62,13 +62,12 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
       });
 
       // Fetch live menu from PetPooja; fall back to defaults on error
-      let items;
+      let items = FALLBACK_ITEMS;
       try {
-        items = await getMenuItems();
-        if (!items.length) items = FALLBACK_ITEMS;
+        const fetched = await getMenuItems();
+        if (fetched.length) items = fetched;
       } catch (e) {
         console.error("[PETPOOJA] Error fetching menu:", e.message);
-        items = FALLBACK_ITEMS;
       }
 
       const rows = items.map((item) => ({
