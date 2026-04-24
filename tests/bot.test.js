@@ -12,16 +12,24 @@ vi.mock(
   "@supabase/supabase-js",
   async () => await import("./mocks/supabase.mock.js"),
 );
+vi.mock(
+  "../lib/petpooja.js",
+  async () => await import("./mocks/petpooja.mock.js"),
+);
+vi.mock(
+  "../lib/razorpay.js",
+  async () => await import("./mocks/razorpay.mock.js"),
+);
 // Import mocks and handler after mocking
 const { sentMessages, resetMocks } = await import("./mocks/whatsapp.mock.js");
 const { resetSessions, peekSession } = await import("./mocks/session.mock.js");
-const { resetDB, seedOrder, getOrder } = await import(
+const { resetDB, seedOrder, getOrder, getSubscription } = await import(
   "./mocks/supabase.mock.js"
 );
+const { createdLinks, resetRazorpay } = await import("./mocks/razorpay.mock.js");
 const { handleIncoming } = await import("../bot/handler.js");
-const { makeTextMessage, makeButtonReply, makeListReply } = await import(
-  "./helpers/simulate.js"
-);
+const { makeTextMessage, makeButtonReply, makeListReply, makeLocationMessage } =
+  await import("./helpers/simulate.js");
 
 const PHONE = "919876543210";
 
@@ -29,6 +37,7 @@ beforeEach(() => {
   resetMocks();
   resetSessions();
   resetDB();
+  resetRazorpay();
 });
 
 // ─── Greeting ────────────────────────────────────────────────────────────────
@@ -81,13 +90,15 @@ describe("Main Menu", () => {
     expect(sentMessages[0].text).toContain("Monthly");
   });
 
-  test("ORDER_NOW sends order instructions", async () => {
+  test("ORDER_NOW starts subscription plan selection", async () => {
     await handleIncoming(
       PHONE,
       makeButtonReply(PHONE, "ORDER_NOW", "Order Now"),
     );
 
-    expect(sentMessages[0].text).toContain("preferred plan");
+    expect(sentMessages[0].type).toBe("list");
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("SELECTING_PLAN_CATEGORY");
   });
 
   test("CONTACT_US sends contact info", async () => {
@@ -209,7 +220,165 @@ describe("Meal Change", () => {
   });
 });
 
-// ─── Edge Cases ──────────────────────────────────────────────────────────────
+// ─── Subscription Flow ───────────────────────────────────────────────────────
+
+describe("Subscription Flow", () => {
+  // Helper: walk the user through all steps up to (but not including) the
+  // specified step so each test starts at the right state.
+  async function reach(upTo) {
+    await handleIncoming(PHONE, makeTextMessage(PHONE, "hi")); // → MAIN_MENU
+    if (upTo === "MAIN_MENU") return;
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "ORDER_NOW", "Order Now")); // → SELECTING_PLAN_CATEGORY
+    if (upTo === "SELECTING_PLAN_CATEGORY") return;
+
+    await handleIncoming(PHONE, makeListReply(PHONE, "PLAN_WEIGHT_LOSS", "Weight Loss")); // → SELECTING_DAYS
+    if (upTo === "SELECTING_DAYS") return;
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "DAYS_7", "7 Days")); // → SELECTING_MEALS_PER_DAY
+    if (upTo === "SELECTING_MEALS_PER_DAY") return;
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "MEALS_1", "Breakfast only")); // → AWAITING_LOCATION
+    if (upTo === "AWAITING_LOCATION") return;
+
+    await handleIncoming(PHONE, makeTextMessage(PHONE, "Koramangala, Bangalore")); // → AWAITING_ADDRESS
+  }
+
+  beforeEach(async () => {
+    await handleIncoming(PHONE, makeTextMessage(PHONE, "hi"));
+    resetMocks();
+  });
+
+  test("ORDER_NOW sends plan category list", async () => {
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "ORDER_NOW", "Order Now"));
+
+    expect(sentMessages[0].type).toBe("list");
+    expect(sentMessages[0].body).toContain("plan");
+    expect(peekSession(PHONE).state).toBe("SELECTING_PLAN_CATEGORY");
+  });
+
+  test("PLAN_KETO stores planId and moves to SELECTING_DAYS", async () => {
+    await reach("SELECTING_PLAN_CATEGORY");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeListReply(PHONE, "PLAN_KETO", "Keto"));
+
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("SELECTING_DAYS");
+    expect(session.data.planId).toBe("PLAN_KETO");
+  });
+
+  test("PLAN_MUSCLE_GAIN stores planId and moves to SELECTING_DAYS", async () => {
+    await reach("SELECTING_PLAN_CATEGORY");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeListReply(PHONE, "PLAN_MUSCLE_GAIN", "Muscle Gain"));
+
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("SELECTING_DAYS");
+    expect(session.data.planId).toBe("PLAN_MUSCLE_GAIN");
+  });
+
+  test("unknown plan id resends plan list", async () => {
+    await reach("SELECTING_PLAN_CATEGORY");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeListReply(PHONE, "PLAN_INVALID", "???"));
+
+    expect(sentMessages[0].type).toBe("list");
+    expect(peekSession(PHONE).state).toBe("SELECTING_PLAN_CATEGORY");
+  });
+
+  test("DAYS_14 stores days and moves to SELECTING_MEALS_PER_DAY", async () => {
+    await reach("SELECTING_DAYS");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "DAYS_14", "14 Days"));
+
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("SELECTING_MEALS_PER_DAY");
+    expect(session.data.days).toBe(14);
+  });
+
+  test("day selection body shows price preview", async () => {
+    await reach("SELECTING_DAYS");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "DAYS_7", "7 Days"));
+
+    // Should show at least one ₹ price
+    expect(sentMessages[0].body).toContain("₹");
+  });
+
+  test("MEALS_3 stores mealsPerDay and moves to AWAITING_LOCATION", async () => {
+    await reach("SELECTING_MEALS_PER_DAY");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "MEALS_3", "All 3 Meals"));
+
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("AWAITING_LOCATION");
+    expect(session.data.mealsPerDay).toBe(3);
+  });
+
+  test("sharing GPS location moves to AWAITING_ADDRESS", async () => {
+    await reach("AWAITING_LOCATION");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeLocationMessage(PHONE, 12.9716, 77.5946));
+
+    expect(sentMessages[0].type).toBe("text");
+    expect(sentMessages[0].text).toContain("address");
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("AWAITING_ADDRESS");
+    expect(session.data.location.latitude).toBe(12.9716);
+    expect(session.data.location.longitude).toBe(77.5946);
+  });
+
+  test("typing area name also moves to AWAITING_ADDRESS", async () => {
+    await reach("AWAITING_LOCATION");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeTextMessage(PHONE, "Indiranagar, Bengaluru"));
+
+    expect(sentMessages[0].type).toBe("text");
+    expect(sentMessages[0].text).toContain("address");
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("AWAITING_ADDRESS");
+    expect(session.data.location.areaName).toBe("Indiranagar, Bengaluru");
+  });
+
+  test("typing address creates subscription, sends payment link, sets AWAITING_PAYMENT", async () => {
+    await reach("AWAITING_ADDRESS");
+    resetMocks();
+
+    await handleIncoming(PHONE, makeTextMessage(PHONE, "42, 3rd Cross, Koramangala"));
+
+    expect(sentMessages[0].type).toBe("text");
+    expect(sentMessages[0].text).toContain("₹");
+    expect(sentMessages[0].text).toContain("rzp.io");
+    expect(createdLinks).toHaveLength(1);
+
+    const session = peekSession(PHONE);
+    expect(session.state).toBe("AWAITING_PAYMENT");
+    expect(session.data.subscriptionId).toBeTruthy();
+
+    const sub = getSubscription(session.data.subscriptionId);
+    expect(sub.phone).toBe(PHONE);
+    expect(sub.status).toBe("pending_payment");
+    expect(sub.address).toBe("42, 3rd Cross, Koramangala");
+  });
+
+  test("any button press while AWAITING_PAYMENT shows payment reminder", async () => {
+    const { setSession } = await import("./mocks/session.mock.js");
+    await setSession(PHONE, { state: "AWAITING_PAYMENT", data: {} });
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "SOME_BTN", "something"));
+
+    expect(sentMessages[0].type).toBe("text");
+    expect(sentMessages[0].text).toContain("Payment Pending");
+  });
+});
 
 describe("Edge Cases", () => {
   test("status updates (no messages) are ignored gracefully", async () => {
