@@ -15,10 +15,11 @@ function verifySignature(rawBody, signature) {
     .createHmac("sha256", secret)
     .update(rawBody)
     .digest("hex");
-  return crypto.timingSafeEqual(
-    Buffer.from(digest, "hex"),
-    Buffer.from(signature, "hex"),
-  );
+  const digestBuf = Buffer.from(digest, "hex");
+  const sigBuf = Buffer.from(signature, "hex");
+  // timingSafeEqual throws if buffers differ in length
+  if (digestBuf.length !== sigBuf.length) return false;
+  return crypto.timingSafeEqual(digestBuf, sigBuf);
 }
 
 export default async function handler(req, res) {
