@@ -30,3 +30,12 @@ export function makeListReply(phone, listId, title, msgId = "msg003") {
     },
   };
 }
+
+export function makeLocationMessage(phone, latitude, longitude, msgId = "msg004") {
+  return {
+    from: phone,
+    id: msgId,
+    type: "location",
+    location: { latitude, longitude },
+  };
+}

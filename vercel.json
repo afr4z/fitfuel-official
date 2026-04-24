@@ -4,6 +4,10 @@
     "api/webhook.js": {
       "maxDuration": 30,
       "memory": 256
+    },
+    "api/razorpay-webhook.js": {
+      "maxDuration": 10,
+      "memory": 128
     }
   }
 }
