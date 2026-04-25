@@ -36,41 +36,56 @@ export default async function handler(req, res) {
 
   const { event, payload } = req.body || {};
 
-  if (event === "payment_link.paid") {
-    const subscriptionId = payload?.payment_link?.entity?.reference_id;
-    const paymentId = payload?.payment?.entity?.id;
+  try {
+    if (event === "payment_link.paid") {
+      const subscriptionId = payload?.payment_link?.entity?.reference_id;
+      const paymentId = payload?.payment?.entity?.id;
 
-    if (!subscriptionId) {
-      return res.status(200).json({ status: "ignored" });
+      if (!subscriptionId) {
+        return res.status(200).json({ status: "ignored" });
+      }
+
+      // Mark subscription as active
+      const { error: updateError } = await supabase
+        .from("subscriptions")
+        .update({
+          status: "active",
+          razorpay_payment_id: paymentId,
+          paid_at: new Date().toISOString(),
+        })
+        .eq("id", subscriptionId);
+
+      if (updateError) {
+        console.error("[WEBHOOK] Failed to activate subscription:", updateError.message);
+        return res.status(500).json({ error: "DB update failed" });
+      }
+
+      // Fetch subscription to get phone number
+      const { data: subscription, error: fetchError } = await supabase
+        .from("subscriptions")
+        .select()
+        .eq("id", subscriptionId)
+        .single();
+
+      if (fetchError) {
+        console.error("[WEBHOOK] Failed to fetch subscription:", fetchError.message);
+        return res.status(500).json({ error: "DB fetch failed" });
+      }
+
+      if (subscription?.phone) {
+        await sendText(
+          subscription.phone,
+          `🎉 *Payment Confirmed!*\n\n` +
+            `Your FitFuel *${subscription.plan_title}* subscription is now *active*!\n\n` +
+            `📦 Deliveries start from tomorrow.\n` +
+            `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
+            `Thank you for choosing FitFuel! 💪`,
+        );
+      }
     }
-
-    // Mark subscription as active
-    await supabase
-      .from("subscriptions")
-      .update({
-        status: "active",
-        razorpay_payment_id: paymentId,
-        paid_at: new Date().toISOString(),
-      })
-      .eq("id", subscriptionId);
-
-    // Fetch subscription to get phone number
-    const { data: subscription } = await supabase
-      .from("subscriptions")
-      .select()
-      .eq("id", subscriptionId)
-      .single();
-
-    if (subscription?.phone) {
-      await sendText(
-        subscription.phone,
-        `🎉 *Payment Confirmed!*\n\n` +
-          `Your FitFuel *${subscription.plan_title}* subscription is now *active*!\n\n` +
-          `📦 Deliveries start from tomorrow.\n` +
-          `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
-          `Thank you for choosing FitFuel! 💪`,
-      );
-    }
+  } catch (err) {
+    console.error("[WEBHOOK] Unhandled error:", err.message, err.stack);
+    return res.status(500).json({ error: "Internal error" });
   }
 
   return res.status(200).json({ status: "ok" });
