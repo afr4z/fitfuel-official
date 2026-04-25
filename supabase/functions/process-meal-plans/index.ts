@@ -69,6 +69,7 @@ async function sendText(to: string, text: string) {
   if (!res.ok) {
     const err = await res.json();
     console.error(`[WA] Failed to send to ${to}:`, JSON.stringify(err));
+    throw new Error(`WhatsApp sendText failed for ${to}: ${res.status}`);
   }
 }
 
@@ -104,6 +105,7 @@ async function sendButtons(
   if (!res.ok) {
     const err = await res.json();
     console.error(`[WA] Failed to send buttons to ${to}:`, JSON.stringify(err));
+    throw new Error(`WhatsApp sendButtons failed for ${to}: ${res.status}`);
   }
 }
 
@@ -162,11 +164,12 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error }), { status: 500 });
     }
 
-    console.log(`[CRON] Found ${slots.length} active ${slot} subscribers`);
+    const activeSlots = slots ?? [];
+    console.log(`[CRON] Found ${activeSlots.length} active ${slot} subscribers`);
 
     // 2. Process each subscriber
     const results = await Promise.allSettled(
-      slots.map(async (slotRow: any) => {
+      activeSlots.map(async (slotRow: any) => {
         const sub = slotRow.meal_plan_subscriptions;
         const phone = sub.phone;
 
@@ -259,7 +262,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         slot,
-        processed: slots.length,
+        processed: activeSlots.length,
         failed: failed.length,
       }),
       { status: 200 },

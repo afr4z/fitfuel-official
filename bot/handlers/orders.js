@@ -27,10 +27,16 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
   switch (action) {
     case "CONFIRM": {
-      await supabase
+      const { error: confirmError } = await supabase
         .from("orders")
         .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
         .eq("id", orderId);
+
+      if (confirmError) {
+        console.error("[DB] CONFIRM update failed:", confirmError.message);
+        await sendText(phone, `Sorry, something went wrong confirming your order. Please try again.`);
+        break;
+      }
 
       await sendText(
         phone,
@@ -41,10 +47,16 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
     }
 
     case "SKIP": {
-      await supabase
+      const { error: skipError } = await supabase
         .from("orders")
         .update({ status: "skipped" })
         .eq("id", orderId);
+
+      if (skipError) {
+        console.error("[DB] SKIP update failed:", skipError.message);
+        await sendText(phone, `Sorry, something went wrong skipping your order. Please try again.`);
+        break;
+      }
 
       await sendText(
         phone,
@@ -99,6 +111,11 @@ export async function handleMealChange(phone, session, listId, setSession) {
   const orderId = parts[1];
   const itemId = parts[2];
 
+  if (!orderId || !itemId) {
+    await sendText(phone, `Sorry, something went wrong. Please try again.`);
+    return;
+  }
+
   // Resolve item name from PetPooja; fall back gracefully
   let itemName = "Selected meal";
   try {
@@ -112,7 +129,7 @@ export async function handleMealChange(phone, session, listId, setSession) {
     if (fallback) itemName = fallback.itemname;
   }
 
-  await supabase
+  const { error: updateError } = await supabase
     .from("orders")
     .update({
       item_id: itemId,
@@ -122,6 +139,12 @@ export async function handleMealChange(phone, session, listId, setSession) {
       confirmed_at: new Date().toISOString(),
     })
     .eq("id", orderId);
+
+  if (updateError) {
+    console.error("[DB] Meal change update failed:", updateError.message);
+    await sendText(phone, `Sorry, something went wrong updating your meal. Please try again.`);
+    return;
+  }
 
   await sendText(
     phone,
