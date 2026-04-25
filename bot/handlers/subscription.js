@@ -2,11 +2,7 @@ import { sendText, sendButtons, sendList } from "../../lib/whatsapp.js";
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../../lib/razorpay.js";
 import { STATES } from "../states.js";
-import {
-  PLAN_CATEGORIES,
-  DAY_OPTIONS,
-  MEAL_OPTIONS,
-} from "../config/plans.js";
+import { PLAN_CATEGORIES, DAY_OPTIONS, MEAL_OPTIONS } from "../config/plans.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -23,7 +19,13 @@ function calcPrice(plan, dayOption, mealOption) {
  * Sends a list or button message depending on the number of options.
  * WhatsApp buttons support at most 3 items; more → use a list.
  */
-async function sendOptions(phone, bodyText, sectionTitle, listButtonLabel, options) {
+async function sendOptions(
+  phone,
+  bodyText,
+  sectionTitle,
+  listButtonLabel,
+  options,
+) {
   if (options.length <= 3) {
     await sendButtons(
       phone,
@@ -106,7 +108,13 @@ export async function handleDaySelection(phone, session, input, setSession) {
     const bodyText = plan
       ? `How many days would you like? (${plan.title})`
       : "How many days would you like?";
-    await sendOptions(phone, bodyText, "Duration", "Choose Duration", DAY_OPTIONS);
+    await sendOptions(
+      phone,
+      bodyText,
+      "Duration",
+      "Choose Duration",
+      DAY_OPTIONS,
+    );
     return;
   }
 
@@ -148,7 +156,12 @@ export async function handleDaySelection(phone, session, input, setSession) {
 
 // ─── Step 4 – Location ────────────────────────────────────────────────────────
 
-export async function handleMealSlotSelection(phone, session, input, setSession) {
+export async function handleMealSlotSelection(
+  phone,
+  session,
+  input,
+  setSession,
+) {
   const mealOption = MEAL_OPTIONS.find((m) => m.id === input);
 
   if (!mealOption) {
@@ -211,8 +224,15 @@ export async function handleLocation(phone, session, message, setSession) {
 // ─── Step 6 – Payment ─────────────────────────────────────────────────────────
 
 export async function handleAddress(phone, session, addressText, setSession) {
-  const { planId, planTitle, dayLabel, days, mealsPerDay, mealLabel, location } =
-    session.data;
+  const {
+    planId,
+    planTitle,
+    dayLabel,
+    days,
+    mealsPerDay,
+    mealLabel,
+    location,
+  } = session.data;
 
   const plan = PLAN_CATEGORIES.find((p) => p.id === planId);
   const dayOption = DAY_OPTIONS.find((d) => d.days === days);
@@ -222,57 +242,31 @@ export async function handleAddress(phone, session, addressText, setSession) {
       ? calcPrice(plan, dayOption, mealOption)
       : 0;
 
-  // Persist subscription
-  const { data: subscription, error } = await supabase
-    .from("subscriptions")
-    .insert({
-      phone,
-      plan_id: planId,
-      plan_title: planTitle,
-      days,
-      day_label: dayLabel,
-      meals_per_day: mealsPerDay,
-      meal_label: mealLabel,
-      address: addressText,
-      location_lat: location?.latitude ?? null,
-      location_lng: location?.longitude ?? null,
-      area_name: location?.areaName ?? location?.locationName ?? null,
-      amount: totalPrice,
-      status: "pending_payment",
-    })
-    .select()
-    .single();
+  // Store address in session — NOT in Supabase yet
+  await setSession(phone, {
+    ...session,
+    state: STATES.AWAITING_PAYMENT,
+    data: { ...session.data, address: addressText, amount: totalPrice },
+  });
 
-  if (error) {
-    console.error("[SUPABASE] Subscription insert error:", error.message);
-    await sendText(phone, `Sorry, something went wrong. Please try again.`);
-    return;
-  }
-
-  // Create Razorpay payment link
+  // Create Razorpay link with enough metadata to reconstruct the order on webhook
   let paymentUrl;
   try {
     const link = await createPaymentLink({
       amount: totalPrice,
-      description: `FitFuel ${planTitle} – ${dayLabel}, ${mealLabel}`,
+      description: `SitFuel ${planTitle} – ${dayLabel}, ${mealLabel}`,
       phone,
-      referenceId: subscription.id,
+      referenceId: phone, // use phone as ref so webhook can look up Redis session
     });
     paymentUrl = link.short_url;
   } catch (e) {
     console.error("[RAZORPAY] Error:", e.message);
     await sendText(
       phone,
-      `Sorry, we couldn't generate your payment link right now.\n\nPlease contact us at hello@fitfuelnutrition.com`,
+      `Sorry, we couldn't generate your payment link right now. Please contact support.`,
     );
     return;
   }
-
-  await setSession(phone, {
-    ...session,
-    state: STATES.AWAITING_PAYMENT,
-    data: { ...session.data, subscriptionId: subscription.id },
-  });
 
   await sendText(
     phone,

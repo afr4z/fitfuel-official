@@ -5,15 +5,9 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-const TTL = 60 * 60 * 24; // 24h Redis key expiry
-
-// How long (ms) an in-progress session stays valid without activity.
-// Override with SESSION_TIMEOUT_MINUTES env var (default: 30).
+const TTL = 60 * 60 * 24;
 const IDLE_TIMEOUT_MS =
-  (parseInt(process.env.SESSION_TIMEOUT_MINUTES, 10) || 30) * 60 * 1000;
-
-// States considered "at rest" — no timeout needed because the user has
-// finished a flow or hasn't started one yet.
+  (parseInt(process.env.SESSION_TIMEOUT_MINUTES, 10) || 5) * 60 * 1000;
 const IDLE_STATES = new Set(["GREETING", "MAIN_MENU"]);
 
 function isExpired(session) {
@@ -25,10 +19,13 @@ function isExpired(session) {
 export async function getSession(phone) {
   const data = await redis.get(`session:${phone}`);
   if (!data) return { state: "GREETING", data: {} };
+
   if (isExpired(data)) {
+    // Delete the stale session but tell the router WHY
     await redis.del(`session:${phone}`);
-    return { state: "GREETING", data: {} };
+    return { state: "SESSION_EXPIRED", data: {} };
   }
+
   return data;
 }
 

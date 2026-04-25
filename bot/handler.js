@@ -9,11 +9,16 @@ import {
   handleMealSlotSelection,
   handleLocation,
   handleAddress,
+  handleSessionExpired,
 } from "./handlers/subscription.js";
 import { sendText } from "../lib/whatsapp.js";
 
 export async function handleIncoming(phone, message) {
   const session = await getSession(phone);
+
+  if (session.state === STATES.SESSION_EXPIRED) {
+    return handleSessionExpired(phone, session, setSession);
+  }
 
   const buttonId = message.interactive?.button_reply?.id || "";
   const listId = message.interactive?.list_reply?.id || "";
@@ -63,13 +68,19 @@ export async function handleIncoming(phone, message) {
   // Subscription onboarding inputs — only valid in the matching state.
   // If the session expired (state reset) these stale button IDs fall through
   // to the default which shows the greeting.
-  if (input.startsWith("PLAN_") && session.state === STATES.SELECTING_PLAN_CATEGORY) {
+  if (
+    input.startsWith("PLAN_") &&
+    session.state === STATES.SELECTING_PLAN_CATEGORY
+  ) {
     return handlePlanCategory(phone, session, input, setSession);
   }
   if (input.startsWith("DAYS_") && session.state === STATES.SELECTING_DAYS) {
     return handleDaySelection(phone, session, input, setSession);
   }
-  if (input.startsWith("MEALS_") && session.state === STATES.SELECTING_MEALS_PER_DAY) {
+  if (
+    input.startsWith("MEALS_") &&
+    session.state === STATES.SELECTING_MEALS_PER_DAY
+  ) {
     return handleMealSlotSelection(phone, session, input, setSession);
   }
 
