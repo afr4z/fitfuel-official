@@ -1,39 +1,3 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
-// Setup type definitions for built-in Supabase Runtime APIs
-
-/* 
-import "@supabase/functions-js/edge-runtime.d.ts"
-
-console.log("Hello from Functions!")
-
-Deno.serve(async (req) => {
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
-  }
-
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
-})
-*/
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/process-meal-plans' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
-
-*/
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -44,66 +8,29 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-const WA_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN")!;
-const WA_PHONE_ID = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")!;
-const WA_URL = `https://graph.facebook.com/v19.0/${WA_PHONE_ID}/messages`;
+const VERCEL_URL = Deno.env.get("VERCEL_URL")!; // e.g. https://fitfuel.vercel.app
+const CRON_SECRET = Deno.env.get("CRON_SECRET")!;
 
-// ─── WhatsApp Helpers ──────────────────────────────────────────────────────
+// ─── Vercel Notify Helper ─────────────────────────────────────────────────
 
-async function sendText(to: string, text: string) {
-  const res = await fetch(WA_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${WA_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to,
-      type: "text",
-      text: { body: text },
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    console.error(`[WA] Failed to send to ${to}:`, JSON.stringify(err));
-  }
-}
-
-async function sendButtons(
+async function notifyViaVercel(
   to: string,
   body: string,
-  buttons: { id: string; title: string }[],
+  buttons?: { id: string; title: string }[],
 ) {
-  const res = await fetch(WA_URL, {
+  const res = await fetch(`${VERCEL_URL}/api/notify`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${WA_TOKEN}`,
+      Authorization: `Bearer ${CRON_SECRET}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to,
-      type: "interactive",
-      interactive: {
-        type: "button",
-        body: { text: body },
-        action: {
-          buttons: buttons.map((b) => ({
-            type: "reply",
-            reply: { id: b.id, title: b.title },
-          })),
-        },
-      },
-    }),
+    body: JSON.stringify({ to, body, buttons }),
   });
 
   if (!res.ok) {
-    const err = await res.json();
-    console.error(`[WA] Failed to send buttons to ${to}:`, JSON.stringify(err));
+    const err = await res.text();
+    console.error(`[NOTIFY] Failed for ${to}:`, err);
+    throw new Error(`Vercel notify failed for ${to}: ${res.status}`);
   }
 }
 
@@ -116,7 +43,7 @@ const SLOT_LABELS: Record<string, string> = {
 };
 
 const SLOT_CUTOFF_MINUTES: Record<string, number> = {
-  breakfast: 30, // customer has 30 min to change after notification
+  breakfast: 30,
   lunch: 60,
   dinner: 60,
 };
@@ -138,7 +65,7 @@ serve(async (req) => {
     const today = new Date().toISOString().split("T")[0];
     console.log(`[CRON] Processing slot=${slot} date=${today}`);
 
-    // 1. Fetch all active subscriptions that include this slot
+    // 1. Fetch all active subscription slots that include this slot
     const { data: slots, error } = await supabase
       .from("subscription_slots")
       .select(
@@ -162,11 +89,12 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error }), { status: 500 });
     }
 
-    console.log(`[CRON] Found ${slots.length} active ${slot} subscribers`);
+    const activeSlots = slots ?? [];
+    console.log(`[CRON] Found ${activeSlots.length} active ${slot} subscribers`);
 
     // 2. Process each subscriber
     const results = await Promise.allSettled(
-      slots.map(async (slotRow: any) => {
+      activeSlots.map(async (slotRow: any) => {
         const sub = slotRow.meal_plan_subscriptions;
         const phone = sub.phone;
 
@@ -218,12 +146,12 @@ serve(async (req) => {
             (1000 * 60 * 60 * 24),
         );
 
-        // 2d. Send WhatsApp notification
+        // 2d. Send WhatsApp notification via Vercel
         const slotLabel = SLOT_LABELS[slot];
         const cutoffMins = SLOT_CUTOFF_MINUTES[slot];
         const mealName = slotRow.default_item_name || "your default meal";
 
-        await sendButtons(
+        await notifyViaVercel(
           phone,
           `${slotLabel} is coming up! 🍽️\n\n` +
             `*Today's meal:* ${mealName}\n` +
@@ -259,7 +187,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         slot,
-        processed: slots.length,
+        processed: activeSlots.length,
         failed: failed.length,
       }),
       { status: 200 },

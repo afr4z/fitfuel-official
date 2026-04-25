@@ -1,11 +1,48 @@
+import { getSession, setSession } from "./session.js";
+import { STATES } from "./states.js";
+import { handleGreeting } from "./handlers/greeting.js";
+import { handleMainMenu } from "./handlers/menu.js";
+import { handleOrderAction, handleMealChange } from "./handlers/orders.js";
+import {
+  handlePlanCategory,
+  handleDaySelection,
+  handleMealSlotSelection,
+  handleLocation,
+  handleAddress,
+} from "./handlers/subscription.js";
+import { handleSessionExpired } from "./handlers/sessionExpired.js";
+import { sendText } from "../lib/whatsapp.js";
+
 export async function handleIncoming(phone, message) {
   const session = await getSession(phone);
+
+  if (session.state === STATES.SESSION_EXPIRED) {
+    return handleSessionExpired(phone, session, setSession);
+  }
 
   const buttonId = message.interactive?.button_reply?.id || "";
   const listId = message.interactive?.list_reply?.id || "";
   const input = buttonId || listId;
 
   console.log(`[HANDLER] phone=${phone} state=${session.state} input=${input}`);
+
+  // WhatsApp location share
+  if (message.type === "location") {
+    if (session.state === STATES.AWAITING_LOCATION) {
+      return handleLocation(phone, session, message, setSession);
+    }
+    return; // ignore location in other states
+  }
+
+  // Text input during onboarding steps that expect free text
+  if (message.type === "text") {
+    if (session.state === STATES.AWAITING_LOCATION) {
+      return handleLocation(phone, session, message, setSession);
+    }
+    if (session.state === STATES.AWAITING_ADDRESS) {
+      return handleAddress(phone, session, message.text.body, setSession);
+    }
+  }
 
   // Any unrecognised input or plain text → show main menu
   if (!input) {
@@ -23,9 +60,28 @@ export async function handleIncoming(phone, message) {
     return handleOrderAction(phone, session, input, setSession);
   }
 
-  // Meal selection
+  // Meal selection from change flow
   if (input.startsWith("MEAL_")) {
     return handleMealChange(phone, session, input, setSession);
+  }
+
+  // Subscription onboarding inputs — only valid in the matching state.
+  // If the session expired (state reset) these stale button IDs fall through
+  // to the default which shows the greeting.
+  if (
+    input.startsWith("PLAN_") &&
+    session.state === STATES.SELECTING_PLAN_CATEGORY
+  ) {
+    return handlePlanCategory(phone, session, input, setSession);
+  }
+  if (input.startsWith("DAYS_") && session.state === STATES.SELECTING_DAYS) {
+    return handleDaySelection(phone, session, input, setSession);
+  }
+  if (
+    input.startsWith("MEALS_") &&
+    session.state === STATES.SELECTING_MEALS_PER_DAY
+  ) {
+    return handleMealSlotSelection(phone, session, input, setSession);
   }
 
   switch (session.state) {
@@ -43,6 +99,13 @@ export async function handleIncoming(phone, message) {
         `CHANGE_${session.data.orderId}`,
         setSession,
       );
+
+    case STATES.AWAITING_PAYMENT:
+      await sendText(
+        phone,
+        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType anything to restart from the beginning.`,
+      );
+      return;
 
     default:
       return handleGreeting(phone, session, setSession);
