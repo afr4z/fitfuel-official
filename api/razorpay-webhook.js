@@ -4,7 +4,7 @@ import { sendText } from "../lib/whatsapp.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
 function verifySignature(rawBody, signature) {
@@ -56,7 +56,10 @@ export default async function handler(req, res) {
         .eq("id", subscriptionId);
 
       if (updateError) {
-        console.error("[WEBHOOK] Failed to activate subscription:", updateError.message);
+        console.error(
+          "[WEBHOOK] Failed to activate subscription:",
+          updateError.message,
+        );
         return res.status(500).json({ error: "DB update failed" });
       }
 
@@ -68,7 +71,10 @@ export default async function handler(req, res) {
         .single();
 
       if (fetchError) {
-        console.error("[WEBHOOK] Failed to fetch subscription:", fetchError.message);
+        console.error(
+          "[WEBHOOK] Failed to fetch subscription:",
+          fetchError.message,
+        );
         return res.status(500).json({ error: "DB fetch failed" });
       }
 
