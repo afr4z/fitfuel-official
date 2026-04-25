@@ -1,5 +1,6 @@
 import { sendText } from "../../lib/whatsapp.js";
 import { handleGreeting } from "./greeting.js";
+import { startSubscription } from "./subscription.js";
 
 export async function handleMainMenu(phone, session, buttonId, setSession) {
   switch (buttonId) {
@@ -9,21 +10,12 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
         `🥗 *Our Nutrition Plans*\n\n` +
           `1️⃣ *Weekly Plan* — ₹999\n   7 days, choose breakfast/lunch/dinner\n\n` +
           `2️⃣ *Monthly Plan* — ₹3,499\n   30 days, choose breakfast/lunch/dinner\n\n` +
-          `Reply *ORDER* to get started 💪`,
+          `Tap *Order Now* to get started 💪`,
       );
       break;
 
     case "ORDER_NOW":
-      await sendText(
-        phone,
-        `🛒 *Place an Order*\n\n` +
-          `To get started, please share:\n` +
-          `1. Your preferred plan (Weekly / Monthly)\n` +
-          `2. Which slots (Breakfast / Lunch / Dinner)\n` +
-          `3. Any dietary restrictions\n\n` +
-          `Our team will get back to you within 2 hours! ⚡`,
-      );
-      break;
+      return startSubscription(phone, session, setSession);
 
     case "CONTACT_US":
       await sendText(
