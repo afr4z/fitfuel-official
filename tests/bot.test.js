@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { vi, describe, test, expect, beforeEach } from "vitest";
+import { vi, describe, test, expect, beforeEach, afterEach } from "vitest";
 vi.mock(
   "../lib/whatsapp.js",
   async () => await import("./mocks/whatsapp.mock.js"),
@@ -377,6 +377,73 @@ describe("Subscription Flow", () => {
 
     expect(sentMessages[0].type).toBe("text");
     expect(sentMessages[0].text).toContain("Payment Pending");
+  });
+});
+
+// ─── Session Timeout ─────────────────────────────────────────────────────────
+
+describe("Session Timeout", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("mid-flow session resets to greeting after timeout", async () => {
+    const { setSession, IDLE_TIMEOUT_MS } = await import("./mocks/session.mock.js");
+    // Put user partway through subscription flow
+    await setSession(PHONE, { state: "SELECTING_DAYS", data: { planId: "PLAN_KETO" } });
+
+    // Advance clock past the timeout
+    vi.advanceTimersByTime(IDLE_TIMEOUT_MS + 1000);
+
+    // Any input should now be treated as a fresh session
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "DAYS_7", "7 Days"));
+
+    expect(sentMessages[0].type).toBe("buttons");
+    expect(sentMessages[0].body).toContain("Welcome");
+  });
+
+  test("mid-flow session is still valid just before timeout", async () => {
+    const { IDLE_TIMEOUT_MS } = await import("./mocks/session.mock.js");
+    // Walk to SELECTING_DAYS
+    await handleIncoming(PHONE, makeTextMessage(PHONE, "hi"));
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "ORDER_NOW", "Order Now"));
+    await handleIncoming(PHONE, makeListReply(PHONE, "PLAN_KETO", "Keto"));
+    resetMocks();
+
+    // Advance to just before expiry
+    vi.advanceTimersByTime(IDLE_TIMEOUT_MS - 1000);
+
+    await handleIncoming(PHONE, makeButtonReply(PHONE, "DAYS_7", "7 Days"));
+
+    // Should continue the flow, not reset
+    expect(peekSession(PHONE).state).toBe("SELECTING_MEALS_PER_DAY");
+  });
+
+  test("GREETING state is never expired by timeout", async () => {
+    const { setSession, IDLE_TIMEOUT_MS } = await import("./mocks/session.mock.js");
+    await setSession(PHONE, { state: "GREETING", data: {} });
+
+    vi.advanceTimersByTime(IDLE_TIMEOUT_MS * 10);
+
+    const { getSession } = await import("./mocks/session.mock.js");
+    const session = await getSession(PHONE);
+    expect(session.state).toBe("GREETING");
+  });
+
+  test("AWAITING_PAYMENT resets after timeout instead of staying stuck", async () => {
+    const { setSession, IDLE_TIMEOUT_MS } = await import("./mocks/session.mock.js");
+    await setSession(PHONE, { state: "AWAITING_PAYMENT", data: { subscriptionId: "sub-1" } });
+
+    vi.advanceTimersByTime(IDLE_TIMEOUT_MS + 1000);
+
+    await handleIncoming(PHONE, makeTextMessage(PHONE, "hi"));
+
+    expect(sentMessages[0].type).toBe("buttons");
+    expect(sentMessages[0].body).toContain("Welcome");
   });
 });
 
