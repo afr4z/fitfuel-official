@@ -48,13 +48,6 @@ const SLOT_CUTOFF_MINUTES: Record<string, number> = {
   dinner: 60,
 };
 
-// mealsPerDay threshold required to be notified for each slot
-const SLOT_MIN_MEALS: Record<string, number> = {
-  breakfast: 1,
-  lunch: 2,
-  dinner: 3,
-};
-
 // ─── Main ──────────────────────────────────────────────────────────────────
 
 serve(async (req) => {
@@ -72,86 +65,129 @@ serve(async (req) => {
     const today = new Date().toISOString().split("T")[0];
     console.log(`[CRON] Processing slot=${slot} date=${today}`);
 
-    // 1. Fetch active subscriptions that cover this meal slot.
-    //    A subscription covers the slot when meals_per_day >= SLOT_MIN_MEALS[slot].
-    //    Expiry is derived from created_at + days (days column holds subscription duration).
-    const minMeals = SLOT_MIN_MEALS[slot];
-
-    const { data: subscriptions, error } = await supabase
-      .from("subscriptions")
-      .select("id, phone, plan_title, meal_label, days, meals_per_day, created_at")
-      .eq("status", "active")
-      .gte("meals_per_day", minMeals);
+    // 1. Fetch all active subscription slots that include this slot
+    const { data: slots, error } = await supabase
+      .from("subscription_slots")
+      .select(
+        `
+        *,
+        meal_plan_subscriptions!inner (
+          id,
+          phone,
+          status,
+          end_date,
+          plan_type
+        )
+      `,
+      )
+      .eq("slot", slot)
+      .eq("meal_plan_subscriptions.status", "active")
+      .gte("meal_plan_subscriptions.end_date", today);
 
     if (error) {
       console.error("[CRON] DB fetch error:", error);
       return new Response(JSON.stringify({ error }), { status: 500 });
     }
 
-    const todayMs = new Date(today).getTime();
+    const activeSlots = slots ?? [];
+    console.log(`[CRON] Found ${activeSlots.length} active ${slot} subscribers`);
 
-    // Filter out subscriptions whose calculated end_date has passed
-    const active = (subscriptions ?? []).filter((sub: any) => {
-      const startMs = new Date(sub.created_at).getTime();
-      const endMs = startMs + sub.days * 24 * 60 * 60 * 1000;
-      return endMs >= todayMs;
-    });
-
-    console.log(`[CRON] Found ${active.length} active ${slot} subscribers`);
-
-    // 2. Send notifications via Vercel
+    // 2. Process each subscriber
     const results = await Promise.allSettled(
-      active.map(async (sub: any) => {
+      activeSlots.map(async (slotRow: any) => {
+        const sub = slotRow.meal_plan_subscriptions;
         const phone = sub.phone;
 
-        const startMs = new Date(sub.created_at).getTime();
-        const endMs = startMs + sub.days * 24 * 60 * 60 * 1000;
-        const daysLeft = Math.ceil((endMs - todayMs) / (1000 * 60 * 60 * 24));
+        // 2a. Check if order already exists for today (avoid duplicates on retry)
+        const { data: existing } = await supabase
+          .from("orders")
+          .select("id")
+          .eq("slot_id", slotRow.id)
+          .eq("delivery_date", today)
+          .single();
 
+        if (existing) {
+          console.log(
+            `[CRON] Order already exists for ${phone} ${slot} ${today} — skipping`,
+          );
+          return;
+        }
+
+        // 2b. Create today's order with default meal
+        const { data: order, error: orderError } = await supabase
+          .from("orders")
+          .insert({
+            subscription_id: sub.id,
+            slot_id: slotRow.id,
+            phone,
+            delivery_date: today,
+            slot,
+            delivery_time: slotRow.delivery_time,
+            item_id: slotRow.default_item_id,
+            item_name: slotRow.default_item_name,
+            is_default: true,
+            status: "pending",
+            notified_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
+
+        if (orderError) {
+          console.error(
+            `[CRON] Failed to create order for ${phone}:`,
+            orderError,
+          );
+          return;
+        }
+
+        // 2c. Check if plan expiring soon
+        const daysLeft = Math.ceil(
+          (new Date(sub.end_date).getTime() - new Date(today).getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
+
+        // 2d. Send WhatsApp notification via Vercel
         const slotLabel = SLOT_LABELS[slot];
         const cutoffMins = SLOT_CUTOFF_MINUTES[slot];
+        const mealName = slotRow.default_item_name || "your default meal";
 
-        const msgBody =
+        await notifyViaVercel(
+          phone,
           `${slotLabel} is coming up! 🍽️\n\n` +
-          `*Plan:* ${sub.plan_title}\n` +
-          `*Meals:* ${sub.meal_label}\n\n` +
-          `You have ${cutoffMins} mins to contact us if you need to make any changes.` +
-          (daysLeft <= 2 ? `\n\n⚠️ Your plan expires in ${daysLeft} day(s)!` : "");
-
-        await notifyViaVercel(phone, msgBody);
+            `*Today's meal:* ${mealName}\n` +
+            `*Delivery at:* ${slotRow.delivery_time}\n\n` +
+            `You have ${cutoffMins} mins to change your meal, or we'll deliver the default.` +
+            (daysLeft <= 2
+              ? `\n\n⚠️ Your plan expires in ${daysLeft} day(s)!`
+              : ""),
+          [
+            { id: `CONFIRM_${order.id}`, title: "✅ Looks good" },
+            { id: `CHANGE_${order.id}`, title: "🔄 Change meal" },
+            { id: `SKIP_${order.id}`, title: "⏭️ Skip today" },
+          ],
+        );
 
         console.log(`[CRON] Notified ${phone} for ${slot}`);
       }),
     );
 
-    // 3. Log failures
+    // 3. Log any failures
     const failed = results.filter((r) => r.status === "rejected");
     if (failed.length) {
       console.error(`[CRON] ${failed.length} notifications failed`);
     }
 
-    // 4. Mark subscriptions as expired where calculated end_date < today
-    //    (handled per-subscription above; we can't do a simple DB column compare
-    //     since end_date is derived, so we update them individually)
-    const expiredIds = (subscriptions ?? [])
-      .filter((sub: any) => {
-        const startMs = new Date(sub.created_at).getTime();
-        const endMs = startMs + sub.days * 24 * 60 * 60 * 1000;
-        return endMs < todayMs;
-      })
-      .map((sub: any) => sub.id);
-
-    if (expiredIds.length > 0) {
-      await supabase
-        .from("subscriptions")
-        .update({ status: "expired" })
-        .in("id", expiredIds);
-    }
+    // 4. Mark expired subscriptions
+    await supabase
+      .from("meal_plan_subscriptions")
+      .update({ status: "expired" })
+      .eq("status", "active")
+      .lt("end_date", today);
 
     return new Response(
       JSON.stringify({
         slot,
-        processed: active.length,
+        processed: activeSlots.length,
         failed: failed.length,
       }),
       { status: 200 },
