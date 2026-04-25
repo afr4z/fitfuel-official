@@ -9,8 +9,8 @@ import {
   handleMealSlotSelection,
   handleLocation,
   handleAddress,
-  handleSessionExpired,
 } from "./handlers/subscription.js";
+import { handleSessionExpired } from "./handlers/sessionExpired.js";
 import { sendText } from "../lib/whatsapp.js";
 
 export async function handleIncoming(phone, message) {
