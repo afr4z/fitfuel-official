@@ -265,6 +265,11 @@ export async function handleAddress(phone, session, addressText, setSession) {
       phone,
       `Sorry, we couldn't generate your payment link right now. Please contact support.`,
     );
+    await setSession(phone, {
+      ...session,
+      state: STATES.GREETING,
+      data: {},
+    });
     return;
   }
 
