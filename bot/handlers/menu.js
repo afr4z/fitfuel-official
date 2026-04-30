@@ -1,4 +1,4 @@
-import { sendText } from "../../lib/whatsapp.js";
+import { sendText, sendButtons } from "../../lib/whatsapp.js";
 import { handleGreeting } from "./greeting.js";
 import { startSubscription } from "./subscription.js";
 
