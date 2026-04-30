@@ -5,12 +5,16 @@ import { startSubscription } from "./subscription.js";
 export async function handleMainMenu(phone, session, buttonId, setSession) {
   switch (buttonId) {
     case "VIEW_PLANS":
-      await sendText(
+      await sendButtons(
         phone,
         `🥗 *Our Nutrition Plans*\n\n` +
-          `1️⃣ *Weekly Plan* — ₹999\n   7 days, choose breakfast/lunch/dinner\n\n` +
-          `2️⃣ *Monthly Plan* — ₹3,499\n   30 days, choose breakfast/lunch/dinner\n\n` +
-          `Tap *Order Now* to get started 💪`,
+          `We offer fully customisable meal plans across 6 diet goals:\n\n` +
+          `🔥 Weight Loss · 💪 Muscle Gain · 🥑 Keto\n` +
+          `🩺 Diabetic-Friendly · 🌱 Vegan · ⚖️ Balanced\n\n` +
+          `📅 *Durations:* 3, 7, 14, or 30 days\n` +
+          `🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3\n\n` +
+          `Pricing starts from ₹120/meal/day. Tap below to build your plan!`,
+        [{ id: "ORDER_NOW", title: "🛒 Build My Plan" }],
       );
       break;
 
