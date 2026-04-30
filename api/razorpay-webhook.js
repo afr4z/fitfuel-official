@@ -54,10 +54,38 @@ export default async function handler(req, res) {
 
   const { event, payload } = req.body || {};
 
+  /**
+   * Extract phone from a payment_link event (reference_id is "{phone}_{ts}").
+   */
+  function phoneFromLink() {
+    return payload?.payment_link?.entity?.reference_id?.split("_")[0] || null;
+  }
+
+  /**
+   * Extract phone from a payment event (contact field, e.g. "+919876543210").
+   * Strips the leading "+" so it matches the stored format.
+   */
+  function phoneFromPayment() {
+    const contact = payload?.payment?.entity?.contact || "";
+    return contact.replace(/^\+/, "") || null;
+  }
+
+  /** Clear the user's session and send them a "please order again" WhatsApp message. */
+  async function handleFailure(phone, reason) {
+    if (!phone) return;
+    await clearSession(phone);
+    await sendText(
+      phone,
+      `❌ *Payment ${reason}*\n\n` +
+        `Unfortunately your FitFuel order could not be completed.\n\n` +
+        `Please send us a message to start a new order whenever you're ready. We're here to help! 🙏`,
+    );
+  }
+
   try {
     if (event === "payment_link.paid") {
       // reference_id is "{phone}_{timestamp}" — extract the phone prefix
-      const phone = payload?.payment_link?.entity?.reference_id?.split("_")[0];
+      const phone = phoneFromLink();
       const razorpayPaymentLinkId = payload?.payment_link?.entity?.id;
       const razorpayPaymentId = payload?.payment?.entity?.id;
 
@@ -123,6 +151,21 @@ export default async function handler(req, res) {
           `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
           `Thank you for choosing FitFuel! 💪`,
       );
+    } else if (event === "payment_link.cancelled") {
+      // Customer or merchant cancelled the payment link
+      const phone = phoneFromLink();
+      console.log("[WEBHOOK] Payment link cancelled for phone:", phone);
+      await handleFailure(phone, "Cancelled");
+    } else if (event === "payment_link.expired") {
+      // Payment link expired without being paid
+      const phone = phoneFromLink();
+      console.log("[WEBHOOK] Payment link expired for phone:", phone);
+      await handleFailure(phone, "Link Expired");
+    } else if (event === "payment.failed") {
+      // A payment attempt failed (wrong card, insufficient funds, etc.)
+      const phone = phoneFromPayment();
+      console.log("[WEBHOOK] Payment failed for phone:", phone);
+      await handleFailure(phone, "Failed");
     }
   } catch (err) {
     console.error("[WEBHOOK] Unhandled error:", err.message, err.stack);
