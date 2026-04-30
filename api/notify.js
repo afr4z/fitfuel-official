@@ -3,8 +3,7 @@ import { sendText, sendButtons } from "../lib/whatsapp.js";
 /**
  * POST /api/notify
  *
- * Called by the Supabase Edge Function cron to send a WhatsApp message.
- * Protected by CRON_SECRET to prevent unauthorized use.
+ * Sends a WhatsApp message. Protected by CRON_SECRET to prevent unauthorized use.
  *
  * Body (JSON):
  *   { to: string, body: string, buttons?: { id: string, title: string }[] }
@@ -14,7 +13,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Verify shared secret sent by Supabase Edge Function
+  // Verify shared secret
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret) {
     const authHeader = req.headers["authorization"] ?? "";
