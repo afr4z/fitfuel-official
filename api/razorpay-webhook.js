@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { sendText } from "../lib/whatsapp.js";
+import { getSession, clearSession } from "../bot/session.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -22,6 +23,23 @@ function verifySignature(rawBody, signature) {
   return crypto.timingSafeEqual(digestBuf, sigBuf);
 }
 
+/** Map subscription duration in days to the plan_type enum expected by the DB. */
+function toPlanType(days) {
+  return days === 7 ? "weekly" : "monthly";
+}
+
+/** Return ISO date strings for start (tomorrow) and end (start + days - 1). */
+function calcDates(days) {
+  const start = new Date();
+  start.setDate(start.getDate() + 1);
+  const end = new Date(start);
+  end.setDate(end.getDate() + days - 1);
+  return {
+    start_date: start.toISOString().split("T")[0],
+    end_date: end.toISOString().split("T")[0],
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -38,56 +56,72 @@ export default async function handler(req, res) {
 
   try {
     if (event === "payment_link.paid") {
-      const subscriptionId = payload?.payment_link?.entity?.reference_id;
-      const paymentId = payload?.payment?.entity?.id;
+      const phone = payload?.payment_link?.entity?.reference_id;
+      const razorpayPaymentLinkId = payload?.payment_link?.entity?.id;
+      const razorpayPaymentId = payload?.payment?.entity?.id;
 
-      if (!subscriptionId) {
+      if (!phone) {
         return res.status(200).json({ status: "ignored" });
       }
 
-      // Mark subscription as active
-      const { error: updateError } = await supabase
-        .from("subscriptions")
-        .update({
-          status: "active",
-          razorpay_payment_id: paymentId,
-          paid_at: new Date().toISOString(),
-        })
-        .eq("id", subscriptionId);
+      // Retrieve the pending subscription details stored in the user's session
+      const session = await getSession(phone);
+      const { planId, planTitle, days, mealLabel, dayLabel, amount } =
+        session?.data || {};
 
-      if (updateError) {
-        console.error(
-          "[WEBHOOK] Failed to activate subscription:",
-          updateError.message,
-        );
-        return res.status(500).json({ error: "DB update failed" });
+      if (!planId || !days) {
+        console.error("[WEBHOOK] No pending session found for phone:", phone);
+        return res.status(200).json({ status: "ignored" });
       }
 
-      // Fetch subscription to get phone number
-      const { data: subscription, error: fetchError } = await supabase
-        .from("subscriptions")
-        .select()
-        .eq("id", subscriptionId)
+      // Upsert customer (create if new, reuse if existing)
+      const { data: customer, error: customerError } = await supabase
+        .from("customers")
+        .upsert({ phone }, { onConflict: "phone" })
+        .select("id")
         .single();
 
-      if (fetchError) {
-        console.error(
-          "[WEBHOOK] Failed to fetch subscription:",
-          fetchError.message,
-        );
-        return res.status(500).json({ error: "DB fetch failed" });
+      if (customerError) {
+        console.error("[WEBHOOK] Customer upsert failed:", customerError.message);
+        return res.status(500).json({ error: "Customer upsert failed" });
       }
 
-      if (subscription?.phone) {
-        await sendText(
-          subscription.phone,
-          `🎉 *Payment Confirmed!*\n\n` +
-            `Your FitFuel *${subscription.plan_title}* subscription is now *active*!\n\n` +
-            `📦 Deliveries start from tomorrow.\n` +
-            `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
-            `Thank you for choosing FitFuel! 💪`,
-        );
+      // Create the subscription record
+      const { start_date, end_date } = calcDates(days);
+      const { error: insertError } = await supabase
+        .from("meal_plan_subscriptions")
+        .insert({
+          customer_id: customer.id,
+          phone,
+          plan_type: toPlanType(days),
+          status: "active",
+          start_date,
+          end_date,
+          payment_status: "paid",
+          razorpay_order_id: razorpayPaymentLinkId || null,
+          razorpay_payment_id: razorpayPaymentId || null,
+        });
+
+      if (insertError) {
+        console.error("[WEBHOOK] Subscription insert failed:", insertError.message);
+        return res.status(500).json({ error: "Subscription insert failed" });
       }
+
+      // Clear the session — user's flow is complete
+      await clearSession(phone);
+
+      // Notify the customer on WhatsApp
+      await sendText(
+        phone,
+        `🎉 *Payment Confirmed!*\n\n` +
+          `Your FitFuel *${planTitle}* plan is now *active*!\n\n` +
+          `📅 Duration: ${dayLabel}\n` +
+          `🍴 Meals: ${mealLabel}\n` +
+          `💰 Amount paid: ₹${amount}\n\n` +
+          `📦 Deliveries start from tomorrow (${start_date}).\n` +
+          `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
+          `Thank you for choosing FitFuel! 💪`,
+      );
     }
   } catch (err) {
     console.error("[WEBHOOK] Unhandled error:", err.message, err.stack);
