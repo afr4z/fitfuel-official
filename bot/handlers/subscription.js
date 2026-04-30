@@ -254,9 +254,9 @@ export async function handleAddress(phone, session, addressText, setSession) {
   try {
     const link = await createPaymentLink({
       amount: totalPrice,
-      description: `SitFuel ${planTitle} – ${dayLabel}, ${mealLabel}`,
+      description: `FitFuel ${planTitle} – ${dayLabel}, ${mealLabel}`,
       phone,
-      referenceId: phone, // use phone as ref so webhook can look up Redis session
+      referenceId: `${phone}_${Date.now()}`, // unique per order; phone is the prefix before '_'
     });
     paymentUrl = link.short_url;
   } catch (e) {
