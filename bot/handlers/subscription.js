@@ -256,7 +256,7 @@ export async function handleAddress(phone, session, addressText, setSession) {
       amount: totalPrice,
       description: `FitFuel ${planTitle} – ${dayLabel}, ${mealLabel}`,
       phone,
-      referenceId: phone, // use phone as ref so webhook can look up Redis session
+      referenceId: `${phone}_${Date.now()}`, // unique per order; phone is the prefix before '_'
     });
     paymentUrl = link.short_url;
   } catch (e) {

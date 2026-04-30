@@ -56,7 +56,8 @@ export default async function handler(req, res) {
 
   try {
     if (event === "payment_link.paid") {
-      const phone = payload?.payment_link?.entity?.reference_id;
+      // reference_id is "{phone}_{timestamp}" — extract the phone prefix
+      const phone = payload?.payment_link?.entity?.reference_id?.split("_")[0];
       const razorpayPaymentLinkId = payload?.payment_link?.entity?.id;
       const razorpayPaymentId = payload?.payment?.entity?.id;
 
