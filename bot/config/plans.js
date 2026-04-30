@@ -58,18 +58,18 @@ export const PLAN_CATEGORIES = [
 // buttons to a list message.
 
 export const DAY_OPTIONS = [
-  { id: "DAYS_7",  label: "7 Days",  days: 7  },
+  { id: "DAYS_3", label: "3 Days", days: 3 },
+  { id: "DAYS_7", label: "7 Days", days: 7 },
   { id: "DAYS_14", label: "14 Days", days: 14 },
   { id: "DAYS_30", label: "30 Days", days: 30 },
 ];
-
 // ─── Meals-per-day options ───────────────────────────────────────────────────
 // mealsPerDay is used as the multiplier in the price formula.
 // If you add more than 3 entries the bot will automatically switch from
 // buttons to a list message.
 
 export const MEAL_OPTIONS = [
-  { id: "MEALS_1", label: "🌅 Breakfast only",    mealsPerDay: 1 },
-  { id: "MEALS_2", label: "🍽️ Lunch + Dinner",    mealsPerDay: 2 },
-  { id: "MEALS_3", label: "🌟 All 3 Meals",        mealsPerDay: 3 },
+  { id: "MEALS_1", label: "🌅 Breakfast only", mealsPerDay: 1 },
+  { id: "MEALS_2", label: "🍽️ Lunch + Dinner", mealsPerDay: 2 },
+  { id: "MEALS_3", label: "🌟 All 3 Meals", mealsPerDay: 3 },
 ];

@@ -36,7 +36,10 @@ function verifySignature(rawBody, signature) {
 }
 
 function toPlanType(days) {
-  return days === 7 ? "weekly" : "monthly";
+  if (days === 3) return "3day";
+  if (days === 7) return "weekly";
+  if (days === 14) return "biweekly";
+  return "monthly";
 }
 
 function calcDates(days) {
