@@ -115,7 +115,7 @@ export default async function handler(req, res) {
 
       // Validate plan_type
       const planType = toPlanType(days);
-      if (!["weekly", "monthly"].includes(planType)) {
+      if (!["3day", "weekly", "biweekly", "monthly"].includes(planType)) {
         console.error("[WEBHOOK] Invalid plan_type:", days, "->", planType);
         return res.status(500).json({ error: "Invalid plan type" });
       }
