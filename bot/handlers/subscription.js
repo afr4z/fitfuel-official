@@ -189,8 +189,9 @@ export async function handleMealSlotSelection(
         `📍 *Where should we deliver?*\n\n` +
         `Tap the button below to share your location, or just type your area / neighbourhood name.`,
     );
-  } catch {
+  } catch (e) {
     // Fall back to plain text if the client doesn't support location_request_message
+    console.log(e);
     await sendText(
       phone,
       `🍴 *${mealOption.label}* selected!\n\n` +
