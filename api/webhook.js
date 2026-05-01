@@ -26,18 +26,18 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "POST") {
-    console.log("[BODY]", JSON.stringify(req.body));
+    //    console.log("[BODY]", JSON.stringify(req.body));
 
     const extracted = extractMessage(req.body);
-    console.log("[EXTRACTED]", JSON.stringify(extracted));
+    //   console.log("[EXTRACTED]", JSON.stringify(extracted));
 
     if (extracted) {
       const { from, message } = extracted;
-      console.log("[HANDLER] calling handleIncoming for", from);
+      //    console.log("[HANDLER] calling handleIncoming for", from);
 
       try {
         await handleIncoming(from, message);
-        console.log("[HANDLER] done");
+        // console.log("[HANDLER] done");
       } catch (e) {
         console.error("[BOT] Error:", e.message, e.stack);
       }
