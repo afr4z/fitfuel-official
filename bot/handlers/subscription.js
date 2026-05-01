@@ -1,4 +1,9 @@
-import { sendText, sendButtons, sendList } from "../../lib/whatsapp.js";
+import {
+  sendText,
+  sendButtons,
+  sendList,
+  sendLocationRequest,
+} from "../../lib/whatsapp.js";
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../../lib/razorpay.js";
 import { STATES } from "../states.js";
