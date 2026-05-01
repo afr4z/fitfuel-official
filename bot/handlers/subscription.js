@@ -182,14 +182,23 @@ export async function handleMealSlotSelection(
       mealLabel: mealOption.label,
     },
   });
-
-  await sendText(
-    phone,
-    `🍴 *${mealOption.label}* selected!\n\n` +
-      `📍 *Please share your delivery location!*\n\n` +
-      `Tap the 📎 attachment icon → *Location* to share your GPS pin,\n` +
-      `or simply type your area / neighbourhood name.`,
-  );
+  try {
+    await sendLocationRequest(
+      phone,
+      `🍴 *${mealOption.label}* selected!\n\n` +
+        `📍 *Where should we deliver?*\n\n` +
+        `Tap the button below to share your location, or just type your area / neighbourhood name.`,
+    );
+  } catch {
+    // Fall back to plain text if the client doesn't support location_request_message
+    await sendText(
+      phone,
+      `🍴 *${mealOption.label}* selected!\n\n` +
+        `📍 *Where should we deliver?*\n\n` +
+        `Tap the 📎 icon → *Location* → *Send Your Current Location*,\n` +
+        `or type your area / neighbourhood name.`,
+    );
+  }
 }
 
 // ─── Step 5 – Address ─────────────────────────────────────────────────────────
