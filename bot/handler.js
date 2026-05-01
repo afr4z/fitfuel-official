@@ -24,8 +24,6 @@ export async function handleIncoming(phone, message) {
   const listId = message.interactive?.list_reply?.id || "";
   const input = buttonId || listId;
 
-  console.log(`[HANDLER] phone=${phone} state=${session.state} input=${input}`);
-
   // WhatsApp location share
   if (message.type === "location") {
     if (session.state === STATES.AWAITING_LOCATION) {
