@@ -40,7 +40,7 @@ export async function handleGreeting(phone, session, setSession) {
     await sendButtons(
       phone,
       `👋 Welcome back to FitFuel Nutrition!\n\n` +
-        `🟢 You have an *active ${planLabel} plan*.${expiryLine}\n\n` +
+        `🟢 You have an *active ${planLabel} plan*.${expiryLine}\n\n` + debugLine +
         `How can we help you?`,
       [
         { id: "MY_PLAN", title: "📋 My Plan" },
