@@ -30,18 +30,20 @@ export async function handleGreeting(phone, session, setSession) {
     const expiryLine = remaining <= 3
       ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
       : `\n📅 *${remaining}* delivery day(s) remaining`;
-  const debugLine =
+
+    const debugLine =
     `\n\n🛠️ DEBUG` +
     `\nstart: ${activeSub.start_date}` +
     `\nend: ${activeSub.end_date}` +
     `\nremaining: ${remaining}`;
 
+  await sendButtons(
+    phone,
+    `👋 Welcome back to FitFuel Nutrition!\n\n` +
+      `🟢 You have an *active ${planLabel} plan*.${expiryLine}` +
+      debugLine +
+      `\n\nHow can we help you?`,
 
-    await sendButtons(
-      phone,
-      `👋 Welcome back to FitFuel Nutrition!\n\n` +
-        `🟢 You have an *active ${planLabel} plan*.${expiryLine}\n\n` + debugLine +
-        `How can we help you?`,
       [
         { id: "MY_PLAN", title: "📋 My Plan" },
         { id: "CONTACT_US", title: "📞 Contact Us" },
