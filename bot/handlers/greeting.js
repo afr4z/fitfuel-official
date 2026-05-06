@@ -25,7 +25,7 @@ export async function handleGreeting(phone, session, setSession) {
     .maybeSingle();
 
   if (activeSub) {
-    const remaining = countRemainingDeliveryDays(activeSub.end_date);
+    const remaining = countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
     const planLabel = getPlanLabel(activeSub.plan_type);
     const expiryLine = remaining <= 3
       ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
