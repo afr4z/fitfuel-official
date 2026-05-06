@@ -30,6 +30,12 @@ export async function handleGreeting(phone, session, setSession) {
     const expiryLine = remaining <= 3
       ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
       : `\n📅 *${remaining}* delivery day(s) remaining`;
+  const debugLine =
+    `\n\n🛠️ DEBUG` +
+    `\nstart: ${activeSub.start_date}` +
+    `\nend: ${activeSub.end_date}` +
+    `\nremaining: ${remaining}`;
+
 
     await sendButtons(
       phone,
