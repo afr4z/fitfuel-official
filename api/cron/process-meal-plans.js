@@ -1,14 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 import { sendButtons } from "../../lib/whatsapp.js";
+import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { buildExpiryNotice } from "../../bot/config/plans.js";
 
-// ─── Clients ───────────────────────────────────────────────────────────────
+// --- Clients ------------------------------------------------------------------
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
-// ─── Slot Config ───────────────────────────────────────────────────────────
+// --- Slot Config --------------------------------------------------------------
 
 const SLOT_LABELS = {
   breakfast: "🌅 Breakfast",
@@ -22,7 +24,7 @@ const SLOT_CUTOFF_MINUTES = {
   dinner: 60,
 };
 
-// ─── Handler ───────────────────────────────────────────────────────────────
+// --- Handler ------------------------------------------------------------------
 
 /**
  * GET /api/cron/process-meal-plans?slot=breakfast|lunch|dinner
@@ -31,7 +33,7 @@ const SLOT_CUTOFF_MINUTES = {
  * and sending WhatsApp notifications to active subscribers.
  *
  * Secured via CRON_SECRET (Vercel automatically sends
- * `Authorization: Bearer <CRON_SECRET>` on every cron invocation).
+ * `Authorization: Bearer <secret>` on every cron invocation).
  */
 export default async function handler(req, res) {
   // Only allow GET (Vercel cron uses GET)
@@ -55,7 +57,27 @@ export default async function handler(req, res) {
   }
 
   const today = new Date().toISOString().split("T")[0];
+
+  // Skip Sundays — the kitchen is closed
+  const todayDate = new Date(today + "T00:00:00Z");
+  if (todayDate.getUTCDay() === 0) {
+    console.log(`[CRON] Sunday — kitchen closed, no deliveries today`);
+    return res.status(200).json({ skipped: "sunday" });
+  }
+
   console.log(`[CRON] Processing slot=${slot} date=${today}`);
+
+  // Check if today is a manually-marked kitchen-closed day
+  const { data: kitchenClosed } = await supabase
+    .from("kitchen_closed_days")
+    .select("reason")
+    .eq("date", today)
+    .maybeSingle();
+
+  if (kitchenClosed) {
+    console.log(`[CRON] Kitchen closed today (${today}) — skipping`);
+    return res.status(200).json({ skipped: "kitchen_closed" });
+  }
 
   // 1. Fetch all active subscription slots that include this slot
   const { data: slots, error } = await supabase
@@ -131,16 +153,13 @@ export default async function handler(req, res) {
         return;
       }
 
-      // 2c. Check if plan expiring soon (floor so today's last day = 1, not 0)
-      const daysLeft = Math.max(
-        1,
-        Math.ceil(
-          (new Date(sub.end_date).getTime() - new Date(today).getTime()) /
-            (1000 * 60 * 60 * 24),
-        ),
-      );
+      // 2c. Count remaining delivery days (non-Sunday days from today to end_date)
+      const daysLeft = countRemainingDeliveryDays(sub.end_date);
 
-      // 2d. Send WhatsApp notification, then record the timestamp
+      // 2d. Build expiry notice
+      const expiryNotice = buildExpiryNotice(daysLeft, true);
+
+      // 2e. Send WhatsApp notification, then record the timestamp
       const slotLabel = SLOT_LABELS[slot];
       const cutoffMins = SLOT_CUTOFF_MINUTES[slot];
       const mealName = slotRow.default_item_name || "your default meal";
@@ -151,9 +170,7 @@ export default async function handler(req, res) {
           `*Today's meal:* ${mealName}\n` +
           `*Delivery at:* ${slotRow.delivery_time}\n\n` +
           `You have ${cutoffMins} mins to change your meal, or we'll deliver the default.` +
-          (daysLeft <= 2
-            ? `\n\n⚠️ Your plan expires in ${daysLeft} day(s)!`
-            : ""),
+          expiryNotice,
         [
           { id: `CONFIRM_${order.id}`, title: "✅ Looks good" },
           { id: `CHANGE_${order.id}`, title: "🔄 Change meal" },

@@ -1,6 +1,14 @@
 import { sendText, sendButtons } from "../../lib/whatsapp.js";
+import { createClient } from "@supabase/supabase-js";
 import { handleGreeting } from "./greeting.js";
 import { startSubscription } from "./subscription.js";
+import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { getPlanLabel, buildExpiryNotice } from "../config/plans.js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+);
 
 export async function handleMainMenu(phone, session, buttonId, setSession) {
   switch (buttonId) {
@@ -20,6 +28,43 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
 
     case "ORDER_NOW":
       return startSubscription(phone, session, setSession);
+
+    case "MY_PLAN": {
+      const today = new Date().toISOString().split("T")[0];
+      const { data: activeSub } = await supabase
+        .from("meal_plan_subscriptions")
+        .select("plan_type, start_date, end_date")
+        .eq("phone", phone)
+        .eq("status", "active")
+        .gte("end_date", today)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!activeSub) {
+        await sendText(
+          phone,
+          `ℹ️ You don't have an active plan right now.\n\nType anything to go back to the menu.`,
+        );
+        break;
+      }
+
+      const remaining = countRemainingDeliveryDays(activeSub.end_date);
+      const planLabel = getPlanLabel(activeSub.plan_type);
+      const expiryLine = buildExpiryNotice(remaining) ||
+        `⏳ *${remaining}* delivery day(s) remaining.`;
+
+      await sendText(
+        phone,
+        `📋 *Your Active Plan*\n\n` +
+          `📦 Plan: *${planLabel}*\n` +
+          `📅 Started: ${activeSub.start_date}\n` +
+          `${expiryLine}\n\n` +
+          `You'll receive a notification before each meal to confirm, skip, or change it.\n\n` +
+          `Type anything to go back to the menu.`,
+      );
+      break;
+    }
 
     case "CONTACT_US":
       await sendText(
