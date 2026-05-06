@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { sendText } from "../../lib/whatsapp.js";
-import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { addDeliveryDays, countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -74,9 +74,9 @@ export default async function handler(req, res) {
   // Extend each subscription's end_date by 1 calendar day and notify the customer
   const results = await Promise.allSettled(
     subs.map(async (sub) => {
-      const newEnd = new Date(sub.end_date + "T00:00:00Z");
-      newEnd.setUTCDate(newEnd.getUTCDate() + 1);
-      const newEndStr = newEnd.toISOString().split("T")[0];
+      // Extend by 1 delivery day (skips Sundays) so the new end_date
+      // is always a valid delivery day
+      const newEndStr = addDeliveryDays(sub.end_date, 1);
 
       const { error: updateError } = await supabase
         .from("meal_plan_subscriptions")

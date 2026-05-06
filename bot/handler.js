@@ -63,17 +63,20 @@ async function handleBack(phone, session, setSession) {
 
     case STATES.AWAITING_PAYMENT: {
       // Abort pending payment and restart
-      const fresh = { state: STATES.GREETING, data: {} };
-      await setSession(phone, fresh);
-      return handleGreeting(phone, fresh, setSession);
+      return resetToGreeting(phone, session, setSession);
     }
 
     default: {
-      const fresh = { state: STATES.GREETING, data: {} };
-      await setSession(phone, fresh);
-      return handleGreeting(phone, fresh, setSession);
+      return resetToGreeting(phone, session, setSession);
     }
   }
+}
+
+/** Resets the session to GREETING and shows the welcome screen. */
+async function resetToGreeting(phone, session, setSession) {
+  const fresh = { state: STATES.GREETING, data: {} };
+  await setSession(phone, fresh);
+  return handleGreeting(phone, fresh, setSession);
 }
 
 export async function handleIncoming(phone, message) {
@@ -114,9 +117,7 @@ export async function handleIncoming(phone, message) {
 
   // Any unrecognised input or plain text → show main menu
   if (!input) {
-    const fresh = { state: STATES.GREETING, data: {} };
-    await setSession(phone, fresh);
-    return handleGreeting(phone, fresh, setSession);
+    return resetToGreeting(phone, session, setSession);
   }
 
   // Order action buttons from cron notifications

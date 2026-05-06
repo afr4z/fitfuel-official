@@ -4,9 +4,18 @@
  * PLAN_CATEGORIES  – each entry becomes a row in the "Choose Your Plan" list.
  * DAY_OPTIONS      – shown as selectable options for subscription duration.
  * MEAL_OPTIONS     – shown as selectable options for meals per day.
+ * PLAN_TYPE_LABELS – human-readable labels for plan_type values stored in DB.
  *
  * Price formula:  plan.basePricePerMealPerDay × dayOption.days × mealOption.mealsPerDay
  */
+
+/** Maps the plan_type stored in meal_plan_subscriptions to a display label. */
+export const PLAN_TYPE_LABELS = {
+  "3day": "3-Day",
+  weekly: "7-Day",
+  biweekly: "14-Day",
+  monthly: "30-Day",
+};
 
 export const PLAN_CATEGORIES = [
   {
