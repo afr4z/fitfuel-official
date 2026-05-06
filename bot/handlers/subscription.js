@@ -7,7 +7,7 @@ import {
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../../lib/razorpay.js";
 import { STATES } from "../states.js";
-import { PLAN_CATEGORIES, DAY_OPTIONS, MEAL_OPTIONS } from "../config/plans.js";
+import { PLAN_CATEGORIES, DAY_OPTIONS, MEAL_OPTIONS, SUNDAY_HOLIDAY_NOTE } from "../config/plans.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 
 const supabase = createClient(
@@ -119,7 +119,7 @@ export async function handlePlanCategory(phone, session, input, setSession) {
   await sendOptions(
     phone,
     `✅ *${plan.title}* selected!\n\nHow many days would you like to subscribe for?\n\n` +
-      `_Note: Sundays are a kitchen holiday — no deliveries on Sundays. Your plan will be extended by a day for every Sunday it falls on, so you always get the full number of delivery days you pay for._`,
+      SUNDAY_HOLIDAY_NOTE,
     "Duration",
     "Choose Duration",
     DAY_OPTIONS,
@@ -137,8 +137,7 @@ export async function handleDaySelection(phone, session, input, setSession) {
     const planLine = plan ? ` (${plan.title})` : "";
     await sendOptions(
       phone,
-      `How many days would you like?${planLine}\n\n` +
-        `_Note: Sundays are a kitchen holiday — no deliveries on Sundays. Your plan will be extended by a day for every Sunday it falls on, so you always get the full number of delivery days you pay for._`,
+      `How many days would you like?${planLine}\n\n` + SUNDAY_HOLIDAY_NOTE,
       "Duration",
       "Choose Duration",
       DAY_OPTIONS,

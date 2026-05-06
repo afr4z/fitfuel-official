@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { handleGreeting } from "./greeting.js";
 import { startSubscription } from "./subscription.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
-import { PLAN_TYPE_LABELS } from "../config/plans.js";
+import { getPlanLabel, buildExpiryNotice } from "../config/plans.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -50,12 +50,9 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
       }
 
       const remaining = countRemainingDeliveryDays(activeSub.end_date);
-      const planLabel =
-        PLAN_TYPE_LABELS[activeSub.plan_type] ?? activeSub.plan_type;
-      const expiryLine =
-        remaining <= 3
-          ? `⚠️ *Expiring soon!* Only *${remaining}* delivery day(s) left.`
-          : `⏳ *${remaining}* delivery day(s) remaining.`;
+      const planLabel = getPlanLabel(activeSub.plan_type);
+      const expiryLine = buildExpiryNotice(remaining) ||
+        `⏳ *${remaining}* delivery day(s) remaining.`;
 
       await sendText(
         phone,

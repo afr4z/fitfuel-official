@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { sendButtons } from "../../lib/whatsapp.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { buildExpiryNotice } from "../../bot/config/plans.js";
 
 // --- Clients ------------------------------------------------------------------
 
@@ -156,14 +157,7 @@ export default async function handler(req, res) {
       const daysLeft = countRemainingDeliveryDays(sub.end_date);
 
       // 2d. Build expiry notice
-      let expiryNotice = "";
-      if (daysLeft === 1) {
-        expiryNotice =
-          `\n\n🚨 *This is your last delivery day!* Reply with any message to renew your plan.`;
-      } else if (daysLeft <= 3) {
-        expiryNotice =
-          `\n\n⚠️ Your plan expires in *${daysLeft}* delivery day(s)! Reply with any message to renew.`;
-      }
+      const expiryNotice = buildExpiryNotice(daysLeft, true);
 
       // 2e. Send WhatsApp notification, then record the timestamp
       const slotLabel = SLOT_LABELS[slot];

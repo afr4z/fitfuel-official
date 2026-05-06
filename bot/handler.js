@@ -172,7 +172,7 @@ export async function handleIncoming(phone, message) {
     case STATES.AWAITING_PAYMENT:
       await sendText(
         phone,
-        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType *back* to cancel and start over.`,
+        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType *back*, *menu*, or *home* to cancel and start over.`,
       );
       return;
 
