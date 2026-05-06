@@ -23,6 +23,6 @@ CREATE INDEX "idx_kitchen_closed_date"
 
 ALTER TABLE "public"."kitchen_closed_days" ENABLE ROW LEVEL SECURITY;
 
-GRANT ALL ON TABLE "public"."kitchen_closed_days" TO "anon";
-GRANT ALL ON TABLE "public"."kitchen_closed_days" TO "authenticated";
+-- Only the service_role (used by server-side API functions) needs access.
+-- anon and authenticated roles should have no access to this admin table.
 GRANT ALL ON TABLE "public"."kitchen_closed_days" TO "service_role";

@@ -44,9 +44,11 @@ function toPlanType(days) {
 }
 
 function calcDates(days) {
-  // Start tomorrow; push forward if tomorrow is a Sunday
-  const start = new Date();
-  start.setUTCDate(start.getUTCDate() + 1);
+  // Derive today as a UTC date string first to avoid local-timezone skew
+  const todayStr = new Date().toISOString().split("T")[0];
+  const start = new Date(todayStr + "T00:00:00Z");
+  start.setUTCDate(start.getUTCDate() + 1); // begin from tomorrow
+  // Push forward if the start day is a Sunday
   while (start.getUTCDay() === 0) {
     start.setUTCDate(start.getUTCDate() + 1);
   }

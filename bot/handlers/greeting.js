@@ -2,18 +2,12 @@ import { sendButtons } from "../../lib/whatsapp.js";
 import { STATES } from "../states.js";
 import { createClient } from "@supabase/supabase-js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { PLAN_TYPE_LABELS } from "../config/plans.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
-
-const PLAN_TYPE_LABELS = {
-  "3day": "3-Day",
-  weekly: "7-Day",
-  biweekly: "14-Day",
-  monthly: "30-Day",
-};
 
 export async function handleGreeting(phone, session, setSession) {
   await setSession(phone, { ...session, state: STATES.MAIN_MENU });

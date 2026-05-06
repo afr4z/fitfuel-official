@@ -3,18 +3,12 @@ import { createClient } from "@supabase/supabase-js";
 import { handleGreeting } from "./greeting.js";
 import { startSubscription } from "./subscription.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { PLAN_TYPE_LABELS } from "../config/plans.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
-
-const PLAN_TYPE_LABELS = {
-  "3day": "3-Day",
-  weekly: "7-Day",
-  biweekly: "14-Day",
-  monthly: "30-Day",
-};
 
 export async function handleMainMenu(phone, session, buttonId, setSession) {
   switch (buttonId) {
