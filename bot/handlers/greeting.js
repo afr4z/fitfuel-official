@@ -16,7 +16,7 @@ export async function handleGreeting(phone, session, setSession) {
   const today = new Date().toISOString().split("T")[0];
   const { data: activeSub } = await supabase
     .from("meal_plan_subscriptions")
-    .select("id, plan_type, end_date")
+    .select("id, plan_type, start_date, end_date")
     .eq("phone", phone)
     .eq("status", "active")
     .gte("end_date", today)
@@ -31,19 +31,10 @@ export async function handleGreeting(phone, session, setSession) {
       ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
       : `\n📅 *${remaining}* delivery day(s) remaining`;
 
-    const debugLine =
-    `\n\n🛠️ DEBUG` +
-    `\nstart: ${activeSub.start_date}` +
-    `\nend: ${activeSub.end_date}` +
-    `\nremaining: ${remaining}`;
-    const debugObject = JSON.stringify(activeSub, null, 2);
-
-  await sendButtons(
-    phone,
-    `👋 Welcome back to FitFuel Nutrition!\n\n` +
+    await sendButtons(
+      phone,
+      `👋 Welcome back to FitFuel Nutrition!\n\n` +
       `🟢 You have an *active ${planLabel} plan*.${expiryLine}` +
-      debugLine +`\n`
-        `🛠️ DEBUG activeSub:\n${debugObject.slice(0, 1200)}`+
       `\n\nHow can we help you?`,
 
       [
