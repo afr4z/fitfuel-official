@@ -7,7 +7,8 @@ import {
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../../lib/razorpay.js";
 import { STATES } from "../states.js";
-import { PLAN_CATEGORIES, DAY_OPTIONS, MEAL_OPTIONS } from "../config/plans.js";
+import { PLAN_CATEGORIES, DAY_OPTIONS, MEAL_OPTIONS, SUNDAY_HOLIDAY_NOTE } from "../config/plans.js";
+import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -54,6 +55,28 @@ async function sendOptions(
 // ─── Step 1 – Plan category ───────────────────────────────────────────────────
 
 export async function startSubscription(phone, session, setSession) {
+  // Block double-subscription: check for an existing active plan
+  const today = new Date().toISOString().split("T")[0];
+  const { data: activeSub } = await supabase
+    .from("meal_plan_subscriptions")
+    .select("id, end_date")
+    .eq("phone", phone)
+    .eq("status", "active")
+    .gte("end_date", today)
+    .limit(1)
+    .maybeSingle();
+
+  if (activeSub) {
+    const remaining = countRemainingDeliveryDays(activeSub.end_date);
+    await sendText(
+      phone,
+      `⚠️ *You already have an active plan!*\n\n` +
+        `Your current plan has *${remaining} delivery day(s)* remaining.\n\n` +
+        `You can subscribe to a new plan once your current one completes.`,
+    );
+    return;
+  }
+
   await setSession(phone, {
     ...session,
     state: STATES.SELECTING_PLAN_CATEGORY,
@@ -95,7 +118,8 @@ export async function handlePlanCategory(phone, session, input, setSession) {
 
   await sendOptions(
     phone,
-    `✅ *${plan.title}* selected!\n\nHow many days would you like to subscribe for?`,
+    `✅ *${plan.title}* selected!\n\nHow many days would you like to subscribe for?\n\n` +
+      SUNDAY_HOLIDAY_NOTE,
     "Duration",
     "Choose Duration",
     DAY_OPTIONS,
@@ -110,12 +134,10 @@ export async function handleDaySelection(phone, session, input, setSession) {
   if (!dayOption) {
     // Resend duration selection
     const plan = PLAN_CATEGORIES.find((p) => p.id === session.data.planId);
-    const bodyText = plan
-      ? `How many days would you like? (${plan.title})`
-      : "How many days would you like?";
+    const planLine = plan ? ` (${plan.title})` : "";
     await sendOptions(
       phone,
-      bodyText,
+      `How many days would you like?${planLine}\n\n` + SUNDAY_HOLIDAY_NOTE,
       "Duration",
       "Choose Duration",
       DAY_OPTIONS,

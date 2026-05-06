@@ -9,9 +9,91 @@ import {
   handleMealSlotSelection,
   handleLocation,
   handleAddress,
+  startSubscription,
 } from "./handlers/subscription.js";
 import { handleSessionExpired } from "./handlers/sessionExpired.js";
-import { sendText } from "../lib/whatsapp.js";
+import { sendText, sendLocationRequest } from "../lib/whatsapp.js";
+
+// Keywords that trigger "go back" navigation regardless of state
+const BACK_KEYWORDS = new Set(["back", "menu", "home", "0", "restart"]);
+
+// Maximum age (in seconds) for an interactive message to be acted upon.
+// Order-action buttons (CONFIRM/SKIP/CHANGE) expire faster since they have
+// hard meal-slot cutoffs; all other interactive buttons use a wider window.
+const ORDER_BUTTON_TTL_SECONDS = 15 * 60;   // 15 minutes
+const MENU_BUTTON_TTL_SECONDS  = 30 * 60;   // 30 minutes
+
+/**
+ * Returns true if the WhatsApp message timestamp is older than `ttlSeconds`.
+ * `message.timestamp` is a Unix epoch string (seconds).
+ */
+function isStale(message, ttlSeconds) {
+  const ts = parseInt(message.timestamp, 10);
+  if (!ts || isNaN(ts)) return false; // no valid timestamp — allow through
+  return Math.floor(Date.now() / 1000) - ts > ttlSeconds;
+}
+
+/**
+ * Navigate the user back to the previous step in the onboarding flow.
+ * Sends a short confirmation before re-rendering the parent step.
+ */
+async function handleBack(phone, session, setSession) {
+  await sendText(phone, `↩️ Going back…`);
+
+  switch (session.state) {
+    case STATES.SELECTING_DAYS:
+      // Back to plan-category list
+      return startSubscription(phone, session, setSession);
+
+    case STATES.SELECTING_MEALS_PER_DAY:
+      // Back to duration selection — planId is still in session.data
+      return handlePlanCategory(
+        phone,
+        session,
+        session.data.planId,
+        setSession,
+      );
+
+    case STATES.AWAITING_LOCATION: {
+      // Back to meals-per-day selection — reconstruct the day option id
+      const dayId = `DAYS_${session.data.days}`;
+      return handleDaySelection(phone, session, dayId, setSession);
+    }
+
+    case STATES.AWAITING_ADDRESS: {
+      // Back to location prompt
+      await setSession(phone, { ...session, state: STATES.AWAITING_LOCATION });
+      try {
+        await sendLocationRequest(
+          phone,
+          `📍 *Where should we deliver?*\n\nTap the button below to share your location, or type your area / neighbourhood name.`,
+        );
+      } catch {
+        await sendText(
+          phone,
+          `📍 *Where should we deliver?*\n\nType your area / neighbourhood name.`,
+        );
+      }
+      return;
+    }
+
+    case STATES.AWAITING_PAYMENT: {
+      // Abort pending payment and restart
+      return resetToGreeting(phone, session, setSession);
+    }
+
+    default: {
+      return resetToGreeting(phone, session, setSession);
+    }
+  }
+}
+
+/** Resets the session to GREETING and shows the welcome screen. */
+async function resetToGreeting(phone, session, setSession) {
+  const fresh = { state: STATES.GREETING, data: {} };
+  await setSession(phone, fresh);
+  return handleGreeting(phone, fresh, setSession);
+}
 
 export async function handleIncoming(phone, message) {
   const session = await getSession(phone);
@@ -32,8 +114,15 @@ export async function handleIncoming(phone, message) {
     return; // ignore location in other states
   }
 
-  // Text input during onboarding steps that expect free text
+  // Text input
   if (message.type === "text") {
+    const text = message.text.body.trim().toLowerCase();
+
+    // "Go back" shortcut — works in any onboarding state
+    if (BACK_KEYWORDS.has(text)) {
+      return handleBack(phone, session, setSession);
+    }
+
     if (session.state === STATES.AWAITING_LOCATION) {
       return handleLocation(phone, session, message, setSession);
     }
@@ -44,17 +133,33 @@ export async function handleIncoming(phone, message) {
 
   // Any unrecognised input or plain text → show main menu
   if (!input) {
-    const fresh = { state: STATES.GREETING, data: {} };
-    await setSession(phone, fresh);
-    return handleGreeting(phone, fresh, setSession);
+    return resetToGreeting(phone, session, setSession);
   }
 
-  // Order action buttons from cron notifications
-  if (
+  // --- Stale-button guard ---------------------------------------------------
+  // Order-action buttons (CONFIRM / SKIP / CHANGE) are tied to a specific
+  // meal slot window; reject them after ORDER_BUTTON_TTL_SECONDS.
+  // All other interactive buttons (menu, onboarding) expire after
+  // MENU_BUTTON_TTL_SECONDS to prevent acting on messages from days ago.
+  const isOrderButton =
     input.startsWith("CONFIRM_") ||
     input.startsWith("SKIP_") ||
-    input.startsWith("CHANGE_")
-  ) {
+    input.startsWith("CHANGE_") ||
+    input.startsWith("MEAL_");
+
+  const ttl = isOrderButton ? ORDER_BUTTON_TTL_SECONDS : MENU_BUTTON_TTL_SECONDS;
+
+  if (isStale(message, ttl)) {
+    await sendText(
+      phone,
+      `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`,
+    );
+    return;
+  }
+  // -------------------------------------------------------------------------
+
+  // Order action buttons from cron notifications
+  if (isOrderButton && !input.startsWith("MEAL_")) {
     return handleOrderAction(phone, session, input, setSession);
   }
 
@@ -101,7 +206,7 @@ export async function handleIncoming(phone, message) {
     case STATES.AWAITING_PAYMENT:
       await sendText(
         phone,
-        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType anything to restart from the beginning.`,
+        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType *back*, *menu*, or *home* to cancel and start over.`,
       );
       return;
 
@@ -109,3 +214,4 @@ export async function handleIncoming(phone, message) {
       return handleGreeting(phone, session, setSession);
   }
 }
+
