@@ -49,7 +49,7 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
         break;
       }
 
-      const remaining = countRemainingDeliveryDays(activeSub.end_date);
+      const remaining = countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
       const planLabel = getPlanLabel(activeSub.plan_type);
       const expiryLine = buildExpiryNotice(remaining) ||
         `⏳ *${remaining}* delivery day(s) remaining.`;
