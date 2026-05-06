@@ -17,6 +17,22 @@ import { sendText, sendLocationRequest } from "../lib/whatsapp.js";
 // Keywords that trigger "go back" navigation regardless of state
 const BACK_KEYWORDS = new Set(["back", "menu", "home", "0", "restart"]);
 
+// Maximum age (in seconds) for an interactive message to be acted upon.
+// Order-action buttons (CONFIRM/SKIP/CHANGE) expire faster since they have
+// hard meal-slot cutoffs; all other interactive buttons use a wider window.
+const ORDER_BUTTON_TTL_SECONDS = 15 * 60;   // 15 minutes
+const MENU_BUTTON_TTL_SECONDS  = 30 * 60;   // 30 minutes
+
+/**
+ * Returns true if the WhatsApp message timestamp is older than `ttlSeconds`.
+ * `message.timestamp` is a Unix epoch string (seconds).
+ */
+function isStale(message, ttlSeconds) {
+  const ts = parseInt(message.timestamp, 10);
+  if (!ts || isNaN(ts)) return false; // no valid timestamp — allow through
+  return Math.floor(Date.now() / 1000) - ts > ttlSeconds;
+}
+
 /**
  * Navigate the user back to the previous step in the onboarding flow.
  * Sends a short confirmation before re-rendering the parent step.
@@ -120,12 +136,30 @@ export async function handleIncoming(phone, message) {
     return resetToGreeting(phone, session, setSession);
   }
 
-  // Order action buttons from cron notifications
-  if (
+  // --- Stale-button guard ---------------------------------------------------
+  // Order-action buttons (CONFIRM / SKIP / CHANGE) are tied to a specific
+  // meal slot window; reject them after ORDER_BUTTON_TTL_SECONDS.
+  // All other interactive buttons (menu, onboarding) expire after
+  // MENU_BUTTON_TTL_SECONDS to prevent acting on messages from days ago.
+  const isOrderButton =
     input.startsWith("CONFIRM_") ||
     input.startsWith("SKIP_") ||
-    input.startsWith("CHANGE_")
-  ) {
+    input.startsWith("CHANGE_") ||
+    input.startsWith("MEAL_");
+
+  const ttl = isOrderButton ? ORDER_BUTTON_TTL_SECONDS : MENU_BUTTON_TTL_SECONDS;
+
+  if (isStale(message, ttl)) {
+    await sendText(
+      phone,
+      `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`,
+    );
+    return;
+  }
+  // -------------------------------------------------------------------------
+
+  // Order action buttons from cron notifications
+  if (isOrderButton && !input.startsWith("MEAL_")) {
     return handleOrderAction(phone, session, input, setSession);
   }
 
@@ -180,3 +214,4 @@ export async function handleIncoming(phone, message) {
       return handleGreeting(phone, session, setSession);
   }
 }
+
