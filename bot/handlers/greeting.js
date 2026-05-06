@@ -36,12 +36,14 @@ export async function handleGreeting(phone, session, setSession) {
     `\nstart: ${activeSub.start_date}` +
     `\nend: ${activeSub.end_date}` +
     `\nremaining: ${remaining}`;
+    const debugObject = JSON.stringify(activeSub, null, 2);
 
   await sendButtons(
     phone,
     `👋 Welcome back to FitFuel Nutrition!\n\n` +
       `🟢 You have an *active ${planLabel} plan*.${expiryLine}` +
-      debugLine +
+      debugLine +`\n`
+        `🛠️ DEBUG activeSub:\n${debugObject.slice(0, 1200)}`+
       `\n\nHow can we help you?`,
 
       [
