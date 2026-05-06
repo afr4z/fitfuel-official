@@ -2,7 +2,7 @@ import { sendButtons } from "../../lib/whatsapp.js";
 import { STATES } from "../states.js";
 import { createClient } from "@supabase/supabase-js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
-import { PLAN_TYPE_LABELS } from "../config/plans.js";
+import { getPlanLabel, buildExpiryNotice } from "../config/plans.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -26,12 +26,10 @@ export async function handleGreeting(phone, session, setSession) {
 
   if (activeSub) {
     const remaining = countRemainingDeliveryDays(activeSub.end_date);
-    const planLabel =
-      PLAN_TYPE_LABELS[activeSub.plan_type] ?? activeSub.plan_type;
-    const expiryLine =
-      remaining <= 3
-        ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
-        : `\n📅 *${remaining}* delivery day(s) remaining`;
+    const planLabel = getPlanLabel(activeSub.plan_type);
+    const expiryLine = remaining <= 3
+      ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
+      : `\n📅 *${remaining}* delivery day(s) remaining`;
 
     await sendButtons(
       phone,
