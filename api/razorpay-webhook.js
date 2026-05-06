@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { sendText } from "../lib/whatsapp.js";
 import { getSession, clearSession } from "../bot/session.js";
+import { addDeliveryDays } from "../lib/deliveryDays.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -43,13 +44,20 @@ function toPlanType(days) {
 }
 
 function calcDates(days) {
+  // Start tomorrow; push forward if tomorrow is a Sunday
   const start = new Date();
-  start.setDate(start.getDate() + 1);
-  const end = new Date(start);
-  end.setDate(end.getDate() + days - 1);
+  start.setUTCDate(start.getUTCDate() + 1);
+  while (start.getUTCDay() === 0) {
+    start.setUTCDate(start.getUTCDate() + 1);
+  }
+  const startStr = start.toISOString().split("T")[0];
+  // end_date = start + (days - 1) additional delivery days.
+  // addDeliveryDays skips Sundays so the customer always gets the
+  // exact number of delivery days they paid for.
+  const endStr = addDeliveryDays(startStr, days - 1);
   return {
-    start_date: start.toISOString().split("T")[0],
-    end_date: end.toISOString().split("T")[0],
+    start_date: startStr,
+    end_date: endStr,
   };
 }
 

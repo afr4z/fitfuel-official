@@ -9,9 +9,72 @@ import {
   handleMealSlotSelection,
   handleLocation,
   handleAddress,
+  startSubscription,
 } from "./handlers/subscription.js";
 import { handleSessionExpired } from "./handlers/sessionExpired.js";
-import { sendText } from "../lib/whatsapp.js";
+import { sendText, sendLocationRequest } from "../lib/whatsapp.js";
+
+// Keywords that trigger "go back" navigation regardless of state
+const BACK_KEYWORDS = new Set(["back", "menu", "home", "0", "restart"]);
+
+/**
+ * Navigate the user back to the previous step in the onboarding flow.
+ * Sends a short confirmation before re-rendering the parent step.
+ */
+async function handleBack(phone, session, setSession) {
+  await sendText(phone, `↩️ Going back…`);
+
+  switch (session.state) {
+    case STATES.SELECTING_DAYS:
+      // Back to plan-category list
+      return startSubscription(phone, session, setSession);
+
+    case STATES.SELECTING_MEALS_PER_DAY:
+      // Back to duration selection — planId is still in session.data
+      return handlePlanCategory(
+        phone,
+        session,
+        session.data.planId,
+        setSession,
+      );
+
+    case STATES.AWAITING_LOCATION: {
+      // Back to meals-per-day selection — reconstruct the day option id
+      const dayId = `DAYS_${session.data.days}`;
+      return handleDaySelection(phone, session, dayId, setSession);
+    }
+
+    case STATES.AWAITING_ADDRESS: {
+      // Back to location prompt
+      await setSession(phone, { ...session, state: STATES.AWAITING_LOCATION });
+      try {
+        await sendLocationRequest(
+          phone,
+          `📍 *Where should we deliver?*\n\nTap the button below to share your location, or type your area / neighbourhood name.`,
+        );
+      } catch {
+        await sendText(
+          phone,
+          `📍 *Where should we deliver?*\n\nType your area / neighbourhood name.`,
+        );
+      }
+      return;
+    }
+
+    case STATES.AWAITING_PAYMENT: {
+      // Abort pending payment and restart
+      const fresh = { state: STATES.GREETING, data: {} };
+      await setSession(phone, fresh);
+      return handleGreeting(phone, fresh, setSession);
+    }
+
+    default: {
+      const fresh = { state: STATES.GREETING, data: {} };
+      await setSession(phone, fresh);
+      return handleGreeting(phone, fresh, setSession);
+    }
+  }
+}
 
 export async function handleIncoming(phone, message) {
   const session = await getSession(phone);
@@ -32,8 +95,15 @@ export async function handleIncoming(phone, message) {
     return; // ignore location in other states
   }
 
-  // Text input during onboarding steps that expect free text
+  // Text input
   if (message.type === "text") {
+    const text = message.text.body.trim().toLowerCase();
+
+    // "Go back" shortcut — works in any onboarding state
+    if (BACK_KEYWORDS.has(text)) {
+      return handleBack(phone, session, setSession);
+    }
+
     if (session.state === STATES.AWAITING_LOCATION) {
       return handleLocation(phone, session, message, setSession);
     }
@@ -101,7 +171,7 @@ export async function handleIncoming(phone, message) {
     case STATES.AWAITING_PAYMENT:
       await sendText(
         phone,
-        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType anything to restart from the beginning.`,
+        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType *back* to cancel and start over.`,
       );
       return;
 
