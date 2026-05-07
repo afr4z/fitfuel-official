@@ -21,6 +21,11 @@ export async function getSession(phone) {
   const data = await redis.get(`session:${phone}`);
   if (!data) return { state: "GREETING", data: {} };
 
+  if (data.state === "SESSION_EXPIRED") {
+    await redis.del(`session:${phone}`);
+    return { state: "SESSION_EXPIRED", data: {} };
+  }
+
   if (isExpired(data)) {
     await redis.del(`session:${phone}`);
     return { state: "SESSION_EXPIRED", data: {} };
@@ -43,6 +48,14 @@ export async function clearSession(phone) {
 export async function deleteSession(phone) {
   await redis.del(`session:${phone}`);
   await redis.zrem(ACTIVITY_SET_KEY, phone);
+}
+
+export async function markSessionExpired(phone) {
+  const session = await redis.get(`session:${phone}`);
+  if (!session) return;
+  const stamped = { ...session, state: "SESSION_EXPIRED", lastActivityAt: Date.now() };
+  await redis.set(`session:${phone}`, stamped, { ex: TTL });
+  await redis.zadd(ACTIVITY_SET_KEY, { score: Date.now(), member: phone });
 }
 
 export async function findExpiredSessions() {

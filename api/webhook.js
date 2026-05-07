@@ -6,7 +6,9 @@ function extractMessage(body) {
   try {
     const value = body?.entry?.[0]?.changes?.[0]?.value;
     if (!value?.messages?.length) return null;
-    return { from: value.messages[0].from, message: value.messages[0] };
+    const msg = value.messages[0];
+    if (msg?.origin?.type === "business") return null;
+    return { from: msg.from, message: msg };
   } catch {
     return null;
   }
