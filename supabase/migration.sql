@@ -101,6 +101,7 @@ CREATE TABLE dishes (
   is_veg BOOLEAN NOT NULL DEFAULT true,
   price DECIMAL(10,2) NOT NULL,
   is_available BOOLEAN NOT NULL DEFAULT true,
+  petpooja_item_id TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
