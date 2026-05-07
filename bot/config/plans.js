@@ -1,7 +1,7 @@
 /**
  * Editable plan configuration.
  *
- * PLAN_CATEGORIES    – each entry becomes a row in the "Choose Your Plan" list.
+ * Plan categories are now fetched from the `meal_plans` Supabase table via lib/mealPlans.js.
  * DAY_OPTIONS        – shown as selectable options for subscription duration.
  * MEAL_OPTIONS       – shown as selectable options for meals per day.
  * PLAN_TYPE_LABELS   – human-readable labels for plan_type values stored in DB.
@@ -50,51 +50,6 @@ export const SUNDAY_HOLIDAY_NOTE =
   `_Note: Sundays are a kitchen holiday — no deliveries on Sundays. ` +
   `Your plan will be extended by a day for every Sunday it falls on, ` +
   `so you always get the full number of delivery days you pay for._`;
-
-export const PLAN_CATEGORIES = [
-  {
-    id: "PLAN_WEIGHT_LOSS",
-    title: "🔥 Weight Loss",
-    description: "Calorie-controlled, high-fibre meals",
-    tag: "weight_loss",
-    basePricePerMealPerDay: 130,
-  },
-  {
-    id: "PLAN_MUSCLE_GAIN",
-    title: "💪 Muscle Gain",
-    description: "High-protein meals for strength & size",
-    tag: "muscle_gain",
-    basePricePerMealPerDay: 150,
-  },
-  {
-    id: "PLAN_KETO",
-    title: "🥑 Keto",
-    description: "Low-carb, high-fat, zero sugar",
-    tag: "keto",
-    basePricePerMealPerDay: 160,
-  },
-  {
-    id: "PLAN_DIABETIC",
-    title: "🩺 Diabetic-Friendly",
-    description: "Low GI, balanced nutrition",
-    tag: "diabetic",
-    basePricePerMealPerDay: 140,
-  },
-  {
-    id: "PLAN_VEGAN",
-    title: "🌱 Vegan",
-    description: "100% plant-based, whole foods",
-    tag: "vegan",
-    basePricePerMealPerDay: 120,
-  },
-  {
-    id: "PLAN_BALANCED",
-    title: "⚖️ Balanced",
-    description: "Everyday healthy eating, no restrictions",
-    tag: "balanced",
-    basePricePerMealPerDay: 125,
-  },
-];
 
 // ─── Duration options ────────────────────────────────────────────────────────
 // If you add more than 3 entries the bot will automatically switch from
