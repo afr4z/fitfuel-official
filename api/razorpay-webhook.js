@@ -1,8 +1,16 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import { sendText } from "../lib/whatsapp.js";
+import { sendText, sendButtons } from "../lib/whatsapp.js";
 import { getSession, clearSession } from "../bot/session.js";
-import { addDeliveryDays } from "../lib/deliveryDays.js";
+import { addDeliveryDays, countRemainingDeliveryDays } from "../lib/deliveryDays.js";
+import { buildExpiryNotice } from "../bot/config/plans.js";
+import {
+  isPastIST,
+  ensureOrder,
+  acceptDeadline,
+  deliveryDateForSlot,
+  SLOT_LABELS,
+} from "../lib/cronUtils.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -157,6 +165,7 @@ export default async function handler(req, res) {
         .from("meal_plan_subscriptions")
         .insert({
           customer_id: customer.id,
+          meal_plan_id: planId,
           phone,
           plan_type: planType,
           status: "active",
@@ -195,13 +204,11 @@ export default async function handler(req, res) {
             : "MEALS_3";
       const slotNames = MEAL_OPTION_SLOTS[mealOptionId] ?? ["breakfast"];
 
-      // Insert subscription_slots
+      // Insert subscription_slots (default dishes are looked up via next_day_meals → weekly_meal_schedule)
       const slotRows = slotNames.map((slot) => ({
         subscription_id: subscription.id,
         slot,
         delivery_time: SLOT_DELIVERY_TIMES[slot],
-        default_item_id: null,
-        default_item_name: null,
       }));
 
       const { error: slotsError } = await supabase
@@ -213,8 +220,6 @@ export default async function handler(req, res) {
           "[WEBHOOK] Slots insert failed:",
           JSON.stringify(slotsError),
         );
-        // Non-fatal: subscription exists, slots can be fixed manually
-        // But log clearly so you know
       } else {
         console.log(
           "[WEBHOOK] Inserted",
@@ -222,6 +227,68 @@ export default async function handler(req, res) {
           "slots for subscription:",
           subscription.id,
         );
+      }
+
+      // ── Late-subscriber: past 7:45pm IST → create orders now ──────────────
+      if (isPastIST(19, 45)) {
+        const fetchSlots = await supabase
+          .from("subscription_slots")
+          .select("id, slot, delivery_time")
+          .eq("subscription_id", subscription.id);
+
+        const insertedSlots = fetchSlots.data ?? [];
+        console.log(`[WEBHOOK] Late subscriber — creating ${insertedSlots.length} order(s) on the fly`);
+
+        for (const sr of insertedSlots) {
+          const delDate = deliveryDateForSlot(sr.slot);
+          const acceptUntil = acceptDeadline(1);
+
+          try {
+            const order = await ensureOrder(
+              subscription.id,
+              sr.id,
+              phone,
+              planId,
+              delDate,
+              sr.slot,
+              sr.delivery_time,
+              acceptUntil,
+            );
+
+            console.log(`[WEBHOOK] Late-subscriber order ${order.id} for ${sr.slot}`);
+
+            // Send immediate notification for breakfast
+            if (sr.slot === "breakfast") {
+              const daysLeft = countRemainingDeliveryDays(start_date, end_date);
+              const expiryNotice = buildExpiryNotice(daysLeft, true);
+              const slotLabel = SLOT_LABELS.breakfast;
+              const itemLine = order.item_name
+                ? `🌅 *${slotLabel}*: ${order.item_name}`
+                : `🌅 *${slotLabel}*`;
+
+              await supabase
+                .from("orders")
+                .update({ notified_at: new Date().toISOString() })
+                .eq("id", order.id);
+
+              await sendButtons(
+                phone,
+                `🌅 *Tomorrow's Breakfast (${delDate})*\n\n` +
+                  `${itemLine} (${sr.delivery_time?.slice(0, 5) || ""})\n\n` +
+                  `You can confirm, skip, or change until *${new Date(acceptUntil).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}*.${expiryNotice}`,
+                [
+                  { id: `CONFIRM_${order.id}`, title: "✅ Confirm" },
+                  { id: `CHANGE_${order.id}`, title: "🔄 Change" },
+                  { id: `SKIP_${order.id}`, title: "⏭️ Skip" },
+                ],
+              );
+
+              console.log(`[WEBHOOK] Notified late subscriber ${phone} for breakfast`);
+            }
+          } catch (err) {
+            console.error(`[WEBHOOK] Failed to create late-subscriber order for ${sr.slot}:`, err.message);
+          }
+        }
       }
 
       // Clear session

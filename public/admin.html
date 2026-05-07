@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitFuel Admin</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  h1 { font-size: 24px; margin-bottom: 24px; }
+  .card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  h2 { font-size: 18px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: center; vertical-align: middle; }
+  th { background: #f9fafb; font-weight: 600; position: sticky; top: 0; }
+  .plan-name { text-align: left; font-weight: 500; white-space: nowrap; min-width: 140px; }
+  .slot-group { display: flex; flex-direction: column; gap: 4px; }
+  select { width: 100%; padding: 4px 6px; font-size: 12px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; }
+  select:disabled { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
+  .slot-label { font-size: 11px; color: #6b7280; text-align: left; margin-bottom: 1px; }
+  .veg-badge { display: inline-block; font-size: 10px; margin-left: 3px; }
+  .saved { color: #22c55e; font-size: 11px; opacity: 0; transition: opacity .3s; margin-left: 4px; }
+  .saved.show { opacity: 1; }
+  .login { max-width: 400px; margin: 80px auto; }
+  .login input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 12px; }
+  .btn { padding: 8px 16px; font-size: 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+  .btn-primary { background: #22c55e; color: #fff; width: 100%; padding: 12px; font-size: 16px; }
+  .btn-primary:hover { background: #16a34a; }
+  .error { color: #dc2626; font-size: 14px; margin-top: 8px; }
+  .day-header { font-size: 13px; }
+  .empty-state { padding: 40px; text-align: center; color: #9ca3af; }
+  .scroll-wrap { overflow-x: auto; }
+  .tabs { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid #e5e7eb; }
+  .tab { padding: 12px 24px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: none; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tab.active { color: #22c55e; border-bottom-color: #22c55e; }
+  .tab:hover { color: #333; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .lock-banner { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #92400e; }
+  .lock-banner strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const API = '/api/admin/plan-defaults';
+const SLOTS = ['breakfast', 'lunch', 'dinner'];
+const SLOT_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' };
+
+function getToken() {
+  return sessionStorage.getItem('admin_token') || '';
+}
+
+async function api(method, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(API, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 401) { sessionStorage.removeItem('admin_token'); render(); return null; }
+  return res.json();
+}
+
+function showSaved(el) {
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+async function saveWeekly(planId, day, slot, dishId, savedEl) {
+  const data = await api('POST', { type: 'weekly', plan_id: planId, day_of_week: day, slot, dish_id: dishId || null });
+  if (data && !data.error) showSaved(savedEl);
+}
+
+async function saveNextDay(planId, slot, dishId, savedEl, date) {
+  const data = await api('POST', { type: 'nextday', plan_id: planId, slot, dish_id: dishId || null, date });
+  if (data && !data.error) {
+    showSaved(savedEl);
+  } else if (data && data.error) {
+    alert(data.error);
+  }
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  document.getElementById('content-' + tabName).classList.add('active');
+}
+
+async function render() {
+  const token = getToken();
+  if (!token) {
+    document.getElementById('app').innerHTML = `
+      <div class="login card">
+        <h2>FitFuel Admin</h2>
+        <input type="password" id="secret" placeholder="Admin Secret" autofocus>
+        <button class="btn btn-primary" onclick="login()">Login</button>
+        <div class="error" id="loginErr"></div>
+      </div>`;
+    return;
+  }
+
+  const data = await api('GET');
+  if (!data) return;
+
+  const { plans, dayLabels, slots, tomorrow, locked } = data;
+  const days = [1, 2, 3, 4, 5, 6];
+
+  document.getElementById('app').innerHTML = `
+    <div class="container">
+      <h1>FitFuel Admin</h1>
+      <div class="tabs">
+        <button class="tab active" id="tab-weekly" onclick="switchTab('weekly')">Weekly Schedule</button>
+        <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow (${tomorrow})</button>
+      </div>
+
+      <div class="tab-content active" id="content-weekly">
+        <div class="card">
+          <div class="scroll-wrap">
+            <table>
+              <thead><tr><th class="plan-name">Plan</th>
+                ${days.map(d => `<th class="day-header">${dayLabels[d]}<br><span style="font-weight:400;font-size:11px;color:#6b7280">${SLOTS.map(s => SLOT_LABELS[s][0]).join(' / ')}</span></th>`).join('')}
+              </tr></thead>
+              <tbody>
+                ${plans.map(plan => `
+                  <tr><td class="plan-name">${plan.name}</td>
+                    ${days.map(d => {
+                      const dayData = plan.week[d] || {};
+                      return `<td>${SLOTS.map(slot => {
+                        const currentId = dayData[slot] || '';
+                        return `<div class="slot-group">
+                          <div class="slot-label">${SLOT_LABELS[slot][0]}</div>
+                          <div style="display:flex;align-items:center;gap:4px;">
+                            <select onchange="saveWeekly('${plan.id}',${d},'${slot}',this.value||null,document.getElementById('ws_${plan.id}_${d}_${slot}'))">
+                              <option value="">—</option>
+                              ${plan.dishes.map(dish => `<option value="${dish.id}" ${dish.id === currentId ? 'selected' : ''}>${dish.name} (₹${dish.price})</option>`).join('')}
+                            </select>
+                            <span class="saved" id="ws_${plan.id}_${d}_${slot}">✓</span>
+                          </div>
+                        </div>`;
+                      }).join('')}</td>`;
+                    }).join('')}
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${!plans.length ? '<div class="empty-state">No plans found. Add them in Supabase first.</div>' : ''}
+          ${plans.every(p => !p.dishes.length) ? '<div class="empty-state" style="margin-top:16px;">No dishes found. Add dishes in Supabase first.</div>' : ''}
+        </div>
+        <div style="font-size:12px;color:#9ca3af;text-align:center;">Weekly schedule is always editable — it applies to every week.</div>
+      </div>
+
+      <div class="tab-content" id="content-tomorrow">
+        ${locked ? '<div class="lock-banner"><strong>🔒 Locked</strong> — Tomorrow\'s menu is locked after 7:45pm IST. Changes cannot be saved.</div>' : '<div class="lock-banner" style="background:#f0fdf4;border-color:#22c55e;color:#166534;"><strong>✅ Open</strong> — You can edit tomorrow\'s menu until 7:45pm IST.</div>'}
+        <div class="card">
+          <div class="scroll-wrap">
+            <table>
+              <thead><tr><th class="plan-name">Plan</th>
+                ${SLOTS.map(s => `<th class="day-header">${SLOT_LABELS[s]}</th>`).join('')}
+              </tr></thead>
+              <tbody>
+                ${plans.map(plan => `
+                  <tr><td class="plan-name">${plan.name}</td>
+                    ${SLOTS.map(slot => {
+                      const currentId = plan.nextDay[slot] || '';
+                      return `<td>
+                        <div style="display:flex;align-items:center;gap:4px;justify-content:center;">
+                          <select ${locked ? 'disabled' : ''} onchange="saveNextDay('${plan.id}','${slot}',this.value||null,document.getElementById('nd_${plan.id}_${slot}'),'${tomorrow}')">
+                            <option value="">—</option>
+                            ${plan.dishes.map(dish => `<option value="${dish.id}" ${dish.id === currentId ? 'selected' : ''}>${dish.name} (₹${dish.price})</option>`).join('')}
+                          </select>
+                          <span class="saved" id="nd_${plan.id}_${slot}">✓</span>
+                        </div>
+                      </td>`;
+                    }).join('')}
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          ${!plans.length ? '<div class="empty-state">No plans found.</div>' : ''}
+        </div>
+        <div style="font-size:12px;color:#9ca3af;text-align:center;">Selecting "—" clears the override — the weekly schedule default will be used instead.</div>
+      </div>
+    </div>`;
+}
+
+function login() {
+  const secret = document.getElementById('secret').value.trim();
+  if (!secret) return;
+  sessionStorage.setItem('admin_token', secret);
+  document.getElementById('loginErr').textContent = '';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

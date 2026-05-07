@@ -7,7 +7,8 @@ import {
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../../lib/razorpay.js";
 import { STATES } from "../states.js";
-import { PLAN_CATEGORIES, DAY_OPTIONS, MEAL_OPTIONS, SUNDAY_HOLIDAY_NOTE } from "../config/plans.js";
+import { getPlanCategories, getPlanById } from "../../lib/mealPlans.js";
+import { DAY_OPTIONS, MEAL_OPTIONS, SUNDAY_HOLIDAY_NOTE } from "../config/plans.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 
 const supabase = createClient(
@@ -18,7 +19,8 @@ const supabase = createClient(
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function calcPrice(plan, dayOption, mealOption) {
-  return plan.basePricePerMealPerDay * dayOption.days * mealOption.mealsPerDay;
+  const rate = plan.pricing?.[dayOption.days] ?? plan.basePricePerMealPerDay;
+  return rate * dayOption.days * mealOption.mealsPerDay;
 }
 
 /**
@@ -83,6 +85,8 @@ export async function startSubscription(phone, session, setSession) {
     data: {},
   });
 
+  const plans = await getPlanCategories();
+
   await sendList(
     phone,
     "🥗 *Choose your meal plan:*\n\nPick the plan that best matches your goal:",
@@ -90,7 +94,7 @@ export async function startSubscription(phone, session, setSession) {
     [
       {
         title: "Available Plans",
-        rows: PLAN_CATEGORIES.map((p) => ({
+        rows: plans.map((p) => ({
           id: p.id,
           title: p.title.substring(0, 24),
           description: p.description.substring(0, 72),
@@ -103,7 +107,7 @@ export async function startSubscription(phone, session, setSession) {
 // ─── Step 2 – Duration ────────────────────────────────────────────────────────
 
 export async function handlePlanCategory(phone, session, input, setSession) {
-  const plan = PLAN_CATEGORIES.find((p) => p.id === input);
+  const plan = await getPlanById(input);
 
   if (!plan) {
     await startSubscription(phone, session, setSession);
@@ -131,9 +135,11 @@ export async function handlePlanCategory(phone, session, input, setSession) {
 export async function handleDaySelection(phone, session, input, setSession) {
   const dayOption = DAY_OPTIONS.find((d) => d.id === input);
 
+  const plans = await getPlanCategories();
+
   if (!dayOption) {
     // Resend duration selection
-    const plan = PLAN_CATEGORIES.find((p) => p.id === session.data.planId);
+    const plan = plans.find((p) => p.id === session.data.planId);
     const planLine = plan ? ` (${plan.title})` : "";
     await sendOptions(
       phone,
@@ -145,7 +151,7 @@ export async function handleDaySelection(phone, session, input, setSession) {
     return;
   }
 
-  const plan = PLAN_CATEGORIES.find((p) => p.id === session.data.planId);
+  const plan = plans.find((p) => p.id === session.data.planId);
 
   await setSession(phone, {
     ...session,
@@ -274,7 +280,8 @@ export async function handleAddress(phone, session, addressText, setSession) {
     location,
   } = session.data;
 
-  const plan = PLAN_CATEGORIES.find((p) => p.id === planId);
+  const plans = await getPlanCategories();
+  const plan = plans.find((p) => p.id === planId);
   const dayOption = DAY_OPTIONS.find((d) => d.days === days);
   const mealOption = MEAL_OPTIONS.find((m) => m.mealsPerDay === mealsPerDay);
   const totalPrice =
