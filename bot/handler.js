@@ -21,8 +21,8 @@ const BACK_KEYWORDS = new Set(["back", "menu", "home", "0", "restart"]);
 // Maximum age (in seconds) for an interactive message to be acted upon.
 // Order-action buttons (CONFIRM/SKIP/CHANGE) expire faster since they have
 // hard meal-slot cutoffs; all other interactive buttons use a wider window.
-const ORDER_BUTTON_TTL_SECONDS = 15 * 60;   // 15 minutes
-const MENU_BUTTON_TTL_SECONDS  = 30 * 60;   // 30 minutes
+const ORDER_BUTTON_TTL_SECONDS = 15 * 60; // 15 minutes
+const MENU_BUTTON_TTL_SECONDS = 30 * 60; // 30 minutes
 
 /**
  * Returns true if the WhatsApp message timestamp is older than `ttlSeconds`.
@@ -152,7 +152,9 @@ export async function handleIncoming(phone, message) {
     input.startsWith("CHANGE_") ||
     input.startsWith("MEAL_");
 
-  const ttl = isOrderButton ? ORDER_BUTTON_TTL_SECONDS : MENU_BUTTON_TTL_SECONDS;
+  const ttl = isOrderButton
+    ? ORDER_BUTTON_TTL_SECONDS
+    : MENU_BUTTON_TTL_SECONDS;
 
   if (isStale(message, ttl)) {
     await sendText(
@@ -232,7 +234,10 @@ export async function handleIncoming(phone, message) {
         }
 
         if (items.length === 0) {
-          await sendText(phone, `Sorry, the menu is unavailable right now. Please try again later.`);
+          await sendText(
+            phone,
+            `Sorry, the menu is unavailable right now. Please try again later.`,
+          );
           return;
         }
 
@@ -241,7 +246,12 @@ export async function handleIncoming(phone, message) {
           title: item.itemname.substring(0, 24),
           description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
         }));
-        await sendList(phone, `🔄 *Change your meal*\n\nPick from today's options:`, "View Menu", [{ title: "Menu", rows }]);
+        await sendList(
+          phone,
+          `🔄 *Change your meal*\n\nPick from today's options:`,
+          "View Menu",
+          [{ title: "Menu", rows }],
+        );
         return;
       }
       return resetToGreeting(phone, session, setSession);
@@ -258,4 +268,3 @@ export async function handleIncoming(phone, message) {
       return handleGreeting(phone, session, setSession);
   }
 }
-
