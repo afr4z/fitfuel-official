@@ -2,7 +2,8 @@ import { getSession, setSession } from "./session.js";
 import { STATES } from "./states.js";
 import { handleGreeting } from "./handlers/greeting.js";
 import { handleMainMenu } from "./handlers/menu.js";
-import { handleOrderAction, handleMealChange } from "./handlers/orders.js";
+import { handleOrderAction, handleMealChange, handleConfirmAll, handleSkipAll, handleChangeOrderStart } from "./handlers/orders.js";
+import { getMenuItems } from "../lib/petpooja.js";
 import {
   handlePlanCategory,
   handleDaySelection,
@@ -82,6 +83,10 @@ async function handleBack(phone, session, setSession) {
       return resetToGreeting(phone, session, setSession);
     }
 
+    case STATES.SELECTING_MEAL_SLOT:
+      // Back to greeting from slot picker
+      return resetToGreeting(phone, session, setSession);
+
     default: {
       return resetToGreeting(phone, session, setSession);
     }
@@ -145,7 +150,10 @@ export async function handleIncoming(phone, message) {
     input.startsWith("CONFIRM_") ||
     input.startsWith("SKIP_") ||
     input.startsWith("CHANGE_") ||
-    input.startsWith("MEAL_");
+    input.startsWith("MEAL_") ||
+    input.startsWith("CONFIRM_ALL_") ||
+    input.startsWith("SKIP_ALL_") ||
+    input.startsWith("CHANGE_ORDER_");
 
   const ttl = isOrderButton ? ORDER_BUTTON_TTL_SECONDS : MENU_BUTTON_TTL_SECONDS;
 
@@ -158,14 +166,32 @@ export async function handleIncoming(phone, message) {
   }
   // -------------------------------------------------------------------------
 
-  // Order action buttons from cron notifications
-  if (isOrderButton && !input.startsWith("MEAL_")) {
-    return handleOrderAction(phone, session, input, setSession);
-  }
-
   // Meal selection from change flow
   if (input.startsWith("MEAL_")) {
     return handleMealChange(phone, session, input, setSession);
+  }
+
+  // Batch confirm/skip from consolidated cron message
+  if (input.startsWith("CONFIRM_ALL_")) {
+    return handleConfirmAll(phone, session, input, setSession);
+  }
+
+  if (input.startsWith("SKIP_ALL_")) {
+    return handleSkipAll(phone, session, input, setSession);
+  }
+
+  // Start change-order flow (show slot picker)
+  if (input.startsWith("CHANGE_ORDER_")) {
+    return handleChangeOrderStart(phone, session, input, setSession);
+  }
+
+  // Order action buttons from cron notifications (per-order confirm/skip/change)
+  if (
+    input.startsWith("CONFIRM_") ||
+    input.startsWith("SKIP_") ||
+    input.startsWith("CHANGE_")
+  ) {
+    return handleOrderAction(phone, session, input, setSession);
   }
 
   // Subscription onboarding inputs — only valid in the matching state.
@@ -202,6 +228,41 @@ export async function handleIncoming(phone, message) {
         `CHANGE_${session.data.orderId}`,
         setSession,
       );
+
+    case STATES.SELECTING_MEAL_SLOT: {
+      if (input.startsWith("PICK_SLOT_")) {
+        const orderId = input.replace("PICK_SLOT_", "");
+        if (!orderId) return resetToGreeting(phone, session, setSession);
+
+        await setSession(phone, {
+          ...session,
+          state: STATES.CHANGING_MEAL,
+          data: { orderId },
+        });
+
+        let items = [];
+        try {
+          const fetched = await getMenuItems();
+          if (fetched.length) items = fetched;
+        } catch (e) {
+          console.error("[DB] Error fetching menu:", e.message);
+        }
+
+        if (items.length === 0) {
+          await sendText(phone, `Sorry, the menu is unavailable right now. Please try again later.`);
+          return;
+        }
+
+        const rows = items.map((item) => ({
+          id: `MEAL_${orderId}_${item.itemid}`,
+          title: item.itemname.substring(0, 24),
+          description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
+        }));
+        await sendList(phone, `🔄 *Change your meal*\n\nPick from today's options:`, "View Menu", [{ title: "Menu", rows }]);
+        return;
+      }
+      return resetToGreeting(phone, session, setSession);
+    }
 
     case STATES.AWAITING_PAYMENT:
       await sendText(

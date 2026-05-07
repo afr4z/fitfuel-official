@@ -3,14 +3,10 @@ import { sendButtons } from "../../lib/whatsapp.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import { buildExpiryNotice } from "../../bot/config/plans.js";
 
-// --- Clients ------------------------------------------------------------------
-
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
-
-// --- Slot Config --------------------------------------------------------------
 
 const SLOT_LABELS = {
   breakfast: "🌅 Breakfast",
@@ -18,30 +14,11 @@ const SLOT_LABELS = {
   dinner: "🌙 Dinner",
 };
 
-const SLOT_CUTOFF_MINUTES = {
-  breakfast: 30,
-  lunch: 60,
-  dinner: 60,
-};
-
-// --- Handler ------------------------------------------------------------------
-
-/**
- * GET /api/cron/process-meal-plans?slot=breakfast|lunch|dinner
- *
- * Vercel Cron Job — processes a meal-plan slot by creating today's orders
- * and sending WhatsApp notifications to active subscribers.
- *
- * Secured via CRON_SECRET (Vercel automatically sends
- * `Authorization: Bearer <secret>` on every cron invocation).
- */
 export default async function handler(req, res) {
-  // Only allow GET (Vercel cron uses GET)
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Verify the cron secret
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret) {
     const authHeader = req.headers["authorization"] ?? "";
@@ -50,163 +27,133 @@ export default async function handler(req, res) {
     }
   }
 
-  const slot = req.query.slot;
+  const tomorrow = new Date();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  const deliveryDate = tomorrow.toISOString().split("T")[0];
 
-  if (!slot || !["breakfast", "lunch", "dinner"].includes(slot)) {
-    return res.status(400).json({ error: "Invalid or missing slot query param" });
-  }
-
-  const today = new Date().toISOString().split("T")[0];
-
-  // Skip Sundays — the kitchen is closed
-  const todayDate = new Date(today + "T00:00:00Z");
-  if (todayDate.getUTCDay() === 0) {
-    console.log(`[CRON] Sunday — kitchen closed, no deliveries today`);
+  const deliveryDateObj = new Date(deliveryDate + "T00:00:00Z");
+  if (deliveryDateObj.getUTCDay() === 0) {
+    console.log(`[CRON] Tomorrow (${deliveryDate}) is Sunday — kitchen closed, skipping`);
     return res.status(200).json({ skipped: "sunday" });
   }
 
-  console.log(`[CRON] Processing slot=${slot} date=${today}`);
-
-  // Check if today is a manually-marked kitchen-closed day
   const { data: kitchenClosed } = await supabase
     .from("kitchen_closed_days")
     .select("reason")
-    .eq("date", today)
+    .eq("date", deliveryDate)
     .maybeSingle();
 
   if (kitchenClosed) {
-    console.log(`[CRON] Kitchen closed today (${today}) — skipping`);
+    console.log(`[CRON] Kitchen closed on ${deliveryDate} — skipping`);
     return res.status(200).json({ skipped: "kitchen_closed" });
   }
 
-  // 1. Fetch all active subscription slots that include this slot
-  const { data: slots, error } = await supabase
-    .from("subscription_slots")
-    .select(
-      `
-      *,
-      meal_plan_subscriptions!inner (
-        id,
-        phone,
-        status,
-        end_date,
-        plan_type
-      )
-    `,
-    )
-    .eq("slot", slot)
-    .eq("meal_plan_subscriptions.status", "active")
-    .gte("meal_plan_subscriptions.end_date", today);
+  console.log(`[CRON] Processing meal plans for delivery on ${deliveryDate}`);
+
+  const { data: subs, error } = await supabase
+    .from("meal_plan_subscriptions")
+    .select(`
+      id, phone, start_date, end_date,
+      subscription_slot:subscription_slots (*)
+    `)
+    .eq("status", "active")
+    .gte("end_date", deliveryDate);
 
   if (error) {
     console.error("[CRON] DB fetch error:", error);
     return res.status(500).json({ error });
   }
 
-  const activeSlots = slots ?? [];
-  console.log(`[CRON] Found ${activeSlots.length} active ${slot} subscribers`);
+  const activeSubs = subs ?? [];
+  console.log(`[CRON] Found ${activeSubs.length} active subscribers`);
 
-  // 2. Process each subscriber
   const results = await Promise.allSettled(
-    activeSlots.map(async (slotRow) => {
-      const sub = slotRow.meal_plan_subscriptions;
+    activeSubs.map(async (sub) => {
       const phone = sub.phone;
+      const slots = sub.subscription_slot ?? [];
+      if (slots.length === 0) return;
 
-      // 2a. Check if order already exists for today (avoid duplicates on retry)
-      const { data: existing } = await supabase
-        .from("orders")
-        .select("id")
-        .eq("slot_id", slotRow.id)
-        .eq("delivery_date", today)
-        .single();
+      const createdOrders = [];
 
-      if (existing) {
-        console.log(
-          `[CRON] Order already exists for ${phone} ${slot} ${today} — skipping`,
-        );
-        return;
+      for (const slotRow of slots) {
+        const { data: existing } = await supabase
+          .from("orders")
+          .select("id")
+          .eq("slot_id", slotRow.id)
+          .eq("delivery_date", deliveryDate)
+          .maybeSingle();
+
+        if (existing) continue;
+
+        const { data: order, error: orderError } = await supabase
+          .from("orders")
+          .insert({
+            subscription_id: sub.id,
+            slot_id: slotRow.id,
+            phone,
+            delivery_date: deliveryDate,
+            slot: slotRow.slot,
+            delivery_time: slotRow.delivery_time,
+            item_id: slotRow.default_item_id,
+            item_name: slotRow.default_item_name,
+            is_default: true,
+            status: "pending",
+          })
+          .select()
+          .single();
+
+        if (orderError) {
+          console.error(`[CRON] Failed to create order for ${phone} ${slotRow.slot}:`, orderError);
+        } else {
+          createdOrders.push(order);
+        }
       }
 
-      // 2b. Create today's order with default meal
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          subscription_id: sub.id,
-          slot_id: slotRow.id,
-          phone,
-          delivery_date: today,
-          slot,
-          delivery_time: slotRow.delivery_time,
-          item_id: slotRow.default_item_id,
-          item_name: slotRow.default_item_name,
-          is_default: true,
-          status: "pending",
-        })
-        .select()
-        .single();
+      if (createdOrders.length === 0) return;
 
-      if (orderError) {
-        console.error(
-          `[CRON] Failed to create order for ${phone}:`,
-          orderError,
-        );
-        return;
-      }
+      const mealLines = createdOrders.map(
+        (o) => `${SLOT_LABELS[o.slot] || o.slot}: *${o.item_name || "Default meal"}* (${o.delivery_time?.slice(0, 5) || "—"})`,
+      ).join("\n");
 
-      // 2c. Count remaining delivery days (non-Sunday days from today to end_date)
-      const daysLeft = countRemainingDeliveryDays(sub.end_date);
-
-      // 2d. Build expiry notice
+      const daysLeft = countRemainingDeliveryDays(sub.start_date, sub.end_date);
       const expiryNotice = buildExpiryNotice(daysLeft, true);
-
-      // 2e. Send WhatsApp notification, then record the timestamp
-      const slotLabel = SLOT_LABELS[slot];
-      const cutoffMins = SLOT_CUTOFF_MINUTES[slot];
-      const mealName = slotRow.default_item_name || "your default meal";
 
       await sendButtons(
         phone,
-        `${slotLabel} is coming up! 🍽️\n\n` +
-          `*Today's meal:* ${mealName}\n` +
-          `*Delivery at:* ${slotRow.delivery_time}\n\n` +
-          `You have ${cutoffMins} mins to change your meal, or we'll deliver the default.` +
+        `🍽️ *Tomorrow's Meals (${deliveryDate})*\n\n${mealLines}\n\n` +
+          `You have until *midnight* to make changes.` +
           expiryNotice,
         [
-          { id: `CONFIRM_${order.id}`, title: "✅ Looks good" },
-          { id: `CHANGE_${order.id}`, title: "🔄 Change meal" },
-          { id: `SKIP_${order.id}`, title: "⏭️ Skip today" },
+          { id: `CONFIRM_ALL_${sub.id}`, title: "✅ Confirm All" },
+          { id: `CHANGE_ORDER_${sub.id}`, title: "🔄 Change" },
+          { id: `SKIP_ALL_${sub.id}`, title: "⏭️ Skip All" },
         ],
       );
 
+      const orderIds = createdOrders.map((o) => o.id);
       await supabase
         .from("orders")
         .update({ notified_at: new Date().toISOString() })
-        .eq("id", order.id);
+        .in("id", orderIds);
 
-      console.log(`[CRON] Notified ${phone} for ${slot}`);
+      console.log(`[CRON] Notified ${phone} — ${createdOrders.length} meal(s)`);
     }),
   );
 
-  // 3. Log any failures
-  const failed = results.filter((r) => r.status === "rejected");
-  if (failed.length) {
-    console.error(`[CRON] ${failed.length} notifications failed`);
-  }
-
-  // 4. Mark expired subscriptions
   const { error: expireError } = await supabase
     .from("meal_plan_subscriptions")
     .update({ status: "expired" })
     .eq("status", "active")
-    .lt("end_date", today);
+    .lt("end_date", deliveryDate);
 
   if (expireError) {
     console.error("[CRON] Failed to mark expired subscriptions:", expireError);
   }
 
+  const failed = results.filter((r) => r.status === "rejected");
   return res.status(200).json({
-    slot,
-    processed: activeSlots.length,
+    delivery_date: deliveryDate,
+    processed: activeSubs.length,
     failed: failed.length,
   });
 }

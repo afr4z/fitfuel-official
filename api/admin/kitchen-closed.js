@@ -58,7 +58,7 @@ export default async function handler(req, res) {
   // Fetch all active subscriptions whose end_date is on or after the closed date
   const { data: activeSubs, error: fetchError } = await supabase
     .from("meal_plan_subscriptions")
-    .select("id, phone, end_date")
+    .select("id, phone, end_date, start_date")
     .eq("status", "active")
     .gte("end_date", date);
 
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
         return;
       }
 
-      const remaining = countRemainingDeliveryDays(newEndStr);
+      const remaining = countRemainingDeliveryDays(sub.start_date, newEndStr);
       const reasonLine = reason ? `\nReason: _${reason}_\n` : "\n";
 
       await sendText(
