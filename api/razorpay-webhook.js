@@ -52,11 +52,11 @@ function toPlanType(days) {
 }
 
 function calcDates(days) {
-  // Derive today as a UTC date string first to avoid local-timezone skew
-  const todayStr = new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  const todayStr = ist.toISOString().split("T")[0];               // IST today
   const start = new Date(todayStr + "T00:00:00Z");
-  start.setUTCDate(start.getUTCDate() + 1); // begin from tomorrow
-  // Push forward if the start day is a Sunday
+  start.setUTCDate(start.getUTCDate() + 1);                       // begin from tomorrow IST
   while (start.getUTCDay() === 0) {
     start.setUTCDate(start.getUTCDate() + 1);
   }
@@ -295,6 +295,9 @@ export default async function handler(req, res) {
       await clearSession(phone);
 
       // Notify customer on WhatsApp
+      const fmt = (s) => new Date(s + "T00:00:00Z").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      const todayIST = new Date(new Date().getTime() + 5.5 * 60 * 60 * 1000).toISOString().split("T")[0];
+      const startLabel = start_date === todayIST ? "today" : `from ${fmt(start_date)}`;
       await sendText(
         phone,
         `🎉 *Payment Confirmed!*\n\n` +
@@ -302,7 +305,7 @@ export default async function handler(req, res) {
           `📅 Duration: ${dayLabel}\n` +
           `🍴 Meals: ${mealLabel}\n` +
           `💰 Amount paid: ₹${amount}\n\n` +
-          `📦 Deliveries start from tomorrow (${start_date}).\n` +
+          `📦 Deliveries start ${startLabel}.\n` +
           `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
           `Thank you for choosing FitFuel! 💪`,
       );
