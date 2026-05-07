@@ -6,6 +6,7 @@ const redis = new Redis({
 });
 
 const TTL = 60 * 60 * 24;
+const ACTIVITY_SET_KEY = "session:activity";
 const IDLE_TIMEOUT_MS =
   (parseInt(process.env.SESSION_TIMEOUT_MINUTES, 10) || 5) * 60 * 1000;
 const IDLE_STATES = new Set(["GREETING", "MAIN_MENU"]);
@@ -21,7 +22,6 @@ export async function getSession(phone) {
   if (!data) return { state: "GREETING", data: {} };
 
   if (isExpired(data)) {
-    // Delete the stale session but tell the router WHY
     await redis.del(`session:${phone}`);
     return { state: "SESSION_EXPIRED", data: {} };
   }
@@ -32,8 +32,38 @@ export async function getSession(phone) {
 export async function setSession(phone, session) {
   const stamped = { ...session, lastActivityAt: Date.now() };
   await redis.set(`session:${phone}`, stamped, { ex: TTL });
+  await redis.zadd(ACTIVITY_SET_KEY, { score: Date.now(), member: phone });
 }
 
 export async function clearSession(phone) {
   await redis.del(`session:${phone}`);
+  await redis.zrem(ACTIVITY_SET_KEY, phone);
+}
+
+export async function deleteSession(phone) {
+  await redis.del(`session:${phone}`);
+  await redis.zrem(ACTIVITY_SET_KEY, phone);
+}
+
+export async function findExpiredSessions() {
+  const cutoff = Date.now() - IDLE_TIMEOUT_MS;
+  const candidatePhones = await redis.zrange(
+    ACTIVITY_SET_KEY,
+    "-inf",
+    cutoff,
+    { byScore: true },
+  );
+
+  if (!candidatePhones || candidatePhones.length === 0) return [];
+
+  const expired = [];
+  for (const phone of candidatePhones) {
+    const session = await redis.get(`session:${phone}`);
+    if (!session) continue;
+    if (isExpired(session)) {
+      expired.push(phone);
+    }
+  }
+
+  return expired;
 }

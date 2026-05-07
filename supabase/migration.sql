@@ -269,3 +269,11 @@ CREATE TABLE kitchen_closed_days (
   reason TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- ─── Permissions ───────────────────────────────────────────────────────────────
+-- Grant table access to service_role (used by server-side code).
+-- Supabase's service_role key bypasses RLS but still needs table-level grants.
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO service_role;
