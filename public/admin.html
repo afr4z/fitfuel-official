@@ -56,9 +56,11 @@ async function api(method, body) {
   const headers = { 'Content-Type': 'application/json' };
   const token = getToken();
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(API, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API, opts);
   if (res.status === 401) { sessionStorage.removeItem('admin_token'); render(); return null; }
-  return res.json();
+  try { return await res.json(); } catch { return { error: 'Invalid JSON response' }; }
 }
 
 function showSaved(el) {
@@ -103,6 +105,20 @@ async function render() {
   const data = await api('GET');
   if (!data) return;
 
+  if (data.error) {
+    document.getElementById('app').innerHTML = `
+      <div class="container">
+        <h1>FitFuel Admin</h1>
+        <div class="card">
+          <div class="error" style="padding:20px;text-align:center;">
+            <strong>API Error:</strong> ${data.error}<br><br>
+            <button class="btn btn-primary" style="width:auto;padding:8px 24px;" onclick="render()">Retry</button>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+
   const { plans, dayLabels, slots, tomorrow, locked } = data;
   const days = [1, 2, 3, 4, 5, 6];
 
@@ -111,7 +127,7 @@ async function render() {
       <h1>FitFuel Admin</h1>
       <div class="tabs">
         <button class="tab active" id="tab-weekly" onclick="switchTab('weekly')">Weekly Schedule</button>
-        <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow (${tomorrow})</button>
+        <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow${tomorrow ? ' (' + tomorrow + ')' : ''}</button>
       </div>
 
       <div class="tab-content active" id="content-weekly">
