@@ -61,7 +61,7 @@ export async function startSubscription(phone, session, setSession) {
   const today = new Date().toISOString().split("T")[0];
   const { data: activeSub } = await supabase
     .from("meal_plan_subscriptions")
-    .select("id, end_date")
+    .select("id, start_date, end_date")
     .eq("phone", phone)
     .eq("status", "active")
     .gte("end_date", today)
@@ -95,7 +95,7 @@ export async function startSubscription(phone, session, setSession) {
       {
         title: "Available Plans",
         rows: plans.map((p) => ({
-          id: p.id,
+          id: "PLAN_" + p.id,
           title: p.title.substring(0, 24),
           description: p.description.substring(0, 72),
         })),
@@ -107,7 +107,7 @@ export async function startSubscription(phone, session, setSession) {
 // ─── Step 2 – Duration ────────────────────────────────────────────────────────
 
 export async function handlePlanCategory(phone, session, input, setSession) {
-  const plan = await getPlanById(input);
+  const plan = await getPlanById(input.replace(/^PLAN_/, ""));
 
   if (!plan) {
     await startSubscription(phone, session, setSession);
