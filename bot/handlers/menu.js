@@ -43,7 +43,7 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
       const today = new Date().toISOString().split("T")[0];
       const { data: activeSub } = await supabase
         .from("meal_plan_subscriptions")
-        .select("plan_type, start_date, end_date")
+        .select("id, plan_type, start_date, end_date")
         .eq("phone", phone)
         .eq("status", "active")
         .gte("end_date", today)
@@ -64,12 +64,32 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
       const expiryLine = buildExpiryNotice(remaining) ||
         `⏳ *${remaining}* delivery day(s) remaining.`;
 
+      let pushedLines = "";
+      const { data: pushedOrders } = await supabase
+        .from("orders")
+        .select("slot, delivery_date")
+        .eq("subscription_id", activeSub.id)
+        .eq("status", "pending")
+        .gt("delivery_date", activeSub.end_date)
+        .order("delivery_date");
+
+      if (pushedOrders?.length) {
+        const lines = pushedOrders.map((o) => {
+          const emoji = o.slot === "breakfast" ? "🌅" : o.slot === "lunch" ? "☀️" : "🌙";
+          const date = new Date(o.delivery_date + "T00:00:00Z").toLocaleDateString("en-IN", {
+            weekday: "short", day: "numeric", month: "short",
+          });
+          return `  ${emoji} ${o.slot} → ${date}`;
+        });
+        pushedLines = `\n⏭️ *${pushedOrders.length} skipped meal(s)* after your plan ends:\n${lines.join("\n")}\n`;
+      }
+
       await sendText(
         phone,
         `📋 *Your Active Plan*\n\n` +
           `📦 Plan: *${planLabel}*\n` +
           `📅 Started: ${activeSub.start_date}\n` +
-          `${expiryLine}\n\n` +
+          `${expiryLine}${pushedLines}\n\n` +
           `You'll receive a notification before each meal to confirm, skip, or change it.\n\n` +
           `Type anything to go back to the menu.`,
       );
