@@ -54,10 +54,6 @@
     {
       "path": "/api/cron/expiry-reminder",
       "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/session-expiry",
-      "schedule": "*/5 * * * *"
     }
   ]
 }
