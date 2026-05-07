@@ -4,6 +4,7 @@ import { handleGreeting } from "./greeting.js";
 import { startSubscription } from "./subscription.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import { getPlanLabel, buildExpiryNotice } from "../config/plans.js";
+import { getPlanCategories } from "../../lib/mealPlans.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -12,19 +13,28 @@ const supabase = createClient(
 
 export async function handleMainMenu(phone, session, buttonId, setSession) {
   switch (buttonId) {
-    case "VIEW_PLANS":
+    case "VIEW_PLANS": {
+      const plans = await getPlanCategories();
+      const planLines = plans
+        .map((p) => {
+          const prices = [3, 7, 14, 30]
+            .filter((d) => p.pricing[d])
+            .map((d) => `₹${p.pricing[d]}/${d}d`)
+            .join(" · ");
+          return `${p.title}\n   ${p.description}\n   Starts at ${prices}`;
+        })
+        .join("\n\n");
+
       await sendButtons(
         phone,
-        `🥗 *Our Nutrition Plans*\n\n` +
-          `We offer fully customisable meal plans across 6 diet goals:\n\n` +
-          `🔥 Weight Loss · 💪 Muscle Gain · 🥑 Keto\n` +
-          `🩺 Diabetic-Friendly · 🌱 Vegan · ⚖️ Balanced\n\n` +
+        `🥗 *Our Nutrition Plans*\n\n${planLines}\n\n` +
           `📅 *Durations:* 3, 7, 14, or 30 days\n` +
           `🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3\n\n` +
-          `Pricing starts from ₹120/meal/day. Tap below to build your plan!`,
+          `Tap below to customise your plan!`,
         [{ id: "ORDER_NOW", title: "🛒 Build My Plan" }],
       );
       break;
+    }
 
     case "ORDER_NOW":
       return startSubscription(phone, session, setSession);
