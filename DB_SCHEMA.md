@@ -82,11 +82,14 @@ CREATE TABLE dishes (
   is_veg BOOLEAN NOT NULL DEFAULT true,
   price DECIMAL(10,2) NOT NULL,
   is_available BOOLEAN NOT NULL DEFAULT true,
+  petpooja_item_id TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
-Seed: 5 placeholder dishes per plan (30 total).
+Seed: 5 placeholder dishes per plan (30 total). `petpooja_item_id` is populated by
+`sync-plans.js` from the Petpooja menu `itemid` field. Used by `dispatch-orders.js`
+when sending orders to Petpooja `save_order` API.
 
 ---
 
