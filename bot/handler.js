@@ -2,7 +2,7 @@ import { getSession, setSession } from "./session.js";
 import { STATES } from "./states.js";
 import { handleGreeting } from "./handlers/greeting.js";
 import { handleMainMenu } from "./handlers/menu.js";
-import { handleOrderAction, handleMealChange, handleConfirmAll, handleSkipAll, handleChangeOrderStart } from "./handlers/orders.js";
+import { handleOrderAction, handleMealChange } from "./handlers/orders.js";
 import { getMenuItems } from "../lib/petpooja.js";
 import {
   handlePlanCategory,
@@ -150,10 +150,7 @@ export async function handleIncoming(phone, message) {
     input.startsWith("CONFIRM_") ||
     input.startsWith("SKIP_") ||
     input.startsWith("CHANGE_") ||
-    input.startsWith("MEAL_") ||
-    input.startsWith("CONFIRM_ALL_") ||
-    input.startsWith("SKIP_ALL_") ||
-    input.startsWith("CHANGE_ORDER_");
+    input.startsWith("MEAL_");
 
   const ttl = isOrderButton ? ORDER_BUTTON_TTL_SECONDS : MENU_BUTTON_TTL_SECONDS;
 
@@ -169,20 +166,6 @@ export async function handleIncoming(phone, message) {
   // Meal selection from change flow
   if (input.startsWith("MEAL_")) {
     return handleMealChange(phone, session, input, setSession);
-  }
-
-  // Batch confirm/skip from consolidated cron message
-  if (input.startsWith("CONFIRM_ALL_")) {
-    return handleConfirmAll(phone, session, input, setSession);
-  }
-
-  if (input.startsWith("SKIP_ALL_")) {
-    return handleSkipAll(phone, session, input, setSession);
-  }
-
-  // Start change-order flow (show slot picker)
-  if (input.startsWith("CHANGE_ORDER_")) {
-    return handleChangeOrderStart(phone, session, input, setSession);
   }
 
   // Order action buttons from cron notifications (per-order confirm/skip/change)
