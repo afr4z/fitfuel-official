@@ -67,7 +67,7 @@ export async function startSubscription(phone, session, setSession) {
     .maybeSingle();
 
   if (activeSub) {
-    const remaining = countRemainingDeliveryDays(activeSub.end_date);
+    const remaining = countRemainingDeliveryDays(activeSub.start_date, activeSub.end_date);
     await sendText(
       phone,
       `⚠️ *You already have an active plan!*\n\n` +

@@ -55,7 +55,7 @@ export default async function handler(req, res) {
 
   const { data: subs, error } = await supabase
     .from("meal_plan_subscriptions")
-    .select("id, phone, plan_type, end_date")
+    .select("id, phone, plan_type, start_date, end_date")
     .eq("status", "active")
     .gte("end_date", today)
     .lte("end_date", windowEndStr);
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
 
   // Filter to exactly 2 remaining delivery days
   const targets = (subs ?? []).filter(
-    (sub) => countRemainingDeliveryDays(sub.end_date) === 2,
+    (sub) => countRemainingDeliveryDays(sub.start_date, sub.end_date) === 2,
   );
 
   console.log(`[EXPIRY-REMINDER] ${targets.length} subscriber(s) to remind`);
