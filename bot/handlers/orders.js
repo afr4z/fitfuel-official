@@ -1,6 +1,7 @@
 import { sendText, sendList } from "../../lib/whatsapp.js";
 import { createClient } from "@supabase/supabase-js";
 import { getMenuItems } from "../../lib/petpooja.js";
+import { addDeliveryDays } from "../../lib/deliveryDays.js";
 import { STATES } from "../states.js";
 
 const supabase = createClient(
@@ -36,7 +37,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
   const { data: order, error: fetchError } = await supabase
     .from("orders")
-    .select("phone, status, slot, accept_until")
+    .select("phone, status, slot, accept_until, item_id, item_name, slot_id, subscription_id, delivery_time")
     .eq("id", orderId)
     .single();
 
@@ -100,10 +101,56 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
         break;
       }
 
-      await sendText(
-        phone,
-        "⏭️ *Skipped!* No delivery for this slot today.\n\nSee you next time 👋",
-      );
+      let pushedDate = null;
+      if (order.subscription_id) {
+        const { data: sub } = await supabase
+          .from("meal_plan_subscriptions")
+          .select("end_date")
+          .eq("id", order.subscription_id)
+          .single();
+
+        if (sub?.end_date) {
+          pushedDate = addDeliveryDays(sub.end_date, 1);
+
+          const { data: existing } = await supabase
+            .from("orders")
+            .select("id")
+            .eq("slot_id", order.slot_id)
+            .eq("delivery_date", pushedDate)
+            .maybeSingle();
+
+          if (!existing) {
+            await supabase.from("orders").insert({
+              subscription_id: order.subscription_id,
+              slot_id: order.slot_id,
+              phone,
+              delivery_date: pushedDate,
+              slot: order.slot,
+              delivery_time: order.delivery_time,
+              item_id: order.item_id,
+              item_name: order.item_name,
+              is_default: false,
+              status: "pending",
+            });
+          }
+
+        }
+      }
+
+      if (pushedDate) {
+        const dateStr = new Date(pushedDate + "T00:00:00Z").toLocaleDateString("en-IN", {
+          weekday: "long", day: "numeric", month: "long",
+        });
+        await sendText(
+          phone,
+          `⏭️ *Skipped!* This meal has been moved to *${dateStr}* (added to the end of your plan).`,
+        );
+      } else {
+        await sendText(
+          phone,
+          "⏭️ *Skipped!* No delivery for this slot today.\n\nSee you next time 👋",
+        );
+      }
       break;
     }
 
