@@ -96,7 +96,7 @@ export async function startSubscription(phone, session, setSession) {
         title: "Available Plans",
         rows: plans.map((p) => ({
           id: "PLAN_" + p.id,
-          title: p.title.substring(0, 24),
+          title: p.shortTitle.substring(0, 24),
           description: p.description.substring(0, 72),
         })),
       },
