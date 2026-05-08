@@ -36,11 +36,12 @@ export function getPlanLabel(planType) {
  */
 export function buildExpiryNotice(daysLeft, inline = false) {
   const prefix = inline ? "\n\n" : "";
+  const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
   if (daysLeft === 1) {
-    return `${prefix}🚨 *This is your last delivery day!* Reply with any message to renew your plan.`;
+    return `${prefix}🚨 *This is your last delivery day!* Tap *Renew Plan* below to continue.`;
   }
-  if (daysLeft <= 3) {
-    return `${prefix}⚠️ Your plan expires in *${daysLeft}* delivery day(s)! Reply with any message to renew.`;
+  if (daysLeft <= threshold) {
+    return `${prefix}⚠️ Your plan expires in *${daysLeft}* delivery day(s)! Tap *Renew Plan* below to continue.`;
   }
   return "";
 }

@@ -27,9 +27,19 @@ export async function handleGreeting(phone, session, setSession) {
   if (activeSub) {
     const remaining = countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
     const planLabel = getPlanLabel(activeSub.plan_type);
-    const expiryLine = remaining <= 3
+    const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
+    const expiryLine = remaining <= threshold
       ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
       : `\n📅 *${remaining}* delivery day(s) remaining`;
+
+    const buttons = [
+      { id: "MY_PLAN", title: "📋 My Plan" },
+      { id: "CONTACT_US", title: "📞 Contact Us" },
+    ];
+
+    if (remaining <= threshold) {
+      buttons.unshift({ id: "ORDER_NOW", title: "🔄 Renew Plan" });
+    }
 
     await sendButtons(
       phone,
@@ -37,10 +47,7 @@ export async function handleGreeting(phone, session, setSession) {
       `🟢 You have an *active ${planLabel} plan*.${expiryLine}` +
       `\n\nHow can we help you?`,
 
-      [
-        { id: "MY_PLAN", title: "📋 My Plan" },
-        { id: "CONTACT_US", title: "📞 Contact Us" },
-      ],
+      buttons,
     );
   } else {
     await sendButtons(

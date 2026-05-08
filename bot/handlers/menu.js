@@ -93,6 +93,18 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
           `You'll receive a notification before each meal to confirm, skip, or change it.\n\n` +
           `Type anything to go back to the menu.`,
       );
+
+      const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
+      if (remaining <= threshold) {
+        await sendButtons(
+          phone,
+          `🔄 Ready to renew your plan?`,
+          [
+            { id: "ORDER_NOW", title: "🔄 Renew Plan" },
+            { id: "CONTACT_US", title: "📞 Contact Us" },
+          ],
+        );
+      }
       break;
     }
 
