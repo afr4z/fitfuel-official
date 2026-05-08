@@ -9,13 +9,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
-const FALLBACK_ITEMS = [
-  { itemid: "item001", itemname: "Paneer Butter Masala", item_type: "1", price: "180" },
-  { itemid: "item002", itemname: "Chicken Biryani",      item_type: "2", price: "220" },
-  { itemid: "item003", itemname: "Dal Tadka + Rice",     item_type: "1", price: "150" },
-  { itemid: "item004", itemname: "Grilled Fish Thali",   item_type: "2", price: "250" },
-];
-
 function isPastDeadline(order) {
   if (!order.accept_until) return false;
   return new Date() > new Date(order.accept_until);
@@ -161,12 +154,18 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
         data: { orderId },
       });
 
-      let items = FALLBACK_ITEMS;
+      let items;
       try {
         const fetched = await getMenuItems();
-        if (fetched.length) items = fetched;
+        if (!fetched?.length) throw new Error("empty menu");
+        items = fetched;
       } catch (e) {
         console.error("[PETPOOJA] Error fetching menu:", e.message);
+        await sendText(
+          phone,
+          "😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.",
+        );
+        return;
       }
 
       const rows = items.map((item) => ({
@@ -234,8 +233,6 @@ export async function handleMealChange(phone, session, listId, setSession) {
     if (item) itemName = item.itemname;
   } catch (e) {
     console.error("[PETPOOJA] Error resolving item name:", e.message);
-    const fallback = FALLBACK_ITEMS.find((i) => i.itemid === itemId);
-    if (fallback) itemName = fallback.itemname;
   }
 
   const { error: updateError } = await supabase

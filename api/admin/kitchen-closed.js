@@ -104,7 +104,7 @@ export default async function handler(req, res) {
         return;
       }
 
-      const remaining = countRemainingDeliveryDays(sub.start_date, newEndStr);
+      const remaining = await countRemainingDeliveryDays(sub.start_date, newEndStr);
       const reasonLine = reason ? `\nReason: _${reason}_\n` : "\n";
 
       await sendText(
