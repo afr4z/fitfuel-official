@@ -23,8 +23,10 @@ function deadlineMessage(order) {
 
 export async function handleOrderAction(phone, session, buttonId, setSession) {
   const [action, orderId] = buttonId.split("_");
+  console.log(`[ORDERS] handleOrderAction called: phone=${phone} action=${action} orderId=${orderId}`);
 
   if (!orderId) {
+    console.log(`[ORDERS] Missing orderId from buttonId=${buttonId}`);
     await sendText(phone, "Sorry, something went wrong. Please try again.");
     return;
   }
@@ -36,18 +38,20 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
     .single();
 
   if (fetchError || !order) {
-    console.error("[DB] Order fetch failed:", fetchError?.message);
+    console.error(`[ORDERS] Order fetch failed: orderId=${orderId} error=${fetchError?.message}`);
     await sendText(phone, "Sorry, we couldn't find that order. Please try again.");
     return;
   }
+  console.log(`[ORDERS] Order found: id=${orderId} status=${order.status} slot=${order.slot} phoneMatch=${order.phone === phone}`);
 
   if (order.phone !== phone) {
-    console.error("[SECURITY] Order ownership mismatch:", { orderPhone: order.phone, requesterPhone: phone });
+    console.error(`[ORDERS] Ownership mismatch: orderPhone=${order.phone} requesterPhone=${phone}`);
     await sendText(phone, "Sorry, something went wrong. Please try again.");
     return;
   }
 
   if (order.status !== "pending") {
+    console.log(`[ORDERS] Order not pending: orderId=${orderId} status=${order.status}`);
     const alreadyMsg =
       order.status === "confirmed"
         ? "✅ This order has already been confirmed."
@@ -59,10 +63,12 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
   }
 
   if (isPastDeadline(order)) {
+    console.log(`[ORDERS] Deadline passed: orderId=${orderId} accept_until=${order.accept_until} bypass=${process.env.BYPASS_DEADLINE_CHECK}`);
     await sendText(phone, deadlineMessage(order));
     return;
   }
 
+  console.log(`[ORDERS] Proceeding to action=${action}`);
   switch (action) {
     case "CONFIRM": {
       const { error: confirmError } = await supabase
@@ -149,6 +155,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
     }
 
     case "CHANGE": {
+      console.log(`[ORDERS] CHANGE case: setting session to CHANGING_MEAL for phone=${phone}`);
       await setSession(phone, {
         ...session,
         state: STATES.CHANGING_MEAL,
@@ -158,10 +165,11 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
       let items;
       try {
         const fetched = await getMenuItems();
+        console.log(`[ORDERS] getMenuItems returned ${fetched?.length ?? 0} items`);
         if (!fetched?.length) throw new Error("empty menu");
         items = fetched;
       } catch (e) {
-        console.error("[PETPOOJA] Error fetching menu:", e.message);
+        console.error(`[ORDERS] Menu fetch failed: ${e.message}`);
         await sendText(
           phone,
           "😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.",
@@ -175,12 +183,14 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
         description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
       }));
 
+      console.log(`[ORDERS] Sending menu list with ${rows.length} items to ${phone}`);
       await sendList(
         phone,
         "🔄 *Change your meal*\n\nPick from today's available options:",
         "View Menu",
         [{ title: "Today's Menu", rows }],
       );
+      console.log(`[ORDERS] Menu list sent successfully to ${phone}`);
       break;
     }
 
@@ -193,8 +203,10 @@ export async function handleMealChange(phone, session, listId, setSession) {
   const parts = listId.split("_");
   const orderId = parts[1];
   const itemId = parts[2];
+  console.log(`[ORDERS] handleMealChange: phone=${phone} orderId=${orderId} itemId=${itemId}`);
 
   if (!orderId || !itemId) {
+    console.log(`[ORDERS] handleMealChange: missing orderId/itemId from listId=${listId}`);
     await sendText(phone, "Sorry, something went wrong. Please try again.");
     return;
   }
