@@ -179,6 +179,11 @@ export async function handleIncoming(phone, message) {
     return handleOrderAction(phone, session, input, setSession);
   }
 
+  // Renew / new subscription — handle from any state (expiry reminder, greeting, MY_PLAN)
+  if (input === "ORDER_NOW") {
+    return startSubscription(phone, session, setSession);
+  }
+
   // Subscription onboarding inputs — only valid in the matching state.
   // If the session expired (state reset) these stale button IDs fall through
   // to the default which shows the greeting.

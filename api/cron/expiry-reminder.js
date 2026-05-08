@@ -65,9 +65,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error });
   }
 
-  // Filter to exactly 2 remaining delivery days
+  // Filter to exactly the threshold number of remaining delivery days
+  const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
   const targets = (subs ?? []).filter(
-    (sub) => countRemainingDeliveryDays(sub.start_date, sub.end_date) === 2,
+    (sub) => countRemainingDeliveryDays(sub.start_date, sub.end_date) === threshold,
   );
 
   console.log(`[EXPIRY-REMINDER] ${targets.length} subscriber(s) to remind`);
@@ -78,7 +79,7 @@ export default async function handler(req, res) {
       await sendButtons(
         sub.phone,
         `⏳ *Your FitFuel plan is almost over!*\n\n` +
-          `Your *${planLabel} plan* has only *2 delivery days* remaining.\n\n` +
+          `Your *${planLabel} plan* has only *${threshold} delivery day(s)* remaining.\n\n` +
           `Don't miss your healthy streak — renew now to keep your meals coming! 🥗`,
         [
           { id: "ORDER_NOW", title: "🔄 Renew Plan" },

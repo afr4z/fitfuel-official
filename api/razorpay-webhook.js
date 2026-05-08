@@ -51,12 +51,26 @@ function toPlanType(days) {
   return "monthly";
 }
 
-function calcDates(days) {
+/**
+ * @param {number} days      Number of delivery days for the new plan.
+ * @param {string|null} [startFrom]  Optional "YYYY-MM-DD" — the first delivery day
+ *                                   of the new plan. Used for renewals so the new
+ *                                   subscription starts the day after the current
+ *                                   plan ends. Falls back to tomorrow IST.
+ */
+function calcDates(days, startFrom = null) {
   const now = new Date();
   const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
-  const todayStr = ist.toISOString().split("T")[0];               // IST today
-  const start = new Date(todayStr + "T00:00:00Z");
-  start.setUTCDate(start.getUTCDate() + 1);                       // begin from tomorrow IST
+  const todayStr = ist.toISOString().split("T")[0];
+
+  let start;
+  if (startFrom) {
+    start = new Date(startFrom + "T00:00:00Z");
+  } else {
+    start = new Date(todayStr + "T00:00:00Z");
+    start.setUTCDate(start.getUTCDate() + 1);                       // begin from tomorrow IST
+  }
+
   while (start.getUTCDay() === 0) {
     start.setUTCDate(start.getUTCDate() + 1);
   }
@@ -124,6 +138,7 @@ export default async function handler(req, res) {
         dayLabel,
         amount,
         mealsPerDay,
+        renewAfterEnd,
       } = session?.data || {};
 
       if (!planId || !days) {
@@ -138,8 +153,11 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Invalid plan type" });
       }
 
+      // For renewals, start the new plan the next delivery day after the current plan ends
+      const startFrom = renewAfterEnd ? addDeliveryDays(renewAfterEnd, 1) : null;
+
       // Validate dates
-      const { start_date, end_date } = calcDates(days);
+      const { start_date, end_date } = calcDates(days, startFrom);
       if (!start_date || !end_date) {
         console.error("[WEBHOOK] Invalid dates:", { start_date, end_date });
         return res.status(500).json({ error: "Invalid subscription dates" });

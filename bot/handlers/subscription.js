@@ -70,19 +70,30 @@ export async function startSubscription(phone, session, setSession) {
 
   if (activeSub) {
     const remaining = countRemainingDeliveryDays(activeSub.start_date, activeSub.end_date);
+    const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
+
+    if (remaining > threshold) {
+      await sendText(
+        phone,
+        `⚠️ *You already have an active plan!*\n\n` +
+          `Your current plan has *${remaining} delivery day(s)* remaining.\n\n` +
+          `You can renew once your plan has ${threshold} or fewer delivery days left.`,
+      );
+      return;
+    }
+
     await sendText(
       phone,
-      `⚠️ *You already have an active plan!*\n\n` +
-        `Your current plan has *${remaining} delivery day(s)* remaining.\n\n` +
-        `You can subscribe to a new plan once your current one completes.`,
+      `🔄 *Renew your plan!*\n\n` +
+        `Your current plan ends shortly. Your new plan will start right after it completes.\n\n` +
+        `Let's set up your new plan!`,
     );
-    return;
   }
 
   await setSession(phone, {
     ...session,
     state: STATES.SELECTING_PLAN_CATEGORY,
-    data: {},
+    data: activeSub ? { ...session.data, renewAfterEnd: activeSub.end_date } : {},
   });
 
   const plans = await getPlanCategories();
