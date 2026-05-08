@@ -211,6 +211,54 @@ export default async function handler(req, res) {
         phone,
       );
 
+      // Check for pre-existing kitchen closed days within the subscription's range
+      const { data: closedDays } = await supabase
+        .from("kitchen_closed_days")
+        .select("date, reason")
+        .gte("date", start_date)
+        .lte("date", end_date);
+
+      if (closedDays?.length) {
+        const nonSundayClosed = closedDays.filter((cd) => {
+          const day = new Date(cd.date + "T00:00:00Z").getUTCDay();
+          return day !== 0;
+        });
+
+        if (nonSundayClosed.length) {
+          let newEnd = end_date;
+          for (const cd of nonSundayClosed) {
+            newEnd = addDeliveryDays(newEnd, 1);
+          }
+
+          const { error: updateError } = await supabase
+            .from("meal_plan_subscriptions")
+            .update({ end_date: newEnd })
+            .eq("id", subscription.id);
+
+          if (!updateError) {
+            console.log(
+              `[WEBHOOK] Extended sub ${subscription.id} end_date from ${end_date} to ${newEnd} due to ${nonSundayClosed.length} kitchen closed day(s)`,
+            );
+
+            const datesList = nonSundayClosed.map((cd) => cd.date).join(", ");
+            const reasonLine = nonSundayClosed[0].reason
+              ? `\nReason: _${nonSundayClosed[0].reason}_\n`
+              : "\n";
+
+            await sendText(
+              phone,
+              `🔒 *Kitchen Closed Days during your plan*\n\n` +
+                `Our kitchen will be closed on: *${datesList}*.${reasonLine}` +
+                `No meals will be delivered on those days.\n\n` +
+                `✅ Your plan has been extended to *${new Date(newEnd + "T00:00:00Z").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}* to make up for it.\n\n` +
+                `We'll be back the next working day! 🙏`,
+            );
+          }
+
+          end_date = newEnd; // update for downstream code
+        }
+      }
+
       // Determine which slots to create from the session's planId
       // Session stores the MEALS_X option id — find which one was chosen
       // mealsPerDay is stored in session; map it back to slot names
