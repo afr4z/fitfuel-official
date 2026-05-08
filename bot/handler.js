@@ -100,16 +100,52 @@ async function resetToGreeting(phone, session, setSession) {
   return handleGreeting(phone, fresh, setSession);
 }
 
+/**
+ * Returns true if `input` is an order-action button (per-order actions tied to
+ * a specific meal notification).  These buttons are always routed immediately,
+ * bypassing session-expiry checks, so users can confirm/skip/change meals
+ * regardless of stale onboarding sessions.
+ */
+function isOrderAction(input) {
+  return (
+    input.startsWith("CONFIRM_") ||
+    input.startsWith("SKIP_") ||
+    input.startsWith("CHANGE_") ||
+    input.startsWith("MEAL_")
+  );
+}
+
 export async function handleIncoming(phone, message) {
   const session = await getSession(phone);
-
-  if (session.state === STATES.SESSION_EXPIRED) {
-    return handleSessionExpired(phone, session, setSession);
-  }
 
   const buttonId = message.interactive?.button_reply?.id || "";
   const listId = message.interactive?.list_reply?.id || "";
   const input = buttonId || listId;
+
+  // ── Order-action buttons (CONFIRM/SKIP/CHANGE/MEAL) ──────────────────────
+  // These are tied to a specific meal notification with a 15-minute TTL and
+  // MUST work regardless of session state — the user may have an expired
+  // onboarding session but still needs to respond to a meal notification.
+  if (isOrderAction(input)) {
+    if (isStale(message, ORDER_BUTTON_TTL_SECONDS)) {
+      await sendText(
+        phone,
+        `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`,
+      );
+      return;
+    }
+
+    if (input.startsWith("MEAL_")) {
+      return handleMealChange(phone, session, input, setSession);
+    }
+    return handleOrderAction(phone, session, input, setSession);
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Session expiry check — only applies to non-order interactions
+  if (session.state === STATES.SESSION_EXPIRED) {
+    return handleSessionExpired(phone, session, setSession);
+  }
 
   // WhatsApp location share
   if (message.type === "location") {
@@ -141,22 +177,8 @@ export async function handleIncoming(phone, message) {
     return resetToGreeting(phone, session, setSession);
   }
 
-  // --- Stale-button guard ---------------------------------------------------
-  // Order-action buttons (CONFIRM / SKIP / CHANGE) are tied to a specific
-  // meal slot window; reject them after ORDER_BUTTON_TTL_SECONDS.
-  // All other interactive buttons (menu, onboarding) expire after
-  // MENU_BUTTON_TTL_SECONDS to prevent acting on messages from days ago.
-  const isOrderButton =
-    input.startsWith("CONFIRM_") ||
-    input.startsWith("SKIP_") ||
-    input.startsWith("CHANGE_") ||
-    input.startsWith("MEAL_");
-
-  const ttl = isOrderButton
-    ? ORDER_BUTTON_TTL_SECONDS
-    : MENU_BUTTON_TTL_SECONDS;
-
-  if (isStale(message, ttl)) {
+  // --- Stale-button guard (menu/onboarding buttons) ------------------------
+  if (isStale(message, MENU_BUTTON_TTL_SECONDS)) {
     await sendText(
       phone,
       `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`,
@@ -164,20 +186,6 @@ export async function handleIncoming(phone, message) {
     return;
   }
   // -------------------------------------------------------------------------
-
-  // Meal selection from change flow
-  if (input.startsWith("MEAL_")) {
-    return handleMealChange(phone, session, input, setSession);
-  }
-
-  // Order action buttons from cron notifications (per-order confirm/skip/change)
-  if (
-    input.startsWith("CONFIRM_") ||
-    input.startsWith("SKIP_") ||
-    input.startsWith("CHANGE_")
-  ) {
-    return handleOrderAction(phone, session, input, setSession);
-  }
 
   // Renew / new subscription — handle from any state (expiry reminder, greeting, MY_PLAN)
   if (input === "ORDER_NOW") {
