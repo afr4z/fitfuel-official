@@ -10,6 +10,7 @@ const supabase = createClient(
 );
 
 function isPastDeadline(order) {
+  if (process.env.BYPASS_DEADLINE_CHECK === "true") return false;
   if (!order.accept_until) return false;
   return new Date() > new Date(order.accept_until);
 }
