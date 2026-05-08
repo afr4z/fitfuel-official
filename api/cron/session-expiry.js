@@ -1,4 +1,5 @@
-import { findExpiredSessions, markSessionExpired } from "../../bot/session.js";
+import { sendText } from "../../lib/whatsapp.js";
+import { findExpiredSessions, clearSession } from "../../bot/session.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
@@ -16,23 +17,32 @@ export default async function handler(req, res) {
     const details = [];
     for (const phone of phones) {
       try {
-        await markSessionExpired(phone);
-        details.push({ phone, status: "marked" });
-        console.log(`[SESSION-EXPIRY] Marked expired ${phone}`);
+        await sendText(
+          phone,
+          `⏰ *Your session expired due to inactivity.*\n\nType *hi* to start again!`,
+        );
+        await clearSession(phone);
+        details.push({ phone, status: "notified" });
+        console.log(`[SESSION-EXPIRY] Notified + cleared ${phone}`);
       } catch (err) {
-        details.push({ phone, status: "failed", error: err.message });
         console.error(`[SESSION-EXPIRY] Failed for ${phone}:`, err.message);
+        try {
+          await clearSession(phone);
+          details.push({ phone, status: "cleared-no-notify", error: err.message });
+        } catch {
+          details.push({ phone, status: "failed", error: err.message });
+        }
       }
     }
 
-    const marked = details.filter((d) => d.status === "marked").length;
+    const notified = details.filter((d) => d.status === "notified").length;
     const now = new Date();
     const istOffset = 5.5 * 60 * 60 * 1000;
     const checkedAt = new Date(now.getTime() + istOffset)
       .toISOString()
       .replace("T", " ")
       .replace("Z", " IST");
-    return res.status(200).json({ checkedAt, found: phones.length, marked, details });
+    return res.status(200).json({ checkedAt, found: phones.length, notified, details });
   } catch (err) {
     console.error("[CRON/session-expiry]", err);
     return res.status(500).json({ error: err.message });
