@@ -1,3 +1,4 @@
+import { createClient } from "@supabase/supabase-js";
 import { getSession, setSession } from "./session.js";
 import { STATES } from "./states.js";
 import { handleGreeting } from "./handlers/greeting.js";
@@ -14,6 +15,11 @@ import {
 } from "./handlers/subscription.js";
 import { handleSessionExpired } from "./handlers/sessionExpired.js";
 import { sendText, sendLocationRequest } from "../lib/whatsapp.js";
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+);
 
 // Keywords that trigger "go back" navigation regardless of state
 const BACK_KEYWORDS = new Set(["back", "menu", "home", "0", "restart"]);
@@ -245,9 +251,27 @@ export async function handleIncoming(phone, message) {
           data: { orderId },
         });
 
+        // Look up the subscription to filter menu items by meal plan
+        let mealPlanId;
+        try {
+          const { data: ord } = await supabase
+            .from("orders")
+            .select("subscription_id")
+            .eq("id", orderId)
+            .single();
+          if (ord?.subscription_id) {
+            const { data: sub } = await supabase
+              .from("meal_plan_subscriptions")
+              .select("meal_plan_id")
+              .eq("id", ord.subscription_id)
+              .single();
+            mealPlanId = sub?.meal_plan_id;
+          }
+        } catch (_) {}
+
         let items = [];
         try {
-          const fetched = await getMenuItems();
+          const fetched = await getMenuItems({ mealPlanId });
           if (fetched.length) items = fetched;
         } catch (e) {
           console.error("[DB] Error fetching menu:", e.message);
