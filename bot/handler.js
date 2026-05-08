@@ -116,18 +116,23 @@ function isOrderAction(input) {
 }
 
 export async function handleIncoming(phone, message) {
+  console.log(`[HANDLER] Incoming: phone=${phone} type=${message.type} msgTs=${message.timestamp}`);
   const session = await getSession(phone);
+  console.log(`[HANDLER] Session state=${session.state}`);
 
   const buttonId = message.interactive?.button_reply?.id || "";
   const listId = message.interactive?.list_reply?.id || "";
   const input = buttonId || listId;
+  if (input) console.log(`[HANDLER] Input detected: ${input}`);
 
   // ── Order-action buttons (CONFIRM/SKIP/CHANGE/MEAL) ──────────────────────
   // These are tied to a specific meal notification with a 15-minute TTL and
   // MUST work regardless of session state — the user may have an expired
   // onboarding session but still needs to respond to a meal notification.
   if (isOrderAction(input)) {
+    console.log(`[HANDLER] Order action received: phone=${phone} input=${input} msgTs=${message.timestamp}`);
     if (isStale(message, ORDER_BUTTON_TTL_SECONDS)) {
+      console.log(`[HANDLER] Stale order button rejected: phone=${phone} input=${input}`);
       await sendText(
         phone,
         `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`,
@@ -136,8 +141,10 @@ export async function handleIncoming(phone, message) {
     }
 
     if (input.startsWith("MEAL_")) {
+      console.log(`[HANDLER] Routing to handleMealChange: phone=${phone}`);
       return handleMealChange(phone, session, input, setSession);
     }
+    console.log(`[HANDLER] Routing to handleOrderAction: phone=${phone}`);
     return handleOrderAction(phone, session, input, setSession);
   }
   // ─────────────────────────────────────────────────────────────────────────
@@ -219,7 +226,7 @@ export async function handleIncoming(phone, message) {
       return handleMainMenu(phone, session, input, setSession);
 
     case STATES.CHANGING_MEAL:
-      // They sent text instead of picking — resend the list
+      console.log(`[HANDLER] CHANGING_MEAL state: routing text input to handleOrderAction for phone=${phone}`);
       return handleOrderAction(
         phone,
         session,
