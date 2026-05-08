@@ -162,9 +162,21 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
         data: { orderId },
       });
 
+      // Look up the subscription to filter menu items by meal plan
+      let mealPlanId;
+      if (order.subscription_id) {
+        const { data: sub } = await supabase
+          .from("meal_plan_subscriptions")
+          .select("meal_plan_id")
+          .eq("id", order.subscription_id)
+          .single();
+        mealPlanId = sub?.meal_plan_id;
+        console.log(`[ORDERS] Subscription meal_plan_id=${mealPlanId}`);
+      }
+
       let items;
       try {
-        const fetched = await getMenuItems();
+        const fetched = await getMenuItems({ mealPlanId });
         console.log(`[ORDERS] getMenuItems returned ${fetched?.length ?? 0} items`);
         if (!fetched?.length) throw new Error("empty menu");
         items = fetched;
@@ -241,7 +253,23 @@ export async function handleMealChange(phone, session, listId, setSession) {
 
   let itemName = "Selected meal";
   try {
-    const items = await getMenuItems();
+    const { data: ord } = await supabase
+      .from("orders")
+      .select("subscription_id")
+      .eq("id", orderId)
+      .single();
+
+    let mealPlanId;
+    if (ord?.subscription_id) {
+      const { data: sub } = await supabase
+        .from("meal_plan_subscriptions")
+        .select("meal_plan_id")
+        .eq("id", ord.subscription_id)
+        .single();
+      mealPlanId = sub?.meal_plan_id;
+    }
+
+    const items = await getMenuItems({ mealPlanId });
     const item = items.find((i) => i.itemid === itemId);
     if (item) itemName = item.itemname;
   } catch (e) {
