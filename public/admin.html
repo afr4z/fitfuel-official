@@ -82,11 +82,79 @@ async function saveNextDay(planId, slot, dishId, savedEl, date) {
   }
 }
 
+const KC_API = '/api/admin/kitchen-closed';
+
+async function kcApi(method, body) {
+  const headers = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(KC_API, opts);
+  if (res.status === 401) { document.getElementById('kc-error').textContent = 'Unauthorized — please re-login.'; return null; }
+  try { return await res.json(); } catch { return { error: 'Invalid JSON response' }; }
+}
+
+async function loadKitchenClosedDays() {
+  const el = document.getElementById('kc-list');
+  const data = await kcApi('GET');
+  if (!data || data.error) {
+    el.innerHTML = '<div class="empty-state">Failed to load closed days.</div>';
+    return;
+  }
+  const days = data.closedDays || [];
+  if (!days.length) {
+    el.innerHTML = '<div class="empty-state">No upcoming closed days.</div>';
+    return;
+  }
+  el.innerHTML = `<table><thead><tr><th style="text-align:left">Date</th><th style="text-align:left">Reason</th></tr></thead><tbody>
+    ${days.map(d => `<tr><td style="text-align:left">${d.date}</td><td style="text-align:left">${d.reason || '—'}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function markKitchenClosed() {
+  const date = document.getElementById('kc-date').value;
+  const reason = document.getElementById('kc-reason').value.trim();
+  const errorEl = document.getElementById('kc-error');
+  const successEl = document.getElementById('kc-success');
+  const btn = document.getElementById('kc-btn');
+  errorEl.textContent = '';
+  successEl.style.display = 'none';
+
+  if (!date) { errorEl.textContent = 'Please select a date.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
+  const data = await kcApi('POST', { date, reason: reason || undefined });
+  if (!data) {
+    btn.disabled = false;
+    btn.textContent = 'Mark Closed';
+    errorEl.textContent = 'Request failed.';
+    return;
+  }
+  if (data.error) {
+    btn.disabled = false;
+    btn.textContent = 'Mark Closed';
+    errorEl.textContent = data.error;
+    return;
+  }
+
+  successEl.textContent = `✅ Kitchen marked closed for ${date}. ${data.extended || 0} subscription(s) extended.`;
+  successEl.style.display = 'block';
+  btn.disabled = false;
+  btn.textContent = 'Mark Closed';
+  document.getElementById('kc-date').value = '';
+  document.getElementById('kc-reason').value = '';
+  loadKitchenClosedDays();
+}
+
 function switchTab(tabName) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + tabName).classList.add('active');
   document.getElementById('content-' + tabName).classList.add('active');
+  if (tabName === 'kitchen') loadKitchenClosedDays();
 }
 
 async function render() {
@@ -128,6 +196,7 @@ async function render() {
       <div class="tabs">
         <button class="tab active" id="tab-weekly" onclick="switchTab('weekly')">Weekly Schedule</button>
         <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow${tomorrow ? ' (' + tomorrow + ')' : ''}</button>
+        <button class="tab" id="tab-kitchen" onclick="switchTab('kitchen')">🔒 Kitchen Closed</button>
       </div>
 
       <div class="tab-content active" id="content-weekly">
@@ -196,6 +265,36 @@ async function render() {
           ${!plans.length ? '<div class="empty-state">No plans found.</div>' : ''}
         </div>
         <div style="font-size:12px;color:#9ca3af;text-align:center;">Selecting "—" clears the override — the weekly schedule default will be used instead.</div>
+      </div>
+
+      <div class="tab-content" id="content-kitchen">
+        <div class="card">
+          <h2>🔒 Mark Kitchen Closed</h2>
+          <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">
+            When you mark a date as closed, all active subscriptions are extended by 1 delivery day
+            and affected customers are notified on WhatsApp.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:end;">
+            <div>
+              <label style="font-size:12px;font-weight:500;display:block;margin-bottom:4px;">Date</label>
+              <input type="date" id="kc-date" style="padding:8px 12px;font-size:14px;border:1px solid #d1d5db;border-radius:6px;">
+            </div>
+            <div style="flex:1;min-width:200px;">
+              <label style="font-size:12px;font-weight:500;display:block;margin-bottom:4px;">Reason (optional)</label>
+              <input type="text" id="kc-reason" placeholder="e.g. Public holiday" style="width:100%;padding:8px 12px;font-size:14px;border:1px solid #d1d5db;border-radius:6px;">
+            </div>
+            <button class="btn btn-primary" id="kc-btn" onclick="markKitchenClosed()" style="width:auto;padding:8px 24px;">Mark Closed</button>
+          </div>
+          <div class="error" id="kc-error" style="margin-top:12px;"></div>
+          <div id="kc-success" style="margin-top:12px;color:#16a34a;font-size:14px;font-weight:500;display:none;"></div>
+        </div>
+
+        <div class="card">
+          <h2>📋 Upcoming Closed Days</h2>
+          <div id="kc-list">
+            <div class="empty-state">Loading...</div>
+          </div>
+        </div>
       </div>
     </div>`;
 }

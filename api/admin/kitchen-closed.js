@@ -8,28 +8,41 @@ const supabase = createClient(
 );
 
 /**
- * POST /api/admin/kitchen-closed
+ * GET  /api/admin/kitchen-closed — returns a list of upcoming kitchen-closed days.
+ * POST /api/admin/kitchen-closed — marks a date as kitchen-closed.
  *
- * Marks a date as a kitchen-closed day, extends all active subscription
- * end_dates by one calendar day, and notifies affected customers on WhatsApp.
+ * Protected by ADMIN_SECRET (same shared secret used by the admin panel).
  *
- * Protected by CRON_SECRET (same shared secret used by cron jobs).
- *
- * Body (JSON):
+ * POST body (JSON):
  *   { date: "YYYY-MM-DD", reason?: string }
  */
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  // Verify shared secret
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (adminSecret) {
     const authHeader = req.headers["authorization"] ?? "";
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    if (authHeader !== `Bearer ${adminSecret}`) {
       return res.status(401).json({ error: "Unauthorized" });
     }
+  }
+
+  if (req.method === "GET") {
+    const today = new Date().toISOString().split("T")[0];
+    const { data, error } = await supabase
+      .from("kitchen_closed_days")
+      .select("date, reason")
+      .gte("date", today)
+      .order("date");
+
+    if (error) {
+      console.error("[KITCHEN-CLOSED] GET error:", error);
+      return res.status(500).json({ error: "Failed to fetch closed days" });
+    }
+
+    return res.status(200).json({ closedDays: data ?? [] });
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const { date, reason } = req.body ?? {};
