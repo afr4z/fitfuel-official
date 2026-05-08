@@ -277,7 +277,7 @@ export default async function handler(req, res) {
 
             // Send immediate notification for breakfast
             if (sr.slot === "breakfast") {
-              const daysLeft = countRemainingDeliveryDays(start_date, end_date);
+              const daysLeft = await countRemainingDeliveryDays(start_date, end_date);
               const expiryNotice = buildExpiryNotice(daysLeft, true);
               const slotLabel = SLOT_LABELS.breakfast;
               const itemLine = order.item_name

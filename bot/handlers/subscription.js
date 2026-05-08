@@ -69,7 +69,7 @@ export async function startSubscription(phone, session, setSession) {
     .maybeSingle();
 
   if (activeSub) {
-    const remaining = countRemainingDeliveryDays(activeSub.start_date, activeSub.end_date);
+    const remaining = await countRemainingDeliveryDays(activeSub.start_date, activeSub.end_date);
     const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
 
     if (remaining > threshold) {

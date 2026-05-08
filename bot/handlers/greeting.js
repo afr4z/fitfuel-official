@@ -25,7 +25,7 @@ export async function handleGreeting(phone, session, setSession) {
     .maybeSingle();
 
   if (activeSub) {
-    const remaining = countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
+    const remaining = await countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
     const planLabel = getPlanLabel(activeSub.plan_type);
     const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
     const expiryLine = remaining <= threshold

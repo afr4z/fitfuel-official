@@ -67,9 +67,11 @@ export default async function handler(req, res) {
 
   // Filter to exactly the threshold number of remaining delivery days
   const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
-  const targets = (subs ?? []).filter(
-    (sub) => countRemainingDeliveryDays(sub.start_date, sub.end_date) === threshold,
-  );
+  const targets = [];
+  for (const sub of subs ?? []) {
+    const remaining = await countRemainingDeliveryDays(sub.start_date, sub.end_date);
+    if (remaining === threshold) targets.push(sub);
+  }
 
   console.log(`[EXPIRY-REMINDER] ${targets.length} subscriber(s) to remind`);
 

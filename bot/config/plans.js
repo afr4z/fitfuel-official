@@ -38,10 +38,10 @@ export function buildExpiryNotice(daysLeft, inline = false) {
   const prefix = inline ? "\n\n" : "";
   const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
   if (daysLeft === 1) {
-    return `${prefix}🚨 *This is your last delivery day!* Tap *Renew Plan* below to continue.`;
+    return `${prefix}🚨 *This is your last delivery day!* Press the *Renew Plan* button on the menu to continue.`;
   }
   if (daysLeft <= threshold) {
-    return `${prefix}⚠️ Your plan expires in *${daysLeft}* delivery day(s)! Tap *Renew Plan* below to continue.`;
+    return `${prefix}⚠️ Your plan expires in *${daysLeft}* delivery day(s)! Press the *Renew Plan* button on the menu to continue.`;
   }
   return "";
 }
