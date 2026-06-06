@@ -91,7 +91,7 @@ INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   CROSS JOIN (VALUES (3, 240), (7, 210), (14, 197), (30, 178)) AS v(days, price)
   WHERE mp.tag = 'weight_loss_veg';
 
--- ─── 3. dishes (created before weekly_meal_schedule so FK references work) ──────
+-- ─── 3. dishes (now includes slot and nutrition columns) ────────────────────────
 
 CREATE TABLE dishes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -102,58 +102,190 @@ CREATE TABLE dishes (
   price DECIMAL(10,2) NOT NULL,
   is_available BOOLEAN NOT NULL DEFAULT true,
   petpooja_item_id TEXT,
+  slot TEXT NOT NULL CHECK (slot IN ('breakfast', 'lunch', 'dinner')),
+  nutrition JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_dishes_meal_plan ON dishes(meal_plan_id);
 CREATE INDEX idx_dishes_available ON dishes(is_available);
+CREATE INDEX idx_dishes_slot ON dishes(slot);
 
--- 5 placeholder dishes per plan (all veg/non-veg accordingly)
+-- ─── Healthy Diet Plan Non-Veg ─────────────────────────────────────────────────
 
-INSERT INTO dishes (meal_plan_id, name, is_veg, price)
-  SELECT id, 'Grilled Chicken with Steamed Vegetables', false, 180 FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
-  SELECT id, 'Egg White Omelette with Whole Wheat Toast', false, 150 FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
-  SELECT id, 'Chicken Salad with Olive Oil Dressing', false, 200 FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
-  SELECT id, 'Tuna Sandwich with Mixed Greens', false, 190 FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
-  SELECT id, 'Chicken Soup with Croutons', false, 170 FROM meal_plans WHERE tag = 'healthy_nonveg';
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Fresh Garden Omelette',              false, 150, 'breakfast', '{"calories":464,"protein":22,"fat":38,"carbs":11}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'High Protein Pancakes (without whey)', true, 180, 'breakfast', '{"calories":459,"protein":16,"fat":16,"carbs":64}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Mixed Fruit Yogurt Bowl',             true, 160, 'breakfast', '{"calories":433,"protein":17,"fat":11,"carbs":68}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Vegetable Sandwich',                  true, 140, 'breakfast', '{"calories":381,"protein":9.4,"fat":14.7,"carbs":49.7}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Protein Smoothie',                    true, 170, 'breakfast', '{"calories":552,"protein":17.4,"fat":22.6,"carbs":70.9}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Overnight Oat Meal',                  true, 130, 'breakfast', '{"calories":445,"protein":18,"fat":13,"carbs":68}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Fruit Salad',                         true, 120, 'breakfast', '{"calories":134,"protein":2,"fat":1,"carbs":31}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg';
 
-INSERT INTO dishes (meal_plan_id, name, is_veg, price)
-  SELECT id, 'Double Chicken Breast with Quinoa', false, 250 FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
-  SELECT id, 'Egg and Chicken Wrap', false, 220 FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
-  SELECT id, 'Protein Power Bowl Chicken Eggs Beans', false, 260 FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
-  SELECT id, 'Grilled Fish with Broccoli', false, 280 FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
-  SELECT id, 'Chicken Tikka with Greek Yogurt', false, 240 FROM meal_plans WHERE tag = 'high_protein_nonveg';
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Paneer Millet Bowl',                  true,  220, 'lunch', '{"calories":521,"protein":24,"fat":30,"carbs":38}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Egg Meal Box',                        false, 210, 'lunch', '{"calories":436,"protein":22.8,"fat":19.5,"carbs":46.2}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Fish Meal Box',                       false, 260, 'lunch', '{"calories":364,"protein":25.2,"fat":10,"carbs":41.7}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Roti with Shrimp',                    false, 250, 'lunch', '{"calories":459,"protein":18,"fat":13,"carbs":67}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Veg Pasta',                           true,  190, 'lunch', '{"calories":402,"protein":17.1,"fat":19.8,"carbs":40.7}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Protein Salad (Veg)',                 true,  180, 'lunch', '{"calories":367,"protein":25.6,"fat":20.6,"carbs":20.4}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Grilled Chicken Sandwich',            false, 230, 'lunch', '{"calories":455,"protein":27.4,"fat":15.5,"carbs":48.4}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg';
 
-INSERT INTO dishes (meal_plan_id, name, is_veg, price)
-  SELECT id, 'Lemon Herb Chicken with Zucchini', false, 190 FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
-  SELECT id, 'Egg Drop Soup with Chicken Strips', false, 160 FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
-  SELECT id, 'Turkey Lettuce Wraps', false, 210 FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
-  SELECT id, 'Baked Fish with Asparagus', false, 230 FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
-  SELECT id, 'Chicken Bone Broth with Veggies', false, 150 FROM meal_plans WHERE tag = 'weight_loss_nonveg';
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Creamy Cucumber Salad',               true,  120, 'dinner', '{"calories":114,"protein":9.4,"fat":2.6,"carbs":15}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Shrimp Omelette',                     false, 200, 'dinner', '{"calories":401,"protein":24,"fat":33,"carbs":5}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Paneer Sandwich',                     true,  190, 'dinner', '{"calories":523,"protein":20,"fat":26,"carbs":49.1}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Mushroom Meal Box',                   true,  210, 'dinner', '{"calories":302,"protein":10,"fat":10,"carbs":45}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Creamy Spinach Pasta',                true,  200, 'dinner', '{"calories":533,"protein":18.3,"fat":32.5,"carbs":43.2}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Chicken Wrap',                        false, 220, 'dinner', '{"calories":372,"protein":25,"fat":20,"carbs":23}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg' UNION ALL
+  SELECT id, 'Chicken Fajita',                      false, 260, 'dinner', '{"calories":483,"protein":33,"fat":20,"carbs":41}'::jsonb FROM meal_plans WHERE tag = 'healthy_nonveg';
 
-INSERT INTO dishes (meal_plan_id, name, is_veg, price)
-  SELECT id, 'Paneer Bhurji with Multigrain Roti', true, 160 FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
-  SELECT id, 'Vegetable Pulao with Raita', true, 140 FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
-  SELECT id, 'Chickpea Salad with Lemon Dressing', true, 150 FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
-  SELECT id, 'Moong Dal Chilla with Mint Chutney', true, 130 FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
-  SELECT id, 'Mixed Vegetable Soup', true, 120 FROM meal_plans WHERE tag = 'healthy_veg';
+-- ─── Healthy Diet Plan Veg ─────────────────────────────────────────────────────
 
-INSERT INTO dishes (meal_plan_id, name, is_veg, price)
-  SELECT id, 'Soya Chunks with Brown Rice', true, 180 FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
-  SELECT id, 'Paneer Tikka with Salad', true, 200 FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
-  SELECT id, 'Dal Khichdi with Curd', true, 150 FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
-  SELECT id, 'Sprouts Salad with Peanuts', true, 160 FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
-  SELECT id, 'Tofu and Vegetable Stir Fry', true, 190 FROM meal_plans WHERE tag = 'high_protein_veg';
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'High Protein Pancakes (without whey)', true, 180, 'breakfast', '{"calories":459,"protein":16,"fat":16,"carbs":64}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Mixed Fruit Yogurt Bowl',             true, 160, 'breakfast', '{"calories":433,"protein":17,"fat":11,"carbs":68}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Vegetable Sandwich',                  true, 140, 'breakfast', '{"calories":381,"protein":9.4,"fat":14.7,"carbs":49.7}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Protein Smoothie',                    true, 170, 'breakfast', '{"calories":552,"protein":17.4,"fat":22.6,"carbs":70.9}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Overnight Oat Meal',                  true, 130, 'breakfast', '{"calories":445,"protein":18,"fat":13,"carbs":68}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Fruit Salad',                         true, 120, 'breakfast', '{"calories":134,"protein":2,"fat":1,"carbs":31}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Peanut Butter Banana Wrap',           true, 160, 'breakfast', '{"calories":520,"protein":18,"fat":21,"carbs":63}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg';
 
-INSERT INTO dishes (meal_plan_id, name, is_veg, price)
-  SELECT id, 'Lauki Soup with Roasted Veggies', true, 120 FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
-  SELECT id, 'Quinoa Vegetable Bowl', true, 180 FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
-  SELECT id, 'Cabbage Soup with Tofu', true, 130 FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
-  SELECT id, 'Grilled Paneer Salad', true, 190 FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
-  SELECT id, 'Green Detox Smoothie Bowl', true, 150 FROM meal_plans WHERE tag = 'weight_loss_veg';
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Paneer Millet Bowl',                  true, 220, 'lunch', '{"calories":521,"protein":24,"fat":30,"carbs":38}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Veg Pasta',                           true, 190, 'lunch', '{"calories":402,"protein":17.1,"fat":19.8,"carbs":40.7}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Protein Salad (Veg)',                 true, 180, 'lunch', '{"calories":367,"protein":25.6,"fat":20.6,"carbs":20.4}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Rajma Meal Box',                      true, 200, 'lunch', '{"calories":430,"protein":19,"fat":8,"carbs":67}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Spinach & Paneer Bowl',               true, 210, 'lunch', '{"calories":470,"protein":25,"fat":21,"carbs":40}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Mushroom Meal Box',                   true, 210, 'lunch', '{"calories":300,"protein":10,"fat":10,"carbs":45}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Roti with Paneer',                    true, 190, 'lunch', '{"calories":500,"protein":22,"fat":18,"carbs":58}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Creamy Cucumber Salad',               true, 120, 'dinner', '{"calories":114,"protein":9.4,"fat":2.6,"carbs":15}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Paneer Sandwich',                     true, 190, 'dinner', '{"calories":523,"protein":20,"fat":26,"carbs":49.1}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Creamy Spinach Pasta',                true, 200, 'dinner', '{"calories":533,"protein":18.3,"fat":32.5,"carbs":43.2}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Paneer Fajita',                       true, 250, 'dinner', '{"calories":500,"protein":24,"fat":18,"carbs":55}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Creamy Mashed Potato',                true, 140, 'dinner', '{"calories":350,"protein":7,"fat":12,"carbs":53}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Peri-Peri Paneer',                    true, 230, 'dinner', '{"calories":430,"protein":25,"fat":24,"carbs":20}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg' UNION ALL
+  SELECT id, 'Sprouts Besan Chilla',                true, 160, 'dinner', '{"calories":320,"protein":18,"fat":9,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'healthy_veg';
+
+-- ─── High Protein Diet Plan Non-Veg ────────────────────────────────────────────
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'High Protein Oatmeal (Chocolate)',      true, 170, 'breakfast', '{"calories":420,"protein":35,"fat":12,"carbs":55}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'High Protein Chocolate Yogurt Bowl',    true, 180, 'breakfast', '{"calories":380,"protein":38,"fat":8,"carbs":45}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'High Protein Chocolate Smoothie Bowl',  true, 190, 'breakfast', '{"calories":450,"protein":40,"fat":14,"carbs":50}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Chicken & Avocado Toast',               false, 220, 'breakfast', '{"calories":480,"protein":42,"fat":22,"carbs":30}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Chicken Omelette',                      false, 190, 'breakfast', '{"calories":420,"protein":45,"fat":25,"carbs":5}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'High Protein Chocolate Smoothie',       true, 170, 'breakfast', '{"calories":460,"protein":42,"fat":16,"carbs":48}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'High Protein Avocado Smoothie',         true, 180, 'breakfast', '{"calories":430,"protein":38,"fat":20,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Chicken Meal Box',                     false, 260, 'lunch', '{"calories":520,"protein":50,"fat":18,"carbs":40}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Roasted Chicken Breast',               false, 250, 'lunch', '{"calories":420,"protein":55,"fat":12,"carbs":15}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Chicken Lemon Strips (Grilled)',       false, 230, 'lunch', '{"calories":400,"protein":48,"fat":15,"carbs":12}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Creamy Chicken Breast',                false, 240, 'lunch', '{"calories":460,"protein":52,"fat":20,"carbs":18}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Grilled Chicken Quinoa Bowl',          false, 270, 'lunch', '{"calories":530,"protein":50,"fat":16,"carbs":45}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Roasted Fish Meal Box',                false, 280, 'lunch', '{"calories":480,"protein":48,"fat":14,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Chicken Pulao',                        false, 240, 'lunch', '{"calories":500,"protein":42,"fat":16,"carbs":48}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Chicken Tikki',                        false, 210, 'dinner', '{"calories":380,"protein":40,"fat":18,"carbs":20}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Fish Quinoa Bowl',                     false, 270, 'dinner', '{"calories":460,"protein":45,"fat":14,"carbs":38}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Shrimp Omelette',                      false, 220, 'dinner', '{"calories":400,"protein":42,"fat":22,"carbs":6}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Chicken Pasta',                        false, 230, 'dinner', '{"calories":480,"protein":44,"fat":18,"carbs":42}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Creamy Chicken Salad',                 false, 200, 'dinner', '{"calories":380,"protein":46,"fat":16,"carbs":12}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Spicy Chicken Sandwich',               false, 210, 'dinner', '{"calories":440,"protein":42,"fat":18,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg' UNION ALL
+  SELECT id, 'Air-fried Potatoes with Grilled Chicken', false, 240, 'dinner', '{"calories":490,"protein":48,"fat":16,"carbs":40}'::jsonb FROM meal_plans WHERE tag = 'high_protein_nonveg';
+
+-- ─── High Protein Diet Plan Veg ────────────────────────────────────────────────
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'High Protein Chocolate Oatmeal',        true, 170, 'breakfast', '{"calories":400,"protein":32,"fat":12,"carbs":52}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'High Protein Chocolate Yogurt Bowl',    true, 180, 'breakfast', '{"calories":370,"protein":35,"fat":8,"carbs":42}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'High Protein Cookies & Cream Waffles (without egg)', true, 190, 'breakfast', '{"calories":430,"protein":30,"fat":16,"carbs":50}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Paneer Sandwich',                       true, 190, 'breakfast', '{"calories":450,"protein":28,"fat":20,"carbs":38}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Creamy Spinach Pasta',                  true, 200, 'breakfast', '{"calories":420,"protein":26,"fat":18,"carbs":40}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Ragi Malt',                             true, 120, 'breakfast', '{"calories":280,"protein":25,"fat":6,"carbs":42}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Mixed Fruit Yogurt',                    true, 150, 'breakfast', '{"calories":350,"protein":28,"fat":8,"carbs":50}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Paneer Millet Bowl',                    true, 230, 'lunch', '{"calories":520,"protein":35,"fat":22,"carbs":42}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'High Protein Roties with Paneer Gravy',  true, 240, 'lunch', '{"calories":510,"protein":38,"fat":20,"carbs":45}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Roti with Chole',                        true, 190, 'lunch', '{"calories":460,"protein":30,"fat":14,"carbs":55}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Rajma Meal Box',                         true, 210, 'lunch', '{"calories":470,"protein":32,"fat":10,"carbs":60}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Vegetable Pulao (Paneer)',               true, 220, 'lunch', '{"calories":480,"protein":34,"fat":18,"carbs":48}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Paneer Tikki',                           true, 200, 'lunch', '{"calories":440,"protein":36,"fat":22,"carbs":30}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Rajma Quinoa Bowl',                      true, 230, 'lunch', '{"calories":490,"protein":38,"fat":12,"carbs":55}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Mushroom Omelette',                      true, 200, 'dinner', '{"calories":380,"protein":28,"fat":18,"carbs":25}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Paneer Fajita',                          true, 250, 'dinner', '{"calories":480,"protein":36,"fat":22,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Spinach Paneer Tikki',                   true, 210, 'dinner', '{"calories":400,"protein":32,"fat":20,"carbs":28}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'High Protein Chocolate Smoothie',        true, 170, 'dinner', '{"calories":420,"protein":38,"fat":14,"carbs":42}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Paneer Sandwich',                        true, 190, 'dinner', '{"calories":450,"protein":28,"fat":20,"carbs":38}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Paneer Wrap',                            true, 220, 'dinner', '{"calories":470,"protein":34,"fat":22,"carbs":40}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg' UNION ALL
+  SELECT id, 'Veg Pasta',                              true, 190, 'dinner', '{"calories":420,"protein":26,"fat":16,"carbs":45}'::jsonb FROM meal_plans WHERE tag = 'high_protein_veg';
+
+-- ─── Weight Loss Diet Plan Non-Veg ─────────────────────────────────────────────
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Ragi Malt',                             true, 100, 'breakfast', '{"calories":220,"protein":18,"fat":4,"carbs":38}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Veg & Cheese Sandwich',                 true, 140, 'breakfast', '{"calories":310,"protein":15,"fat":12,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Spicy Chicken Sandwich',                false, 170, 'breakfast', '{"calories":350,"protein":28,"fat":10,"carbs":32}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Fruit Salad',                           true, 110, 'breakfast', '{"calories":134,"protein":2,"fat":1,"carbs":31}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Egg Whites Omelette',                   false, 130, 'breakfast', '{"calories":210,"protein":25,"fat":8,"carbs":4}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Spinach Papaya Juice',                  true, 90,  'breakfast', '{"calories":140,"protein":3,"fat":1,"carbs":32}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Beetroot Juice',                        true, 90,  'breakfast', '{"calories":120,"protein":2,"fat":0,"carbs":28}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Broccoli Meal Box',                     true, 190, 'lunch', '{"calories":340,"protein":18,"fat":12,"carbs":38}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Mushroom Meal Box',                     true, 200, 'lunch', '{"calories":300,"protein":14,"fat":10,"carbs":36}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Steamed Broccoli',                      true, 120, 'lunch', '{"calories":160,"protein":10,"fat":4,"carbs":22}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Broccoli Wrap',                         true, 160, 'lunch', '{"calories":290,"protein":14,"fat":10,"carbs":34}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Barbecue Wrap (Veg)',                   true, 170, 'lunch', '{"calories":310,"protein":16,"fat":12,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Veg Semi Salad',                        true, 140, 'lunch', '{"calories":220,"protein":12,"fat":8,"carbs":26}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Pineapple Juice',                       true, 90,  'lunch', '{"calories":130,"protein":1,"fat":0,"carbs":32}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Roasted Broccoli',                      true, 120, 'dinner', '{"calories":140,"protein":8,"fat":5,"carbs":18}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'High Fiber Beetroot Smoothie',          true, 110, 'dinner', '{"calories":180,"protein":4,"fat":2,"carbs":36}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Veg & Cheese Sandwich',                 true, 140, 'dinner', '{"calories":310,"protein":15,"fat":12,"carbs":35}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Creamy Avocado Salad',                  true, 180, 'dinner', '{"calories":280,"protein":6,"fat":22,"carbs":16}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Fresh Garden Salad',                    true, 110, 'dinner', '{"calories":120,"protein":4,"fat":2,"carbs":20}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Papaya Juice',                          true, 80,  'dinner', '{"calories":110,"protein":1,"fat":0,"carbs":26}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg' UNION ALL
+  SELECT id, 'Watermelon Juice',                      true, 80,  'dinner', '{"calories":90,"protein":1,"fat":0,"carbs":22}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_nonveg';
+
+-- ─── Weight Loss Diet Plan Veg ─────────────────────────────────────────────────
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Green Smoothie Bowl',                   true, 140, 'breakfast', '{"calories":280,"protein":8,"fat":6,"carbs":50}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Oatmeal with Berry Compote',            true, 120, 'breakfast', '{"calories":310,"protein":10,"fat":5,"carbs":58}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Tofu Scramble with Vegetables',         true, 160, 'breakfast', '{"calories":260,"protein":18,"fat":12,"carbs":18}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Papaya Bowl with Lime',                 true, 100, 'breakfast', '{"calories":180,"protein":2,"fat":1,"carbs":42}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Coconut Water with Chia Seeds',         true, 90,  'breakfast', '{"calories":150,"protein":4,"fat":5,"carbs":24}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Steamed Idli with Sambar',              true, 110, 'breakfast', '{"calories":290,"protein":10,"fat":3,"carbs":58}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Vegetable Poha',                        true, 100, 'breakfast', '{"calories":270,"protein":6,"fat":8,"carbs":44}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Cauliflower Rice Bowl',                 true, 180, 'lunch', '{"calories":220,"protein":12,"fat":8,"carbs":28}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Zucchini Noodles with Pesto',           true, 190, 'lunch', '{"calories":240,"protein":8,"fat":16,"carbs":18}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Cabbage and Lentil Soup',               true, 120, 'lunch', '{"calories":190,"protein":12,"fat":3,"carbs":30}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Cucumber Avocado Rolls',                true, 160, 'lunch', '{"calories":250,"protein":6,"fat":16,"carbs":22}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Steamed Vegetable Momos',               true, 140, 'lunch', '{"calories":280,"protein":10,"fat":4,"carbs":50}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Mixed Sprouts Salad',                   true, 130, 'lunch', '{"calories":210,"protein":14,"fat":4,"carbs":32}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Lauki Soup with Quinoa',                true, 130, 'lunch', '{"calories":180,"protein":8,"fat":2,"carbs":32}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg';
+
+INSERT INTO dishes (meal_plan_id, name, is_veg, price, slot, nutrition)
+  SELECT id, 'Clear Vegetable Soup',                  true, 100, 'dinner', '{"calories":120,"protein":4,"fat":2,"carbs":22}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Tofu and Spinach Salad',                true, 160, 'dinner', '{"calories":220,"protein":16,"fat":12,"carbs":14}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Grilled Zucchini with Hummus',          true, 170, 'dinner', '{"calories":260,"protein":10,"fat":14,"carbs":26}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Cabbage Soup',                          true, 90,  'dinner', '{"calories":150,"protein":6,"fat":2,"carbs":28}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Cucumber Raita with Roasted Papad',     true, 100, 'dinner', '{"calories":200,"protein":8,"fat":6,"carbs":28}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Bell Pepper and Tomato Salad',          true, 110, 'dinner', '{"calories":170,"protein":4,"fat":8,"carbs":22}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg' UNION ALL
+  SELECT id, 'Herbal Tea with Rice Cakes',            true, 70,  'dinner', '{"calories":130,"protein":3,"fat":2,"carbs":26}'::jsonb FROM meal_plans WHERE tag = 'weight_loss_veg';
 
 -- ─── 2c. weekly_meal_schedule (default dish per plan × day-of-week × slot) ──────
--- Replaces old plan_weekly_meals. No null dish defaults — guaranteed by seed below.
 
 CREATE TABLE weekly_meal_schedule (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -166,13 +298,14 @@ CREATE TABLE weekly_meal_schedule (
 );
 
 -- Generate 108 schedule rows (6 plans × 6 days × 3 slots) by cyclically assigning
--- the 5 dishes per plan in order: dish 1→2→3→4→5→1→2→… across the 18 slots.
+-- the 7 dishes per plan in order across the 18 slots per plan.
 INSERT INTO weekly_meal_schedule (plan_id, day_of_week, slot, dish_id)
   WITH numbered_dishes AS (
     SELECT
       d.id,
       d.meal_plan_id,
-      ROW_NUMBER() OVER (PARTITION BY d.meal_plan_id ORDER BY d.name) AS idx
+      d.slot AS dish_slot,
+      ROW_NUMBER() OVER (PARTITION BY d.meal_plan_id, d.slot ORDER BY d.name) AS idx
     FROM dishes d
     WHERE d.is_available = true
   )
@@ -186,10 +319,10 @@ INSERT INTO weekly_meal_schedule (plan_id, day_of_week, slot, dish_id)
   CROSS JOIN (VALUES ('breakfast', 0), ('lunch', 1), ('dinner', 2)) AS s(slot, slot_order)
   JOIN numbered_dishes nd
     ON nd.meal_plan_id = mp.id
-   AND nd.idx = ((d.dow - 1) * 3 + s.slot_order) % 5 + 1;
+   AND nd.dish_slot = s.slot
+   AND nd.idx = ((d.dow - 1) * 3 + s.slot_order) % 7 + 1;
 
--- ─── 2d. next_day_meals (tomorrow override per plan × slot) ─────────────────────
--- Populated by admin panel or auto-filled by commit-meals cron.
+-- ─── 2d. next_day_meals ────────────────────────────────────────────────────────
 
 CREATE TABLE next_day_meals (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -272,8 +405,7 @@ CREATE TABLE kitchen_closed_days (
 );
 
 -- ─── Permissions ───────────────────────────────────────────────────────────────
--- Grant table access to service_role (used by server-side code).
--- Supabase's service_role key bypasses RLS but still needs table-level grants.
+
 GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;

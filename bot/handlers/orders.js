@@ -176,7 +176,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
       let items;
       try {
-        const fetched = await getMenuItems({ mealPlanId });
+        const fetched = await getMenuItems({ mealPlanId, slot: order.slot });
         console.log(`[ORDERS] getMenuItems returned ${fetched?.length ?? 0} items`);
         if (!fetched?.length) throw new Error("empty menu");
         items = fetched;
@@ -255,7 +255,7 @@ export async function handleMealChange(phone, session, listId, setSession) {
   try {
     const { data: ord } = await supabase
       .from("orders")
-      .select("subscription_id")
+      .select("subscription_id, slot")
       .eq("id", orderId)
       .single();
 
@@ -269,7 +269,7 @@ export async function handleMealChange(phone, session, listId, setSession) {
       mealPlanId = sub?.meal_plan_id;
     }
 
-    const items = await getMenuItems({ mealPlanId });
+    const items = await getMenuItems({ mealPlanId, slot: ord?.slot });
     const item = items.find((i) => i.itemid === itemId);
     if (item) itemName = item.itemname;
   } catch (e) {
