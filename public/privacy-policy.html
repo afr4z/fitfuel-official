@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy – FitFuel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #f0fdf4;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 32px 16px;
+      color: #1f2937;
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .header {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 40px 36px 32px;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #166534;
+      margin-bottom: 8px;
+    }
+    .header .meta {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+    .content {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 36px;
+    }
+    .content h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #166534;
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+    .content h2:first-child {
+      margin-top: 0;
+    }
+    .content p {
+      font-size: 0.95rem;
+      color: #4b5563;
+      margin-bottom: 12px;
+    }
+    .content ul {
+      margin: 0 0 12px 20px;
+      color: #4b5563;
+      font-size: 0.95rem;
+    }
+    .content li {
+      margin-bottom: 6px;
+    }
+    .content a {
+      color: #166534;
+      text-decoration: underline;
+    }
+    .content strong {
+      color: #1f2937;
+    }
+    .brand {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Privacy Policy</h1>
+      <div class="meta">Jadpod Fitness Private Limited &mdash; Effective Date: July 14, 2026</div>
+    </div>
+
+    <div class="content">
+      <h2>1. Introduction</h2>
+      <p>
+        Jadpod Fitness Private Limited ("we", "us", "our"), operating under the brand name <strong>FitFuel</strong>,
+        is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and
+        safeguard your information when you use our meal subscription service delivered through WhatsApp and related
+        platforms.
+      </p>
+      <p>
+        By using FitFuel's services, you agree to the collection and use of information in accordance with this
+        policy. If you do not agree, please discontinue use of our services.
+      </p>
+
+      <h2>2. Information We Collect</h2>
+      <p>We collect the following categories of information:</p>
+      <ul>
+        <li><strong>Personal Information:</strong> Name, phone number, email address, and delivery address provided during the subscription process.</li>
+        <li><strong>Location Data:</strong> Delivery location and address details used to coordinate meal deliveries.</li>
+        <li><strong>Payment Information:</strong> Payment transaction details processed through Razorpay. We do <strong>not</strong> store your credit/debit card numbers, UPI IDs, or banking credentials on our servers.</li>
+        <li><strong>Communications:</strong> WhatsApp messages exchanged with our automated ordering system, including order preferences, meal selections, and feedback.</li>
+        <li><strong>Session Data:</strong> Temporary session identifiers stored in Redis with automatic expiry (24-hour time-to-live) used to maintain your conversation state with our chatbot.</li>
+      </ul>
+
+      <h2>3. How We Use Your Information</h2>
+      <p>We use the collected information for the following purposes:</p>
+      <ul>
+        <li>Processing and fulfilling your meal plan subscriptions and individual meal orders.</li>
+        <li>Coordinating delivery schedules and communicating order confirmations, meal changes, and notifications via WhatsApp.</li>
+        <li>Processing payments through our payment processor, Razorpay.</li>
+        <li>Managing your subscription, including plan changes, cancellations, and expiry reminders.</li>
+        <li>Improving our service quality and customer support.</li>
+        <li>Complying with legal obligations where applicable.</li>
+      </ul>
+
+      <h2>4. Data Sharing &amp; Third Parties</h2>
+      <p>We share your information only with the following third-party service providers as necessary to operate our service:</p>
+      <ul>
+        <li><strong>Razorpay:</strong> Payment processing. Razorpay handles payment card and banking data in compliance with PCI-DSS standards. We only receive transaction confirmation and order IDs.</li>
+        <li><strong>WhatsApp (Meta):</strong> Message delivery for order confirmations, meal notifications, and chatbot interactions via the WhatsApp Cloud API.</li>
+        <li><strong>Petpooja:</strong> Restaurant POS integration for order dispatch and fulfillment. We share order details (items, quantities, delivery time) with Petpooja to prepare and dispatch your meals.</li>
+        <li><strong>Supabase:</strong> Database hosting and management for customer profiles, subscriptions, and order records.</li>
+        <li><strong>Upstash:</strong> Redis-based session storage for maintaining chatbot conversation state.</li>
+      </ul>
+      <p>We do <strong>not</strong> sell, rent, or trade your personal information to any third parties for marketing purposes.</p>
+
+      <h2>5. Data Retention</h2>
+      <ul>
+        <li><strong>Customer profiles and subscription records:</strong> Retained for as long as your account is active and for a reasonable period thereafter to support order history and legal compliance.</li>
+        <li><strong>Order records:</strong> Retained for operational and accounting purposes.</li>
+        <li><strong>Session data:</strong> Automatically deleted after 24 hours of inactivity via Redis time-to-live (TTL) expiry.</li>
+        <li><strong>WhatsApp messages:</strong> Subject to Meta's data retention policies for the WhatsApp Business API.</li>
+      </ul>
+
+      <h2>6. Data Security</h2>
+      <p>We implement industry-standard security measures to protect your information:</p>
+      <ul>
+        <li>All data is transmitted over encrypted HTTPS connections.</li>
+        <li>Payment processing is handled entirely by Razorpay; no sensitive financial data passes through or is stored on our servers.</li>
+        <li>Session data is stored in encrypted Redis instances with automatic expiration.</li>
+        <li>Access to administrative functions is protected by authentication credentials.</li>
+      </ul>
+      <p>While we take reasonable precautions, no method of electronic transmission or storage is 100% secure. We cannot guarantee absolute security of your data.</p>
+
+      <h2>7. Your Rights</h2>
+      <p>You have the following rights regarding your personal data:</p>
+      <ul>
+        <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
+        <li><strong>Correction:</strong> Request correction of inaccurate or incomplete data.</li>
+        <li><strong>Deletion:</strong> Request deletion of your personal data, subject to legal and operational retention requirements.</li>
+        <li><strong>Opt-out:</strong> You may stop receiving WhatsApp notifications by messaging us with a stop/unsubscribe request.</li>
+      </ul>
+      <p>To exercise any of these rights, please contact us using the details provided below.</p>
+
+      <h2>8. Cookies &amp; Tracking</h2>
+      <p>
+        Our service uses minimal cookies necessary for session management within the admin panel. We do not use
+        third-party tracking cookies, advertising cookies, or analytics tracking on our public-facing pages.
+      </p>
+
+      <h2>9. Children's Privacy</h2>
+      <p>
+        FitFuel's services are intended for individuals aged 18 and above. We do not knowingly collect personal
+        information from children. If we become aware that we have collected data from a child, we will take steps
+        to delete it promptly.
+      </p>
+
+      <h2>10. Changes to This Policy</h2>
+      <p>
+        We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements.
+        Any updates will be posted on this page with a revised effective date. We encourage you to review this policy
+        periodically.
+      </p>
+
+      <h2>11. Contact Us</h2>
+      <p>
+        If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices,
+        please contact us at:
+      </p>
+      <p>
+        <strong>Jadpod Fitness Private Limited</strong><br />
+        Email: <a href="mailto:support@fitfuelofficial.com">support@fitfuelofficial.com</a><br />
+        WhatsApp: Message us directly on our FitFuel WhatsApp number
+      </p>
+    </div>
+
+    <p class="brand">FitFuel &mdash; Fresh meals, every day</p>
+  </div>
+</body>
+</html>
