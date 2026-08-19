@@ -2,6 +2,7 @@ import { sendText, sendList } from "../../lib/whatsapp.js";
 import { createClient } from "@supabase/supabase-js";
 import { getMenuItems } from "../../lib/petpooja.js";
 import { addDeliveryDays } from "../../lib/deliveryDays.js";
+import { formatDateIST } from "../../lib/time.js";
 import { STATES } from "../states.js";
 
 const supabase = createClient(
@@ -138,7 +139,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
       }
 
       if (pushedDate) {
-        const dateStr = new Date(pushedDate + "T00:00:00Z").toLocaleDateString("en-IN", {
+        const dateStr = formatDateIST(pushedDate, {
           weekday: "long", day: "numeric", month: "long",
         });
         await sendText(

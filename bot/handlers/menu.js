@@ -5,6 +5,7 @@ import { startSubscription } from "./subscription.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import { getPlanLabel, buildExpiryNotice } from "../config/plans.js";
 import { getPlanCategories } from "../../lib/mealPlans.js";
+import { formatDateIST } from "../../lib/time.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -76,7 +77,7 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
       if (pushedOrders?.length) {
         const lines = pushedOrders.map((o) => {
           const emoji = o.slot === "breakfast" ? "🌅" : o.slot === "lunch" ? "☀️" : "🌙";
-          const date = new Date(o.delivery_date + "T00:00:00Z").toLocaleDateString("en-IN", {
+          const date = formatDateIST(o.delivery_date, {
             weekday: "short", day: "numeric", month: "short",
           });
           return `  ${emoji} ${o.slot} → ${date}`;
