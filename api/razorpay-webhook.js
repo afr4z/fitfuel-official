@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { sendText, sendButtons } from "../lib/whatsapp.js";
+import { formatTimeIST, formatDateIST } from "../lib/time.js";
 import { getSession, clearSession } from "../bot/session.js";
 import { addDeliveryDays, countRemainingDeliveryDays } from "../lib/deliveryDays.js";
 import { buildExpiryNotice } from "../bot/config/plans.js";
@@ -250,7 +251,7 @@ export default async function handler(req, res) {
               `🔒 *Kitchen Closed Days during your plan*\n\n` +
                 `Our kitchen will be closed on: *${datesList}*.${reasonLine}` +
                 `No meals will be delivered on those days.\n\n` +
-                `✅ Your plan has been extended to *${new Date(newEnd + "T00:00:00Z").toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}* to make up for it.\n\n` +
+                `✅ Your plan has been extended to *${formatDateIST(newEnd, { day: "numeric", month: "short", year: "numeric" })}* to make up for it.\n\n` +
                 `We'll be back the next working day! 🙏`,
             );
           }
@@ -341,7 +342,7 @@ export default async function handler(req, res) {
                 phone,
                 `🌅 *Tomorrow's Breakfast (${delDate})*\n\n` +
                   `${itemLine} (${sr.delivery_time?.slice(0, 5) || ""})\n\n` +
-                  `You can confirm, skip, or change until *${new Date(acceptUntil).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}*.${expiryNotice}`,
+                  `You can confirm, skip, or change until *${formatTimeIST(acceptUntil)}*.${expiryNotice}`,
                 [
                   { id: `CONFIRM_${order.id}`, title: "✅ Confirm" },
                   { id: `CHANGE_${order.id}`, title: "🔄 Change" },
@@ -361,7 +362,7 @@ export default async function handler(req, res) {
       await clearSession(phone);
 
       // Notify customer on WhatsApp
-      const fmt = (s) => new Date(s + "T00:00:00Z").toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      const fmt = (s) => formatDateIST(s);
       const todayIST = new Date(new Date().getTime() + 5.5 * 60 * 60 * 1000).toISOString().split("T")[0];
       const startLabel = start_date === todayIST ? "today" : `from ${fmt(start_date)}`;
       await sendText(
