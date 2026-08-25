@@ -4,7 +4,13 @@ import { sendText, sendButtons } from "../lib/whatsapp.js";
 import { formatTimeIST, formatDateIST } from "../lib/time.js";
 import { getSession, clearSession } from "../bot/session.js";
 import { addDeliveryDays, countRemainingDeliveryDays } from "../lib/deliveryDays.js";
-import { buildExpiryNotice } from "../bot/config/plans.js";
+import {
+  buildExpiryNotice,
+  paymentFailed,
+  kitchenClosedDaysDuringPlan,
+  lateSubscriberBreakfast,
+  paymentConfirmed,
+} from "../bot/config/messages.js";
 import {
   isPastIST,
   ensureOrder,
@@ -112,12 +118,7 @@ export default async function handler(req, res) {
   async function handleFailure(phone, reason) {
     if (!phone) return;
     await clearSession(phone);
-    await sendText(
-      phone,
-      `❌ *Payment ${reason}*\n\n` +
-        `Unfortunately your FitFuel order could not be completed.\n\n` +
-        `Please send us a message to start a new order whenever you're ready. We're here to help! 🙏`,
-    );
+    await sendText(phone, paymentFailed({ reason }));
   }
 
   try {
@@ -248,11 +249,11 @@ export default async function handler(req, res) {
 
             await sendText(
               phone,
-              `🔒 *Kitchen Closed Days during your plan*\n\n` +
-                `Our kitchen will be closed on: *${datesList}*.${reasonLine}` +
-                `No meals will be delivered on those days.\n\n` +
-                `✅ Your plan has been extended to *${formatDateIST(newEnd, { day: "numeric", month: "short", year: "numeric" })}* to make up for it.\n\n` +
-                `We'll be back the next working day! 🙏`,
+              kitchenClosedDaysDuringPlan({
+                datesList,
+                reasonLine,
+                newEndDate: formatDateIST(newEnd, { day: "numeric", month: "short", year: "numeric" }),
+              }),
             );
           }
 
@@ -340,9 +341,13 @@ export default async function handler(req, res) {
 
               await sendButtons(
                 phone,
-                `🌅 *Tomorrow's Breakfast (${delDate})*\n\n` +
-                  `${itemLine} (${sr.delivery_time?.slice(0, 5) || ""})\n\n` +
-                  `You can confirm, skip, or change until *${formatTimeIST(acceptUntil)}*.${expiryNotice}`,
+                lateSubscriberBreakfast({
+                  delDate,
+                  itemLine,
+                  timeStr: sr.delivery_time?.slice(0, 5) || "",
+                  acceptUntilTime: formatTimeIST(acceptUntil),
+                  expiryNotice,
+                }),
                 [
                   { id: `CONFIRM_${order.id}`, title: "✅ Confirm" },
                   { id: `CHANGE_${order.id}`, title: "🔄 Change" },
@@ -367,14 +372,7 @@ export default async function handler(req, res) {
       const startLabel = start_date === todayIST ? "today" : `from ${fmt(start_date)}`;
       await sendText(
         phone,
-        `🎉 *Payment Confirmed!*\n\n` +
-          `Your FitFuel *${planTitle}* plan is now *active*!\n\n` +
-          `📅 Duration: ${dayLabel}\n` +
-          `🍴 Meals: ${mealLabel}\n` +
-          `💰 Amount paid: ₹${amount}\n\n` +
-          `📦 Deliveries start ${startLabel}.\n` +
-          `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
-          `Thank you for choosing FitFuel! 💪`,
+        paymentConfirmed({ planTitle, dayLabel, mealLabel, amount, startLabel }),
       );
     } else if (event === "payment_link.cancelled") {
       const phone = phoneFromLink();

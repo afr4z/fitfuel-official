@@ -8,8 +8,22 @@ import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../../lib/razorpay.js";
 import { STATES } from "../states.js";
 import { getPlanCategories, getPlanById } from "../../lib/mealPlans.js";
-import { DAY_OPTIONS, MEAL_OPTIONS, SUNDAY_HOLIDAY_NOTE } from "../config/plans.js";
+import { DAY_OPTIONS, MEAL_OPTIONS } from "../config/plans.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import {
+  alreadyActivePlan,
+  RENEW_PLAN_START,
+  CHOOSE_MEAL_PLAN,
+  planSelected,
+  durationReprompt,
+  SUNDAY_HOLIDAY_NOTE,
+  mealsPerDay,
+  locationPrompt,
+  locationPromptFallback,
+  ADDRESS_PROMPT,
+  PAYMENT_LINK_ERROR,
+  orderSummary,
+} from "../config/messages.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -75,19 +89,12 @@ export async function startSubscription(phone, session, setSession) {
     if (remaining > threshold) {
       await sendText(
         phone,
-        `⚠️ *You already have an active plan!*\n\n` +
-          `Your current plan has *${remaining} delivery day(s)* remaining.\n\n` +
-          `You can renew once your plan has ${threshold} or fewer delivery days left.`,
+        alreadyActivePlan({ remaining, threshold }),
       );
       return;
     }
 
-    await sendText(
-      phone,
-      `🔄 *Renew your plan!*\n\n` +
-        `Your current plan ends shortly. Your new plan will start right after it completes.\n\n` +
-        `Let's set up your new plan!`,
-    );
+    await sendText(phone, RENEW_PLAN_START);
   }
 
   await setSession(phone, {
@@ -100,7 +107,7 @@ export async function startSubscription(phone, session, setSession) {
 
   await sendList(
     phone,
-    "🥗 *Choose your meal plan:*\n\nPick the plan that best matches your goal:",
+    CHOOSE_MEAL_PLAN,
     "View Plans",
     [
       {
@@ -133,8 +140,7 @@ export async function handlePlanCategory(phone, session, input, setSession) {
 
   await sendOptions(
     phone,
-    `✅ *${plan.title}* selected!\n\nHow many days would you like to subscribe for?\n\n` +
-      SUNDAY_HOLIDAY_NOTE,
+    planSelected({ planTitle: plan.title, sundayNote: SUNDAY_HOLIDAY_NOTE }),
     "Duration",
     "Choose Duration",
     DAY_OPTIONS,
@@ -154,7 +160,7 @@ export async function handleDaySelection(phone, session, input, setSession) {
     const planLine = plan ? ` (${plan.title})` : "";
     await sendOptions(
       phone,
-      `How many days would you like?${planLine}\n\n` + SUNDAY_HOLIDAY_NOTE,
+      durationReprompt({ planLine, sundayNote: SUNDAY_HOLIDAY_NOTE }),
       "Duration",
       "Choose Duration",
       DAY_OPTIONS,
@@ -186,8 +192,7 @@ export async function handleDaySelection(phone, session, input, setSession) {
       ).join("\n")
     : "";
 
-  const bodyText =
-    `📅 *${dayOption.label}* selected!\n\nHow many meals per day?\n\n${priceLines}`.trim();
+  const bodyText = mealsPerDay({ dayLabel: dayOption.label, priceLines });
 
   await sendOptions(
     phone,
@@ -229,9 +234,7 @@ export async function handleMealSlotSelection(
   try {
     await sendLocationRequest(
       phone,
-      `🍴 *${mealOption.label}* selected!\n\n` +
-        `📍 *Where should we deliver?*\n\n` +
-        `Tap the button below to share your location, or just type your area / neighbourhood name.`,
+      locationPrompt({ mealLabel: mealOption.label }),
     );
   } catch (err) {
     console.error(
@@ -241,10 +244,7 @@ export async function handleMealSlotSelection(
     // Fall back to plain text
     await sendText(
       phone,
-      `🍴 *${mealOption.label}* selected!\n\n` +
-        `📍 *Where should we deliver?*\n\n` +
-        `Tap the 📎 icon → *Location* → *Send Your Current Location*,\n` +
-        `or type your area / neighbourhood name.`,
+      locationPromptFallback({ mealLabel: mealOption.label }),
     );
   }
 }
@@ -270,12 +270,7 @@ export async function handleLocation(phone, session, message, setSession) {
     data: { ...session.data, location: locationData },
   });
 
-  await sendText(
-    phone,
-    `📍 *Got your location!*\n\n` +
-      `🏠 Please type your *full delivery address*:\n` +
-      `(flat/house number, street name, landmark)`,
-  );
+  await sendText(phone, ADDRESS_PROMPT);
 }
 
 // ─── Step 6 – Payment ─────────────────────────────────────────────────────────
@@ -319,10 +314,7 @@ export async function handleAddress(phone, session, addressText, setSession) {
     paymentUrl = link.short_url;
   } catch (e) {
     console.error("[RAZORPAY] Error:", e.message);
-    await sendText(
-      phone,
-      `Sorry, we couldn't generate your payment link right now. Please contact support.`,
-    );
+    await sendText(phone, PAYMENT_LINK_ERROR);
     await setSession(phone, {
       ...session,
       state: STATES.GREETING,
@@ -333,13 +325,6 @@ export async function handleAddress(phone, session, addressText, setSession) {
 
   await sendText(
     phone,
-    `✅ *Order Summary*\n\n` +
-      `📦 Plan: ${planTitle}\n` +
-      `📅 Duration: ${dayLabel}\n` +
-      `🍴 Meals: ${mealLabel}\n` +
-      `🏠 Address: ${addressText}\n` +
-      `💰 Total: ₹${totalPrice}\n\n` +
-      `💳 *Complete your payment here:*\n${paymentUrl}\n\n` +
-      `_Your subscription activates once payment is confirmed!_`,
+    orderSummary({ planTitle, dayLabel, mealLabel, addressText, totalPrice, paymentUrl }),
   );
 }

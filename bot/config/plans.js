@@ -8,10 +8,10 @@
  *
  * Helpers:
  *   getPlanLabel(planType)          – returns the display label for a plan_type.
- *   buildExpiryNotice(daysLeft)     – returns an expiry warning string (or "").
- *   SUNDAY_HOLIDAY_NOTE             – disclaimer shown during duration selection.
  *
  * Price formula:  plan.basePricePerMealPerDay × dayOption.days × mealOption.mealsPerDay
+ *
+ * User-facing messages live in ./messages.js.
  */
 
 /** Maps the plan_type stored in meal_plan_subscriptions to a display label. */
@@ -26,31 +26,6 @@ export const PLAN_TYPE_LABELS = {
 export function getPlanLabel(planType) {
   return PLAN_TYPE_LABELS[planType] ?? planType;
 }
-
-/**
- * Returns an expiry-warning string when the plan is ending soon, or "" otherwise.
- * Used in meal-slot cron notifications, greeting, and plan-detail messages.
- *
- * @param {number} daysLeft  Remaining delivery days (from countRemainingDeliveryDays).
- * @param {boolean} [inline] When true, prefixes a newline for inline use in longer strings.
- */
-export function buildExpiryNotice(daysLeft, inline = false) {
-  const prefix = inline ? "\n\n" : "";
-  const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
-  if (daysLeft === 1) {
-    return `${prefix}🚨 *This is your last delivery day!* Press the *Renew Plan* button on the menu to continue.`;
-  }
-  if (daysLeft <= threshold) {
-    return `${prefix}⚠️ Your plan expires in *${daysLeft}* delivery day(s)! Press the *Renew Plan* button on the menu to continue.`;
-  }
-  return "";
-}
-
-/** Disclaimer appended to the duration-selection message. */
-export const SUNDAY_HOLIDAY_NOTE =
-  `_Note: Sundays are a kitchen holiday — no deliveries on Sundays. ` +
-  `Your plan will be extended by a day for every Sunday it falls on, ` +
-  `so you always get the full number of delivery days you pay for._`;
 
 // ─── Duration options ────────────────────────────────────────────────────────
 // If you add more than 3 entries the bot will automatically switch from

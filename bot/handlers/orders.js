@@ -4,6 +4,27 @@ import { getMenuItems } from "../../lib/petpooja.js";
 import { addDeliveryDays } from "../../lib/deliveryDays.js";
 import { formatDateIST } from "../../lib/time.js";
 import { STATES } from "../states.js";
+import {
+  ERROR_GENERIC,
+  ERROR_ORDER_NOT_FOUND,
+  DEADLINE_LUNCH,
+  DEADLINE_DINNER,
+  DEADLINE_GENERIC,
+  ALREADY_CONFIRMED,
+  ALREADY_SKIPPED,
+  ALREADY_PROCESSED,
+  CONFIRM_ERROR,
+  CONFIRM_SUCCESS,
+  SKIP_ERROR,
+  skipPushed,
+  SKIP_NO_PUSH,
+  MENU_LOAD_ERROR,
+  CHANGE_MEAL_LIST,
+  UNRECOGNISED_ACTION,
+  ALREADY_PROCESSED_CANNOT_CHANGE,
+  MEAL_UPDATE_ERROR,
+  mealUpdated,
+} from "../config/messages.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -17,9 +38,9 @@ function isPastDeadline(order) {
 }
 
 function deadlineMessage(order) {
-  if (order.slot === "lunch") return "⏰ The 9:30am deadline has passed. Changes can no longer be made for lunch.";
-  if (order.slot === "dinner") return "⏰ The 5pm deadline has passed. Changes can no longer be made for dinner.";
-  return "⏰ The deadline has passed. Changes can no longer be made for this meal.";
+  if (order.slot === "lunch") return DEADLINE_LUNCH;
+  if (order.slot === "dinner") return DEADLINE_DINNER;
+  return DEADLINE_GENERIC;
 }
 
 export async function handleOrderAction(phone, session, buttonId, setSession) {
@@ -28,7 +49,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
   if (!orderId) {
     console.log(`[ORDERS] Missing orderId from buttonId=${buttonId}`);
-    await sendText(phone, "Sorry, something went wrong. Please try again.");
+    await sendText(phone, ERROR_GENERIC);
     return;
   }
 
@@ -40,14 +61,14 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
   if (fetchError || !order) {
     console.error(`[ORDERS] Order fetch failed: orderId=${orderId} error=${fetchError?.message}`);
-    await sendText(phone, "Sorry, we couldn't find that order. Please try again.");
+    await sendText(phone, ERROR_ORDER_NOT_FOUND);
     return;
   }
   console.log(`[ORDERS] Order found: id=${orderId} status=${order.status} slot=${order.slot} phoneMatch=${order.phone === phone}`);
 
   if (order.phone !== phone) {
     console.error(`[ORDERS] Ownership mismatch: orderPhone=${order.phone} requesterPhone=${phone}`);
-    await sendText(phone, "Sorry, something went wrong. Please try again.");
+    await sendText(phone, ERROR_GENERIC);
     return;
   }
 
@@ -55,10 +76,10 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
     console.log(`[ORDERS] Order not pending: orderId=${orderId} status=${order.status}`);
     const alreadyMsg =
       order.status === "confirmed"
-        ? "✅ This order has already been confirmed."
+        ? ALREADY_CONFIRMED
         : order.status === "skipped"
-          ? "⏭️ This order has already been skipped."
-          : "ℹ️ This order has already been processed.";
+          ? ALREADY_SKIPPED
+          : ALREADY_PROCESSED;
     await sendText(phone, alreadyMsg);
     return;
   }
@@ -79,14 +100,11 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
       if (confirmError) {
         console.error("[DB] CONFIRM update failed:", confirmError.message);
-        await sendText(phone, "Sorry, something went wrong confirming your order. Please try again.");
+        await sendText(phone, CONFIRM_ERROR);
         break;
       }
 
-      await sendText(
-        phone,
-        "✅ *Confirmed!* Your meal is locked in.\n\nWe'll notify you once it's on the way 🚀",
-      );
+      await sendText(phone, CONFIRM_SUCCESS);
       break;
     }
 
@@ -98,7 +116,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
       if (skipError) {
         console.error("[DB] SKIP update failed:", skipError.message);
-        await sendText(phone, "Sorry, something went wrong skipping your order. Please try again.");
+        await sendText(phone, SKIP_ERROR);
         break;
       }
 
@@ -142,15 +160,9 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
         const dateStr = formatDateIST(pushedDate, {
           weekday: "long", day: "numeric", month: "long",
         });
-        await sendText(
-          phone,
-          `⏭️ *Skipped!* This meal has been moved to *${dateStr}* (added to the end of your plan).`,
-        );
+        await sendText(phone, skipPushed({ dateStr }));
       } else {
-        await sendText(
-          phone,
-          "⏭️ *Skipped!* No delivery for this slot today.\n\nSee you next time 👋",
-        );
+        await sendText(phone, SKIP_NO_PUSH);
       }
       break;
     }
@@ -183,10 +195,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
         items = fetched;
       } catch (e) {
         console.error(`[ORDERS] Menu fetch failed: ${e.message}`);
-        await sendText(
-          phone,
-          "😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.",
-        );
+        await sendText(phone, MENU_LOAD_ERROR);
         return;
       }
 
@@ -199,7 +208,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
       console.log(`[ORDERS] Sending menu list with ${rows.length} items to ${phone}`);
       await sendList(
         phone,
-        "🔄 *Change your meal*\n\nPick from today's available options:",
+        CHANGE_MEAL_LIST,
         "View Menu",
         [{ title: "Today's Menu", rows }],
       );
@@ -208,7 +217,7 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
     }
 
     default:
-      await sendText(phone, "Sorry, I didn't understand that. Please use the buttons.");
+      await sendText(phone, UNRECOGNISED_ACTION);
   }
 }
 
@@ -220,7 +229,7 @@ export async function handleMealChange(phone, session, listId, setSession) {
 
   if (!orderId || !itemId) {
     console.log(`[ORDERS] handleMealChange: missing orderId/itemId from listId=${listId}`);
-    await sendText(phone, "Sorry, something went wrong. Please try again.");
+    await sendText(phone, ERROR_GENERIC);
     return;
   }
 
@@ -232,18 +241,18 @@ export async function handleMealChange(phone, session, listId, setSession) {
 
   if (fetchError || !order) {
     console.error("[DB] Order fetch failed:", fetchError?.message);
-    await sendText(phone, "Sorry, we couldn't find that order. Please try again.");
+    await sendText(phone, ERROR_ORDER_NOT_FOUND);
     return;
   }
 
   if (order.phone !== phone) {
     console.error("[SECURITY] Order ownership mismatch on meal change:", { orderPhone: order.phone, requesterPhone: phone });
-    await sendText(phone, "Sorry, something went wrong. Please try again.");
+    await sendText(phone, ERROR_GENERIC);
     return;
   }
 
   if (order.status !== "pending") {
-    await sendText(phone, "ℹ️ This order has already been processed and can't be changed.");
+    await sendText(phone, ALREADY_PROCESSED_CANNOT_CHANGE);
     return;
   }
 
@@ -290,14 +299,11 @@ export async function handleMealChange(phone, session, listId, setSession) {
 
   if (updateError) {
     console.error("[DB] Meal change update failed:", updateError.message);
-    await sendText(phone, "Sorry, something went wrong updating your meal. Please try again.");
+    await sendText(phone, MEAL_UPDATE_ERROR);
     return;
   }
 
-  await sendText(
-    phone,
-    `✅ *Meal updated!*\n\nYour new meal: *${itemName}*\n\nWe'll have it ready for your slot 🍽️`,
-  );
+  await sendText(phone, mealUpdated({ itemName }));
 
   await setSession(phone, { state: "GREETING", data: {} });
 }

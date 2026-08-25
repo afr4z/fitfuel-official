@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { sendText } from "../../lib/whatsapp.js";
 import { addDeliveryDays, countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { kitchenClosed } from "../../bot/config/messages.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -109,12 +110,7 @@ export default async function handler(req, res) {
 
       await sendText(
         sub.phone,
-        `🔒 *Kitchen Closed — ${date}*\n` +
-          reasonLine +
-          `\nWe're sorry, our kitchen won't be operating on ${date}. No meals will be delivered that day.\n\n` +
-          `✅ Your plan has been extended by 1 day to make up for it.\n` +
-          `📅 You now have *${remaining} delivery day(s)* remaining.\n\n` +
-          `We'll be back the next working day! 🙏`,
+        kitchenClosed({ date, reasonLine, remaining }),
       );
     }),
   );

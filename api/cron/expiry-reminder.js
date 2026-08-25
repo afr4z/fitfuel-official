@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { sendButtons } from "../../lib/whatsapp.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import { getPlanLabel } from "../../bot/config/plans.js";
+import { expiryReminder } from "../../bot/config/messages.js";
 
 // --- Clients ------------------------------------------------------------------
 
@@ -80,9 +81,7 @@ export default async function handler(req, res) {
       const planLabel = getPlanLabel(sub.plan_type);
       await sendButtons(
         sub.phone,
-        `⏳ *Your FitFuel plan is almost over!*\n\n` +
-          `Your *${planLabel} plan* has only *${threshold} delivery day(s)* remaining.\n\n` +
-          `Don't miss your healthy streak — renew now to keep your meals coming! 🥗`,
+        expiryReminder({ planLabel, threshold }),
         [
           { id: "ORDER_NOW", title: "🔄 Renew Plan" },
           { id: "CONTACT_US", title: "📞 Contact Us" },
