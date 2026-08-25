@@ -2,7 +2,8 @@ import { sendButtons } from "../../lib/whatsapp.js";
 import { STATES } from "../states.js";
 import { createClient } from "@supabase/supabase-js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
-import { getPlanLabel, buildExpiryNotice } from "../config/plans.js";
+import { getPlanLabel } from "../config/plans.js";
+import { greetingReturning, GREETING_NEW } from "../config/messages.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -28,9 +29,6 @@ export async function handleGreeting(phone, session, setSession) {
     const remaining = await countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
     const planLabel = getPlanLabel(activeSub.plan_type);
     const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
-    const expiryLine = remaining <= threshold
-      ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
-      : `\n📅 *${remaining}* delivery day(s) remaining`;
 
     const buttons = [
       { id: "MY_PLAN", title: "📋 My Plan" },
@@ -43,16 +41,13 @@ export async function handleGreeting(phone, session, setSession) {
 
     await sendButtons(
       phone,
-      `👋 Welcome back to FitFuel Nutrition!\n\n` +
-      `🟢 You have an *active ${planLabel} plan*.${expiryLine}` +
-      `\n\nHow can we help you?`,
-
+      greetingReturning({ planLabel, remaining, nearExpiry: remaining <= threshold }),
       buttons,
     );
   } else {
     await sendButtons(
       phone,
-      "👋 Welcome to FitFuel Nutrition!\n\nHow can we help you today?",
+      GREETING_NEW,
       [
         { id: "VIEW_PLANS", title: "🥗 View Plans" },
         { id: "ORDER_NOW", title: "🛒 Order Now" },

@@ -15,6 +15,15 @@ import {
 } from "./handlers/subscription.js";
 import { handleSessionExpired } from "./handlers/sessionExpired.js";
 import { sendText, sendLocationRequest } from "../lib/whatsapp.js";
+import {
+  GOING_BACK,
+  LOCATION_BACK,
+  LOCATION_BACK_FALLBACK,
+  BUTTON_EXPIRED,
+  MENU_UNAVAILABLE,
+  CHANGE_MEAL_LIST_ALT,
+  PAYMENT_PENDING,
+} from "./config/messages.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -45,7 +54,7 @@ function isStale(message, ttlSeconds) {
  * Sends a short confirmation before re-rendering the parent step.
  */
 async function handleBack(phone, session, setSession) {
-  await sendText(phone, `↩️ Going back…`);
+  await sendText(phone, GOING_BACK);
 
   switch (session.state) {
     case STATES.SELECTING_DAYS:
@@ -71,15 +80,9 @@ async function handleBack(phone, session, setSession) {
       // Back to location prompt
       await setSession(phone, { ...session, state: STATES.AWAITING_LOCATION });
       try {
-        await sendLocationRequest(
-          phone,
-          `📍 *Where should we deliver?*\n\nTap the button below to share your location, or type your area / neighbourhood name.`,
-        );
+        await sendLocationRequest(phone, LOCATION_BACK);
       } catch {
-        await sendText(
-          phone,
-          `📍 *Where should we deliver?*\n\nType your area / neighbourhood name.`,
-        );
+        await sendText(phone, LOCATION_BACK_FALLBACK);
       }
       return;
     }
@@ -139,10 +142,7 @@ export async function handleIncoming(phone, message) {
     console.log(`[HANDLER] Order action received: phone=${phone} input=${input} msgTs=${message.timestamp}`);
     if (isStale(message, ORDER_BUTTON_TTL_SECONDS)) {
       console.log(`[HANDLER] Stale order button rejected: phone=${phone} input=${input}`);
-      await sendText(
-        phone,
-        `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`,
-      );
+      await sendText(phone, BUTTON_EXPIRED);
       return;
     }
 
@@ -192,10 +192,7 @@ export async function handleIncoming(phone, message) {
 
   // --- Stale-button guard (menu/onboarding buttons) ------------------------
   if (isStale(message, MENU_BUTTON_TTL_SECONDS)) {
-    await sendText(
-      phone,
-      `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`,
-    );
+    await sendText(phone, BUTTON_EXPIRED);
     return;
   }
   // -------------------------------------------------------------------------
@@ -278,10 +275,7 @@ export async function handleIncoming(phone, message) {
         }
 
         if (items.length === 0) {
-          await sendText(
-            phone,
-            `Sorry, the menu is unavailable right now. Please try again later.`,
-          );
+          await sendText(phone, MENU_UNAVAILABLE);
           return;
         }
 
@@ -292,7 +286,7 @@ export async function handleIncoming(phone, message) {
         }));
         await sendList(
           phone,
-          `🔄 *Change your meal*\n\nPick from today's options:`,
+          CHANGE_MEAL_LIST_ALT,
           "View Menu",
           [{ title: "Menu", rows }],
         );
@@ -302,10 +296,7 @@ export async function handleIncoming(phone, message) {
     }
 
     case STATES.AWAITING_PAYMENT:
-      await sendText(
-        phone,
-        `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType *back*, *menu*, or *home* to cancel and start over.`,
-      );
+      await sendText(phone, PAYMENT_PENDING);
       return;
 
     default:

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bot Messages – FitFuel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #f0fdf4;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 32px 16px;
+      color: #1f2937;
+      line-height: 1.7;
+    }
+    .container {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .header {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 40px 36px 32px;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #166534;
+      margin-bottom: 8px;
+    }
+    .header .meta {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+    .content {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 36px;
+    }
+    .content h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #166534;
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+    .content h2:first-child {
+      margin-top: 0;
+    }
+    .content h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #374151;
+      margin-top: 20px;
+      margin-bottom: 6px;
+    }
+    .content p {
+      font-size: 0.95rem;
+      color: #4b5563;
+      margin-bottom: 12px;
+    }
+    .content pre {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-bottom: 12px;
+      color: #374151;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .content .buttons {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-bottom: 16px;
+      padding-left: 4px;
+    }
+    .content .note {
+      background: #fefce8;
+      border-left: 3px solid #eab308;
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.875rem;
+      color: #713f12;
+      margin-bottom: 16px;
+    }
+    .content .section-divider {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 28px 0 0 0;
+    }
+    .brand {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>FitFuel Bot Messages</h1>
+      <div class="meta">All WhatsApp messages sent by the FitFuel bot</div>
+    </div>
+
+    <div class="content">
+
+      <!-- ─── 1. Welcome / Greeting ─── -->
+      <h2>1. Welcome / Greeting</h2>
+
+      <h3>Returning user — active plan (near expiry)</h3>
+      <pre>👋 Welcome back to FitFuel Nutrition!
+
+🟢 You have an *active ${planLabel} plan*.
+⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!
+
+How can we help you?</pre>
+
+      <h3>Returning user — active plan</h3>
+      <pre>👋 Welcome back to FitFuel Nutrition!
+
+🟢 You have an *active ${planLabel} plan*.
+📅 *${remaining}* delivery day(s) remaining
+
+How can we help you?</pre>
+
+      <h3>New user</h3>
+      <pre>👋 Welcome to FitFuel Nutrition!
+
+How can we help you today?</pre>
+      <div class="buttons">Buttons: 📋 My Plan · 📞 Contact Us · 🥗 View Plans · 🛒 Order Now</div>
+
+      <hr class="section-divider">
+
+      <!-- ─── 2. Main Menu ─── -->
+      <h2>2. Main Menu</h2>
+
+      <h3>View Plans</h3>
+      <pre>🥗 *Our Nutrition Plans*
+
+[plan list with prices]
+
+📅 *Durations:* 3, 7, 14, or 30 days
+🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3
+
+Tap below to customise your plan!</pre>
+      <div class="buttons">Button: 🛒 Build My Plan</div>
+
+      <h3>My Plan — no active subscription</h3>
+      <pre>ℹ️ You don't have an active plan right now.
+
+Type anything to go back to the menu.</pre>
+
+      <h3>My Plan — active subscription</h3>
+      <pre>📋 *Your Active Plan*
+
+📦 Plan: *${planLabel}*
+📅 Started: ${startDate}
+⏳ *${remaining}* delivery day(s) remaining.
+⏭️ *${skippedCount} skipped meal(s)* after your plan ends:
+[skipped meal list]
+
+You'll receive a notification before each meal to confirm, skip, or change it.
+
+Type anything to go back to the menu.</pre>
+      <div class="buttons">Buttons: 🔄 Renew Plan · 📞 Contact Us</div>
+
+      <h3>Ready to renew</h3>
+      <pre>🔄 Ready to renew your plan?</pre>
+
+      <h3>Contact Us</h3>
+      <pre>📞 *Get in Touch*
+
+📧 Email: hello@fitfuelnutrition.com
+📱 WhatsApp: This chat!
+🌐 Website: www.fitfuelnutrition.com
+🕐 Support hours: Mon–Sat, 9am–7pm</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 3. Subscription Onboarding ─── -->
+      <h2>3. Subscription Onboarding</h2>
+
+      <h3>Already has active plan</h3>
+      <pre>⚠️ *You already have an active plan!*
+
+Your current plan has *${remaining} delivery day(s)* remaining.
+
+You can renew once your plan has ${threshold} or fewer delivery days left.</pre>
+
+      <h3>Renewal flow start</h3>
+      <pre>🔄 *Renew your plan!*
+
+Your current plan ends shortly. Your new plan will start right after it completes.
+
+Let's set up your new plan!</pre>
+
+      <h3>Step 1 — Choose meal plan</h3>
+      <pre>🥗 *Choose your meal plan:*
+
+Pick the plan that best matches your goal:</pre>
+
+      <h3>Step 2 — Duration selected</h3>
+      <pre>✅ *${planTitle}* selected!
+
+How many days would you like to subscribe for?
+
+_Note: Sundays are a kitchen holiday — no deliveries on Sundays. Your plan will be extended by a day for every Sunday it falls on, so you always get the full number of delivery days you pay for._</pre>
+
+      <h3>Step 2 — Re-prompt (invalid input)</h3>
+      <pre>How many days would you like? (${planTitle})
+
+_Note: Sundays are a kitchen holiday — no deliveries on Sundays. Your plan will be extended by a day for every Sunday it falls on, so you always get the full number of delivery days you pay for._</pre>
+
+      <h3>Step 3 — Meals per day</h3>
+      <pre>📅 *${dayLabel}* selected!
+
+How many meals per day?
+
+🌅 Breakfast only — ₹${price}
+🍽️ Lunch + Dinner — ₹${price}
+🌟 All 3 Meals — ₹${price}</pre>
+
+      <h3>Step 4 — Location request (with button)</h3>
+      <pre>🍴 *${mealLabel}* selected!
+
+📍 *Where should we deliver?*
+
+Tap the button below to share your location, or just type your area / neighbourhood name.</pre>
+
+      <h3>Step 4 — Location request (text fallback)</h3>
+      <pre>🍴 *${mealLabel}* selected!
+
+📍 *Where should we deliver?*
+
+Tap the 📎 icon → *Location* → *Send Your Current Location*,
+or type your area / neighbourhood name.</pre>
+
+      <h3>Step 5 — Address prompt</h3>
+      <pre>📍 *Got your location!*
+
+🏠 Please type your *full delivery address*:
+(flat/house number, street name, landmark)</pre>
+
+      <h3>Step 6 — Payment link error</h3>
+      <pre>Sorry, we couldn't generate your payment link right now. Please contact support.</pre>
+
+      <h3>Step 6 — Order summary with payment link</h3>
+      <pre>✅ *Order Summary*
+
+📦 Plan: ${planTitle}
+📅 Duration: ${dayLabel}
+🍴 Meals: ${mealLabel}
+🏠 Address: ${addressText}
+💰 Total: ₹${totalPrice}
+
+💳 *Complete your payment here:*
+${paymentUrl}
+
+_Your subscription activates once payment is confirmed!_</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 4. Order Actions ─── -->
+      <h2>4. Order Actions (Confirm / Skip / Change)</h2>
+
+      <h3>Errors</h3>
+      <pre>Sorry, something went wrong. Please try again.</pre>
+      <pre>Sorry, we couldn't find that order. Please try again.</pre>
+
+      <h3>Deadline passed</h3>
+      <pre>⏰ The 9:30am deadline has passed. Changes can no longer be made for lunch.</pre>
+      <pre>⏰ The 5pm deadline has passed. Changes can no longer be made for dinner.</pre>
+      <pre>⏰ The deadline has passed. Changes can no longer be made for this meal.</pre>
+
+      <h3>Already processed</h3>
+      <pre>✅ This order has already been confirmed.</pre>
+      <pre>⏭️ This order has already been skipped.</pre>
+      <pre>ℹ️ This order has already been processed.</pre>
+
+      <h3>Confirm success</h3>
+      <pre>✅ *Confirmed!* Your meal is locked in.
+
+We'll notify you once it's on the way 🚀</pre>
+
+      <h3>Skip — meal pushed to end of plan</h3>
+      <pre>⏭️ *Skipped!* This meal has been moved to *${dateStr}* (added to the end of your plan).</pre>
+
+      <h3>Skip — no remaining subscription</h3>
+      <pre>⏭️ *Skipped!* No delivery for this slot today.
+
+See you next time 👋</pre>
+
+      <h3>Change — menu unavailable</h3>
+      <pre>😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.</pre>
+
+      <h3>Change — pick new meal</h3>
+      <pre>🔄 *Change your meal*
+
+Pick from today's available options:</pre>
+
+      <h3>Change — order already processed</h3>
+      <pre>ℹ️ This order has already been processed and can't be changed.</pre>
+
+      <h3>Change — meal updated</h3>
+      <pre>✅ *Meal updated!*
+
+Your new meal: *${itemName}*
+
+We'll have it ready for your slot 🍽️</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 5. Meal Notifications ─── -->
+      <h2>5. Meal Notifications (Daily)</h2>
+
+      <h3>Breakfast notification header</h3>
+      <pre>🌅 *Tomorrow's Breakfast (${deliveryDate})*</pre>
+
+      <h3>Lunch / Dinner notification header</h3>
+      <pre>🍽️ *Today's ${slotLabel} (${deliveryDate})*</pre>
+
+      <h3>Deadline reminders</h3>
+      <pre>You can confirm, skip, or change until *10pm tonight*.</pre>
+      <pre>⏰ Respond by *9:30am* — changes close after that.</pre>
+      <pre>⏰ Respond by *5pm* — changes close after that.</pre>
+
+      <h3>Rescheduled meal notification</h3>
+      <pre>⏭️ *Rescheduled ${slotLabel}*
+
+You skipped this meal earlier — it's being delivered today.
+
+🍽️ *${slotLabel}*: ${itemName}</pre>
+      <div class="buttons">Buttons on all meal notifications: ✅ Confirm · 🔄 Change · ⏭️ Skip</div>
+
+      <hr class="section-divider">
+
+      <!-- ─── 6. Payment ─── -->
+      <h2>6. Payment</h2>
+
+      <h3>Payment failed / cancelled / expired</h3>
+      <pre>❌ *Payment ${reason}*
+
+Unfortunately your FitFuel order could not be completed.
+
+Please send us a message to start a new order whenever you're ready. We're here to help! 🙏</pre>
+
+      <h3>Payment confirmed</h3>
+      <pre>🎉 *Payment Confirmed!*
+
+Your FitFuel *${planTitle}* plan is now *active*!
+
+📅 Duration: ${dayLabel}
+🍴 Meals: ${mealLabel}
+💰 Amount paid: ₹${amount}
+
+📦 Deliveries start ${startLabel}.
+You'll get a daily notification before each meal to confirm, skip, or change it.
+
+Thank you for choosing FitFuel! 💪</pre>
+
+      <h3>Kitchen closed days during plan</h3>
+      <pre>🔒 *Kitchen Closed Days during your plan*
+
+Our kitchen will be closed on: *${datesList}*.
+Reason: _${reason}_
+No meals will be delivered on those days.
+
+✅ Your plan has been extended to *${newEndDate}* to make up for it.
+
+We'll be back the next working day! 🙏</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 7. Expiry Reminder ─── -->
+      <h2>7. Expiry Reminder</h2>
+
+      <pre>⏳ *Your FitFuel plan is almost over!*
+
+Your *${planLabel} plan* has only *${threshold} delivery day(s)* remaining.
+
+Don't miss your healthy streak — renew now to keep your meals coming! 🥗</pre>
+      <div class="buttons">Buttons: 🔄 Renew Plan · 📞 Contact Us</div>
+
+      <hr class="section-divider">
+
+      <!-- ─── 8. Plan Expiry Notices ─── -->
+      <h2>8. Plan Expiry Notices</h2>
+
+      <h3>Last delivery day</h3>
+      <pre>🚨 *This is your last delivery day!* Press the *Renew Plan* button on the menu to continue.</pre>
+
+      <h3>Near expiry</h3>
+      <pre>⚠️ Your plan expires in *${daysLeft}* delivery day(s)! Press the *Renew Plan* button on the menu to continue.</pre>
+
+      <h3>Sunday / holiday disclaimer</h3>
+      <pre>_Note: Sundays are a kitchen holiday — no deliveries on Sundays. Your plan will be extended by a day for every Sunday it falls on, so you always get the full number of delivery days you pay for._</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 9. Kitchen Closed ─── -->
+      <h2>9. Kitchen Closed (Admin)</h2>
+
+      <pre>🔒 *Kitchen Closed — ${date}*
+${reasonLine}
+We're sorry, our kitchen won't be operating on ${date}. No meals will be delivered that day.
+
+✅ Your plan has been extended by 1 day to make up for it.
+📅 You now have *${remaining} delivery day(s)* remaining.
+
+We'll be back the next working day! 🙏</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 10. Session & Button Expiry ─── -->
+      <h2>10. Session &amp; Button Expiry</h2>
+
+      <h3>Session expired</h3>
+      <pre>⏰ *Your session expired due to inactivity.*
+
+Type *hi* to start again!</pre>
+
+      <h3>Button expired</h3>
+      <pre>⏰ That button has expired — it's from an older message.
+
+Type *hi* to start fresh!</pre>
+
+      <h3>Payment pending</h3>
+      <pre>⏳ *Payment Pending*
+
+Please complete your payment using the link we sent you.
+
+Type *back*, *menu*, or *home* to cancel and start over.</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 11. Navigation ─── -->
+      <h2>11. Navigation</h2>
+
+      <pre>↩️ Going back…</pre>
+
+      <h3>Back to location (with button)</h3>
+      <pre>📍 *Where should we deliver?*
+
+Tap the button below to share your location, or type your area / neighbourhood name.</pre>
+
+      <h3>Back to location (text fallback)</h3>
+      <pre>📍 *Where should we deliver?*
+
+Type your area / neighbourhood name.</pre>
+
+      <hr class="section-divider">
+
+      <!-- ─── 12. Menu Unavailable ─── -->
+      <h2>12. Menu Unavailable</h2>
+
+      <pre>Sorry, the menu is unavailable right now. Please try again later.</pre>
+
+    </div>
+
+    <p class="brand">FitFuel &mdash; Fresh meals, every day</p>
+  </div>
+</body>
+</html>

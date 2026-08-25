@@ -1,5 +1,6 @@
 import { sendText } from "../../lib/whatsapp.js";
 import { findExpiredSessions, clearSession } from "../../bot/session.js";
+import { SESSION_EXPIRED } from "../../bot/config/messages.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
@@ -17,10 +18,7 @@ export default async function handler(req, res) {
     const details = [];
     for (const phone of phones) {
       try {
-        await sendText(
-          phone,
-          `⏰ *Your session expired due to inactivity.*\n\nType *hi* to start again!`,
-        );
+        await sendText(phone, SESSION_EXPIRED);
         await clearSession(phone);
         details.push({ phone, status: "notified" });
         console.log(`[SESSION-EXPIRY] Notified + cleared ${phone}`);

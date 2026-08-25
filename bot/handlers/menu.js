@@ -3,7 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { handleGreeting } from "./greeting.js";
 import { startSubscription } from "./subscription.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
-import { getPlanLabel, buildExpiryNotice } from "../config/plans.js";
+import { getPlanLabel } from "../config/plans.js";
+import { buildExpiryNotice, viewPlans, MY_PLAN_NO_ACTIVE, myPlanActive, MY_PLAN_RENEW_PROMPT, CONTACT_US } from "../config/messages.js";
 import { getPlanCategories } from "../../lib/mealPlans.js";
 import { formatDateIST } from "../../lib/time.js";
 
@@ -28,10 +29,7 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
 
       await sendButtons(
         phone,
-        `🥗 *Our Nutrition Plans*\n\n${planLines}\n\n` +
-          `📅 *Durations:* 3, 7, 14, or 30 days\n` +
-          `🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3\n\n` +
-          `Tap below to customise your plan!`,
+        viewPlans({ planLines }),
         [{ id: "ORDER_NOW", title: "🛒 Build My Plan" }],
       );
       break;
@@ -53,10 +51,7 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
         .maybeSingle();
 
       if (!activeSub) {
-        await sendText(
-          phone,
-          `ℹ️ You don't have an active plan right now.\n\nType anything to go back to the menu.`,
-        );
+        await sendText(phone, MY_PLAN_NO_ACTIVE);
         break;
       }
 
@@ -87,19 +82,14 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
 
       await sendText(
         phone,
-        `📋 *Your Active Plan*\n\n` +
-          `📦 Plan: *${planLabel}*\n` +
-          `📅 Started: ${activeSub.start_date}\n` +
-          `${expiryLine}${pushedLines}\n\n` +
-          `You'll receive a notification before each meal to confirm, skip, or change it.\n\n` +
-          `Type anything to go back to the menu.`,
+        myPlanActive({ planLabel, startDate: activeSub.start_date, expiryLine, pushedLines }),
       );
 
       const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
       if (remaining <= threshold) {
         await sendButtons(
           phone,
-          `🔄 Ready to renew your plan?`,
+          MY_PLAN_RENEW_PROMPT,
           [
             { id: "ORDER_NOW", title: "🔄 Renew Plan" },
             { id: "CONTACT_US", title: "📞 Contact Us" },
@@ -110,14 +100,7 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
     }
 
     case "CONTACT_US":
-      await sendText(
-        phone,
-        `📞 *Get in Touch*\n\n` +
-          `📧 Email: hello@fitfuelnutrition.com\n` +
-          `📱 WhatsApp: This chat!\n` +
-          `🌐 Website: www.fitfuelnutrition.com\n` +
-          `🕐 Support hours: Mon–Sat, 9am–7pm`,
-      );
+      await sendText(phone, CONTACT_US);
       break;
 
     default:
