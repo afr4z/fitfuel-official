@@ -4,68 +4,163 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Successful – FitFuel</title>
+  <meta name="description" content="Your FitFuel meal plan subscription is being activated. Thank you for choosing FitFuel." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
+      --green-400: #4ade80; --green-500: #22c55e; --green-600: #16a34a;
+      --green-700: #15803d; --green-800: #166534; --green-900: #14532d;
+      --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db;
+      --gray-400: #9ca3af; --gray-500: #6b7280; --gray-600: #4b5563;
+      --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f0fdf4;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(160deg, var(--green-50) 0%, #fff 50%, var(--green-100) 100%);
+      font-family: var(--font);
+      color: var(--gray-800);
       padding: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+    body::before, body::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      animation: float-orb 18s ease-in-out infinite;
+    }
+    body::before {
+      top: -150px; right: -150px; width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%);
+    }
+    body::after {
+      bottom: -120px; left: -120px; width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(74,222,128,0.1) 0%, transparent 70%);
+      animation-delay: -9s;
+    }
+    @keyframes float-orb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(20px, -20px) scale(1.05); }
     }
     .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      max-width: 420px;
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      border-radius: 24px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.12);
+      max-width: 440px;
       width: 100%;
-      padding: 48px 32px;
+      padding: 56px 40px;
       text-align: center;
+      border: 1px solid rgba(229,231,235,0.6);
+      animation: card-in 0.6s var(--ease-out) 0.2s both;
     }
-    .icon {
-      font-size: 64px;
-      margin-bottom: 24px;
-      line-height: 1;
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
+    .check-wrap {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 28px;
+      background: linear-gradient(135deg, var(--green-500), var(--green-600));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(34,197,94,0.35);
+      animation: pop 0.5s var(--ease-out) 0.1s both;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .check-wrap svg { width: 44px; height: 44px; color: #fff; }
     h1 {
       font-size: 1.75rem;
-      font-weight: 700;
-      color: #166534;
+      font-weight: 800;
+      color: var(--green-800);
       margin-bottom: 12px;
+      letter-spacing: -0.02em;
     }
-    p {
-      color: #4b5563;
+    .lead {
+      color: var(--gray-600);
       font-size: 1rem;
       line-height: 1.6;
       margin-bottom: 8px;
     }
+    .lead strong { color: var(--gray-800); }
     .note {
-      margin-top: 24px;
-      background: #f0fdf4;
-      border-radius: 10px;
-      padding: 14px 18px;
-      color: #166534;
+      margin-top: 28px;
+      background: var(--green-50);
+      border: 1px solid var(--green-100);
+      border-radius: 14px;
+      padding: 16px 20px;
+      color: var(--green-800);
       font-size: 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      text-align: left;
     }
-    .brand {
+    .note svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--green-600); margin-top: 2px; }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       margin-top: 32px;
+      color: var(--green-700);
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: color 0.2s var(--ease-base);
+      text-decoration: none;
+    }
+    .cta:hover { color: var(--green-500); }
+    .brand {
+      margin-top: 36px;
       font-size: 0.8rem;
-      color: #9ca3af;
+      color: var(--gray-400);
+      font-weight: 500;
+    }
+    .brand strong { color: var(--gray-500); }
+
+    @media (max-width: 480px) {
+      .card { padding: 44px 28px; border-radius: 20px; }
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="icon">✅</div>
-    <h1>Payment Successful!</h1>
-    <p>Thank you for choosing <strong>FitFuel</strong>.</p>
-    <p>Your meal plan subscription is now being activated.</p>
-    <div class="note">
-      📱 You'll receive a confirmation message on WhatsApp shortly with your plan details.
+    <div class="check-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
     </div>
-    <p class="brand">FitFuel &mdash; Fresh meals, every day</p>
+    <h1>Payment Successful!</h1>
+    <p class="lead">Thank you for choosing <strong>FitFuel</strong>.<br>Your meal plan subscription is now being activated.</p>
+    <div class="note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M12 6v6l4 2"/></svg>
+      <span>You'll receive a confirmation message on WhatsApp shortly with your plan details.</span>
+    </div>
+    <a class="cta" href="https://wa.me/916300159766" target="_blank" rel="noopener">
+      Message us on WhatsApp
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+    </a>
+    <p class="brand"><strong>FitFuel</strong> &mdash; Fresh meals, every day</p>
   </div>
 </body>
 </html>
