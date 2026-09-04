@@ -3,507 +3,200 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FitFuel – Fresh Meals, Every Day</title>
-  <meta name="description" content="FitFuel delivers fresh, customized meal plans to your doorstep. Choose from Healthy Diet, High Protein, or Weight Loss plans. Order via WhatsApp." />
+  <title>FitFuel Nutrition – Fresh Meals, Every Day</title>
+  <meta name="description" content="FitFuel Nutrition delivers fresh, customized meal plans to your doorstep. Choose from Healthy Diet, High Protein, or Weight Loss plans. Order via WhatsApp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #1f2937;
-      background: #fff;
-      line-height: 1.6;
+    :root {
+      --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
+      --green-400: #4ade80; --green-500: #22c55e; --green-600: #16a34a;
+      --green-700: #15803d; --green-800: #166534; --green-900: #14532d;
+      --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+      --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+      --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+      --gray-900: #111827; --amber-400: #fbbf24; --amber-500: #f59e0b;
+      --radius-full: 9999px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+      --shadow-glow: 0 0 40px rgba(34,197,94,0.25);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+    body { font-family: var(--font); color: var(--gray-800); background: #fff; line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
     a { color: inherit; text-decoration: none; }
     img { max-width: 100%; display: block; }
 
-    /* ── Navbar ─────────────────────────────────────────────────── */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .nav-inner {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .nav-brand {
-      font-size: 1.35rem;
-      font-weight: 800;
-      color: #166534;
-    }
-    .nav-brand span { color: #22c55e; }
-    .nav-links { display: flex; gap: 28px; align-items: center; }
-    .nav-links a {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #4b5563;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: #166534; }
-    .nav-cta {
-      background: #22c55e;
-      color: #fff !important;
-      padding: 8px 20px;
-      border-radius: 999px;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-    .nav-cta:hover { background: #16a34a; }
+    .reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.08s; } .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; } .reveal-delay-4 { transition-delay: 0.32s; }
+    .reveal-delay-5 { transition-delay: 0.40s; } .reveal-delay-6 { transition-delay: 0.48s; }
 
-    /* ── Hero ───────────────────────────────────────────────────── */
-    .hero {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%);
-      padding: 80px 24px 72px;
-      text-align: center;
-    }
-    .hero-inner { max-width: 720px; margin: 0 auto; }
-    .hero-badge {
-      display: inline-block;
-      background: #dcfce7;
-      color: #166534;
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 6px 16px;
-      border-radius: 999px;
-      margin-bottom: 24px;
-      border: 1px solid #bbf7d0;
-    }
-    .hero h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 800;
-      color: #166534;
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-    .hero h1 em {
-      font-style: normal;
-      color: #22c55e;
-    }
-    .hero p {
-      font-size: 1.15rem;
-      color: #4b5563;
-      margin-bottom: 36px;
-      max-width: 560px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #22c55e;
-      color: #fff;
-      padding: 14px 32px;
-      border-radius: 999px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      transition: background 0.2s, transform 0.15s;
-      box-shadow: 0 4px 16px rgba(34,197,94,0.3);
-    }
-    .btn-primary:hover { background: #16a34a; transform: translateY(-1px); }
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #fff;
-      color: #166534;
-      padding: 14px 32px;
-      border-radius: 999px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      border: 2px solid #d1fae5;
-      transition: border-color 0.2s, transform 0.15s;
-    }
-    .btn-secondary:hover { border-color: #22c55e; transform: translateY(-1px); }
-    .hero-trust {
-      margin-top: 40px;
-      display: flex;
-      gap: 32px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px) saturate(1.8); -webkit-backdrop-filter: blur(20px) saturate(1.8); border-bottom: 1px solid rgba(229,231,235,0.6); transition: all 0.3s var(--ease-base); }
+    .nav.scrolled { background: rgba(255,255,255,0.92); box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
+    .nav-inner { max-width: 1120px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-size: 1.2rem; font-weight: 800; color: var(--green-800); letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 6px; }
+    .nav-brand span { color: var(--green-500); }
+    .nav-sub { font-size: 0.6rem; font-weight: 500; color: var(--gray-400); letter-spacing: 0.02em; white-space: nowrap; }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--gray-600); transition: color 0.15s var(--ease-base); position: relative; }
+    .nav-links a::after { content: ""; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--green-500); border-radius: 1px; transition: width 0.3s var(--ease-base); }
+    .nav-links a:hover { color: var(--green-800); }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta { background: var(--green-500); color: #fff !important; padding: 9px 22px; border-radius: var(--radius-full); font-weight: 600; transition: all 0.3s var(--ease-base); box-shadow: 0 2px 12px rgba(34,197,94,0.25); }
+    .nav-cta::after { display: none !important; }
+    .nav-cta:hover { background: var(--green-600); box-shadow: 0 4px 20px rgba(34,197,94,0.35); transform: translateY(-1px); }
+
+    .hero { position: relative; padding: 100px 24px 80px; text-align: center; overflow: hidden; background: linear-gradient(160deg, var(--green-50) 0%, #fff 40%, var(--green-100) 100%); }
+    .hero::before { content: ""; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%); border-radius: 50%; animation: float-orb 20s ease-in-out infinite; }
+    .hero::after { content: ""; position: absolute; bottom: -150px; left: -150px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(74,222,128,0.1) 0%, transparent 70%); border-radius: 50%; animation: float-orb 25s ease-in-out infinite reverse; }
+    @keyframes float-orb { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -20px) scale(1.05); } 66% { transform: translate(-20px, 15px) scale(0.95); } }
+    .hero-inner { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(220,252,231,0.8); backdrop-filter: blur(8px); color: var(--green-800); font-size: 0.8rem; font-weight: 600; padding: 7px 18px; border-radius: var(--radius-full); margin-bottom: 28px; border: 1px solid rgba(187,247,208,0.6); animation: badge-in 0.6s var(--ease-out) 0.2s both; }
+    @keyframes badge-in { from { opacity: 0; transform: translateY(12px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .hero-badge .pulse { width: 8px; height: 8px; background: var(--green-500); border-radius: 50%; animation: pulse 2s ease-in-out infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.5); } }
+    .hero h1 { font-size: clamp(2.2rem, 5.5vw, 3.4rem); font-weight: 800; color: var(--green-900); line-height: 1.15; margin-bottom: 20px; letter-spacing: -0.03em; animation: hero-slide 0.7s var(--ease-out) 0.35s both; }
+    @keyframes hero-slide { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .gradient-text { background: linear-gradient(135deg, var(--green-500), var(--green-700)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-subtitle { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--gray-600); margin-bottom: 40px; max-width: 560px; margin-left: auto; margin-right: auto; animation: hero-slide 0.7s var(--ease-out) 0.5s both; }
+    .hero-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; animation: hero-slide 0.7s var(--ease-out) 0.65s both; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--green-500); color: #fff; padding: 15px 34px; border-radius: var(--radius-full); font-size: 1.05rem; font-weight: 700; transition: all 0.3s var(--ease-base); box-shadow: 0 4px 20px rgba(34,197,94,0.3); position: relative; overflow: hidden; cursor: pointer; border: none; }
+    .btn-primary::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent); opacity: 0; transition: opacity 0.15s; }
+    .btn-primary:hover { background: var(--green-600); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(34,197,94,0.4); }
+    .btn-primary:hover::before { opacity: 1; }
+    .btn-primary:active { transform: translateY(0) scale(0.98); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.8); backdrop-filter: blur(8px); color: var(--green-700); padding: 15px 34px; border-radius: var(--radius-full); font-size: 1.05rem; font-weight: 600; border: 2px solid var(--green-200); transition: all 0.3s var(--ease-base); cursor: pointer; }
+    .btn-secondary:hover { border-color: var(--green-400); background: #fff; transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .btn-secondary:active { transform: translateY(0) scale(0.98); }
+
+    .hero-trust { margin-top: 48px; display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; animation: hero-slide 0.7s var(--ease-out) 0.8s both; }
     .hero-trust-item { text-align: center; }
-    .hero-trust-item strong {
-      display: block;
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #166534;
-    }
-    .hero-trust-item span {
-      font-size: 0.8rem;
-      color: #6b7280;
-      font-weight: 500;
-    }
+    .hero-trust-item .counter { font-size: 1.6rem; font-weight: 800; color: var(--green-800); display: block; line-height: 1; }
+    .hero-trust-item span { font-size: 0.8rem; color: var(--gray-500); font-weight: 500; }
 
-    /* ── Section shared ─────────────────────────────────────────── */
-    .section { padding: 72px 24px; }
-    .section-alt { background: #f9fafb; }
-    .section-green { background: #f0fdf4; }
-    .section-title {
-      text-align: center;
-      font-size: clamp(1.5rem, 3.5vw, 2rem);
-      font-weight: 800;
-      color: #166534;
-      margin-bottom: 8px;
-    }
-    .section-subtitle {
-      text-align: center;
-      color: #6b7280;
-      font-size: 1rem;
-      margin-bottom: 48px;
-      max-width: 520px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+    .section { padding: 80px 24px; }
+    .section-alt { background: var(--gray-50); }
+    .section-green { background: linear-gradient(180deg, var(--green-50), #fff); }
+    .section-title { text-align: center; font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 800; color: var(--green-800); margin-bottom: 8px; letter-spacing: -0.02em; }
+    .section-subtitle { text-align: center; color: var(--gray-500); font-size: 1rem; margin-bottom: 52px; max-width: 520px; margin-left: auto; margin-right: auto; }
 
-    /* ── How It Works ───────────────────────────────────────────── */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-    .step {
-      text-align: center;
-      padding: 32px 20px;
-    }
-    .step-icon {
-      width: 64px;
-      height: 64px;
-      background: #dcfce7;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.75rem;
-      margin: 0 auto 20px;
-    }
-    .step-num {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #22c55e;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-    }
-    .step h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin-bottom: 8px;
-    }
-    .step p {
-      font-size: 0.9rem;
-      color: #6b7280;
-      line-height: 1.5;
-    }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; }
+    .step { text-align: center; padding: 32px 16px; border-radius: 16px; transition: all 0.3s var(--ease-base); }
+    .step:hover { background: #fff; box-shadow: var(--shadow-md); transform: translateY(-4px); }
+    .step-icon { width: 68px; height: 68px; background: linear-gradient(135deg, var(--green-100), var(--green-50)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 20px; transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out); }
+    .step:hover .step-icon { transform: scale(1.08) rotate(-3deg); box-shadow: var(--shadow-glow); }
+    .step-num { font-size: 0.7rem; font-weight: 700; color: var(--green-500); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .step h3 { font-size: 1.05rem; font-weight: 700; color: var(--gray-800); margin-bottom: 8px; }
+    .step p { font-size: 0.88rem; color: var(--gray-500); line-height: 1.5; }
 
-    /* ── Plans ──────────────────────────────────────────────────── */
-    .plans-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .plan-card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-      padding: 32px 28px;
-      border: 1px solid #e5e7eb;
-      transition: box-shadow 0.2s, transform 0.15s;
-      display: flex;
-      flex-direction: column;
-    }
-    .plan-card:hover {
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
-    }
-    .plan-card.featured {
-      border: 2px solid #22c55e;
-      position: relative;
-    }
-    .plan-card.featured::before {
-      content: "Most Popular";
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #22c55e;
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 4px 14px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-    .plan-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    .plan-emoji { font-size: 2rem; }
-    .plan-name {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #1f2937;
-    }
-    .plan-tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 999px;
-      margin-bottom: 12px;
-    }
-    .tag-veg { background: #dcfce7; color: #166534; }
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1040px; margin: 0 auto; }
+    .plan-card { background: #fff; border-radius: 20px; box-shadow: var(--shadow-sm); padding: 32px 28px; border: 1px solid var(--gray-200); transition: all 0.4s var(--ease-out); display: flex; flex-direction: column; position: relative; }
+    .plan-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-6px); border-color: var(--green-200); }
+    .plan-card.featured { border: 2px solid var(--green-500); box-shadow: var(--shadow-glow); }
+    .plan-card.featured:hover { box-shadow: 0 0 60px rgba(34,197,94,0.3); }
+    .plan-card.featured::before { content: "Most Popular"; position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--green-500), var(--green-600)); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 5px 16px; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+    .plan-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .plan-emoji { font-size: 2rem; transition: transform 0.3s var(--ease-out); }
+    .plan-card:hover .plan-emoji { transform: scale(1.15) rotate(-5deg); }
+    .plan-name { font-size: 1.1rem; font-weight: 700; color: var(--gray-800); }
+    .plan-tag { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); margin-bottom: 12px; }
+    .tag-veg { background: var(--green-100); color: var(--green-800); }
     .tag-nonveg { background: #fef3c7; color: #92400e; }
-    .plan-desc {
-      font-size: 0.9rem;
-      color: #6b7280;
-      margin-bottom: 20px;
-      flex-grow: 1;
-    }
-    .plan-pricing {
-      background: #f9fafb;
-      border-radius: 12px;
-      padding: 16px;
-    }
-    .plan-pricing-title {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 10px;
-    }
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-      font-size: 0.85rem;
-    }
-    .price-row:not(:last-child) {
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .price-days { color: #4b5563; }
-    .price-amount { font-weight: 700; color: #166534; }
-    .price-note {
-      font-size: 0.75rem;
-      color: #9ca3af;
-      margin-top: 10px;
-    }
-    .plan-cta {
-      display: block;
-      text-align: center;
-      background: #22c55e;
-      color: #fff;
-      padding: 12px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      margin-top: 20px;
-      transition: background 0.2s;
-    }
-    .plan-cta:hover { background: #16a34a; }
+    .plan-desc { font-size: 0.88rem; color: var(--gray-500); margin-bottom: 20px; flex-grow: 1; line-height: 1.5; }
+    .plan-pricing { background: var(--gray-50); border-radius: 14px; padding: 16px; border: 1px solid var(--gray-100); }
+    .plan-pricing-title { font-size: 0.7rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .price-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 0.85rem; }
+    .price-row:not(:last-child) { border-bottom: 1px solid var(--gray-100); }
+    .price-days { color: var(--gray-600); }
+    .price-amount { font-weight: 700; color: var(--green-800); }
+    .price-note { font-size: 0.72rem; color: var(--gray-400); margin-top: 10px; }
+    .plan-cta { display: block; text-align: center; background: var(--green-500); color: #fff; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; margin-top: 20px; transition: all 0.3s var(--ease-base); position: relative; overflow: hidden; }
+    .plan-cta::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent); opacity: 0; transition: opacity 0.15s; }
+    .plan-cta:hover { background: var(--green-600); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(34,197,94,0.3); }
+    .plan-cta:hover::before { opacity: 1; }
+    .plan-cta:active { transform: translateY(0) scale(0.98); }
 
-    /* ── Why FitFuel ────────────────────────────────────────────── */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 28px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-    .feature {
-      background: #fff;
-      border-radius: 14px;
-      padding: 28px 24px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-      border: 1px solid #e5e7eb;
-    }
-    .feature-icon {
-      font-size: 1.6rem;
-      margin-bottom: 14px;
-    }
-    .feature h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin-bottom: 6px;
-    }
-    .feature p {
-      font-size: 0.88rem;
-      color: #6b7280;
-      line-height: 1.5;
-    }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 960px; margin: 0 auto; }
+    .feature { background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); border-radius: 18px; padding: 28px 24px; border: 1px solid rgba(229,231,235,0.6); transition: all 0.35s var(--ease-out); }
+    .feature:hover { background: #fff; box-shadow: var(--shadow-lg); transform: translateY(-4px); border-color: var(--green-200); }
+    .feature-icon { font-size: 1.7rem; margin-bottom: 16px; transition: transform 0.3s var(--ease-out); display: inline-block; }
+    .feature:hover .feature-icon { transform: scale(1.2) rotate(-5deg); }
+    .feature h3 { font-size: 1rem; font-weight: 700; color: var(--gray-800); margin-bottom: 6px; }
+    .feature p { font-size: 0.85rem; color: var(--gray-500); line-height: 1.5; }
 
-    /* ── Testimonials ───────────────────────────────────────────── */
-    .testimonials-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-    .testimonial {
-      background: #fff;
-      border-radius: 14px;
-      padding: 28px 24px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-      border: 1px solid #e5e7eb;
-    }
-    .testimonial-stars { color: #f59e0b; font-size: 0.9rem; margin-bottom: 12px; }
-    .testimonial p {
-      font-size: 0.9rem;
-      color: #4b5563;
-      line-height: 1.6;
-      margin-bottom: 16px;
-      font-style: italic;
-    }
-    .testimonial-author {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .testimonial-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #dcfce7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #166534;
-    }
-    .testimonial-name {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #1f2937;
-    }
-    .testimonial-plan {
-      font-size: 0.75rem;
-      color: #9ca3af;
-    }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; }
+    .testimonial { background: #fff; border-radius: 18px; padding: 28px 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100); transition: all 0.35s var(--ease-out); }
+    .testimonial:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
+    .testimonial-stars { color: var(--amber-400); font-size: 0.9rem; margin-bottom: 14px; letter-spacing: 2px; }
+    .testimonial p { font-size: 0.88rem; color: var(--gray-600); line-height: 1.65; margin-bottom: 18px; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--green-100), var(--green-200)); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: var(--green-800); flex-shrink: 0; }
+    .testimonial-name { font-size: 0.85rem; font-weight: 600; color: var(--gray-800); }
+    .testimonial-plan { font-size: 0.72rem; color: var(--gray-400); }
 
-    /* ── CTA Banner ─────────────────────────────────────────────── */
-    .cta-banner {
-      background: linear-gradient(135deg, #166534 0%, #15803d 100%);
-      padding: 72px 24px;
-      text-align: center;
-    }
-    .cta-banner h2 {
-      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 12px;
-    }
-    .cta-banner p {
-      color: #bbf7d0;
-      font-size: 1.05rem;
-      margin-bottom: 32px;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .cta-banner .btn-primary {
-      background: #fff;
-      color: #166534;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-    }
-    .cta-banner .btn-primary:hover { background: #f0fdf4; }
+    .cta-banner { position: relative; overflow: hidden; background: linear-gradient(135deg, var(--green-800) 0%, var(--green-700) 50%, var(--green-600) 100%); padding: 80px 24px; text-align: center; }
+    .cta-banner::before { content: ""; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%); border-radius: 50%; animation: float-orb 15s ease-in-out infinite; }
+    .cta-banner::after { content: ""; position: absolute; bottom: -80px; left: -80px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%); border-radius: 50%; animation: float-orb 18s ease-in-out infinite reverse; }
+    .cta-banner h2 { font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -0.02em; position: relative; z-index: 1; }
+    .cta-banner .cta-sub { color: rgba(187,247,208,0.9); font-size: 1.05rem; margin-bottom: 36px; max-width: 480px; margin-left: auto; margin-right: auto; position: relative; z-index: 1; }
+    .cta-banner .btn-primary { background: #fff; color: var(--green-800); box-shadow: 0 4px 24px rgba(0,0,0,0.2); position: relative; z-index: 1; }
+    .cta-banner .btn-primary:hover { background: var(--green-50); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+    .cta-banner .btn-primary svg { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
 
-    /* ── Footer ─────────────────────────────────────────────────── */
-    .footer {
-      background: #1f2937;
-      color: #d1d5db;
-      padding: 48px 24px 32px;
-    }
-    .footer-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 40px;
-    }
-    .footer-brand {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 12px;
-    }
-    .footer-brand span { color: #22c55e; }
-    .footer-desc {
-      font-size: 0.85rem;
-      color: #9ca3af;
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-    .footer h4 {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 14px;
-    }
+    .footer { background: var(--gray-900); color: var(--gray-300); padding: 56px 24px 32px; }
+    .footer-inner { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; }
+    .footer-brand { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .footer-brand span { color: var(--green-500); }
+    .footer-desc { font-size: 0.85rem; color: var(--gray-400); line-height: 1.6; margin-bottom: 8px; }
+    .footer-company { font-size: 0.78rem; color: var(--gray-500); margin-top: 4px; }
+    .footer h4 { font-size: 0.75rem; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
     .footer ul { list-style: none; }
-    .footer li { margin-bottom: 8px; }
-    .footer a {
-      font-size: 0.85rem;
-      color: #9ca3af;
-      transition: color 0.2s;
-    }
-    .footer a:hover { color: #22c55e; }
-    .footer-bottom {
-      max-width: 960px;
-      margin: 32px auto 0;
-      padding-top: 24px;
-      border-top: 1px solid #374151;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .footer-bottom p {
-      font-size: 0.8rem;
-      color: #6b7280;
-    }
+    .footer li { margin-bottom: 10px; }
+    .footer a { font-size: 0.85rem; color: var(--gray-400); transition: color 0.2s var(--ease-base); }
+    .footer a:hover { color: var(--green-400); }
+    .footer-bottom { max-width: 960px; margin: 36px auto 0; padding-top: 24px; border-top: 1px solid var(--gray-700); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .footer-bottom p { font-size: 0.78rem; color: var(--gray-500); }
+    .footer-bottom a { color: var(--gray-400); transition: color 0.2s; }
+    .footer-bottom a:hover { color: var(--green-400); }
 
-    /* ── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .features-grid, .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .steps { grid-template-columns: 1fr; }
+      .nav-sub { display: none; }
+      .nav-brand { font-size: 1.35rem; }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .features-grid, .testimonials-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; gap: 28px; }
-      .hero { padding: 56px 20px 48px; }
+      .hero { padding: 64px 20px 56px; }
       .section { padding: 56px 20px; }
       .cta-banner { padding: 56px 20px; }
       .footer-bottom { flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .steps { grid-template-columns: 1fr; }
+      .hero-trust { gap: 24px; }
+      .plans-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── Navbar ──────────────────────────────────────────────── -->
-  <nav class="nav">
+  <nav class="nav" id="nav">
     <div class="nav-inner">
-      <a href="/" class="nav-brand">Fit<span>Fuel</span></a>
+      <a href="/" class="nav-brand">Fit<span>Fuel</span> Nutrition <span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
       <div class="nav-links">
         <a href="#how-it-works">How It Works</a>
         <a href="#plans">Plans</a>
@@ -513,12 +206,11 @@
     </div>
   </nav>
 
-  <!-- ── Hero ────────────────────────────────────────────────── -->
   <section class="hero">
     <div class="hero-inner">
-      <div class="hero-badge">🟢 Now delivering in your city</div>
-      <h1>Fresh, Healthy Meals<br>Delivered to <em>Your Door</em></h1>
-      <p>Customized meal plans for your fitness goals. Choose your plan, pick your meals, and we handle the rest — cooked fresh and delivered daily.</p>
+      <div class="hero-badge"><span class="pulse"></span> Now delivering in your city</div>
+      <h1>Fresh, Healthy Meals<br>Delivered to <span class="gradient-text">Your Door</span></h1>
+      <p class="hero-subtitle">Customized meal plans for your fitness goals. Choose your plan, pick your meals, and we handle the rest — cooked fresh and delivered daily.</p>
       <div class="hero-buttons">
         <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20to%20order%20a%20meal%20plan" class="btn-primary" target="_blank" rel="noopener">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -527,46 +219,36 @@
         <a href="#plans" class="btn-secondary">View Plans ↓</a>
       </div>
       <div class="hero-trust">
-        <div class="hero-trust-item">
-          <strong>6</strong>
-          <span>Meal Plans</span>
-        </div>
-        <div class="hero-trust-item">
-          <strong>100%</strong>
-          <span>Fresh Cooked</span>
-        </div>
-        <div class="hero-trust-item">
-          <strong>100%</strong>
-          <span>Customizable Meals</span>
-        </div>
+        <div class="hero-trust-item"><span class="counter" data-target="6">0</span><span>Meal Plans</span></div>
+        <div class="hero-trust-item"><span class="counter" data-target="100" data-suffix="%">0</span><span>Fresh Cooked</span></div>
+        <div class="hero-trust-item"><span class="counter" data-target="100" data-suffix="%">0</span><span>Customizable</span></div>
       </div>
     </div>
   </section>
 
-  <!-- ── How It Works ─────────────────────────────────────────── -->
   <section class="section section-alt" id="how-it-works">
-    <h2 class="section-title">How It Works</h2>
-    <p class="section-subtitle">Getting healthy meals has never been easier. Four simple steps and you're set.</p>
+    <h2 class="section-title reveal">How It Works</h2>
+    <p class="section-subtitle reveal">Getting healthy meals has never been easier. Four simple steps and you're set.</p>
     <div class="steps">
-      <div class="step">
+      <div class="step reveal reveal-delay-1">
         <div class="step-icon">💬</div>
         <div class="step-num">Step 1</div>
         <h3>Message Us</h3>
         <p>Send "Hi" on WhatsApp and our smart chatbot will guide you through everything.</p>
       </div>
-      <div class="step">
+      <div class="step reveal reveal-delay-2">
         <div class="step-icon">📋</div>
         <div class="step-num">Step 2</div>
         <h3>Pick Your Plan</h3>
         <p>Choose from 6 meal plans, select your duration (3-30 days), and meals per day.</p>
       </div>
-      <div class="step">
+      <div class="step reveal reveal-delay-3">
         <div class="step-icon">💳</div>
         <div class="step-num">Step 3</div>
         <h3>Pay Securely</h3>
         <p>Complete payment via Razorpay. UPI, cards, net banking — all accepted.</p>
       </div>
-      <div class="step">
+      <div class="step reveal reveal-delay-4">
         <div class="step-icon">🍽️</div>
         <div class="step-num">Step 4</div>
         <h3>Enjoy Fresh Meals</h3>
@@ -575,18 +257,12 @@
     </div>
   </section>
 
-  <!-- ── Plans & Pricing ─────────────────────────────────────── -->
   <section class="section" id="plans">
-    <h2 class="section-title">Meal Plans & Pricing</h2>
-    <p class="section-subtitle">Choose the plan that fits your goals. The longer you subscribe, the more you save.</p>
+    <h2 class="section-title reveal">Meal Plans & Pricing</h2>
+    <p class="section-subtitle reveal">Choose the plan that fits your goals. The longer you subscribe, the more you save.</p>
     <div class="plans-grid">
-
-      <!-- Healthy Diet Non-Veg -->
-      <div class="plan-card">
-        <div class="plan-header">
-          <span class="plan-emoji">🥗</span>
-          <span class="plan-name">Healthy Diet</span>
-        </div>
+      <div class="plan-card reveal reveal-delay-1">
+        <div class="plan-header"><span class="plan-emoji">🥗</span><span class="plan-name">Healthy Diet</span></div>
         <span class="plan-tag tag-nonveg">Non-Veg</span>
         <p class="plan-desc">Balanced everyday nutrition with a mix of vegetarian and non-vegetarian meals to keep you energized.</p>
         <div class="plan-pricing">
@@ -599,13 +275,8 @@
         </div>
         <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20the%20Healthy%20Diet%20Non-Veg%20plan" class="plan-cta" target="_blank" rel="noopener">Order on WhatsApp</a>
       </div>
-
-      <!-- Healthy Diet Veg -->
-      <div class="plan-card">
-        <div class="plan-header">
-          <span class="plan-emoji">🥗</span>
-          <span class="plan-name">Healthy Diet</span>
-        </div>
+      <div class="plan-card reveal reveal-delay-2">
+        <div class="plan-header"><span class="plan-emoji">🥗</span><span class="plan-name">Healthy Diet</span></div>
         <span class="plan-tag tag-veg">Veg</span>
         <p class="plan-desc">Balanced everyday nutrition with wholesome vegetarian meals for a healthy lifestyle.</p>
         <div class="plan-pricing">
@@ -618,13 +289,8 @@
         </div>
         <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20the%20Healthy%20Diet%20Veg%20plan" class="plan-cta" target="_blank" rel="noopener">Order on WhatsApp</a>
       </div>
-
-      <!-- High Protein Non-Veg (Featured) -->
-      <div class="plan-card featured">
-        <div class="plan-header">
-          <span class="plan-emoji">💪</span>
-          <span class="plan-name">High Protein</span>
-        </div>
+      <div class="plan-card featured reveal reveal-delay-3">
+        <div class="plan-header"><span class="plan-emoji">💪</span><span class="plan-name">High Protein</span></div>
         <span class="plan-tag tag-nonveg">Non-Veg</span>
         <p class="plan-desc">Protein-focused meals designed for muscle recovery and strength. Ideal for fitness enthusiasts and athletes.</p>
         <div class="plan-pricing">
@@ -637,13 +303,8 @@
         </div>
         <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20the%20High%20Protein%20Non-Veg%20plan" class="plan-cta" target="_blank" rel="noopener">Order on WhatsApp</a>
       </div>
-
-      <!-- High Protein Veg -->
-      <div class="plan-card">
-        <div class="plan-header">
-          <span class="plan-emoji">💪</span>
-          <span class="plan-name">High Protein</span>
-        </div>
+      <div class="plan-card reveal reveal-delay-4">
+        <div class="plan-header"><span class="plan-emoji">💪</span><span class="plan-name">High Protein</span></div>
         <span class="plan-tag tag-veg">Veg</span>
         <p class="plan-desc">Protein-rich vegetarian meals packed with paneer, legumes, and whole grains for lean muscle building.</p>
         <div class="plan-pricing">
@@ -656,13 +317,8 @@
         </div>
         <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20the%20High%20Protein%20Veg%20plan" class="plan-cta" target="_blank" rel="noopener">Order on WhatsApp</a>
       </div>
-
-      <!-- Weight Loss Non-Veg -->
-      <div class="plan-card">
-        <div class="plan-header">
-          <span class="plan-emoji">🔥</span>
-          <span class="plan-name">Weight Loss</span>
-        </div>
+      <div class="plan-card reveal reveal-delay-5">
+        <div class="plan-header"><span class="plan-emoji">🔥</span><span class="plan-name">Weight Loss</span></div>
         <span class="plan-tag tag-nonveg">Non-Veg</span>
         <p class="plan-desc">Calorie-controlled fat-loss meals with lean proteins and low-carb options to help you shed weight effectively.</p>
         <div class="plan-pricing">
@@ -675,13 +331,8 @@
         </div>
         <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20the%20Weight%20Loss%20Non-Veg%20plan" class="plan-cta" target="_blank" rel="noopener">Order on WhatsApp</a>
       </div>
-
-      <!-- Weight Loss Veg -->
-      <div class="plan-card">
-        <div class="plan-header">
-          <span class="plan-emoji">🔥</span>
-          <span class="plan-name">Weight Loss</span>
-        </div>
+      <div class="plan-card reveal reveal-delay-6">
+        <div class="plan-header"><span class="plan-emoji">🔥</span><span class="plan-name">Weight Loss</span></div>
         <span class="plan-tag tag-veg">Veg</span>
         <p class="plan-desc">Low-calorie vegetarian fat-loss meals with fresh salads, soups, and portion-controlled Indian dishes.</p>
         <div class="plan-pricing">
@@ -694,41 +345,39 @@
         </div>
         <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20the%20Weight%20Loss%20Veg%20plan" class="plan-cta" target="_blank" rel="noopener">Order on WhatsApp</a>
       </div>
-
     </div>
   </section>
 
-  <!-- ── Why FitFuel ─────────────────────────────────────────── -->
   <section class="section section-green" id="why">
-    <h2 class="section-title">Why FitFuel?</h2>
-    <p class="section-subtitle">We're not just another meal service. We're your nutrition partner.</p>
+    <h2 class="section-title reveal">Why FitFuel?</h2>
+    <p class="section-subtitle reveal">We're not just another meal service. We're your nutrition partner.</p>
     <div class="features-grid">
-      <div class="feature">
+      <div class="feature reveal reveal-delay-1">
         <div class="feature-icon">👨‍🍳</div>
         <h3>Cooked Fresh Daily</h3>
         <p>Every meal is prepared fresh on the day of delivery — never frozen, never reheated.</p>
       </div>
-      <div class="feature">
+      <div class="feature reveal reveal-delay-2">
         <div class="feature-icon">📱</div>
         <h3>WhatsApp-First Ordering</h3>
         <p>No app downloads. Just message us on WhatsApp and our chatbot handles everything.</p>
       </div>
-      <div class="feature">
+      <div class="feature reveal reveal-delay-3">
         <div class="feature-icon">🔄</div>
         <h3>Skip or Change Anytime</h3>
         <p>Don't like today's meal? Skip it or swap it — all from a WhatsApp notification.</p>
       </div>
-      <div class="feature">
+      <div class="feature reveal reveal-delay-4">
         <div class="feature-icon">📊</div>
         <h3>Goal-Based Plans</h3>
         <p>Whether you want to lose weight, build muscle, or eat healthy — we have a plan for you.</p>
       </div>
-      <div class="feature">
+      <div class="feature reveal reveal-delay-5">
         <div class="feature-icon">🚚</div>
-        <h3>Free Delivery</h3>
-        <p>No hidden charges. What you see is what you pay. Delivery is always on us.</p>
+        <h3>Daily Delivery</h3>
+        <p>Fresh meals delivered to your doorstep every single day of your subscription.</p>
       </div>
-      <div class="feature">
+      <div class="feature reveal reveal-delay-6">
         <div class="feature-icon">🛡️</div>
         <h3>Secure Payments</h3>
         <p>Pay via UPI, cards, or net banking through Razorpay — India's most trusted payment gateway.</p>
@@ -736,64 +385,52 @@
     </div>
   </section>
 
-  <!-- ── Testimonials ────────────────────────────────────────── -->
   <section class="section" id="testimonials">
-    <h2 class="section-title">What Our Customers Say</h2>
-    <p class="section-subtitle">Real feedback from real people eating FitFuel every day.</p>
+    <h2 class="section-title reveal">What Our Customers Say</h2>
+    <p class="section-subtitle reveal">Real feedback from real people eating FitFuel every day.</p>
     <div class="testimonials-grid">
-      <div class="testimonial">
+      <div class="testimonial reveal reveal-delay-1">
         <div class="testimonial-stars">★★★★★</div>
         <p>"The convenience is unmatched. I just confirm my meal on WhatsApp in the morning and fresh food shows up at lunch. Game changer for my work-from-home days."</p>
         <div class="testimonial-author">
           <div class="testimonial-avatar">A</div>
-          <div>
-            <div class="testimonial-name">Arjun M.</div>
-            <div class="testimonial-plan">High Protein Non-Veg</div>
-          </div>
+          <div><div class="testimonial-name">Arjun M.</div><div class="testimonial-plan">High Protein Non-Veg</div></div>
         </div>
       </div>
-      <div class="testimonial">
+      <div class="testimonial reveal reveal-delay-2">
         <div class="testimonial-stars">★★★★★</div>
         <p>"I've tried many tiffin services. FitFuel is the only one where I actually look forward to every meal. The weight loss plan helped me lose 4kg in the first month!"</p>
         <div class="testimonial-author">
           <div class="testimonial-avatar">P</div>
-          <div>
-            <div class="testimonial-name">Priya S.</div>
-            <div class="testimonial-plan">Weight Loss Veg</div>
-          </div>
+          <div><div class="testimonial-name">Priya S.</div><div class="testimonial-plan">Weight Loss Veg</div></div>
         </div>
       </div>
-      <div class="testimonial">
+      <div class="testimonial reveal reveal-delay-3">
         <div class="testimonial-stars">★★★★★</div>
         <p>"Being able to skip or change meals from a notification is brilliant. No more wasting food or money. The chatbot makes everything so smooth."</p>
         <div class="testimonial-author">
           <div class="testimonial-avatar">R</div>
-          <div>
-            <div class="testimonial-name">Rohit K.</div>
-            <div class="testimonial-plan">Healthy Diet Non-Veg</div>
-          </div>
+          <div><div class="testimonial-name">Rohit K.</div><div class="testimonial-plan">Healthy Diet Non-Veg</div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── CTA Banner ──────────────────────────────────────────── -->
   <section class="cta-banner">
-    <h2>Ready to Eat Healthy?</h2>
-    <p>Start your meal plan today. Fresh, customized meals delivered to your door every day.</p>
-    <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20to%20order%20a%20meal%20plan" class="btn-primary" target="_blank" rel="noopener">
+    <h2 class="reveal">Ready to Eat Healthy?</h2>
+    <p class="cta-sub reveal">Start your meal plan today. Fresh, customized meals delivered to your door every day.</p>
+    <a href="https://wa.me/916300159766?text=Hi%20FitFuel!%20I%20want%20to%20order%20a%20meal%20plan" class="btn-primary reveal" target="_blank" rel="noopener">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       Start on WhatsApp
     </a>
   </section>
 
-  <!-- ── Footer ───────────────────────────────────────────────── -->
   <footer class="footer">
     <div class="footer-inner">
       <div>
-        <div class="footer-brand">Fit<span>Fuel</span></div>
-        <p class="footer-desc">Fresh, customized meals delivered to your doorstep.</p>
-        <p class="footer-desc" style="margin-top:4px;font-size:0.8rem;color:#6b7280;">By Jadpod Fitness Pvt Ltd</p>
+        <div class="footer-brand">Fit<span>Fuel</span> Nutrition</div>
+      <p class="footer-desc">Fresh, customized meals delivered to your doorstep.</p>
+      <p class="footer-company">By Jadpod Fitness Private Limited</p>
       </div>
       <div>
         <h4>Quick Links</h4>
@@ -819,5 +456,54 @@
     </div>
   </footer>
 
+  <script>
+    // ── Scroll Reveal (Intersection Observer) ─────────────────────
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!prefersReduced) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("visible"); observer.unobserve(e.target); } });
+      }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+      document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+    } else {
+      document.querySelectorAll(".reveal").forEach(el => el.classList.add("visible"));
+    }
+
+    // ── Navbar scroll effect ──────────────────────────────────────
+    const nav = document.getElementById("nav");
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          nav.classList.toggle("scrolled", window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // ── Animated Counters ─────────────────────────────────────────
+    function animateCounter(el) {
+      const target = parseInt(el.dataset.target);
+      const suffix = el.dataset.suffix || "";
+      const duration = 1200;
+      const start = performance.now();
+      function tick(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(eased * target) + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    if (!prefersReduced) {
+      const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); counterObserver.unobserve(e.target); } });
+      }, { threshold: 0.5 });
+      document.querySelectorAll(".counter").forEach(el => counterObserver.observe(el));
+    } else {
+      document.querySelectorAll(".counter").forEach(el => { el.textContent = el.dataset.target + (el.dataset.suffix || ""); });
+    }
+  </script>
 </body>
 </html>
