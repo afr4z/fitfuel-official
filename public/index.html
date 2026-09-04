@@ -167,8 +167,8 @@
     /* ── How It Works ───────────────────────────────────────────── */
     .steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 32px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
       max-width: 960px;
       margin: 0 auto;
     }
@@ -489,6 +489,7 @@
     /* ── Responsive ─────────────────────────────────────────────── */
     @media (max-width: 768px) {
       .nav-links { display: none; }
+      .steps { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; gap: 28px; }
       .hero { padding: 56px 20px 48px; }
       .section { padding: 56px 20px; }
@@ -535,8 +536,8 @@
           <span>Fresh Cooked</span>
         </div>
         <div class="hero-trust-item">
-          <strong>0</strong>
-          <span>Delivery Fees</span>
+          <strong>100%</strong>
+          <span>Customizable Meals</span>
         </div>
       </div>
     </div>
@@ -791,7 +792,8 @@
     <div class="footer-inner">
       <div>
         <div class="footer-brand">Fit<span>Fuel</span></div>
-        <p class="footer-desc">Fresh, customized meals delivered to your doorstep. Powered by Jadpod Fitness Private Limited.</p>
+        <p class="footer-desc">Fresh, customized meals delivered to your doorstep.</p>
+        <p class="footer-desc" style="margin-top:4px;font-size:0.8rem;color:#6b7280;">By Jadpod Fitness Pvt Ltd</p>
       </div>
       <div>
         <h4>Quick Links</h4>
