@@ -13,14 +13,14 @@ export function greetingReturning({ planLabel, remaining, nearExpiry }) {
     ? `\n⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!`
     : `\n📅 *${remaining}* delivery day(s) remaining`;
   return (
-    `👋 Welcome back to FitFuel Nutrition!\n\n` +
+    `👋 Welcome back to FitFuel!\n\n` +
     `🟢 You have an *active ${planLabel} plan*.${expiryLine}` +
     `\n\nHow can we help you?`
   );
 }
 
 export const GREETING_NEW =
-  `👋 Welcome to FitFuel Nutrition!\n\nHow can we help you today?`;
+  `👋 Welcome to FitFuel!\n\nHow can we help you today?`;
 
 // ─── Main Menu ───────────────────────────────────────────────────────────────
 

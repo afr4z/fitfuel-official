@@ -11,7 +11,7 @@
 ### Returning user — active plan (near expiry)
 
 ```
-👋 Welcome back to FitFuel Nutrition!
+👋 Welcome back to FitFuel!
 
 🟢 You have an *active ${planLabel} plan*.
 ⚠️ Your plan expires soon — only *${remaining}* delivery day(s) left!
@@ -22,7 +22,7 @@ How can we help you?
 ### Returning user — active plan
 
 ```
-👋 Welcome back to FitFuel Nutrition!
+👋 Welcome back to FitFuel!
 
 🟢 You have an *active ${planLabel} plan*.
 📅 *${remaining}* delivery day(s) remaining
@@ -33,7 +33,7 @@ How can we help you?
 ### New user
 
 ```
-👋 Welcome to FitFuel Nutrition!
+👋 Welcome to FitFuel!
 
 How can we help you today?
 ```
