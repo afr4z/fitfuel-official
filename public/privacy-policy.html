@@ -4,87 +4,143 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Privacy Policy – FitFuel</title>
+  <meta name="description" content="Privacy policy for FitFuel, operated by Jadpod Fitness Private Limited." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
+      --green-400: #4ade80; --green-500: #22c55e; --green-600: #16a34a;
+      --green-700: #15803d; --green-800: #166534; --green-900: #14532d;
+      --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+      --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+      --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+      --gray-900: #111827;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh;
-      background: #f0fdf4;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 32px 16px;
-      color: #1f2937;
+      background: linear-gradient(180deg, var(--green-50) 0%, #fff 100%);
+      font-family: var(--font);
+      color: var(--gray-800);
+      padding: 32px 16px 64px;
       line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
     }
-    .container {
-      max-width: 720px;
-      width: 100%;
-      margin: 0 auto;
+    .container { max-width: 760px; width: 100%; margin: 0 auto; }
+    .brand-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
     }
+    .brand-bar a {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--green-800);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+    .brand-bar a span { color: var(--green-500); }
     .header {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      padding: 40px 36px 32px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      padding: 44px 40px 36px;
       margin-bottom: 24px;
+      border: 1px solid rgba(229,231,235,0.6);
+      text-align: center;
     }
     .header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #166534;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--green-800);
       margin-bottom: 8px;
+      letter-spacing: -0.02em;
     }
-    .header .meta {
-      font-size: 0.875rem;
-      color: #6b7280;
-    }
+    .header .meta { font-size: 0.85rem; color: var(--gray-500); }
+    .header .meta strong { color: var(--gray-600); }
     .content {
       background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      padding: 36px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+      padding: 44px 40px;
+      border: 1px solid rgba(229,231,235,0.6);
     }
     .content h2 {
       font-size: 1.15rem;
       font-weight: 700;
-      color: #166534;
-      margin-top: 28px;
-      margin-bottom: 10px;
+      color: var(--green-800);
+      margin-top: 36px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--green-100);
     }
-    .content h2:first-child {
-      margin-top: 0;
-    }
+    .content h2:first-child { margin-top: 0; padding-top: 0; }
     .content p {
       font-size: 0.95rem;
-      color: #4b5563;
-      margin-bottom: 12px;
+      color: var(--gray-600);
+      margin-bottom: 14px;
     }
-    .content ul {
-      margin: 0 0 12px 20px;
-      color: #4b5563;
-      font-size: 0.95rem;
-    }
+    .content ul { margin: 0 0 16px 0; list-style: none; }
     .content li {
-      margin-bottom: 6px;
+      font-size: 0.92rem;
+      color: var(--gray-600);
+      margin-bottom: 10px;
+      padding-left: 26px;
+      position: relative;
     }
-    .content a {
-      color: #166534;
-      text-decoration: underline;
+    .content li::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 9px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-400);
     }
-    .content strong {
-      color: #1f2937;
+    .content a { color: var(--green-600); text-decoration: underline; text-underline-offset: 2px; transition: color 0.2s var(--ease-base); }
+    .content a:hover { color: var(--green-500); }
+    .content strong { color: var(--gray-800); }
+    .contact-box {
+      background: var(--green-50);
+      border: 1px solid var(--green-100);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-top: 8px;
     }
     .brand {
       text-align: center;
-      margin-top: 32px;
+      margin-top: 40px;
       font-size: 0.8rem;
-      color: #9ca3af;
+      color: var(--gray-400);
+      font-weight: 500;
+    }
+    .brand strong { color: var(--gray-500); }
+
+    @media (max-width: 480px) {
+      .header, .content { padding: 32px 24px; border-radius: 16px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="brand-bar">
+      <a href="/">Fit<span>Fuel</span></a>
+    </div>
+
     <div class="header">
       <h1>Privacy Policy</h1>
-      <div class="meta">Jadpod Fitness Private Limited &mdash; Effective Date: July 14, 2026</div>
+      <div class="meta"><strong>Jadpod Fitness Private Limited</strong> &mdash; Effective Date: July 14, 2026</div>
     </div>
 
     <div class="content">
@@ -185,14 +241,14 @@
         If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices,
         please contact us at:
       </p>
-      <p>
+      <div class="contact-box">
         <strong>Jadpod Fitness Private Limited</strong><br />
         Email: <a href="mailto:pradeepprince858@gmail.com">pradeepprince858@gmail.com</a><br />
         WhatsApp: Message us directly on our FitFuel WhatsApp number
-      </p>
+      </div>
     </div>
 
-    <p class="brand">FitFuel &mdash; Fresh meals, every day</p>
+    <p class="brand"><strong>FitFuel</strong> &mdash; Fresh meals, every day</p>
   </div>
 </body>
 </html>

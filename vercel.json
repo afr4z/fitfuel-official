@@ -1,5 +1,19 @@
 {
   "version": 2,
+  "rewrites": [
+    {
+      "source": "/payment-success",
+      "destination": "/payment-success.html"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy-policy.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    }
+  ],
   "functions": {
     "api/webhook.js": {
       "maxDuration": 30,
