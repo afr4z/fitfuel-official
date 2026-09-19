@@ -91,7 +91,7 @@ export default async function handler(req, res) {
 
       await sendNotification(
         sub.phone,
-        "expiry_reminder",
+        process.env.WHATSAPP_EXPIRY_TEMPLATE || "expiry_reminder",
         templateParams,
         body,
         fallbackButtons,

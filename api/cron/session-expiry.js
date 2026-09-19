@@ -1,4 +1,4 @@
-import { sendText } from "../../lib/whatsapp.js";
+import { sendNotification } from "../../lib/sendNotification.js";
 import { findExpiredSessions, clearSession } from "../../bot/session.js";
 import { SESSION_EXPIRED } from "../../bot/config/messages.js";
 
@@ -18,7 +18,13 @@ export default async function handler(req, res) {
     const details = [];
     for (const phone of phones) {
       try {
-        await sendText(phone, SESSION_EXPIRED);
+        await sendNotification(
+          phone,
+          process.env.WHATSAPP_SESSION_EXPIRED_TEMPLATE || "session_expired",
+          [],
+          SESSION_EXPIRED,
+          null,
+        );
         await clearSession(phone);
         details.push({ phone, status: "notified" });
         console.log(`[SESSION-EXPIRY] Notified + cleared ${phone}`);

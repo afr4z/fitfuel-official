@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { sendText, sendButtons } from "../lib/whatsapp.js";
+import { sendNotification } from "../lib/sendNotification.js";
 import { formatTimeIST, formatDateIST } from "../lib/time.js";
 import { getSession, clearSession } from "../bot/session.js";
 import { addDeliveryDays, countRemainingDeliveryDays } from "../lib/deliveryDays.js";
@@ -152,7 +153,13 @@ export default async function handler(req, res) {
   async function handleFailure(phone, reason) {
     if (!phone) return;
     await clearSession(phone);
-    await sendText(phone, paymentFailed({ reason }));
+    await sendNotification(
+      phone,
+      process.env.WHATSAPP_PAYMENT_FAILED_TEMPLATE || "payment_failed",
+      [{ type: "text", text: reason }],
+      paymentFailed({ reason }),
+      null,
+    );
   }
 
   try {
@@ -281,13 +288,22 @@ export default async function handler(req, res) {
               ? `\nReason: _${nonSundayClosed[0].reason}_\n`
               : "\n";
 
-            await sendText(
+            const templateParams = [
+              { type: "text", text: datesList },
+              { type: "text", text: reasonLine.replace(/\n/g, " ").replace(/_/g, "") },
+              { type: "text", text: formatDateIST(newEnd, { day: "numeric", month: "short", year: "numeric" }) },
+            ];
+
+            await sendNotification(
               phone,
+              process.env.WHATSAPP_KITCHEN_CLOSED_TEMPLATE || "kitchen_closed",
+              templateParams,
               kitchenClosedDaysDuringPlan({
                 datesList,
                 reasonLine,
                 newEndDate: formatDateIST(newEnd, { day: "numeric", month: "short", year: "numeric" }),
               }),
+              null,
             );
           }
 
@@ -404,9 +420,20 @@ export default async function handler(req, res) {
       const fmt = (s) => formatDateIST(s);
       const todayIST = new Date(new Date().getTime() + 5.5 * 60 * 60 * 1000).toISOString().split("T")[0];
       const startLabel = start_date === todayIST ? "today" : `from ${fmt(start_date)}`;
-      await sendText(
+      const body = paymentConfirmed({ planTitle, dayLabel, mealLabel, amount, startLabel });
+      const templateParams = [
+        { type: "text", text: planTitle },
+        { type: "text", text: dayLabel },
+        { type: "text", text: mealLabel },
+        { type: "text", text: `₹${amount}` },
+        { type: "text", text: startLabel },
+      ];
+      await sendNotification(
         phone,
-        paymentConfirmed({ planTitle, dayLabel, mealLabel, amount, startLabel }),
+        process.env.WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE || "payment_confirmed",
+        templateParams,
+        body,
+        null,
       );
 
       // Create magic login token for auto-login on payment-success page
