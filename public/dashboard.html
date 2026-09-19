@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – FitFuel Nutrition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
+      --green-400: #4ade80; --green-500: #22c55e; --green-600: #16a34a;
+      --green-700: #15803d; --green-800: #166534; --green-900: #14532d;
+      --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+      --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+      --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+      --gray-900: #111827; --red-500: #ef4444; --amber-500: #f59e0b;
+      --radius-full: 9999px; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 8px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1); --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); color: var(--gray-800); background: var(--gray-50); line-height: 1.6; min-height: 100vh; }
+    .nav { background: #fff; border-bottom: 1px solid var(--gray-200); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1120px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-size: 1.2rem; font-weight: 800; color: var(--green-800); }
+    .nav-brand .accent { color: var(--green-500); }
+    .nav-user { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; }
+    .nav-user .name { font-weight: 600; color: var(--gray-800); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; font-size: 0.9rem; font-weight: 600; border-radius: var(--radius-md); border: none; cursor: pointer; transition: all 0.2s var(--ease-base); font-family: inherit; }
+    .btn-secondary { background: #fff; color: var(--green-700); border: 2px solid var(--green-200); }
+    .btn-secondary:hover { border-color: var(--green-400); background: var(--green-50); }
+    .btn-ghost { background: transparent; color: var(--gray-600); border: none; padding: 8px 12px; }
+    .btn-ghost:hover { color: var(--red-500); background: #fef2f2; border-radius: var(--radius-sm); }
+    .container { max-width: 1120px; margin: 0 auto; padding: 32px 24px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+    .page-title { font-size: 1.75rem; font-weight: 800; color: var(--gray-900); }
+    .page-subtitle { color: var(--gray-500); margin-top: 4px; }
+    .card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .card-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: var(--gray-900); }
+    .card-content { padding: 24px; }
+    .section { margin-bottom: 32px; }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--gray-500); }
+    .empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.5; }
+    .empty-state h3 { font-size: 1rem; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+    .empty-state p { font-size: 0.85rem; }
+    .plan-card { border: 1px solid var(--gray-200); border-radius: var(--radius-md); padding: 20px; transition: all 0.2s var(--ease-base); }
+    .plan-card:hover { box-shadow: var(--shadow-md); border-color: var(--green-200); }
+    .plan-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .plan-info { display: flex; align-items: center; gap: 12px; }
+    .plan-emoji { font-size: 2rem; }
+    .plan-name { font-weight: 700; color: var(--gray-900); font-size: 1.1rem; }
+    .plan-tag { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-full); }
+    .tag-veg { background: var(--green-100); color: var(--green-800); }
+    .tag-nonveg { background: #fef3c7; color: #92400e; }
+    .plan-type { font-size: 0.75rem; font-weight: 600; color: var(--green-600); background: var(--green-50); padding: 4px 10px; border-radius: var(--radius-full); text-transform: uppercase; }
+    .plan-dates { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+    .plan-date { background: var(--gray-50); border-radius: var(--radius-sm); padding: 10px 12px; }
+    .plan-date-label { font-size: 0.7rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+    .plan-date-value { font-weight: 600; color: var(--gray-900); }
+    .plan-progress { margin-bottom: 16px; }
+    .progress-bar { height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--green-500); border-radius: 3px; transition: width 0.4s var(--ease-out); }
+    .progress-text { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gray-500); margin-top: 6px; }
+    .plan-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .meal-list { display: grid; gap: 12px; }
+    .meal-card { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--gray-50); border-radius: var(--radius-md); border: 1px solid var(--gray-200); }
+    .meal-date { font-weight: 700; color: var(--gray-900); white-space: nowrap; font-size: 0.9rem; }
+    .meal-slot { font-size: 0.7rem; font-weight: 600; color: var(--green-600); background: var(--green-50); padding: 3px 10px; border-radius: var(--radius-full); text-transform: uppercase; white-space: nowrap; }
+    .meal-item { flex: 1; color: var(--gray-700); }
+    .meal-status { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: var(--radius-full); text-transform: capitalize; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-confirmed { background: var(--green-100); color: var(--green-800); }
+    .status-skipped { background: var(--gray-100); color: var(--gray-600); }
+    .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .profile-field { background: var(--gray-50); border-radius: var(--radius-md); padding: 16px; }
+    .profile-label { font-size: 0.7rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .profile-value { font-weight: 600; color: var(--gray-900); }
+    .loading-state { display: flex; align-items: center; justify-content: center; padding: 48px; gap: 12px; color: var(--gray-500); }
+    .spinner { width: 24px; height: 24px; border: 2px solid var(--gray-200); border-top-color: var(--green-500); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 768px) {
+      .nav-inner { padding: 12px 16px; }
+      .container { padding: 24px 16px; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .plan-dates { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition</a>
+      <div class="nav-user">
+        <span class="name" id="user-name">Loading…</span>
+        <button class="btn btn-ghost" id="btn-logout">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Manage your subscriptions and upcoming meals</p>
+      </div>
+      <a href="/order" class="btn btn-secondary">Order New Plan</a>
+    </div>
+
+    <div class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Active Subscriptions</h2>
+        </div>
+        <div class="card-content" id="subscriptions-list">
+          <div class="loading-state"><div class="spinner"></div>Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Upcoming Meals</h2>
+        </div>
+        <div class="card-content" id="meals-list">
+          <div class="loading-state"><div class="spinner"></div>Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Profile</h2>
+        </div>
+        <div class="card-content" id="profile-info">
+          <div class="loading-state"><div class="spinner"></div>Loading…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api/auth';
+
+    async function fetchMe() {
+      const res = await fetch(`${API_BASE}/me`, { credentials: 'include' });
+      if (!res.ok) {
+        if (res.status === 401) window.location.href = '/login';
+        throw new Error('Failed to load dashboard');
+      }
+      return res.json();
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00Z');
+      return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function formatDateShort(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00Z');
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }
+
+    function calcProgress(start, end) {
+      const today = new Date().toISOString().split('T')[0];
+      const s = new Date(start + 'T00:00:00Z');
+      const e = new Date(end + 'T00:00:00Z');
+      const t = new Date(today + 'T00:00:00Z');
+      if (t < s) return 0;
+      if (t > e) return 100;
+      const total = (e - s) / (1000 * 60 * 60 * 24);
+      const elapsed = (t - s) / (1000 * 60 * 60 * 24);
+      return Math.round((elapsed / total) * 100);
+    }
+
+    function renderSubscriptions(subs) {
+      const el = document.getElementById('subscriptions-list');
+      if (!subs?.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <h3>No active subscriptions</h3>
+            <p>You don't have any active meal plans right now.</p>
+          </div>
+        `;
+        return;
+      }
+      el.innerHTML = subs.map(sub => {
+        const plan = sub.meal_plans || {};
+        const progress = calcProgress(sub.start_date, sub.end_date);
+        return `
+          <div class="plan-card">
+            <div class="plan-header">
+              <div class="plan-info">
+                <span class="plan-emoji">${plan.emoji || '🥗'}</span>
+                <div>
+                  <div class="plan-name">${plan.name || 'Meal Plan'}</div>
+                  <span class="plan-tag ${plan.tag?.toLowerCase() === 'veg' ? 'tag-veg' : 'tag-nonveg'}">${plan.tag || ''}</span>
+                </div>
+              </div>
+              <span class="plan-type">${sub.plan_type?.replace('3day', '3-Day') || sub.plan_type}</span>
+            </div>
+            <div class="plan-dates">
+              <div class="plan-date">
+                <div class="plan-date-label">Started</div>
+                <div class="plan-date-value">${formatDate(sub.start_date)}</div>
+              </div>
+              <div class="plan-date">
+                <div class="plan-date-label">Ends</div>
+                <div class="plan-date-value">${formatDate(sub.end_date)}</div>
+              </div>
+            </div>
+            <div class="plan-progress">
+              <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+              <div class="progress-text"><span>${progress}% complete</span><span>${progress >= 100 ? 'Ended' : 'Active'}</span></div>
+            </div>
+            <div class="plan-actions">
+              <a href="/order" class="btn btn-secondary" style="flex:1;text-align:center;">Renew / New Plan</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderMeals(meals) {
+      const el = document.getElementById('meals-list');
+      if (!meals?.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6v6l4 2"/></svg>
+            <h3>No upcoming meals</h3>
+            <p>Your next meals will appear here once scheduled.</p>
+          </div>
+        `;
+        return;
+      }
+      el.innerHTML = `
+        <div class="meal-list">
+          ${meals.map(m => `
+            <div class="meal-card">
+              <div class="meal-date">${formatDateShort(m.delivery_date)}</div>
+              <span class="meal-slot">${m.slot}</span>
+              <div class="meal-item">${m.item_name || '<em>Menu not set</em>'}</div>
+              <span class="meal-status status-${m.status || 'pending'}">${m.status || 'pending'}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderProfile(data) {
+      const el = document.getElementById('profile-info');
+      el.innerHTML = `
+        <div class="profile-grid">
+          <div class="profile-field"><div class="profile-label">Phone</div><div class="profile-value">${data.phone}</div></div>
+          <div class="profile-field"><div class="profile-label">Name</div><div class="profile-value">${data.name || '—'}</div></div>
+          <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value">${data.email || '—'}</div></div>
+          <div class="profile-field"><div class="profile-label">Area</div><div class="profile-value">${data.location || '—'}</div></div>
+          <div class="profile-field"><div class="profile-label">Address</div><div class="profile-value">${data.address || '—'}</div></div>
+        </div>
+      `;
+    }
+
+    async function loadDashboard() {
+      try {
+        const data = await fetchMe();
+        document.getElementById('user-name').textContent = data.name || data.phone;
+        renderSubscriptions(data.subscriptions);
+        renderMeals(data.upcomingMeals);
+        renderProfile(data);
+      } catch (err) {
+        console.error('[DASHBOARD] Load failed:', err);
+        document.getElementById('subscriptions-list').innerHTML = '<div class="empty-state"><p>Failed to load data</p></div>';
+        document.getElementById('meals-list').innerHTML = '<div class="empty-state"><p>Failed to load data</p></div>';
+        document.getElementById('profile-info').innerHTML = '<div class="empty-state"><p>Failed to load data</p></div>';
+      }
+    }
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      await fetch(`${API_BASE}/logout`, { method: 'POST', credentials: 'include' });
+      window.location.href = '/login';
+    });
+
+    loadDashboard();
+  </script>
+</body>
+</html>
