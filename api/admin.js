@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { sendText } from "../../lib/whatsapp.js";
+import { sendNotification } from "../../lib/sendNotification.js";
 import { addDeliveryDays, countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import { kitchenClosed } from "../../bot/config/messages.js";
 import { isPastIST, tomorrowDateStrIST } from "../../lib/cronUtils.js";
@@ -118,9 +119,18 @@ async function handleKitchenClosed(req, res) {
       const remaining = await countRemainingDeliveryDays(sub.start_date, newEndStr);
       const reasonLine = reason ? `\nReason: _${reason}_\n` : "\n";
 
-      await sendText(
+      const templateParams = [
+        { type: "text", text: date },
+        { type: "text", text: reasonLine.replace(/\n/g, " ").replace(/_/g, "") },
+        { type: "text", text: remaining.toString() },
+      ];
+
+      await sendNotification(
         sub.phone,
+        process.env.WHATSAPP_KITCHEN_CLOSED_TEMPLATE || "kitchen_closed",
+        templateParams,
         kitchenClosed({ date, reasonLine, remaining }),
+        null,
       );
     }),
   );
