@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/nav.css" />
+  <link rel="stylesheet" href="/css/main.css" />
   <style>
     :root {
       --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
@@ -30,26 +32,10 @@
       background: linear-gradient(180deg, var(--green-50) 0%, #fff 100%);
       font-family: var(--font);
       color: var(--gray-800);
-      padding: 32px 16px 64px;
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
     }
-    .container { max-width: 760px; width: 100%; margin: 0 auto; }
-    .brand-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-    .brand-bar a {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--green-800);
-      letter-spacing: -0.02em;
-      text-decoration: none;
-    }
-    .brand-bar a span { color: var(--green-500); }
+    .container { max-width: 760px; width: 100%; margin: 0 auto; padding: 32px 16px 64px; }
     .header {
       background: #fff;
       border-radius: 20px;
@@ -133,10 +119,9 @@
   </style>
 </head>
 <body>
+  <div id="nav-placeholder"></div>
+
   <div class="container">
-    <div class="brand-bar">
-      <a href="/">Fit<span>Fuel</span> Nutrition</a>
-    </div>
 
     <div class="header">
       <h1>Privacy Policy</h1>
@@ -250,5 +235,6 @@
 
     <p class="brand"><strong>FitFuel Nutrition</strong> &mdash; Fresh meals, every day</p>
   </div>
+<script src="/js/nav.js" defer></script>
 </body>
 </html>
