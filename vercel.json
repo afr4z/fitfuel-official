@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/order",
+      "destination": "/order.html"
+    },
+    {
       "source": "/payment-success",
       "destination": "/payment-success.html"
     },

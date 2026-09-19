@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "WhatsApp Cloud API bot on Vercel serverless",
   "type": "module",
-  "scripts": {
-    "dev": "vercel dev"
-  },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
     "@upstash/redis": "^1.37.0"
