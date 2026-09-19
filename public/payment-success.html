@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/nav.css" />
+  <link rel="stylesheet" href="/css/main.css" />
   <style>
     :root {
       --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
@@ -26,13 +28,9 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: linear-gradient(160deg, var(--green-50) 0%, #fff 50%, var(--green-100) 100%);
       font-family: var(--font);
       color: var(--gray-800);
-      padding: 24px;
       overflow: hidden;
       position: relative;
     }
@@ -65,6 +63,7 @@
       box-shadow: 0 12px 48px rgba(0,0,0,0.12);
       max-width: 440px;
       width: 100%;
+      margin: 64px auto;
       padding: 56px 40px;
       text-align: center;
       border: 1px solid rgba(229,231,235,0.6);
@@ -152,21 +151,12 @@
     .redirecting { color: var(--gray-500); font-size: 0.9rem; }
 
     @media (max-width: 480px) {
-      .card { padding: 44px 28px; border-radius: 20px; }
+      .card { margin: 40px 16px; padding: 44px 28px; border-radius: 20px; }
     }
-    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--gray-200); padding: 14px 16px; margin: -24px -24px 24px; }
-    .nav-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-    .nav-brand { font-size: 1.1rem; font-weight: 800; color: var(--green-800); }
-    .nav-brand .accent { color: var(--green-500); }
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition</a>
-      <div id="nav-auth"></div>
-    </div>
-  </nav>
+  <div id="nav-placeholder"></div>
 
   <div class="card" id="card">
     <div class="check-wrap">
@@ -230,6 +220,6 @@
       await tryMagicLogin();
     })();
   </script>
-  <script src="/js/auth-nav.js"></script>
+  <script src="/js/nav.js" defer></script>
 </body>
 </html>

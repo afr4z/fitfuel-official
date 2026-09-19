@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/nav.css" />
+  <link rel="stylesheet" href="/css/main.css" />
   <style>
     :root {
       --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
@@ -30,10 +32,6 @@
     body { font-family: var(--font); color: var(--gray-800); background: #fff; line-height: 1.6; min-height: 100vh; }
     a { color: inherit; text-decoration: none; }
     .container { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
-    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px) saturate(1.8); border-bottom: 1px solid var(--gray-200); padding: 14px 16px; }
-    .nav-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
-    .nav-brand { font-size: 1.1rem; font-weight: 800; color: var(--green-800); }
-    .nav-brand .accent { color: var(--green-500); }
     .progress { display: flex; gap: 8px; margin: 24px 0; }
     .progress-step { flex: 1; height: 4px; background: var(--gray-200); border-radius: 2px; overflow: hidden; position: relative; }
     .progress-step.active::after { content: ""; position: absolute; inset: 0; background: var(--green-500); transform: translateX(-100%); animation: fill 0.4s var(--ease-out) forwards; }
@@ -111,12 +109,7 @@
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition</a>
-      <div id="nav-auth"></div>
-    </div>
-  </nav>
+  <div id="nav-placeholder"></div>
 
   <div class="container">
     <div class="progress" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="3" aria-label="Order progress">
@@ -628,6 +621,7 @@
         }
       }, 100);
     }
-  <script src="/js/auth-nav.js"></script>
+  </script>
+  <script src="/js/nav.js" defer></script>
 </body>
 </html>

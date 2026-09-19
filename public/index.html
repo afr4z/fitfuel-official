@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/nav.css" />
+  <link rel="stylesheet" href="/css/main.css" />
   <style>
     :root {
       --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
@@ -42,25 +44,9 @@
     .reveal-delay-3 { transition-delay: 0.24s; } .reveal-delay-4 { transition-delay: 0.32s; }
     .reveal-delay-5 { transition-delay: 0.40s; } .reveal-delay-6 { transition-delay: 0.48s; }
 
-    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.7); backdrop-filter: blur(20px) saturate(1.8); -webkit-backdrop-filter: blur(20px) saturate(1.8); border-bottom: 1px solid rgba(229,231,235,0.6); transition: all 0.3s var(--ease-base); }
-    .nav.scrolled { background: rgba(255,255,255,0.92); box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
-    .nav-inner { max-width: 1120px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-    .nav-brand { font-size: 1.2rem; font-weight: 800; color: var(--green-800); letter-spacing: -0.02em; }
-    .nav-brand .accent { color: var(--green-500); }
-    .nav-sub { font-size: 0.6rem; font-weight: 500; color: var(--gray-400); letter-spacing: 0.02em; white-space: nowrap; margin-left: 8px; vertical-align: middle; }
-    .nav-links { display: flex; gap: 32px; align-items: center; }
-    .nav-links a { font-size: 0.875rem; font-weight: 500; color: var(--gray-600); transition: color 0.15s var(--ease-base); position: relative; }
-    .nav-links a::after { content: ""; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--green-500); border-radius: 1px; transition: width 0.3s var(--ease-base); }
-    .nav-links a:hover { color: var(--green-800); }
-    .nav-links a:hover::after { width: 100%; }
-    .nav-cta { background: var(--green-500); color: #fff !important; padding: 9px 22px; border-radius: var(--radius-full); font-weight: 600; transition: all 0.3s var(--ease-base); box-shadow: 0 2px 12px rgba(34,197,94,0.25); }
-    .nav-cta::after { display: none !important; }
-    .nav-cta:hover { background: var(--green-600); box-shadow: 0 4px 20px rgba(34,197,94,0.35); transform: translateY(-1px); }
-
     .hero { position: relative; padding: 100px 24px 80px; text-align: center; overflow: hidden; background: linear-gradient(160deg, var(--green-50) 0%, #fff 40%, var(--green-100) 100%); }
     .hero::before { content: ""; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%); border-radius: 50%; animation: float-orb 20s ease-in-out infinite; }
     .hero::after { content: ""; position: absolute; bottom: -150px; left: -150px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(74,222,128,0.1) 0%, transparent 70%); border-radius: 50%; animation: float-orb 25s ease-in-out infinite reverse; }
-    @keyframes float-orb { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(30px, -20px) scale(1.05); } 66% { transform: translate(-20px, 15px) scale(0.95); } }
     .hero-inner { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
     .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(220,252,231,0.8); backdrop-filter: blur(8px); color: var(--green-800); font-size: 0.8rem; font-weight: 600; padding: 7px 18px; border-radius: var(--radius-full); margin-bottom: 28px; border: 1px solid rgba(187,247,208,0.6); animation: badge-in 0.6s var(--ease-out) 0.2s both; }
     @keyframes badge-in { from { opacity: 0; transform: translateY(12px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -174,9 +160,6 @@
       .features-grid, .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .nav-sub { display: none; }
-      .nav-brand { font-size: 1.35rem; }
       .steps { grid-template-columns: repeat(2, 1fr); }
       .features-grid, .testimonials-grid { grid-template-columns: 1fr; }
       .footer-inner { grid-template-columns: 1fr; gap: 28px; }
@@ -194,18 +177,7 @@
 </head>
 <body>
 
-  <nav class="nav" id="nav">
-    <div class="nav-inner">
-      <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition <span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
-      <div class="nav-links">
-        <a href="#how-it-works">How It Works</a>
-        <a href="#plans">Plans</a>
-        <a href="#why">Why FitFuel</a>
-        <a href="/order" class="nav-cta">Order Now</a>
-        <div id="nav-auth"></div>
-      </div>
-    </div>
-  </nav>
+  <div id="nav-placeholder"></div>
 
   <section class="hero">
     <div class="hero-inner">
@@ -457,7 +429,6 @@
     </div>
   </footer>
 
-  <script src="/js/auth-nav.js"></script>
   <script>
     // ── Scroll Reveal (Intersection Observer) ─────────────────────
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -469,19 +440,6 @@
     } else {
       document.querySelectorAll(".reveal").forEach(el => el.classList.add("visible"));
     }
-
-    // ── Navbar scroll effect ──────────────────────────────────────
-    const nav = document.getElementById("nav");
-    let ticking = false;
-    window.addEventListener("scroll", () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          nav.classList.toggle("scrolled", window.scrollY > 20);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
 
     // ── Animated Counters ─────────────────────────────────────────
     function animateCounter(el) {
@@ -507,5 +465,6 @@
       document.querySelectorAll(".counter").forEach(el => { el.textContent = el.dataset.target + (el.dataset.suffix || ""); });
     }
   </script>
+  <script src="/js/nav.js" defer></script>
 </body>
 </html>
