@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../lib/razorpay.js";
 import { getPlanCategories } from "../lib/mealPlans.js";
+import { countRemainingDeliveryDays } from "../lib/deliveryDays.js";
 import { setSession } from "../bot/session.js";
 
 const supabase = createClient(
@@ -27,6 +28,36 @@ export default async function handler(req, res) {
 
     if (!planId || !days || !mealsPerDay || !phone) {
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // ─── Double-subscription guard (mirrors the bot flow) ───────────────────
+    // If an active plan still has more than RENEWAL_THRESHOLD_DAYS of
+    // deliveries remaining, refuse the purchase. Within the threshold, allow
+    // a renewal: the new plan starts the day after the current one ends.
+    const today = new Date().toISOString().split("T")[0];
+    const { data: activeSub } = await supabase
+      .from("meal_plan_subscriptions")
+      .select("id, start_date, end_date")
+      .eq("phone", phone)
+      .eq("status", "active")
+      .gte("end_date", today)
+      .limit(1)
+      .maybeSingle();
+
+    let renewAfterEnd;
+    if (activeSub) {
+      const remaining = await countRemainingDeliveryDays(
+        activeSub.start_date,
+        activeSub.end_date,
+      );
+      const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
+
+      if (remaining > threshold) {
+        return res.status(409).json({
+          error: `You already have an active meal plan with ${remaining} delivery day(s) remaining. Renew it within the last ${threshold} days instead.`,
+        });
+      }
+      renewAfterEnd = activeSub.end_date;
     }
 
     const plans = await getPlanCategories();
@@ -84,6 +115,7 @@ export default async function handler(req, res) {
         dayLabel,
         amount: totalAmount,
         mealsPerDay,
+        renewAfterEnd,
       },
     });
 
