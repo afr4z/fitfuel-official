@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
-import { sendButtons } from "../../lib/whatsapp.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import { getPlanLabel } from "../../bot/config/plans.js";
 import { expiryReminder } from "../../bot/config/messages.js";
+import { sendNotification } from "../../lib/sendNotification.js";
 
 // --- Clients ------------------------------------------------------------------
 
@@ -79,13 +79,22 @@ export default async function handler(req, res) {
   const results = await Promise.allSettled(
     targets.map(async (sub) => {
       const planLabel = getPlanLabel(sub.plan_type);
-      await sendButtons(
+      const body = expiryReminder({ planLabel, threshold });
+      const fallbackButtons = [
+        { id: "ORDER_NOW", title: "🔄 Renew Plan" },
+        { id: "CONTACT_US", title: "📞 Contact Us" },
+      ];
+      const templateParams = [
+        { type: "text", text: planLabel },
+        { type: "text", text: threshold.toString() },
+      ];
+
+      await sendNotification(
         sub.phone,
-        expiryReminder({ planLabel, threshold }),
-        [
-          { id: "ORDER_NOW", title: "🔄 Renew Plan" },
-          { id: "CONTACT_US", title: "📞 Contact Us" },
-        ],
+        "expiry_reminder",
+        templateParams,
+        body,
+        fallbackButtons,
       );
       console.log(`[EXPIRY-REMINDER] Reminded ${sub.phone} (${planLabel})`);
     }),
