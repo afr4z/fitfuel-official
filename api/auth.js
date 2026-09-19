@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { sendText } from "../lib/whatsapp.js";
+import { sendText, sendTemplate } from "../lib/whatsapp.js";
 import { sendNotification } from "../lib/sendNotification.js";
 
 const supabase = createClient(
@@ -241,17 +241,15 @@ async function handleSendOTP(req, res) {
 
   try {
     const templateName = process.env.WHATSAPP_OTP_TEMPLATE || "otp_code";
-    const templateParams = [
-      { type: "text", text: otp },
-      { type: "text", text: "5 minutes" },
-    ];
-    await sendNotification(
-      `91${cleanPhone}`,
+    const to = `91${cleanPhone}`;
+    console.log("[AUTH] Sending OTP:", { to, templateName, otp });
+    const result = await sendTemplate(
+      to,
       templateName,
-      templateParams,
-      `Your FitFuel login code is: ${otp}. Valid for 5 minutes.`,
-      null,
+      "en",
+      [{ type: "body", parameters: [{ type: "text", text: otp }] }],
     );
+    console.log("[AUTH] OTP sent successfully:", result);
   } catch (err) {
     console.error("[AUTH] WhatsApp send failed:", err.message);
     return res.status(500).json({ error: "Failed to send OTP" });

@@ -131,7 +131,8 @@ export async function handleIncoming(phone, message) {
 
   const buttonId = message.interactive?.button_reply?.id || "";
   const listId = message.interactive?.list_reply?.id || "";
-  const input = buttonId || listId;
+  const templateButtonPayload = message.button?.payload || "";
+  const input = buttonId || listId || templateButtonPayload;
   if (input) console.log(`[HANDLER] Input detected: ${input}`);
 
   // ── Order-action buttons (CONFIRM/SKIP/CHANGE/MEAL) ──────────────────────

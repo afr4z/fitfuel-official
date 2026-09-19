@@ -81,8 +81,8 @@ export default async function handler(req, res) {
       const planLabel = getPlanLabel(sub.plan_type);
       const body = expiryReminder({ planLabel, threshold });
       const fallbackButtons = [
-        { id: "ORDER_NOW", title: "🔄 Renew Plan" },
-        { id: "CONTACT_US", title: "📞 Contact Us" },
+        { id: "ORDER_NOW", title: "Renew Plan" },
+        { id: "CONTACT_US", title: "Contact Us" },
       ];
       const templateParams = [
         { type: "text", text: planLabel },
