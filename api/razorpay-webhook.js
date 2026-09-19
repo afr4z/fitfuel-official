@@ -19,6 +19,40 @@ import {
   SLOT_LABELS,
 } from "../lib/cronUtils.js";
 
+const supabaseAuth = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+);
+
+async function createMagicToken(phone, referenceId) {
+  const token = `magic_${phone}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  const key = `magic:${token}`;
+  const data = JSON.stringify({ phone, referenceId, createdAt: Date.now() });
+  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    body: data,
+  });
+  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${key}/600`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+
+  // Store referenceId -> token mapping for lookup from payment-success
+  const refKey = `magic_ref:${referenceId}`;
+  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${refKey}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    body: JSON.stringify({ token }),
+  });
+  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${refKey}/600`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+
+  return token;
+}
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -374,6 +408,13 @@ export default async function handler(req, res) {
         phone,
         paymentConfirmed({ planTitle, dayLabel, mealLabel, amount, startLabel }),
       );
+
+      // Create magic login token for auto-login on payment-success page
+      const referenceId = payload?.payment_link?.entity?.reference_id;
+      if (referenceId) {
+        const magicToken = await createMagicToken(phone, referenceId);
+        console.log(`[WEBHOOK] Created magic token for ${phone}: ${magicToken}`);
+      }
     } else if (event === "payment_link.cancelled") {
       const phone = phoneFromLink();
       console.log("[WEBHOOK] Payment link cancelled for phone:", phone);

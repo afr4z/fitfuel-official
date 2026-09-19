@@ -1,5 +1,6 @@
 console.log("[BOOT] webhook function starting");
 import { handleIncoming } from "../bot/handler.js";
+import { updateUserActivity } from "../bot/session.js";
 
 function extractMessage(body) {
   try {
@@ -30,6 +31,7 @@ export default async function handler(req, res) {
     const extracted = extractMessage(req.body);
     if (extracted) {
       const { from, message } = extracted;
+      await updateUserActivity(from);
       try {
         await handleIncoming(from, message);
       } catch (e) {

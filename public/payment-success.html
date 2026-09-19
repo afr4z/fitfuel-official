@@ -139,6 +139,17 @@
       font-weight: 500;
     }
     .brand strong { color: var(--gray-500); }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-200);
+      border-top-color: var(--green-500);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .redirecting { color: var(--gray-500); font-size: 0.9rem; }
 
     @media (max-width: 480px) {
       .card { padding: 44px 28px; border-radius: 20px; }
@@ -146,7 +157,7 @@
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="card">
     <div class="check-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
     </div>
@@ -156,11 +167,57 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M12 6v6l4 2"/></svg>
       <span>You'll receive a confirmation message on WhatsApp shortly with your plan details.</span>
     </div>
-    <a class="cta" href="https://wa.me/916300159766" target="_blank" rel="noopener">
+    <div class="spinner" id="spinner"></div>
+    <p class="redirecting" id="redirecting">Signing you in…</p>
+    <a class="cta" href="https://wa.me/916300159766" target="_blank" rel="noopener" id="whatsapp-link" style="display:none;">
       Message us on WhatsApp
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+    </a>
+    <a class="cta" href="/dashboard" id="dashboard-link" style="display:none;">
+      Go to Dashboard
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
     </a>
     <p class="brand"><strong>FitFuel Nutrition</strong> &mdash; Fresh meals, every day</p>
   </div>
+
+  <script>
+    (async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const referenceId = urlParams.get('razorpay_payment_link_reference_id');
+
+      async function tryMagicLogin() {
+        if (!referenceId) {
+          showFallback();
+          return;
+        }
+        try {
+          const res = await fetch(`/api/auth/magic-login?reference_id=${encodeURIComponent(referenceId)}`, {
+            method: 'GET',
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            document.getElementById('redirecting').textContent = 'Signed in! Redirecting to dashboard…';
+            setTimeout(() => window.location.href = '/dashboard', 800);
+          } else {
+            console.warn('Magic login failed:', data.error);
+            showFallback();
+          }
+        } catch (err) {
+          console.error('Magic login error:', err);
+          showFallback();
+        }
+      }
+
+      function showFallback() {
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('redirecting').textContent = 'Payment complete. You can now access your dashboard.';
+        document.getElementById('whatsapp-link').style.display = 'inline-flex';
+        document.getElementById('dashboard-link').style.display = 'inline-flex';
+      }
+
+      await tryMagicLogin();
+    })();
+  </script>
 </body>
 </html>
