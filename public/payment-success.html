@@ -154,9 +154,20 @@
     @media (max-width: 480px) {
       .card { padding: 44px 28px; border-radius: 20px; }
     }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--gray-200); padding: 14px 16px; margin: -24px -24px 24px; }
+    .nav-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-size: 1.1rem; font-weight: 800; color: var(--green-800); }
+    .nav-brand .accent { color: var(--green-500); }
   </style>
 </head>
 <body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition</a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
   <div class="card" id="card">
     <div class="check-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
@@ -219,5 +230,6 @@
       await tryMagicLogin();
     })();
   </script>
+  <script src="/js/auth-nav.js"></script>
 </body>
 </html>

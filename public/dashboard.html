@@ -96,10 +96,7 @@
   <nav class="nav">
     <div class="nav-inner">
       <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition</a>
-      <div class="nav-user">
-        <span class="name" id="user-name">Loading…</span>
-        <button class="btn btn-ghost" id="btn-logout">Logout</button>
-      </div>
+      <div id="nav-auth"></div>
     </div>
   </nav>
 
@@ -111,6 +108,8 @@
       </div>
       <a href="/order" class="btn btn-secondary">Order New Plan</a>
     </div>
+
+    <div id="user-name" style="display:none;"></div>
 
     <div class="section">
       <div class="card">
@@ -290,5 +289,6 @@
 
     loadDashboard();
   </script>
+  <script src="/js/auth-nav.js"></script>
 </body>
 </html>
