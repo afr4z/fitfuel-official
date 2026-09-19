@@ -94,6 +94,19 @@ function toPlanType(days) {
 }
 
 /**
+ * Normalize an Indian mobile number to international format (91XXXXXXXXXX),
+ * matching what the WhatsApp bot stores. Web checkouts may submit a bare
+ * 10-digit number; Razorpay/WhatsApp sometimes include "+" or country code.
+ */
+function normalizePhone(raw) {
+  const digits = String(raw || "").replace(/\D/g, "");
+  if (digits.length === 10) return `91${digits}`;
+  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}`;
+  if (digits.length === 12 && digits.startsWith("91")) return digits;
+  return null;
+}
+
+/**
  * @param {number} days      Number of delivery days for the new plan.
  * @param {string|null} [startFrom]  Optional "YYYY-MM-DD" — the first delivery day
  *                                   of the new plan. Used for renewals so the new
@@ -150,9 +163,12 @@ export default async function handler(req, res) {
     return contact.replace(/^\+/, "") || null;
   }
 
-  async function handleFailure(phone, reason) {
-    if (!phone) return;
-    await clearSession(phone);
+  async function handleFailure(rawPhone, reason) {
+    if (!rawPhone) return;
+    const phone = normalizePhone(rawPhone) || rawPhone;
+    // Sessions are keyed with the phone used when the link was created, which
+    // may be 10-digit for legacy web links, so clear that exact key.
+    await clearSession(rawPhone);
     await sendNotification(
       phone,
       process.env.WHATSAPP_PAYMENT_FAILED_TEMPLATE || "payment_failed",
@@ -164,15 +180,20 @@ export default async function handler(req, res) {
 
   try {
     if (event === "payment_link.paid") {
-      const phone = phoneFromLink();
+      const rawPhone = phoneFromLink();
       const razorpayPaymentLinkId = payload?.payment_link?.entity?.id;
       const razorpayPaymentId = payload?.payment?.entity?.id;
 
-      if (!phone) {
+      if (!rawPhone) {
         return res.status(200).json({ status: "ignored" });
       }
 
-      const session = await getSession(phone);
+      // Look the pending session up with the raw phone used when the link was
+      // created (legacy web links used a bare 10-digit prefix), but persist
+      // everything with the normalized international format so subscriptions
+      // from WhatsApp and the website share one identity per customer.
+      const session = await getSession(rawPhone);
+      const phone = normalizePhone(rawPhone) || rawPhone;
       const {
         planId,
         planTitle,
@@ -206,10 +227,27 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Invalid subscription dates" });
       }
 
-      // Upsert customer
+      // Upsert customer, carrying any details collected on the web checkout
+      // (name/email/address/location) that were stashed in the pending session.
+      // The WhatsApp bot also stores address + location in session.data, so
+      // they flow through here too.
+      const details = session?.data || {};
+      const locationValue =
+        typeof details.location === "string"
+          ? { areaName: details.location }
+          : details.location ?? null;
       const { data: customer, error: customerError } = await supabase
         .from("customers")
-        .upsert({ phone }, { onConflict: "phone" })
+        .upsert(
+          {
+            phone,
+            ...(details.name ? { name: details.name } : {}),
+            ...(details.email ? { email: details.email } : {}),
+            ...(details.address ? { address: details.address } : {}),
+            ...(locationValue ? { location: locationValue } : {}),
+          },
+          { onConflict: "phone" },
+        )
         .select("id")
         .single();
 
@@ -414,7 +452,7 @@ export default async function handler(req, res) {
       }
 
       // Clear session
-      await clearSession(phone);
+      await clearSession(rawPhone);
 
       // Notify customer on WhatsApp
       const fmt = (s) => formatDateIST(s);

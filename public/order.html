@@ -249,15 +249,6 @@
       </div>
     </form>
 
-    <div class="form-step success-state" id="success-step" style="display:none;">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-      </div>
-      <h2 class="success-title">Redirecting to Payment</h2>
-      <p class="success-text">Complete your payment securely via Razorpay. You'll be redirected in a moment.</p>
-      <a href="#" class="btn btn-primary" id="manual-redirect" style="display:inline-flex;width:auto;max-width:300px;">Continue to Payment</a>
-    </div>
-
     <p class="footer-note">By ordering, you agree to our <a href="/privacy-policy">Privacy Policy</a>. Secure payments powered by <strong>Razorpay</strong>.</p>
   </div>
 
@@ -521,15 +512,10 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to create order');
 
-        document.getElementById('step3').style.display = 'none';
-        document.getElementById('btn-row').style.display = 'none';
-        document.getElementById('success-step').style.display = 'block';
-
-        document.getElementById('manual-redirect').href = data.paymentUrl;
-
-        setTimeout(() => {
-          window.location.href = data.paymentUrl;
-        }, 1500);
+        // Go straight to Razorpay on this click — no intermediate screen or
+        // extra button. Nothing is written to the database until the webhook
+        // confirms the payment.
+        window.location.href = data.paymentUrl;
       } catch (err) {
         console.error('[ORDER] Submit failed:', err);
         showError(err.message || 'Something went wrong. Please try again.');

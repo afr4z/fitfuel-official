@@ -9,6 +9,20 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
+/**
+ * Normalize an Indian mobile number to the same international format
+ * (91XXXXXXXXXX) the WhatsApp bot stores in meal_plan_subscriptions.phone.
+ * Without this, the double-subscription guard would not find plans created
+ * via WhatsApp and the webhook would store mismatched phones.
+ */
+function normalizePhone(raw) {
+  const digits = String(raw || "").replace(/\D/g, "");
+  if (digits.length === 10) return `91${digits}`;
+  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}`;
+  if (digits.length === 12 && digits.startsWith("91")) return digits;
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -30,6 +44,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const normPhone = normalizePhone(phone);
+    if (!normPhone) {
+      return res.status(400).json({ error: "Invalid phone number" });
+    }
+
     // ─── Double-subscription guard (mirrors the bot flow) ───────────────────
     // If an active plan still has more than RENEWAL_THRESHOLD_DAYS of
     // deliveries remaining, refuse the purchase. Within the threshold, allow
@@ -38,7 +57,7 @@ export default async function handler(req, res) {
     const { data: activeSub } = await supabase
       .from("meal_plan_subscriptions")
       .select("id, start_date, end_date")
-      .eq("phone", phone)
+      .eq("phone", normPhone)
       .eq("status", "active")
       .gte("end_date", today)
       .limit(1)
@@ -73,19 +92,12 @@ export default async function handler(req, res) {
 
     const totalAmount = Math.round(pricePerMealPerDay * mealsPerDay * days);
 
-    const { error: customerError } = await supabase
-      .from("customers")
-      .upsert(
-        { phone, name, email, address, location },
-        { onConflict: "phone" }
-      );
+    // No database writes before payment. The customer row, subscription,
+    // slots, and orders are only created by the Razorpay webhook after the
+    // payment is confirmed. The checkout details are stashed in the pending
+    // session below and persisted by the webhook.
 
-    if (customerError) {
-      console.error("[WEB-ORDER] Customer upsert failed:", customerError);
-      return res.status(500).json({ error: "Failed to save customer" });
-    }
-
-    const referenceId = `${phone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    const referenceId = `${normPhone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
 
     const mealLabel =
       mealsPerDay === 1 ? "Breakfast" : mealsPerDay === 2 ? "Lunch + Dinner" : "All 3 Meals";
@@ -94,7 +106,7 @@ export default async function handler(req, res) {
     const paymentLink = await createPaymentLink({
       amount: totalAmount,
       description: `${plan.title} — ${dayLabel} — ${mealLabel}`,
-      phone,
+      phone: normPhone,
       referenceId,
     });
 
@@ -105,7 +117,7 @@ export default async function handler(req, res) {
     // state: "GREETING" is idle-exempt, so getSession() won't drop the
     // session if the customer takes a few minutes to pay at Razorpay
     // (it still expires after the session TTL).
-    await setSession(phone, {
+    await setSession(normPhone, {
       state: "GREETING",
       data: {
         planId,
@@ -116,6 +128,10 @@ export default async function handler(req, res) {
         amount: totalAmount,
         mealsPerDay,
         renewAfterEnd,
+        name,
+        email,
+        address,
+        location,
       },
     });
 

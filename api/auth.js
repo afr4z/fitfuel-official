@@ -338,7 +338,9 @@ async function handleVerifyOTP(req, res) {
   await deleteOTP(cleanPhone);
 
   const token = createSessionToken();
-  await storeSession(token, cleanPhone);
+  // Store the same international format (91XXXXXXXXXX) used everywhere else
+  // so dashboard lookups also find subscriptions created via WhatsApp.
+  await storeSession(token, `91${cleanPhone}`);
 
   res.setHeader(
     "Set-Cookie",
