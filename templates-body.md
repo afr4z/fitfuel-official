@@ -4,12 +4,14 @@
 
 ## 1. Breakfast Notification (`breakfast_notification`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)
+**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)  
+**Sent:** 8:00 PM IST (for **tomorrow's** breakfast)  
+**Cron:** `30 14 * * *` (14:30 UTC = 20:00 IST)
 
 ### Body Text (copy exactly):
 
 ```
-🌅 Good morning! Your breakfast for {{1}} is scheduled.
+🌅 Good evening! Your breakfast for tomorrow ({{1}}) is scheduled.
 
 🍽️ Meal: {{2}} at {{3}}
 
@@ -26,11 +28,11 @@ Tap a button below to confirm, change, or skip this meal.
 ### Sample Values:
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| 15 January 2025 | Idli Sambar | 08:00 | You can confirm, skip, or change until 10pm tonight. | Your plan expires in 2 delivery days. |
+| 16 January 2025 | Idli Sambar | 08:00 | You can confirm, skip, or change until 10pm tonight. | Your plan expires in 2 delivery days. |
 
 ### Rendered Sample:
 ```
-🌅 Good morning! Your breakfast for 15 January 2025 is scheduled.
+🌅 Good evening! Your breakfast for tomorrow (16 January 2025) is scheduled.
 
 🍽️ Meal: Idli Sambar at 08:00
 
@@ -48,12 +50,14 @@ Tap a button below to confirm, change, or skip this meal.
 
 ## 2. Lunch Notification (`lunch_notification`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)
+**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)  
+**Sent:** 8:30 AM IST (for **today's** lunch)  
+**Cron:** `0 3 * * *` (03:00 UTC = 08:30 IST)
 
 ### Body Text:
 
 ```
-☀️ Hello! Your lunch for {{1}} is on the way.
+☀️ Good morning! Your lunch for today ({{1}}) is scheduled.
 
 🍽️ Meal: {{2}} at {{3}}
 
@@ -74,7 +78,7 @@ Please use the buttons below to manage your order.
 
 ### Rendered Sample:
 ```
-☀️ Hello! Your lunch for 15 January 2025 is on the way.
+☀️ Good morning! Your lunch for today (15 January 2025) is scheduled.
 
 🍽️ Meal: Chicken Biryani at 12:30
 
@@ -92,12 +96,14 @@ Please use the buttons below to manage your order.
 
 ## 3. Dinner Notification (`dinner_notification`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)
+**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)  
+**Sent:** 4:00 PM IST (for **today's** dinner)  
+**Cron:** `30 10 * * *` (10:30 UTC = 16:00 IST)
 
 ### Body Text:
 
 ```
-🌙 Good evening! Your dinner for {{1}} is scheduled.
+🌙 Good afternoon! Your dinner for today ({{1}}) is scheduled.
 
 🍽️ Meal: {{2}} at {{3}}
 
@@ -118,7 +124,7 @@ Use the buttons below to confirm, change, or skip.
 
 ### Rendered Sample:
 ```
-🌙 Good evening! Your dinner for 15 January 2025 is scheduled.
+🌙 Good afternoon! Your dinner for today (15 January 2025) is scheduled.
 
 🍽️ Meal: Dal Makhani with Roti at 19:30
 
@@ -136,12 +142,13 @@ Use the buttons below to confirm, change, or skip.
 
 ## 4. Rescheduled Meal (`rescheduled_meal`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)
+**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)  
+**Sent:** Same time as the meal's regular notification (when a skipped meal is re-delivered)
 
 ### Body Text:
 
 ```
-⏭️ Hi there! The {{1}} you skipped earlier is now rescheduled for today.
+⏭️ Hi there! The {{1}} you skipped earlier is now being delivered today ({{4}}).
 
 🍽️ {{2}} {{1}}: {{3}}
 
@@ -149,18 +156,18 @@ Please let us know if you'd like to confirm, change, or skip this meal.
 ```
 
 ### Variables:
-| {{1}} | {{2}} | {{3}} |
-|-------|-------|-------|
-| slot_label | slot_emoji | item_name |
+| {{1}} | {{2}} | {{3}} | {{4}} |
+|-------|-------|-------|-------|
+| slot_label | slot_emoji | item_name | delivery_date |
 
 ### Sample Values:
-| {{1}} | {{2}} | {{3}} |
-|-------|-------|-------|
-| Lunch | ☀️ | Chicken Biryani |
+| {{1}} | {{2}} | {{3}} | {{4}} |
+|-------|-------|-------|-------|
+| Lunch | ☀️ | Chicken Biryani | 15 January 2025 |
 
 ### Rendered Sample:
 ```
-⏭️ Hi there! The Lunch you skipped earlier is now rescheduled for today.
+⏭️ Hi there! The Lunch you skipped earlier is now being delivered today (15 January 2025).
 
 🍽️ ☀️ Lunch: Chicken Biryani
 
@@ -176,7 +183,9 @@ Please let us know if you'd like to confirm, change, or skip this meal.
 
 ## 5. Expiry Reminder (`expiry_reminder`)
 
-**Category:** MARKETING | **Language:** en | **Buttons:** Quick Reply (2)
+**Category:** MARKETING | **Language:** en | **Buttons:** Quick Reply (2)  
+**Sent:** 1:30 PM IST (for plans with exactly 2 delivery days remaining)  
+**Cron:** `0 8 * * *` (08:00 UTC = 13:30 IST)
 
 ### Body Text:
 
@@ -211,7 +220,8 @@ You have only 2 delivery day(s) remaining. Don't let your healthy streak end —
 
 ## 6. Session Expired (`session_expired`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** None
+**Category:** UTILITY | **Language:** en | **Buttons:** None  
+**Sent:** Every 5 minutes via cron (when user's session expires after 5 min idle)
 
 ### Body Text:
 
@@ -234,7 +244,8 @@ Please type "hi" to start a new conversation with FitFuel Nutrition.
 
 ## 7. OTP Code (`otp_code`)
 
-**Category:** AUTHENTICATION | **Language:** en | **Buttons:** OTP (special)
+**Category:** AUTHENTICATION | **Language:** en | **Buttons:** OTP (special)  
+**Sent:** On-demand when user requests login on web dashboard
 
 ### Body Text:
 
@@ -266,7 +277,8 @@ Your FitFuel verification code is 482917. This code is valid for 5 minutes.
 
 ## 8. Payment Failed (`payment_failed`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** None
+**Category:** UTILITY | **Language:** en | **Buttons:** None  
+**Sent:** On Razorpay webhook when payment_link.cancelled / payment_link.expired / payment.failed
 
 ### Body Text:
 
@@ -297,7 +309,8 @@ Unfortunately your FitFuel order could not be completed. Please reply to this me
 
 ## 9. Payment Confirmed (`payment_confirmed`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** None
+**Category:** UTILITY | **Language:** en | **Buttons:** None  
+**Sent:** On Razorpay webhook when payment_link.paid (immediately after payment)
 
 ### Body Text:
 
@@ -342,7 +355,8 @@ Thank you for choosing FitFuel! 💪
 
 ## 10. Kitchen Closed (`kitchen_closed`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** None
+**Category:** UTILITY | **Language:** en | **Buttons:** None  
+**Sent:** When admin marks kitchen closed (holiday) via admin panel
 
 ### Body Text:
 
@@ -385,18 +399,18 @@ We'll be back the next working day! 🙏
 
 ## Quick Reference Table
 
-| Template | Variables | Buttons | Category |
-|----------|-----------|---------|----------|
-| breakfast_notification | 5 | 3 Quick Reply | UTILITY |
-| lunch_notification | 5 | 3 Quick Reply | UTILITY |
-| dinner_notification | 5 | 3 Quick Reply | UTILITY |
-| rescheduled_meal | 3 | 3 Quick Reply | UTILITY |
-| expiry_reminder | 2 | 2 Quick Reply | MARKETING |
-| session_expired | 0 | None | UTILITY |
-| otp_code | 2 | OTP (special) | AUTHENTICATION |
-| payment_failed | 1 | None | UTILITY |
-| payment_confirmed | 5 | None | UTILITY |
-| kitchen_closed | 3 | None | UTILITY |
+| Template | Variables | Buttons | Category | Sent At |
+|----------|-----------|---------|----------|---------|
+| breakfast_notification | 5 | 3 Quick Reply | UTILITY | 8 PM (for tomorrow) |
+| lunch_notification | 5 | 3 Quick Reply | UTILITY | 8:30 AM (for today) |
+| dinner_notification | 5 | 3 Quick Reply | UTILITY | 4 PM (for today) |
+| rescheduled_meal | 4 | 3 Quick Reply | UTILITY | Same as meal slot |
+| expiry_reminder | 2 | 2 Quick Reply | MARKETING | 1:30 PM |
+| session_expired | 0 | None | UTILITY | Every 5 min |
+| otp_code | 2 | OTP (special) | AUTHENTICATION | On-demand |
+| payment_failed | 1 | None | UTILITY | Webhook |
+| payment_confirmed | 5 | None | UTILITY | Webhook |
+| kitchen_closed | 3 | None | UTILITY | Admin action |
 
 ---
 
