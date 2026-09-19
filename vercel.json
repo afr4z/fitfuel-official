@@ -6,6 +6,26 @@
       "destination": "/order.html"
     },
     {
+      "source": "/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/api/plans",
+      "destination": "/api/public.js"
+    },
+    {
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth.js"
+    },
+    {
+      "source": "/api/admin/:path*",
+      "destination": "/api/admin.js"
+    },
+    {
       "source": "/payment-success",
       "destination": "/payment-success.html"
     },
@@ -25,6 +45,18 @@
     },
     "api/razorpay-webhook.js": {
       "maxDuration": 10,
+      "memory": 128
+    },
+    "api/auth.js": {
+      "maxDuration": 30,
+      "memory": 128
+    },
+    "api/public.js": {
+      "maxDuration": 10,
+      "memory": 128
+    },
+    "api/admin.js": {
+      "maxDuration": 30,
       "memory": 128
     },
     "api/cron/commit-meals.js": {

@@ -1,4 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
+import { sendText } from "../../lib/whatsapp.js";
+import { addDeliveryDays, countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
+import { kitchenClosed } from "../../bot/config/messages.js";
 import { isPastIST, tomorrowDateStrIST } from "../../lib/cronUtils.js";
 
 const supabase = createClient(
@@ -21,6 +24,120 @@ export default async function handler(req, res) {
     if (auth !== `Bearer ${adminSecret}`) return unauthorized(res);
   }
 
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const path = url.pathname;
+
+  // Kitchen Closed endpoints
+  if (path === "/api/admin/kitchen-closed") {
+    return handleKitchenClosed(req, res);
+  }
+
+  // Plan Defaults endpoints
+  if (path === "/api/admin/plan-defaults") {
+    return handlePlanDefaults(req, res);
+  }
+
+  return res.status(404).json({ error: "Not found" });
+}
+
+async function handleKitchenClosed(req, res) {
+  if (req.method === "GET") {
+    const today = new Date().toISOString().split("T")[0];
+    const { data, error } = await supabase
+      .from("kitchen_closed_days")
+      .select("date, reason")
+      .gte("date", today)
+      .order("date");
+
+    if (error) {
+      console.error("[KITCHEN-CLOSED] GET error:", error);
+      return res.status(500).json({ error: "Failed to fetch closed days" });
+    }
+
+    return res.status(200).json({ closedDays: data ?? [] });
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { date, reason } = req.body ?? {};
+
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res
+      .status(400)
+      .json({ error: "Missing or invalid date (expected YYYY-MM-DD)" });
+  }
+
+  const { error: insertError } = await supabase
+    .from("kitchen_closed_days")
+    .insert({ date, reason: reason ?? null });
+
+  if (insertError) {
+    if (insertError.code === "23505") {
+      return res
+        .status(409)
+        .json({ error: "Kitchen already marked as closed on that date" });
+    }
+    console.error("[KITCHEN-CLOSED] Insert error:", insertError);
+    return res.status(500).json({ error: "Failed to mark kitchen as closed" });
+  }
+
+  const { data: activeSubs, error: fetchError } = await supabase
+    .from("meal_plan_subscriptions")
+    .select("id, phone, end_date, start_date")
+    .eq("status", "active")
+    .gte("end_date", date);
+
+  if (fetchError) {
+    console.error("[KITCHEN-CLOSED] Fetch subscriptions error:", fetchError);
+    return res
+      .status(500)
+      .json({ error: "Failed to fetch active subscriptions" });
+  }
+
+  const subs = activeSubs ?? [];
+
+  const results = await Promise.allSettled(
+    subs.map(async (sub) => {
+      const newEndStr = addDeliveryDays(sub.end_date, 1);
+
+      const { error: updateError } = await supabase
+        .from("meal_plan_subscriptions")
+        .update({ end_date: newEndStr })
+        .eq("id", sub.id);
+
+      if (updateError) {
+        console.error(
+          `[KITCHEN-CLOSED] Failed to extend sub ${sub.id}:`,
+          updateError,
+        );
+        return;
+      }
+
+      const remaining = await countRemainingDeliveryDays(sub.start_date, newEndStr);
+      const reasonLine = reason ? `\nReason: _${reason}_\n` : "\n";
+
+      await sendText(
+        sub.phone,
+        kitchenClosed({ date, reasonLine, remaining }),
+      );
+    }),
+  );
+
+  const failed = results.filter((r) => r.status === "rejected");
+  if (failed.length) {
+    console.error(`[KITCHEN-CLOSED] ${failed.length} notifications failed`);
+  }
+
+  return res.status(200).json({
+    date,
+    extended: subs.length,
+    failed: failed.length,
+  });
+}
+
+async function handlePlanDefaults(req, res) {
   if (req.method === "GET") {
     const tomorrow = tomorrowDateStrIST();
     const isLocked = isPastIST(19, 45);
