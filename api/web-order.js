@@ -1,36 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../lib/razorpay.js";
-import { getPlanCategories, getPlanById } from "../lib/mealPlans.js";
-import { addDeliveryDays } from "../lib/deliveryDays.js";
+import { getPlanCategories } from "../lib/mealPlans.js";
+import { setSession } from "../bot/session.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
-
-function toPlanType(days) {
-  if (days === 3) return "3day";
-  if (days === 7) return "weekly";
-  if (days === 14) return "biweekly";
-  return "monthly";
-}
-
-function calcDates(days) {
-  const now = new Date();
-  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
-  const todayStr = ist.toISOString().split("T")[0];
-
-  let start = new Date(todayStr + "T00:00:00Z");
-  start.setUTCDate(start.getUTCDate() + 1);
-
-  while (start.getUTCDay() === 0) {
-    start.setUTCDate(start.getUTCDate() + 1);
-  }
-  const startStr = start.toISOString().split("T")[0];
-
-  const endStr = addDeliveryDays(startStr, days - 1);
-  return { start_date: startStr, end_date: endStr };
-}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -66,21 +42,17 @@ export default async function handler(req, res) {
 
     const totalAmount = Math.round(pricePerMealPerDay * mealsPerDay * days);
 
-    const { data: customer, error: customerError } = await supabase
+    const { error: customerError } = await supabase
       .from("customers")
       .upsert(
         { phone, name, email, address, location },
         { onConflict: "phone" }
-      )
-      .select("id")
-      .single();
+      );
 
     if (customerError) {
       console.error("[WEB-ORDER] Customer upsert failed:", customerError);
       return res.status(500).json({ error: "Failed to save customer" });
     }
-
-    const { start_date, end_date } = calcDates(days);
 
     const referenceId = `${phone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
 
@@ -95,28 +67,25 @@ export default async function handler(req, res) {
       referenceId,
     });
 
-    const { error: sessionError } = await supabase.from("web_order_sessions").insert({
-      phone,
-      name,
-      email,
-      address,
-      location,
-      plan_id: planId,
-      days,
-      meals_per_day: mealsPerDay,
-      total_amount: totalAmount,
-      razorpay_payment_link_id: paymentLink.id,
-      reference_id: referenceId,
-      customer_id: customer.id,
-      start_date,
-      end_date,
-      status: "pending",
+    // Store the pending order in the same Redis session the Razorpay webhook
+    // already reads (bot/session.js). On payment_link.paid the webhook takes
+    // the phone from reference_id, reads session.data, and completes the
+    // subscription — identical path to WhatsApp orders, no extra table.
+    // state: "GREETING" is idle-exempt, so getSession() won't drop the
+    // session if the customer takes a few minutes to pay at Razorpay
+    // (it still expires after the session TTL).
+    await setSession(phone, {
+      state: "GREETING",
+      data: {
+        planId,
+        planTitle: plan.title,
+        days,
+        mealLabel,
+        dayLabel,
+        amount: totalAmount,
+        mealsPerDay,
+      },
     });
-
-    if (sessionError) {
-      console.error("[WEB-ORDER] Session insert failed:", sessionError);
-      return res.status(500).json({ error: "Failed to create order session" });
-    }
 
     return res.status(200).json({
       paymentUrl: paymentLink.short_url,
