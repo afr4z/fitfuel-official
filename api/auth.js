@@ -19,19 +19,28 @@ async function storeOTP(phone, otp) {
   const data = JSON.stringify({ otp, createdAt: Date.now() });
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
     body: data,
   });
-  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${key}/${OTP_TTL_SECONDS}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
-  });
+  await fetch(
+    `${process.env.UPSTASH_REDIS_REST_URL}/expire/${key}/${OTP_TTL_SECONDS}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+      },
+    },
+  );
 }
 
 async function getOTP(phone) {
   const key = `otp:${phone}`;
   const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
   const data = await res.json();
   return data.result ? JSON.parse(data.result) : null;
@@ -41,14 +50,18 @@ async function deleteOTP(phone) {
   const key = `otp:${phone}`;
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/${key}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
 }
 
 async function getMagicToken(token) {
   const key = `magic:${token}`;
   const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
   const data = await res.json();
   return data.result ? JSON.parse(data.result) : null;
@@ -57,7 +70,9 @@ async function getMagicToken(token) {
 async function getMagicTokenByRef(referenceId) {
   const key = `magic_ref:${referenceId}`;
   const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
   const data = await res.json();
   if (!data.result) return null;
@@ -69,7 +84,9 @@ async function deleteMagicTokenByRef(referenceId) {
   const key = `magic_ref:${referenceId}`;
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/${key}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
 }
 
@@ -78,19 +95,28 @@ async function storeSession(token, phone) {
   const data = JSON.stringify({ phone, createdAt: Date.now() });
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
     body: data,
   });
-  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${key}/${SESSION_TTL_DAYS * 86400}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
-  });
+  await fetch(
+    `${process.env.UPSTASH_REDIS_REST_URL}/expire/${key}/${SESSION_TTL_DAYS * 86400}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+      },
+    },
+  );
 }
 
 async function getSession(token) {
   const key = `session:${token}`;
   const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
   const data = await res.json();
   return data.result ? JSON.parse(data.result) : null;
@@ -100,7 +126,9 @@ async function deleteSession(token) {
   const key = `session:${token}`;
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/${key}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
 }
 
@@ -116,10 +144,12 @@ async function getCustomerByPhone(phone) {
 async function getActiveSubscriptions(phone) {
   const { data } = await supabase
     .from("meal_plan_subscriptions")
-    .select(`
+    .select(
+      `
       id, plan_type, status, start_date, end_date, meal_plan_id,
       meal_plans (name, emoji, tag)
-    `)
+    `,
+    )
     .eq("phone", phone)
     .eq("status", "active")
     .gte("end_date", new Date().toISOString().split("T")[0])
@@ -140,10 +170,12 @@ async function getUpcomingMeals(phone) {
   const subIds = subs.map((s) => s.id);
   const { data: orders } = await supabase
     .from("orders")
-    .select(`
+    .select(
+      `
       id, delivery_date, slot, status, item_name,
       subscription_slots!inner(subscription_id)
-    `)
+    `,
+    )
     .in("subscription_slots.subscription_id", subIds)
     .gte("delivery_date", new Date().toISOString().split("T")[0])
     .order("delivery_date", { ascending: true })
@@ -154,29 +186,49 @@ async function getUpcomingMeals(phone) {
 
 export default async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname;
+  const path = url.searchParams.get("path") || url.pathname;
+  console.log("[AUTH] Handler:", {
+    method: req.method,
+    path,
+    pathname: url.pathname,
+  });
 
-  if (req.method === "POST" && path === "/api/auth/send-otp") {
+  if (
+    req.method === "POST" &&
+    (path === "/api/auth/send-otp" || path === "send-otp")
+  ) {
     return handleSendOTP(req, res);
   }
 
-  if (req.method === "POST" && path === "/api/auth/verify-otp") {
+  if (
+    req.method === "POST" &&
+    (path === "/api/auth/verify-otp" || path === "verify-otp")
+  ) {
     return handleVerifyOTP(req, res);
   }
 
-  if (req.method === "POST" && path === "/api/auth/magic-login") {
+  if (
+    req.method === "POST" &&
+    (path === "/api/auth/magic-login" || path === "magic-login")
+  ) {
     return handleMagicLogin(req, res);
   }
 
-  if (req.method === "GET" && path === "/api/auth/magic-login") {
+  if (
+    req.method === "GET" &&
+    (path === "/api/auth/magic-login" || path === "magic-login")
+  ) {
     return handleMagicLoginByRef(req, res, url);
   }
 
-  if (req.method === "POST" && path === "/api/auth/logout") {
+  if (
+    req.method === "POST" &&
+    (path === "/api/auth/logout" || path === "logout")
+  ) {
     return handleLogout(req, res);
   }
 
-  if (req.method === "GET" && path === "/api/auth/me") {
+  if (req.method === "GET" && (path === "/api/auth/me" || path === "me")) {
     return handleMe(req, res);
   }
 
@@ -200,7 +252,10 @@ async function handleMagicLoginByRef(req, res, url) {
   const sessionToken = createSessionToken();
   await storeSession(sessionToken, magic.phone);
 
-  res.setHeader("Set-Cookie", `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`);
+  res.setHeader(
+    "Set-Cookie",
+    `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
+  );
   return res.status(200).json({ success: true, phone: magic.phone });
 }
 
@@ -220,8 +275,17 @@ async function handleMagicLogin(req, res) {
   const sessionToken = createSessionToken();
   await storeSession(sessionToken, magic.phone);
 
-  res.setHeader("Set-Cookie", `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`);
-  return res.status(200).json({ success: true, phone: magic.phone, referenceId: magic.referenceId });
+  res.setHeader(
+    "Set-Cookie",
+    `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
+  );
+  return res
+    .status(200)
+    .json({
+      success: true,
+      phone: magic.phone,
+      referenceId: magic.referenceId,
+    });
 }
 
 async function handleSendOTP(req, res) {
@@ -229,7 +293,9 @@ async function handleSendOTP(req, res) {
   const cleanPhone = phone?.replace(/\D/g, "");
 
   if (!cleanPhone || !/^[0-9]{10}$/.test(cleanPhone)) {
-    return res.status(400).json({ error: "Invalid phone number (10 digits required)" });
+    return res
+      .status(400)
+      .json({ error: "Invalid phone number (10 digits required)" });
   }
 
   const otp = generateOTP();
@@ -239,19 +305,18 @@ async function handleSendOTP(req, res) {
     const templateName = process.env.WHATSAPP_OTP_TEMPLATE || "otp_code";
     const to = `91${cleanPhone}`;
     console.log("[AUTH] Sending OTP:", { to, templateName, otp });
-    const result = await sendTemplate(
-      to,
-      templateName,
-      "en",
-      [{ type: "body", parameters: [{ type: "text", text: otp }] }],
-    );
+    const result = await sendTemplate(to, templateName, "en", [
+      { type: "body", parameters: [{ type: "text", text: otp }] },
+    ]);
     console.log("[AUTH] OTP sent successfully:", result);
   } catch (err) {
     console.error("[AUTH] WhatsApp send failed:", err.message);
     return res.status(500).json({ error: "Failed to send OTP" });
   }
 
-  return res.status(200).json({ success: true, message: "OTP sent via WhatsApp" });
+  return res
+    .status(200)
+    .json({ success: true, message: "OTP sent via WhatsApp" });
 }
 
 async function handleVerifyOTP(req, res) {
@@ -275,7 +340,10 @@ async function handleVerifyOTP(req, res) {
   const token = createSessionToken();
   await storeSession(token, cleanPhone);
 
-  res.setHeader("Set-Cookie", `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`);
+  res.setHeader(
+    "Set-Cookie",
+    `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
+  );
   return res.status(200).json({ success: true, token });
 }
 
@@ -285,7 +353,10 @@ async function handleLogout(req, res) {
   if (match) {
     await deleteSession(match[1]);
   }
-  res.setHeader("Set-Cookie", "session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0");
+  res.setHeader(
+    "Set-Cookie",
+    "session=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0",
+  );
   return res.status(200).json({ success: true });
 }
 
