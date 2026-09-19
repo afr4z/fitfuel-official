@@ -72,10 +72,6 @@ async function deleteMagicTokenByRef(referenceId) {
     headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
   });
 }
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 async function storeSession(token, phone) {
   const key = `session:${token}`;
