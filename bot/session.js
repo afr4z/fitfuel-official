@@ -40,6 +40,13 @@ export async function setSession(phone, session) {
   await redis.zadd(ACTIVITY_SET_KEY, { score: Date.now(), member: phone });
 }
 
+export async function updateUserActivity(phone) {
+  const session = await redis.get(`session:${phone}`);
+  if (!session) return;
+  const stamped = { ...session, lastUserMessageAt: Date.now() };
+  await redis.set(`session:${phone}`, stamped, { ex: TTL });
+}
+
 export async function clearSession(phone) {
   await redis.del(`session:${phone}`);
   await redis.zrem(ACTIVITY_SET_KEY, phone);

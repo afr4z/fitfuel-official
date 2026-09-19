@@ -59,6 +59,10 @@
       "maxDuration": 30,
       "memory": 128
     },
+    "api/web-order.js": {
+      "maxDuration": 30,
+      "memory": 128
+    },
     "api/cron/commit-meals.js": {
       "maxDuration": 120,
       "memory": 256

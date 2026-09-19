@@ -44,7 +44,33 @@ async function deleteOTP(phone) {
   });
 }
 
-function createSessionToken() {
+async function getMagicToken(token) {
+  const key = `magic:${token}`;
+  const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+  const data = await res.json();
+  return data.result ? JSON.parse(data.result) : null;
+}
+
+async function getMagicTokenByRef(referenceId) {
+  const key = `magic_ref:${referenceId}`;
+  const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+  const data = await res.json();
+  if (!data.result) return null;
+  const { token } = JSON.parse(data.result);
+  return getMagicToken(token);
+}
+
+async function deleteMagicTokenByRef(referenceId) {
+  const key = `magic_ref:${referenceId}`;
+  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/${key}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+  });
+}
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array, (b) => b.toString(16).padStart(2, "0")).join("");
@@ -141,6 +167,14 @@ export default async function handler(req, res) {
     return handleVerifyOTP(req, res);
   }
 
+  if (req.method === "POST" && path === "/api/auth/magic-login") {
+    return handleMagicLogin(req, res);
+  }
+
+  if (req.method === "GET" && path === "/api/auth/magic-login") {
+    return handleMagicLoginByRef(req, res, url);
+  }
+
   if (req.method === "POST" && path === "/api/auth/logout") {
     return handleLogout(req, res);
   }
@@ -150,6 +184,47 @@ export default async function handler(req, res) {
   }
 
   return res.status(404).json({ error: "Not found" });
+}
+
+async function handleMagicLoginByRef(req, res, url) {
+  const referenceId = url.searchParams.get("reference_id");
+  if (!referenceId) {
+    return res.status(400).json({ error: "Missing reference_id" });
+  }
+
+  const magic = await getMagicTokenByRef(referenceId);
+  if (!magic) {
+    return res.status(401).json({ error: "Token expired or invalid" });
+  }
+
+  await deleteMagicToken(magic.otp ? `magic:${magic.otp}` : ""); // cleanup
+  await deleteMagicTokenByRef(referenceId);
+
+  const sessionToken = createSessionToken();
+  await storeSession(sessionToken, magic.phone);
+
+  res.setHeader("Set-Cookie", `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`);
+  return res.status(200).json({ success: true, phone: magic.phone });
+}
+
+async function handleMagicLogin(req, res) {
+  const { token } = req.body || {};
+  if (!token || !token.startsWith("magic_")) {
+    return res.status(400).json({ error: "Invalid token" });
+  }
+
+  const magic = await getMagicToken(token);
+  if (!magic) {
+    return res.status(401).json({ error: "Token expired or invalid" });
+  }
+
+  await deleteMagicToken(token);
+
+  const sessionToken = createSessionToken();
+  await storeSession(sessionToken, magic.phone);
+
+  res.setHeader("Set-Cookie", `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`);
+  return res.status(200).json({ success: true, phone: magic.phone, referenceId: magic.referenceId });
 }
 
 async function handleSendOTP(req, res) {
