@@ -24,8 +24,12 @@
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); color: var(--gray-800); background: #fff; line-height: 1.6; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
-    .card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 420px; box-shadow: var(--shadow-sm); }
+    body { font-family: var(--font); color: var(--gray-800); background: #fff; line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; padding: 24px 16px; }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--gray-200); padding: 14px 16px; margin: -24px -16px 24px; }
+    .nav-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+    .nav-brand { font-size: 1.1rem; font-weight: 800; color: var(--green-800); }
+    .nav-brand .accent { color: var(--green-500); }
+    .card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 420px; box-shadow: var(--shadow-sm); flex: 1; }
     .logo { text-align: center; margin-bottom: 24px; }
     .logo a { font-size: 1.5rem; font-weight: 800; color: var(--green-800); text-decoration: none; }
     .logo a .accent { color: var(--green-500); }
@@ -65,6 +69,13 @@
   </style>
 </head>
 <body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition</a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
   <div class="card">
     <div class="logo"><a href="/">Fit<span class="accent">Fuel</span> Nutrition</a></div>
 
@@ -283,5 +294,6 @@
       document.getElementById('otp-error').classList.remove('visible');
     });
   </script>
+  <script src="/js/auth-nav.js"></script>
 </body>
 </html>

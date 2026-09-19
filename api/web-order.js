@@ -82,7 +82,7 @@ export default async function handler(req, res) {
 
     const { start_date, end_date } = calcDates(days);
 
-    const referenceId = `web_${phone}_${planId}_${Date.now()}`;
+    const referenceId = `w_${phone.slice(-6)}_${Math.random().toString(36).slice(2, 8)}`;
 
     const mealLabel =
       mealsPerDay === 1 ? "Breakfast" : mealsPerDay === 2 ? "Lunch + Dinner" : "All 3 Meals";
