@@ -77,7 +77,19 @@ async function getMagicTokenByRef(referenceId) {
   const data = await res.json();
   if (!data.result) return null;
   const { token } = JSON.parse(data.result);
-  return getMagicToken(token);
+  const magic = await getMagicToken(token);
+  if (!magic) return null;
+  return { ...magic, token };
+}
+
+async function deleteMagicToken(token) {
+  const key = `magic:${token}`;
+  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/${key}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
+  });
 }
 
 async function deleteMagicTokenByRef(referenceId) {
@@ -88,6 +100,12 @@ async function deleteMagicTokenByRef(referenceId) {
       Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
     },
   });
+}
+
+function createSessionToken() {
+  return `${Date.now()}_${Math.random().toString(36).slice(2)}${Math.random()
+    .toString(36)
+    .slice(2)}`;
 }
 
 async function storeSession(token, phone) {
@@ -246,7 +264,7 @@ async function handleMagicLoginByRef(req, res, url) {
     return res.status(401).json({ error: "Token expired or invalid" });
   }
 
-  await deleteMagicToken(magic.otp ? `magic:${magic.otp}` : ""); // cleanup
+  await deleteMagicToken(magic.token || ""); // cleanup: remove magic:{token}
   await deleteMagicTokenByRef(referenceId);
 
   const sessionToken = createSessionToken();
