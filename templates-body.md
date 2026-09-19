@@ -9,30 +9,34 @@
 ### Body Text (copy exactly):
 
 ```
-🌅 *Tomorrow's Breakfast ({{1})*
+🌅 Good morning! Your breakfast for {{1}} is scheduled.
 
-{{2}} ({{3}})
+🍽️ Meal: {{2}} at {{3}}
 
-{{4}}{{5}}
+{{4}} {{5}}
+
+Tap a button below to confirm, change, or skip this meal.
 ```
 
 ### Variables (in order):
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| delivery_date | item_line | time_str | deadline_msg | expiry_notice |
+| delivery_date | item_name | time_str | deadline_msg | expiry_notice |
 
 ### Sample Values:
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| 15 Jan 2025 | 🌅 *Breakfast*: Idli Sambar | 08:00 | You can confirm, skip, or change until *10pm tonight*. | ⚠️ Your plan expires in *2* delivery day(s)! |
+| 15 January 2025 | Idli Sambar | 08:00 | You can confirm, skip, or change until 10pm tonight. | Your plan expires in 2 delivery days. |
 
 ### Rendered Sample:
 ```
-🌅 *Tomorrow's Breakfast (15 Jan 2025)*
+🌅 Good morning! Your breakfast for 15 January 2025 is scheduled.
 
-🌅 *Breakfast*: Idli Sambar (08:00)
+🍽️ Meal: Idli Sambar at 08:00
 
-You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires in *2* delivery day(s)!
+You can confirm, skip, or change until 10pm tonight. Your plan expires in 2 delivery days.
+
+Tap a button below to confirm, change, or skip this meal.
 ```
 
 ### Buttons (Quick Reply):
@@ -49,30 +53,34 @@ You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires i
 ### Body Text:
 
 ```
-☀️ *Today's Lunch ({{1})*
+☀️ Hello! Your lunch for {{1}} is on the way.
 
-{{2}} ({{3}})
+🍽️ Meal: {{2}} at {{3}}
 
-{{4}}{{5}}
+{{4}} {{5}}
+
+Please use the buttons below to manage your order.
 ```
 
 ### Variables:
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| delivery_date | item_line | time_str | deadline_msg | expiry_notice |
+| delivery_date | item_name | time_str | deadline_msg | expiry_notice |
 
 ### Sample Values:
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| 15 Jan 2025 | ☀️ *Lunch*: Chicken Biryani | 12:30 | ⏰ Respond by *9:30am* — changes close after that. | ⚠️ Your plan expires in *2* delivery day(s)! |
+| 15 January 2025 | Chicken Biryani | 12:30 | Please respond by 9:30am — changes close after that. | Your plan expires in 2 delivery days. |
 
 ### Rendered Sample:
 ```
-☀️ *Today's Lunch (15 Jan 2025)*
+☀️ Hello! Your lunch for 15 January 2025 is on the way.
 
-☀️ *Lunch*: Chicken Biryani (12:30)
+🍽️ Meal: Chicken Biryani at 12:30
 
-⏰ Respond by *9:30am* — changes close after that.⚠️ Your plan expires in *2* delivery day(s)!
+Please respond by 9:30am — changes close after that. Your plan expires in 2 delivery days.
+
+Please use the buttons below to manage your order.
 ```
 
 ### Buttons (Quick Reply):
@@ -89,30 +97,34 @@ You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires i
 ### Body Text:
 
 ```
-🌙 *Today's Dinner ({{1})*
+🌙 Good evening! Your dinner for {{1}} is scheduled.
 
-{{2}} ({{3}})
+🍽️ Meal: {{2}} at {{3}}
 
-{{4}}{{5}}
+{{4}} {{5}}
+
+Use the buttons below to confirm, change, or skip.
 ```
 
 ### Variables:
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| delivery_date | item_line | time_str | deadline_msg | expiry_notice |
+| delivery_date | item_name | time_str | deadline_msg | expiry_notice |
 
 ### Sample Values:
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| 15 Jan 2025 | 🌙 *Dinner*: Dal Makhani + Roti | 19:30 | ⏰ Respond by *5pm* — changes close after that. | ⚠️ Your plan expires in *2* delivery day(s)! |
+| 15 January 2025 | Dal Makhani with Roti | 19:30 | Please respond by 5pm — changes close after that. | Your plan expires in 2 delivery days. |
 
 ### Rendered Sample:
 ```
-🌙 *Today's Dinner (15 Jan 2025)*
+🌙 Good evening! Your dinner for 15 January 2025 is scheduled.
 
-🌙 *Dinner*: Dal Makhani + Roti (19:30)
+🍽️ Meal: Dal Makhani with Roti at 19:30
 
-⏰ Respond by *5pm* — changes close after that.⚠️ Your plan expires in *2* delivery day(s)!
+Please respond by 5pm — changes close after that. Your plan expires in 2 delivery days.
+
+Use the buttons below to confirm, change, or skip.
 ```
 
 ### Buttons (Quick Reply):
@@ -129,11 +141,11 @@ You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires i
 ### Body Text:
 
 ```
-⏭️ *Rescheduled {{1})*
+⏭️ Hi there! The {{1}} you skipped earlier is now rescheduled for today.
 
-You skipped this meal earlier — it's being delivered today.
+🍽️ {{2}} {{1}}: {{3}}
 
-{{2}} *{{1}}*: {{3}}
+Please let us know if you'd like to confirm, change, or skip this meal.
 ```
 
 ### Variables:
@@ -148,11 +160,11 @@ You skipped this meal earlier — it's being delivered today.
 
 ### Rendered Sample:
 ```
-⏭️ *Rescheduled Lunch*
+⏭️ Hi there! The Lunch you skipped earlier is now rescheduled for today.
 
-You skipped this meal earlier — it's being delivered today.
+🍽️ ☀️ Lunch: Chicken Biryani
 
-☀️ *Lunch*: Chicken Biryani
+Please let us know if you'd like to confirm, change, or skip this meal.
 ```
 
 ### Buttons (Quick Reply):
@@ -169,11 +181,9 @@ You skipped this meal earlier — it's being delivered today.
 ### Body Text:
 
 ```
-⏳ *Your FitFuel plan is almost over!*
+⏳ Hi! Your FitFuel {{1}} plan is ending soon.
 
-Your *{{1}} plan* has only *{{2}} delivery day(s)* remaining.
-
-Don't miss your healthy streak — renew now to keep your meals coming! 🥗
+You have only {{2}} delivery day(s) remaining. Don't let your healthy streak end — renew today to keep your meals coming! 🥗
 ```
 
 ### Variables:
@@ -184,15 +194,13 @@ Don't miss your healthy streak — renew now to keep your meals coming! 🥗
 ### Sample Values:
 | {{1}} | {{2}} |
 |-------|-------|
-| 🥗 Healthy Diet Non-Veg | 2 |
+| Healthy Diet Non-Veg | 2 |
 
 ### Rendered Sample:
 ```
-⏳ *Your FitFuel plan is almost over!*
+⏳ Hi! Your FitFuel Healthy Diet Non-Veg plan is ending soon.
 
-Your *🥗 Healthy Diet Non-Veg plan* has only *2 delivery day(s)* remaining.
-
-Don't miss your healthy streak — renew now to keep your meals coming! 🥗
+You have only 2 delivery day(s) remaining. Don't let your healthy streak end — renew today to keep your meals coming! 🥗
 ```
 
 ### Buttons (Quick Reply):
@@ -208,30 +216,30 @@ Don't miss your healthy streak — renew now to keep your meals coming! 🥗
 ### Body Text:
 
 ```
-⏰ *Your session expired due to inactivity.*
+⏰ Your session has expired due to inactivity.
 
-Type *hi* to start again!
+Please type "hi" to start a new conversation with FitFuel Nutrition.
 ```
 
 ### Variables: None
 
 ### Rendered Sample:
 ```
-⏰ *Your session expired due to inactivity.*
+⏰ Your session has expired due to inactivity.
 
-Type *hi* to start again!
+Please type "hi" to start a new conversation with FitFuel Nutrition.
 ```
 
 ---
 
 ## 7. OTP Code (`otp_code`)
 
-**Category:** AUTHENTICATION | **Language:** en | **Buttons:** OTP (not Quick Reply)
+**Category:** AUTHENTICATION | **Language:** en | **Buttons:** OTP (special)
 
 ### Body Text:
 
 ```
-Your FitFuel login code is: {{1}}. Valid for {{2}}.
+Your FitFuel verification code is {{1}}. This code is valid for {{2}}.
 ```
 
 ### Variables:
@@ -246,7 +254,7 @@ Your FitFuel login code is: {{1}}. Valid for {{2}}.
 
 ### Rendered Sample:
 ```
-Your FitFuel login code is: 482917. Valid for 5 minutes.
+Your FitFuel verification code is 482917. This code is valid for 5 minutes.
 ```
 
 ### Special Settings:
@@ -263,11 +271,9 @@ Your FitFuel login code is: 482917. Valid for 5 minutes.
 ### Body Text:
 
 ```
-❌ *Payment {{1})*
+❌ We're sorry — your payment was {{1}}.
 
-Unfortunately your FitFuel order could not be completed.
-
-Please send us a message to start a new order whenever you're ready. We're here to help! 🙏
+Unfortunately your FitFuel order could not be completed. Please reply to this message or contact us to start a new order whenever you're ready. We're here to help! 🙏
 ```
 
 ### Variables:
@@ -278,15 +284,13 @@ Please send us a message to start a new order whenever you're ready. We're here 
 ### Sample Values:
 | {{1}} |
 |-------|
-| Cancelled |
+| cancelled |
 
 ### Rendered Sample:
 ```
-❌ *Payment Cancelled*
+❌ We're sorry — your payment was cancelled.
 
-Unfortunately your FitFuel order could not be completed.
-
-Please send us a message to start a new order whenever you're ready. We're here to help! 🙏
+Unfortunately your FitFuel order could not be completed. Please reply to this message or contact us to start a new order whenever you're ready. We're here to help! 🙏
 ```
 
 ---
@@ -298,16 +302,14 @@ Please send us a message to start a new order whenever you're ready. We're here 
 ### Body Text:
 
 ```
-🎉 *Payment Confirmed!*
+🎉 Great news! Your payment is confirmed.
 
-Your FitFuel *{{1}}* plan is now *active*!
+Your FitFuel {{1}} plan is now active for {{2}} with {{3}}.
 
-📅 Duration: {{2}}
-🍴 Meals: {{3}}
-💰 Amount paid: {{4}}
+Amount paid: {{4}}
+Deliveries begin: {{5}}
 
-📦 Deliveries start {{5}}.
-You'll get a daily notification before each meal to confirm, skip, or change it.
+You'll receive daily notifications before each meal to confirm, skip, or change it.
 
 Thank you for choosing FitFuel! 💪
 ```
@@ -320,20 +322,18 @@ Thank you for choosing FitFuel! 💪
 ### Sample Values:
 | {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
 |-------|-------|-------|-------|-------|
-| 🥗 Healthy Diet Non-Veg | 7 Days | Lunch + Dinner | ₹1,540 | from 16 Jan 2025 |
+| Healthy Diet Non-Veg | 7 Days | Lunch + Dinner | ₹1,540 | 16 January 2025 |
 
 ### Rendered Sample:
 ```
-🎉 *Payment Confirmed!*
+🎉 Great news! Your payment is confirmed.
 
-Your FitFuel *🥗 Healthy Diet Non-Veg* plan is now *active*!
+Your FitFuel Healthy Diet Non-Veg plan is now active for 7 Days with Lunch + Dinner.
 
-📅 Duration: 7 Days
-🍴 Meals: Lunch + Dinner
-💰 Amount paid: ₹1,540
+Amount paid: ₹1,540
+Deliveries begin: 16 January 2025
 
-📦 Deliveries start from 16 Jan 2025.
-You'll get a daily notification before each meal to confirm, skip, or change it.
+You'll receive daily notifications before each meal to confirm, skip, or change it.
 
 Thank you for choosing FitFuel! 💪
 ```
@@ -347,13 +347,13 @@ Thank you for choosing FitFuel! 💪
 ### Body Text:
 
 ```
-🔒 *Kitchen Closed — {{1})*
+🔒 Kitchen Closed Notice — {{1}}
+
 {{2}}
 
-We're sorry, our kitchen won't be operating on {{1}}. No meals will be delivered that day.
+Our kitchen will be closed on {{1}}, so no meals will be delivered that day.
 
-✅ Your plan has been extended by 1 day to make up for it.
-📅 You now have *{{3}} delivery day(s)* remaining.
+Good news: your plan has been extended by 1 day. You now have {{3}} delivery day(s) remaining.
 
 We'll be back the next working day! 🙏
 ```
@@ -366,17 +366,17 @@ We'll be back the next working day! 🙏
 ### Sample Values:
 | {{1}} | {{2}} | {{3}} |
 |-------|-------|-------|
-| 26 Jan 2025 | Republic Day holiday | 5 |
+| 26 January 2025 | Republic Day holiday | 5 |
 
 ### Rendered Sample:
 ```
-🔒 *Kitchen Closed — 26 Jan 2025*
+🔒 Kitchen Closed Notice — 26 January 2025
+
 Republic Day holiday
 
-We're sorry, our kitchen won't be operating on 26 Jan 2025. No meals will be delivered that day.
+Our kitchen will be closed on 26 January 2025, so no meals will be delivered that day.
 
-✅ Your plan has been extended by 1 day to make up for it.
-📅 You now have *5 delivery day(s)* remaining.
+Good news: your plan has been extended by 1 day. You now have 5 delivery day(s) remaining.
 
 We'll be back the next working day! 🙏
 ```
@@ -385,8 +385,8 @@ We'll be back the next working day! 🙏
 
 ## Quick Reference Table
 
-| Template | Variables Count | Buttons | Category |
-|----------|-----------------|---------|----------|
+| Template | Variables | Buttons | Category |
+|----------|-----------|---------|----------|
 | breakfast_notification | 5 | 3 Quick Reply | UTILITY |
 | lunch_notification | 5 | 3 Quick Reply | UTILITY |
 | dinner_notification | 5 | 3 Quick Reply | UTILITY |
@@ -400,13 +400,14 @@ We'll be back the next working day! 🙏
 
 ---
 
-## Meta Business Manager - Paste Instructions
+## Meta Business Manager - Setup Checklist
 
 For each template:
 1. **Name:** Use exact name (e.g., `breakfast_notification`)
 2. **Category:** As listed above
 3. **Language:** English (en)
-4. **Body:** Paste the "Body Text" section exactly as shown
-5. **Variables:** Meta will auto-detect {{1}}, {{2}}, etc. - verify order matches table
-6. **Buttons:** Add Quick Reply buttons as listed (or OTP for otp_code)
+4. **Body:** Paste the "Body Text" section exactly
+5. **Variables:** Meta auto-detects {{1}}, {{2}}... verify order matches table
+6. **Buttons:** Add Quick Reply buttons as listed (OTP for otp_code)
 7. **Submit** for review
+8. **Test** with Meta test phone numbers once approved
