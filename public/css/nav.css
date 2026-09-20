@@ -29,7 +29,7 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   font-size: 1.15rem; font-weight: 800; color: var(--green-800, #166534);
   letter-spacing: -0.02em; text-decoration: none; display: inline-flex; align-items: center; white-space: nowrap;
 }
-.nav-brand .accent { color: var(--green-500, #22c55e); }
+.nav-brand .accent { color: var(--orange-500, #ee701c); }
 .nav-sub {
   font-size: 0.6rem; font-weight: 500; color: var(--gray-400, #9ca3af);
   letter-spacing: 0.02em; margin-left: 8px; vertical-align: middle; white-space: nowrap;
