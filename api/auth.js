@@ -297,13 +297,11 @@ async function handleMagicLogin(req, res) {
     "Set-Cookie",
     `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
   );
-  return res
-    .status(200)
-    .json({
-      success: true,
-      phone: magic.phone,
-      referenceId: magic.referenceId,
-    });
+  return res.status(200).json({
+    success: true,
+    phone: magic.phone,
+    referenceId: magic.referenceId,
+  });
 }
 
 async function handleSendOTP(req, res) {
@@ -325,6 +323,12 @@ async function handleSendOTP(req, res) {
     console.log("[AUTH] Sending OTP:", { to, templateName, otp });
     const result = await sendTemplate(to, templateName, "en", [
       { type: "body", parameters: [{ type: "text", text: otp }] },
+      {
+        type: "button",
+        sub_type: "url",
+        index: 0,
+        parameters: [{ type: "text", text: otp }],
+      },
     ]);
     console.log("[AUTH] OTP sent successfully:", result);
   } catch (err) {
