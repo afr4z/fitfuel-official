@@ -4,7 +4,10 @@ import { sendText, sendButtons } from "../lib/whatsapp.js";
 import { sendNotification } from "../lib/sendNotification.js";
 import { formatTimeIST, formatDateIST } from "../lib/time.js";
 import { getSession, clearSession } from "../bot/session.js";
-import { addDeliveryDays, countRemainingDeliveryDays } from "../lib/deliveryDays.js";
+import {
+  addDeliveryDays,
+  countRemainingDeliveryDays,
+} from "../lib/deliveryDays.js";
 import {
   buildExpiryNotice,
   paymentFailed,
@@ -19,6 +22,7 @@ import {
   deliveryDateForSlot,
   SLOT_LABELS,
 } from "../lib/cronUtils.js";
+import { resolveDeliveryAddress } from "../lib/addresses.js";
 
 const supabaseAuth = createClient(
   process.env.SUPABASE_URL,
@@ -31,24 +35,32 @@ async function createMagicToken(phone, referenceId) {
   const data = JSON.stringify({ phone, referenceId, createdAt: Date.now() });
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
     body: data,
   });
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${key}/600`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
 
   // Store referenceId -> token mapping for lookup from payment-success
   const refKey = `magic_ref:${referenceId}`;
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${refKey}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
     body: JSON.stringify({ token }),
   });
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/expire/${refKey}/600`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
   });
 
   return token;
@@ -101,7 +113,8 @@ function toPlanType(days) {
 function normalizePhone(raw) {
   const digits = String(raw || "").replace(/\D/g, "");
   if (digits.length === 10) return `91${digits}`;
-  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}`;
+  if (digits.length === 11 && digits.startsWith("0"))
+    return `91${digits.slice(1)}`;
   if (digits.length === 12 && digits.startsWith("91")) return digits;
   return null;
 }
@@ -123,7 +136,7 @@ function calcDates(days, startFrom = null) {
     start = new Date(startFrom + "T00:00:00Z");
   } else {
     start = new Date(todayStr + "T00:00:00Z");
-    start.setUTCDate(start.getUTCDate() + 1);                       // begin from tomorrow IST
+    start.setUTCDate(start.getUTCDate() + 1); // begin from tomorrow IST
   }
 
   while (start.getUTCDay() === 0) {
@@ -218,7 +231,9 @@ export default async function handler(req, res) {
       }
 
       // For renewals, start the new plan the next delivery day after the current plan ends
-      const startFrom = renewAfterEnd ? addDeliveryDays(renewAfterEnd, 1) : null;
+      const startFrom = renewAfterEnd
+        ? addDeliveryDays(renewAfterEnd, 1)
+        : null;
 
       // Validate dates
       const { start_date, end_date } = calcDates(days, startFrom);
@@ -228,14 +243,9 @@ export default async function handler(req, res) {
       }
 
       // Upsert customer, carrying any details collected on the web checkout
-      // (name/email/address/location) that were stashed in the pending session.
-      // The WhatsApp bot also stores address + location in session.data, so
-      // they flow through here too.
+      // (name/email) that were stashed in the pending session. Addresses now
+      // live in the customer_addresses address book (see below).
       const details = session?.data || {};
-      const locationValue =
-        typeof details.location === "string"
-          ? { areaName: details.location }
-          : details.location ?? null;
       const { data: customer, error: customerError } = await supabase
         .from("customers")
         .upsert(
@@ -243,8 +253,6 @@ export default async function handler(req, res) {
             phone,
             ...(details.name ? { name: details.name } : {}),
             ...(details.email ? { email: details.email } : {}),
-            ...(details.address ? { address: details.address } : {}),
-            ...(locationValue ? { location: locationValue } : {}),
           },
           { onConflict: "phone" },
         )
@@ -259,6 +267,15 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Customer upsert failed" });
       }
 
+      // Resolve the delivery address into the address book. Supports both a
+      // previously saved address (addressId from the web checkout / bot saved
+      // address) and a brand-new one (address + location). The resolved row
+      // becomes the customer's default address for future orders.
+      const deliveryAddress = await resolveDeliveryAddress(
+        customer.id,
+        details,
+      );
+
       // Insert subscription
       const { data: subscription, error: insertError } = await supabase
         .from("meal_plan_subscriptions")
@@ -266,6 +283,7 @@ export default async function handler(req, res) {
           customer_id: customer.id,
           meal_plan_id: planId,
           phone,
+          address_id: deliveryAddress?.id ?? null,
           plan_type: planType,
           status: "active",
           start_date,
@@ -328,8 +346,18 @@ export default async function handler(req, res) {
 
             const templateParams = [
               { type: "text", text: datesList },
-              { type: "text", text: reasonLine.replace(/\n/g, " ").replace(/_/g, "") },
-              { type: "text", text: formatDateIST(newEnd, { day: "numeric", month: "short", year: "numeric" }) },
+              {
+                type: "text",
+                text: reasonLine.replace(/\n/g, " ").replace(/_/g, ""),
+              },
+              {
+                type: "text",
+                text: formatDateIST(newEnd, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                }),
+              },
             ];
 
             await sendNotification(
@@ -339,7 +367,11 @@ export default async function handler(req, res) {
               kitchenClosedDaysDuringPlan({
                 datesList,
                 reasonLine,
-                newEndDate: formatDateIST(newEnd, { day: "numeric", month: "short", year: "numeric" }),
+                newEndDate: formatDateIST(newEnd, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                }),
               }),
               null,
             );
@@ -393,7 +425,9 @@ export default async function handler(req, res) {
           .eq("subscription_id", subscription.id);
 
         const insertedSlots = fetchSlots.data ?? [];
-        console.log(`[WEBHOOK] Late subscriber — creating ${insertedSlots.length} order(s) on the fly`);
+        console.log(
+          `[WEBHOOK] Late subscriber — creating ${insertedSlots.length} order(s) on the fly`,
+        );
 
         for (const sr of insertedSlots) {
           const delDate = deliveryDateForSlot(sr.slot);
@@ -411,11 +445,16 @@ export default async function handler(req, res) {
               acceptUntil,
             );
 
-            console.log(`[WEBHOOK] Late-subscriber order ${order.id} for ${sr.slot}`);
+            console.log(
+              `[WEBHOOK] Late-subscriber order ${order.id} for ${sr.slot}`,
+            );
 
             // Send immediate notification for breakfast
             if (sr.slot === "breakfast") {
-              const daysLeft = await countRemainingDeliveryDays(start_date, end_date);
+              const daysLeft = await countRemainingDeliveryDays(
+                start_date,
+                end_date,
+              );
               const expiryNotice = buildExpiryNotice(daysLeft, true);
               const slotLabel = SLOT_LABELS.breakfast;
               const itemLine = order.item_name
@@ -443,10 +482,15 @@ export default async function handler(req, res) {
                 ],
               );
 
-              console.log(`[WEBHOOK] Notified late subscriber ${phone} for breakfast`);
+              console.log(
+                `[WEBHOOK] Notified late subscriber ${phone} for breakfast`,
+              );
             }
           } catch (err) {
-            console.error(`[WEBHOOK] Failed to create late-subscriber order for ${sr.slot}:`, err.message);
+            console.error(
+              `[WEBHOOK] Failed to create late-subscriber order for ${sr.slot}:`,
+              err.message,
+            );
           }
         }
       }
@@ -456,9 +500,18 @@ export default async function handler(req, res) {
 
       // Notify customer on WhatsApp
       const fmt = (s) => formatDateIST(s);
-      const todayIST = new Date(new Date().getTime() + 5.5 * 60 * 60 * 1000).toISOString().split("T")[0];
-      const startLabel = start_date === todayIST ? "today" : `from ${fmt(start_date)}`;
-      const body = paymentConfirmed({ planTitle, dayLabel, mealLabel, amount, startLabel });
+      const todayIST = new Date(new Date().getTime() + 5.5 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
+      const startLabel =
+        start_date === todayIST ? "today" : `from ${fmt(start_date)}`;
+      const body = paymentConfirmed({
+        planTitle,
+        dayLabel,
+        mealLabel,
+        amount,
+        startLabel,
+      });
       const templateParams = [
         { type: "text", text: planTitle },
         { type: "text", text: dayLabel },
@@ -478,7 +531,9 @@ export default async function handler(req, res) {
       const referenceId = payload?.payment_link?.entity?.reference_id;
       if (referenceId) {
         const magicToken = await createMagicToken(phone, referenceId);
-        console.log(`[WEBHOOK] Created magic token for ${phone}: ${magicToken}`);
+        console.log(
+          `[WEBHOOK] Created magic token for ${phone}: ${magicToken}`,
+        );
       }
     } else if (event === "payment_link.cancelled") {
       const phone = phoneFromLink();

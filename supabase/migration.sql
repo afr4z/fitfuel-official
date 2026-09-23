@@ -19,10 +19,24 @@ CREATE TABLE customers (
   phone TEXT NOT NULL UNIQUE,
   name TEXT,
   email TEXT,
-  address TEXT,
-  location JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- ─── 1b. customer_addresses (address book — source of truth) ──────────────────
+
+CREATE TABLE customer_addresses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  label TEXT NOT NULL DEFAULT 'Home',
+  address TEXT NOT NULL,
+  location JSONB,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_customer_addresses_customer ON customer_addresses(customer_id);
+CREATE UNIQUE INDEX idx_customer_addresses_unique ON customer_addresses(customer_id, address);
 
 -- ─── 2. meal_plans ─────────────────────────────────────────────────────────────
 
@@ -197,6 +211,7 @@ CREATE TABLE meal_plan_subscriptions (
   customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
   meal_plan_id UUID REFERENCES meal_plans(id),
   phone TEXT NOT NULL,
+  address_id UUID REFERENCES customer_addresses(id) ON DELETE SET NULL,
   plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', 'monthly')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled')),
   start_date DATE NOT NULL,
@@ -261,14 +276,20 @@ CREATE TABLE kitchen_closed_days (
 
 -- ─── Test data ─────────────────────────────────────────────────────────────────
 -- Insert a test customer so dispatch-orders.js has someone to send to.
-INSERT INTO customers (phone, name, address) VALUES
-  ('9999999999', 'Test User', 'Test Address, Bangalore');
+INSERT INTO customers (phone, name) VALUES
+  ('9999999999', 'Test User');
+
+-- Give the test customer one saved address (address book).
+INSERT INTO customer_addresses (customer_id, label, address, is_default)
+  SELECT id, 'Home', 'Test Address, Bangalore', true FROM customers WHERE phone = '9999999999';
 
 -- Create a test subscription (healthy_veg, 3day, starting today).
-INSERT INTO meal_plan_subscriptions (customer_id, meal_plan_id, phone, plan_type, start_date, end_date)
-  SELECT c.id, mp.id, '9999999999', '3day', CURRENT_DATE, CURRENT_DATE + 2
-  FROM customers c, meal_plans mp
-  WHERE c.phone = '9999999999' AND mp.tag = 'healthy_veg';
+INSERT INTO meal_plan_subscriptions (customer_id, meal_plan_id, phone, address_id, plan_type, start_date, end_date)
+  SELECT c.id, mp.id, '9999999999', ca.id, '3day', CURRENT_DATE, CURRENT_DATE + 2
+  FROM customers c
+  JOIN meal_plans mp ON mp.tag = 'healthy_veg'
+  JOIN customer_addresses ca ON ca.customer_id = c.id
+  WHERE c.phone = '9999999999';
 
 -- Create a slot for breakfast dispatch at 07:30 IST.
 INSERT INTO subscription_slots (subscription_id, slot, delivery_time)

@@ -153,7 +153,7 @@ async function deleteSession(token) {
 async function getCustomerByPhone(phone) {
   const { data } = await supabase
     .from("customers")
-    .select("id, name, email, address, location")
+    .select("id, name, email")
     .eq("phone", phone)
     .single();
   return data;
@@ -248,6 +248,31 @@ export default async function handler(req, res) {
 
   if (req.method === "GET" && (path === "/api/auth/me" || path === "me")) {
     return handleMe(req, res);
+  }
+
+  if (req.method === "PATCH" && (path === "/api/auth/me" || path === "me")) {
+    return handleUpdateProfile(req, res);
+  }
+
+  if (
+    req.method === "POST" &&
+    (path === "/api/auth/addresses" || path === "addresses")
+  ) {
+    return handleAddAddress(req, res);
+  }
+
+  if (
+    req.method === "PATCH" &&
+    (path.startsWith("/api/auth/addresses/") || path.startsWith("addresses/"))
+  ) {
+    return handleUpdateAddress(req, res, path);
+  }
+
+  if (
+    req.method === "DELETE" &&
+    (path.startsWith("/api/auth/addresses/") || path.startsWith("addresses/"))
+  ) {
+    return handleDeleteAddress(req, res, path);
   }
 
   return res.status(404).json({ error: "Not found" });
@@ -385,31 +410,234 @@ async function handleLogout(req, res) {
 }
 
 async function handleMe(req, res) {
-  const cookie = req.headers.cookie || "";
-  const match = cookie.match(/session=([^;]+)/);
-  if (!match) {
-    return res.status(401).json({ error: "Not authenticated" });
-  }
+  const phone = await sessionPhone(req, res);
+  if (!phone) return;
 
-  const session = await getSession(match[1]);
-  if (!session) {
-    return res.status(401).json({ error: "Session expired" });
-  }
-
-  const phone = session.phone;
-  const [customer, subscriptions, upcomingMeals] = await Promise.all([
-    getCustomerByPhone(phone),
-    getActiveSubscriptions(phone),
-    getUpcomingMeals(phone),
-  ]);
+  const [customer, subscriptions, upcomingMeals, addresses] = await Promise.all(
+    [
+      getCustomerByPhone(phone),
+      getActiveSubscriptions(phone),
+      getUpcomingMeals(phone),
+      getCustomerAddresses(phone),
+    ],
+  );
 
   return res.status(200).json({
     phone,
     name: customer?.name,
     email: customer?.email,
-    address: customer?.address,
-    location: customer?.location,
+    addresses,
     subscriptions,
     upcomingMeals,
   });
+}
+
+/** Resolve the authenticated phone from the session cookie, or 401. */
+async function sessionPhone(req, res) {
+  const cookie = req.headers.cookie || "";
+  const match = cookie.match(/session=([^;]+)/);
+  if (!match) {
+    res.status(401).json({ error: "Not authenticated" });
+    return null;
+  }
+
+  const session = await getSession(match[1]);
+  if (!session) {
+    res.status(401).json({ error: "Session expired" });
+    return null;
+  }
+
+  return session.phone;
+}
+
+async function getCustomerIdByPhone(phone) {
+  const customer = await getCustomerByPhone(phone);
+  return customer?.id || null;
+}
+
+async function getCustomerAddresses(phone) {
+  const customerId = await getCustomerIdByPhone(phone);
+  if (!customerId) return [];
+  const { data } = await supabase
+    .from("customer_addresses")
+    .select("*")
+    .eq("customer_id", customerId)
+    .order("is_default", { ascending: false })
+    .order("created_at", { ascending: true });
+  return data || [];
+}
+
+async function handleUpdateProfile(req, res) {
+  const phone = await sessionPhone(req, res);
+  if (!phone) return;
+
+  const { name, email } = req.body || {};
+  const updates = {};
+  if (name !== undefined) updates.name = String(name).slice(0, 200);
+  if (email !== undefined) updates.email = String(email).slice(0, 300);
+  if (!Object.keys(updates).length) {
+    return res.status(400).json({ error: "Nothing to update" });
+  }
+
+  const { data: customer, error } = await supabase
+    .from("customers")
+    .upsert({ phone, ...updates }, { onConflict: "phone" })
+    .select("id, name, email")
+    .single();
+
+  if (error) {
+    console.error("[AUTH] Profile update failed:", JSON.stringify(error));
+    return res.status(500).json({ error: "Failed to update profile" });
+  }
+
+  return res.status(200).json({
+    success: true,
+    name: customer.name,
+    email: customer.email,
+    addresses: await getCustomerAddresses(phone),
+  });
+}
+
+function normalizeAddressLocation(location) {
+  if (!location) return null;
+  if (typeof location === "string") return { areaName: location };
+  return location;
+}
+
+async function handleAddAddress(req, res) {
+  const phone = await sessionPhone(req, res);
+  if (!phone) return;
+
+  const { label, address, location } = req.body || {};
+  if (!address || !String(address).trim()) {
+    return res.status(400).json({ error: "Address is required" });
+  }
+
+  const { data: customer, error: customerError } = await supabase
+    .from("customers")
+    .upsert({ phone }, { onConflict: "phone" })
+    .select("id")
+    .single();
+
+  if (customerError || !customer) {
+    console.error(
+      "[AUTH] Address add — customer upsert failed:",
+      JSON.stringify(customerError),
+    );
+    return res.status(500).json({ error: "Failed to save address" });
+  }
+
+  const { data: addressRow, error } = await supabase
+    .from("customer_addresses")
+    .insert({
+      customer_id: customer.id,
+      label: String(label || "Home").slice(0, 100),
+      address: String(address).trim(),
+      location: normalizeAddressLocation(location),
+      is_default: false,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("[AUTH] Address add failed:", JSON.stringify(error));
+    return res.status(500).json({ error: "Failed to save address" });
+  }
+
+  // First saved address becomes the default.
+  const { count } = await supabase
+    .from("customer_addresses")
+    .select("id", { count: "exact", head: true })
+    .eq("customer_id", customer.id);
+  if (count === 1) {
+    await setDefaultAddress(customer.id, addressRow.id);
+  }
+
+  return res.status(200).json({
+    success: true,
+    addresses: await getCustomerAddresses(phone),
+  });
+}
+
+async function handleUpdateAddress(req, res, path) {
+  const phone = await sessionPhone(req, res);
+  if (!phone) return;
+
+  const addressId = path.split("/").pop();
+  const customerId = await getCustomerIdByPhone(phone);
+  if (!customerId) {
+    return res.status(404).json({ error: "Address not found" });
+  }
+
+  const { label, address, location, is_default } = req.body || {};
+  const updates = {};
+  if (label !== undefined) updates.label = String(label).slice(0, 100);
+  if (address !== undefined) {
+    updates.address = String(address).trim();
+    updates.updated_at = new Date().toISOString();
+  }
+  if (location !== undefined) {
+    updates.location = normalizeAddressLocation(location);
+  }
+
+  const { error } = await supabase
+    .from("customer_addresses")
+    .update(updates)
+    .eq("id", addressId)
+    .eq("customer_id", customerId);
+
+  if (error) {
+    console.error("[AUTH] Address update failed:", JSON.stringify(error));
+    return res.status(500).json({ error: "Failed to update address" });
+  }
+
+  if (is_default) {
+    await setDefaultAddress(customerId, addressId);
+  }
+
+  return res.status(200).json({
+    success: true,
+    addresses: await getCustomerAddresses(phone),
+  });
+}
+
+async function handleDeleteAddress(req, res, path) {
+  const phone = await sessionPhone(req, res);
+  if (!phone) return;
+
+  const addressId = path.split("/").pop();
+  const customerId = await getCustomerIdByPhone(phone);
+  if (!customerId) {
+    return res.status(404).json({ error: "Address not found" });
+  }
+
+  const { error } = await supabase
+    .from("customer_addresses")
+    .delete()
+    .eq("id", addressId)
+    .eq("customer_id", customerId);
+
+  if (error) {
+    console.error("[AUTH] Address delete failed:", JSON.stringify(error));
+    return res.status(500).json({ error: "Failed to delete address" });
+  }
+
+  return res.status(200).json({
+    success: true,
+    addresses: await getCustomerAddresses(phone),
+  });
+}
+
+async function setDefaultAddress(customerId, addressId) {
+  // Clear any existing default first, then set the new one.
+  await supabase
+    .from("customer_addresses")
+    .update({ is_default: false })
+    .eq("customer_id", customerId)
+    .neq("id", addressId);
+  await supabase
+    .from("customer_addresses")
+    .update({ is_default: true, updated_at: new Date().toISOString() })
+    .eq("id", addressId)
+    .eq("customer_id", customerId);
 }

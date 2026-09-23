@@ -3,6 +3,7 @@ import { createPaymentLink } from "../lib/razorpay.js";
 import { getPlanCategories } from "../lib/mealPlans.js";
 import { countRemainingDeliveryDays } from "../lib/deliveryDays.js";
 import { setSession } from "../bot/session.js";
+import { getCustomerByPhone } from "../lib/addresses.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -18,9 +19,35 @@ const supabase = createClient(
 function normalizePhone(raw) {
   const digits = String(raw || "").replace(/\D/g, "");
   if (digits.length === 10) return `91${digits}`;
-  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}`;
+  if (digits.length === 11 && digits.startsWith("0"))
+    return `91${digits.slice(1)}`;
   if (digits.length === 12 && digits.startsWith("91")) return digits;
   return null;
+}
+
+/**
+ * Read the OTP session (created by /api/auth/verify-otp) from the cookie.
+ * Returns the verified phone in international format, or null.
+ */
+async function getSessionPhone(req) {
+  const cookie = req.headers.cookie || "";
+  const match = cookie.match(/session=([^;]+)/);
+  if (!match) return null;
+  const token = match[1];
+  const key = `session:${token}`;
+  const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/${key}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+    },
+  });
+  const data = await res.json();
+  if (!data.result) return null;
+  try {
+    const session = JSON.parse(data.result);
+    return normalizePhone(session.phone);
+  } catch {
+    return null;
+  }
 }
 
 export default async function handler(req, res) {
@@ -33,20 +60,25 @@ export default async function handler(req, res) {
       planId,
       days,
       mealsPerDay,
-      phone,
       name,
       email,
+      addressId,
       address,
       location,
     } = req.body;
 
-    if (!planId || !days || !mealsPerDay || !phone) {
+    if (!planId || !days || !mealsPerDay) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const normPhone = normalizePhone(phone);
+    // ─── OTP authentication first (phone comes from the verified session) ───
+    // The checkout now verifies the phone via OTP before ordering, so the
+    // phone is taken from the session cookie — never from the request body.
+    const normPhone = await getSessionPhone(req);
     if (!normPhone) {
-      return res.status(400).json({ error: "Invalid phone number" });
+      return res
+        .status(401)
+        .json({ error: "Please verify your phone number first (OTP)" });
     }
 
     // ─── Double-subscription guard (mirrors the bot flow) ───────────────────
@@ -92,6 +124,25 @@ export default async function handler(req, res) {
 
     const totalAmount = Math.round(pricePerMealPerDay * mealsPerDay * days);
 
+    // ─── Delivery address: saved addressId OR new address + location ────────
+    if (addressId) {
+      const customer = await getCustomerByPhone(normPhone);
+      if (!customer) {
+        return res.status(400).json({ error: "Invalid saved address" });
+      }
+      const { data: saved } = await supabase
+        .from("customer_addresses")
+        .select("id, address, location, label")
+        .eq("id", addressId)
+        .eq("customer_id", customer.id)
+        .maybeSingle();
+      if (!saved) {
+        return res.status(400).json({ error: "Invalid saved address" });
+      }
+    } else if (!address || !String(address).trim()) {
+      return res.status(400).json({ error: "Please add a delivery address" });
+    }
+
     // No database writes before payment. The customer row, subscription,
     // slots, and orders are only created by the Razorpay webhook after the
     // payment is confirmed. The checkout details are stashed in the pending
@@ -100,7 +151,11 @@ export default async function handler(req, res) {
     const referenceId = `${normPhone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
 
     const mealLabel =
-      mealsPerDay === 1 ? "Breakfast" : mealsPerDay === 2 ? "Lunch + Dinner" : "All 3 Meals";
+      mealsPerDay === 1
+        ? "Breakfast"
+        : mealsPerDay === 2
+          ? "Lunch + Dinner"
+          : "All 3 Meals";
     const dayLabel = `${days} Days`;
 
     const paymentLink = await createPaymentLink({
@@ -130,8 +185,7 @@ export default async function handler(req, res) {
         renewAfterEnd,
         name,
         email,
-        address,
-        location,
+        ...(addressId ? { addressId } : { address, location }),
       },
     });
 

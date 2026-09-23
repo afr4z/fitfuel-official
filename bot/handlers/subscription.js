@@ -21,9 +21,16 @@ import {
   locationPrompt,
   locationPromptFallback,
   ADDRESS_PROMPT,
+  ADDRESS_BOOK_PROMPT,
+  ADDRESS_SAVED_SELECTED,
   PAYMENT_LINK_ERROR,
   orderSummary,
 } from "../config/messages.js";
+import {
+  getCustomerByPhone,
+  getCustomerAddresses,
+  addressButtonLabel,
+} from "../../lib/addresses.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -83,14 +90,14 @@ export async function startSubscription(phone, session, setSession) {
     .maybeSingle();
 
   if (activeSub) {
-    const remaining = await countRemainingDeliveryDays(activeSub.start_date, activeSub.end_date);
+    const remaining = await countRemainingDeliveryDays(
+      activeSub.start_date,
+      activeSub.end_date,
+    );
     const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
 
     if (remaining > threshold) {
-      await sendText(
-        phone,
-        alreadyActivePlan({ remaining, threshold }),
-      );
+      await sendText(phone, alreadyActivePlan({ remaining, threshold }));
       return;
     }
 
@@ -100,26 +107,23 @@ export async function startSubscription(phone, session, setSession) {
   await setSession(phone, {
     ...session,
     state: STATES.SELECTING_PLAN_CATEGORY,
-    data: activeSub ? { ...session.data, renewAfterEnd: activeSub.end_date } : {},
+    data: activeSub
+      ? { ...session.data, renewAfterEnd: activeSub.end_date }
+      : {},
   });
 
   const plans = await getPlanCategories();
 
-  await sendList(
-    phone,
-    CHOOSE_MEAL_PLAN,
-    "View Plans",
-    [
-      {
-        title: "Available Plans",
-        rows: plans.map((p) => ({
-          id: "PLAN_" + p.id,
-          title: p.shortTitle.substring(0, 24),
-          description: p.description.substring(0, 72),
-        })),
-      },
-    ],
-  );
+  await sendList(phone, CHOOSE_MEAL_PLAN, "View Plans", [
+    {
+      title: "Available Plans",
+      rows: plans.map((p) => ({
+        id: "PLAN_" + p.id,
+        title: p.shortTitle.substring(0, 24),
+        description: p.description.substring(0, 72),
+      })),
+    },
+  ]);
 }
 
 // ─── Step 2 – Duration ────────────────────────────────────────────────────────
@@ -203,7 +207,7 @@ export async function handleDaySelection(phone, session, input, setSession) {
   );
 }
 
-// ─── Step 4 – Location ────────────────────────────────────────────────────────
+// ─── Step 4 – Address (saved address book OR new location) ─────────────────────
 
 export async function handleMealSlotSelection(
   phone,
@@ -222,14 +226,53 @@ export async function handleMealSlotSelection(
     return;
   }
 
+  const nextData = {
+    ...session.data,
+    mealsPerDay: mealOption.mealsPerDay,
+    mealLabel: mealOption.label,
+  };
+
+  // If the customer has saved addresses, let them pick one (or enter a new
+  // one) before we ask for a fresh location.
+  let savedAddresses = [];
+  try {
+    const customer = await getCustomerByPhone(phone);
+    if (customer) {
+      savedAddresses = await getCustomerAddresses(customer.id);
+    }
+  } catch (err) {
+    console.error(
+      "[SUBSCRIPTION] Failed to load saved addresses:",
+      err.message,
+    );
+  }
+
+  if (savedAddresses.length) {
+    await setSession(phone, {
+      ...session,
+      state: STATES.SELECTING_ADDRESS,
+      data: nextData,
+    });
+    const options = savedAddresses.map((addr) => ({
+      id: `ADDR_${addr.id}`,
+      label: addressButtonLabel(addr),
+      description: addr.address,
+    }));
+    options.push({ id: "ADDR_OTHER", label: "Other location" });
+    await sendOptions(
+      phone,
+      ADDRESS_BOOK_PROMPT,
+      "Saved Addresses",
+      "Choose Address",
+      options,
+    );
+    return;
+  }
+
   await setSession(phone, {
     ...session,
     state: STATES.AWAITING_LOCATION,
-    data: {
-      ...session.data,
-      mealsPerDay: mealOption.mealsPerDay,
-      mealLabel: mealOption.label,
-    },
+    data: nextData,
   });
   try {
     await sendLocationRequest(
@@ -249,7 +292,91 @@ export async function handleMealSlotSelection(
   }
 }
 
-// ─── Step 5 – Address ─────────────────────────────────────────────────────────
+// ─── Step 4b – Saved address selection ─────────────────────────────────────────
+
+export async function handleAddressChoice(phone, session, input, setSession) {
+  // "Other location" → fall through to the normal location + address flow
+  if (input === "ADDR_OTHER") {
+    await setSession(phone, {
+      ...session,
+      state: STATES.AWAITING_LOCATION,
+    });
+    try {
+      await sendLocationRequest(
+        phone,
+        locationPrompt({ mealLabel: session.data.mealLabel }),
+      );
+    } catch (err) {
+      console.error(
+        "[LOCATION_REQUEST] Failed to send location_request_message:",
+        err.message,
+      );
+      await sendText(
+        phone,
+        locationPromptFallback({ mealLabel: session.data.mealLabel }),
+      );
+    }
+    return;
+  }
+
+  // Unexpected input while picking an address → re-show the address options
+  if (!input.startsWith("ADDR_")) {
+    await setSession(phone, {
+      ...session,
+      state: STATES.SELECTING_ADDRESS,
+    });
+    const customer = await getCustomerByPhone(phone);
+    let savedAddresses = [];
+    if (customer) savedAddresses = await getCustomerAddresses(customer.id);
+    if (savedAddresses.length) {
+      const options = savedAddresses.map((addr) => ({
+        id: `ADDR_${addr.id}`,
+        label: addressButtonLabel(addr),
+        description: addr.address,
+      }));
+      options.push({ id: "ADDR_OTHER", label: "Other location" });
+      return sendOptions(
+        phone,
+        ADDRESS_BOOK_PROMPT,
+        "Saved Addresses",
+        "Choose Address",
+        options,
+      );
+    }
+    return sendText(phone, ADDRESS_PROMPT);
+  }
+
+  const addressId = input.replace("ADDR_", "");
+  const customer = await getCustomerByPhone(phone);
+  if (!customer) {
+    await sendText(phone, ADDRESS_PROMPT);
+    return;
+  }
+
+  const addresses = await getCustomerAddresses(customer.id);
+  const addr = addresses.find((a) => a.id === addressId);
+  if (!addr) {
+    await sendText(phone, ADDRESS_PROMPT);
+    return;
+  }
+
+  await sendText(phone, ADDRESS_SAVED_SELECTED);
+
+  // Jump straight to the payment step (reuse the summary + Razorpay flow).
+  // Pass the updated session so addressId/addressLabel survive handleAddress's
+  // own setSession (which spreads session.data).
+  const updatedSession = {
+    ...session,
+    data: {
+      ...session.data,
+      addressId: addr.id,
+      address: addr.address,
+      location: addr.location,
+      addressLabel: addr.label,
+    },
+  };
+  return handleAddress(phone, updatedSession, addr.address, setSession);
+}
 
 export async function handleLocation(phone, session, message, setSession) {
   let locationData = {};
@@ -325,6 +452,13 @@ export async function handleAddress(phone, session, addressText, setSession) {
 
   await sendText(
     phone,
-    orderSummary({ planTitle, dayLabel, mealLabel, addressText, totalPrice, paymentUrl }),
+    orderSummary({
+      planTitle,
+      dayLabel,
+      mealLabel,
+      addressText,
+      totalPrice,
+      paymentUrl,
+    }),
   );
 }

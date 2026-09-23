@@ -19,8 +19,7 @@ export function greetingReturning({ planLabel, remaining, nearExpiry }) {
   );
 }
 
-export const GREETING_NEW =
-  `👋 Welcome to FitFuel Nutrition!\n\nHow can we help you today?`;
+export const GREETING_NEW = `👋 Welcome to FitFuel Nutrition!\n\nHow can we help you today?`;
 
 // ─── Main Menu ───────────────────────────────────────────────────────────────
 
@@ -33,10 +32,14 @@ export function viewPlans({ planLines }) {
   );
 }
 
-export const MY_PLAN_NO_ACTIVE =
-  `ℹ️ You don't have an active plan right now.\n\nType anything to go back to the menu.`;
+export const MY_PLAN_NO_ACTIVE = `ℹ️ You don't have an active plan right now.\n\nType anything to go back to the menu.`;
 
-export function myPlanActive({ planLabel, startDate, expiryLine, pushedLines }) {
+export function myPlanActive({
+  planLabel,
+  startDate,
+  expiryLine,
+  pushedLines,
+}) {
   return (
     `📋 *Your Active Plan*\n\n` +
     `📦 Plan: *${planLabel}*\n` +
@@ -47,8 +50,7 @@ export function myPlanActive({ planLabel, startDate, expiryLine, pushedLines }) 
   );
 }
 
-export const MY_PLAN_RENEW_PROMPT =
-  `🔄 Ready to renew your plan?`;
+export const MY_PLAN_RENEW_PROMPT = `🔄 Ready to renew your plan?`;
 
 export const CONTACT_US =
   `📞 *Get in Touch*\n\n` +
@@ -72,8 +74,7 @@ export const RENEW_PLAN_START =
   `Your current plan ends shortly. Your new plan will start right after it completes.\n\n` +
   `Let's set up your new plan!`;
 
-export const CHOOSE_MEAL_PLAN =
-  `🥗 *Choose your meal plan:*\n\nPick the plan that best matches your goal:`;
+export const CHOOSE_MEAL_PLAN = `🥗 *Choose your meal plan:*\n\nPick the plan that best matches your goal:`;
 
 export function planSelected({ planTitle, sundayNote }) {
   return (
@@ -112,10 +113,22 @@ export const ADDRESS_PROMPT =
   `🏠 Please type your *full delivery address*:\n` +
   `(flat/house number, street name, landmark)`;
 
-export const PAYMENT_LINK_ERROR =
-  `Sorry, we couldn't generate your payment link right now. Please contact support.`;
+export const ADDRESS_BOOK_PROMPT =
+  `📍 *Where should we deliver?*\n\n` +
+  `Pick a saved address, or choose *Other location* to enter a new one:`;
 
-export function orderSummary({ planTitle, dayLabel, mealLabel, addressText, totalPrice, paymentUrl }) {
+export const ADDRESS_SAVED_SELECTED = `✅ *Got it!* Using your saved address for this order.`;
+
+export const PAYMENT_LINK_ERROR = `Sorry, we couldn't generate your payment link right now. Please contact support.`;
+
+export function orderSummary({
+  planTitle,
+  dayLabel,
+  mealLabel,
+  addressText,
+  totalPrice,
+  paymentUrl,
+}) {
   return (
     `✅ *Order Summary*\n\n` +
     `📦 Plan: ${planTitle}\n` +
@@ -130,65 +143,46 @@ export function orderSummary({ planTitle, dayLabel, mealLabel, addressText, tota
 
 // ─── Order Actions ───────────────────────────────────────────────────────────
 
-export const ERROR_GENERIC =
-  `Sorry, something went wrong. Please try again.`;
+export const ERROR_GENERIC = `Sorry, something went wrong. Please try again.`;
 
-export const ERROR_ORDER_NOT_FOUND =
-  `Sorry, we couldn't find that order. Please try again.`;
+export const ERROR_ORDER_NOT_FOUND = `Sorry, we couldn't find that order. Please try again.`;
 
-export const DEADLINE_LUNCH =
-  `⏰ The 9:30am deadline has passed. Changes can no longer be made for lunch.`;
+export const DEADLINE_LUNCH = `⏰ The 9:30am deadline has passed. Changes can no longer be made for lunch.`;
 
-export const DEADLINE_DINNER =
-  `⏰ The 5pm deadline has passed. Changes can no longer be made for dinner.`;
+export const DEADLINE_DINNER = `⏰ The 5pm deadline has passed. Changes can no longer be made for dinner.`;
 
-export const DEADLINE_GENERIC =
-  `⏰ The deadline has passed. Changes can no longer be made for this meal.`;
+export const DEADLINE_GENERIC = `⏰ The deadline has passed. Changes can no longer be made for this meal.`;
 
-export const ALREADY_CONFIRMED =
-  `✅ This order has already been confirmed.`;
+export const ALREADY_CONFIRMED = `✅ This order has already been confirmed.`;
 
-export const ALREADY_SKIPPED =
-  `⏭️ This order has already been skipped.`;
+export const ALREADY_SKIPPED = `⏭️ This order has already been skipped.`;
 
-export const ALREADY_PROCESSED =
-  `ℹ️ This order has already been processed.`;
+export const ALREADY_PROCESSED = `ℹ️ This order has already been processed.`;
 
-export const CONFIRM_ERROR =
-  `Sorry, something went wrong confirming your order. Please try again.`;
+export const CONFIRM_ERROR = `Sorry, something went wrong confirming your order. Please try again.`;
 
-export const CONFIRM_SUCCESS =
-  `✅ *Confirmed!* Your meal is locked in.\n\nWe'll notify you once it's on the way 🚀`;
+export const CONFIRM_SUCCESS = `✅ *Confirmed!* Your meal is locked in.\n\nWe'll notify you once it's on the way 🚀`;
 
-export const SKIP_ERROR =
-  `Sorry, something went wrong skipping your order. Please try again.`;
+export const SKIP_ERROR = `Sorry, something went wrong skipping your order. Please try again.`;
 
 export function skipPushed({ dateStr }) {
   return `⏭️ *Skipped!* This meal has been moved to *${dateStr}* (added to the end of your plan).`;
 }
 
-export const SKIP_NO_PUSH =
-  `⏭️ *Skipped!* No delivery for this slot today.\n\nSee you next time 👋`;
+export const SKIP_NO_PUSH = `⏭️ *Skipped!* No delivery for this slot today.\n\nSee you next time 👋`;
 
-export const MENU_LOAD_ERROR =
-  `😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.`;
+export const MENU_LOAD_ERROR = `😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.`;
 
-export const CHANGE_MEAL_LIST =
-  `🔄 *Change your meal*\n\nPick from today's available options:`;
+export const CHANGE_MEAL_LIST = `🔄 *Change your meal*\n\nPick from today's available options:`;
 
-export const UNRECOGNISED_ACTION =
-  `Sorry, I didn't understand that. Please use the buttons.`;
+export const UNRECOGNISED_ACTION = `Sorry, I didn't understand that. Please use the buttons.`;
 
-export const ALREADY_PROCESSED_CANNOT_CHANGE =
-  `ℹ️ This order has already been processed and can't be changed.`;
+export const ALREADY_PROCESSED_CANNOT_CHANGE = `ℹ️ This order has already been processed and can't be changed.`;
 
-export const MEAL_UPDATE_ERROR =
-  `Sorry, something went wrong updating your meal. Please try again.`;
+export const MEAL_UPDATE_ERROR = `Sorry, something went wrong updating your meal. Please try again.`;
 
 export function mealUpdated({ itemName }) {
-  return (
-    `✅ *Meal updated!*\n\nYour new meal: *${itemName}*\n\nWe'll have it ready for your slot 🍽️`
-  );
+  return `✅ *Meal updated!*\n\nYour new meal: *${itemName}*\n\nWe'll have it ready for your slot 🍽️`;
 }
 
 // ─── Meal Notifications ──────────────────────────────────────────────────────
@@ -207,14 +201,11 @@ export function slotItemLine({ emoji, slotLabel, itemName }) {
     : `${emoji} *${slotLabel}*`;
 }
 
-export const DEADLINE_BREAKFAST =
-  `You can confirm, skip, or change until *10pm tonight*.`;
+export const DEADLINE_BREAKFAST = `You can confirm, skip, or change until *10pm tonight*.`;
 
-export const DEADLINE_LUNCH_NOTIFICATION =
-  `⏰ Respond by *9:30am* — changes close after that.`;
+export const DEADLINE_LUNCH_NOTIFICATION = `⏰ Respond by *9:30am* — changes close after that.`;
 
-export const DEADLINE_DINNER_NOTIFICATION =
-  `⏰ Respond by *5pm* — changes close after that.`;
+export const DEADLINE_DINNER_NOTIFICATION = `⏰ Respond by *5pm* — changes close after that.`;
 
 export function rescheduledMeal({ slotLabel, slotEmoji, itemName }) {
   return (
@@ -234,7 +225,11 @@ export function paymentFailed({ reason }) {
   );
 }
 
-export function kitchenClosedDaysDuringPlan({ datesList, reasonLine, newEndDate }) {
+export function kitchenClosedDaysDuringPlan({
+  datesList,
+  reasonLine,
+  newEndDate,
+}) {
   return (
     `🔒 *Kitchen Closed Days during your plan*\n\n` +
     `Our kitchen will be closed on: *${datesList}*.${reasonLine}` +
@@ -244,7 +239,13 @@ export function kitchenClosedDaysDuringPlan({ datesList, reasonLine, newEndDate 
   );
 }
 
-export function lateSubscriberBreakfast({ delDate, itemLine, timeStr, acceptUntilTime, expiryNotice }) {
+export function lateSubscriberBreakfast({
+  delDate,
+  itemLine,
+  timeStr,
+  acceptUntilTime,
+  expiryNotice,
+}) {
   return (
     `🌅 *Tomorrow's Breakfast (${delDate})*\n\n` +
     `${itemLine} (${timeStr})\n\n` +
@@ -252,7 +253,13 @@ export function lateSubscriberBreakfast({ delDate, itemLine, timeStr, acceptUnti
   );
 }
 
-export function paymentConfirmed({ planTitle, dayLabel, mealLabel, amount, startLabel }) {
+export function paymentConfirmed({
+  planTitle,
+  dayLabel,
+  mealLabel,
+  amount,
+  startLabel,
+}) {
   return (
     `🎉 *Payment Confirmed!*\n\n` +
     `Your FitFuel *${planTitle}* plan is now *active*!\n\n` +
@@ -267,25 +274,19 @@ export function paymentConfirmed({ planTitle, dayLabel, mealLabel, amount, start
 
 // ─── Session & Button Expiry ─────────────────────────────────────────────────
 
-export const SESSION_EXPIRED =
-  `⏰ *Your session expired due to inactivity.*\n\nType *hi* to start again!`;
+export const SESSION_EXPIRED = `⏰ *Your session expired due to inactivity.*\n\nType *hi* to start again!`;
 
-export const BUTTON_EXPIRED =
-  `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`;
+export const BUTTON_EXPIRED = `⏰ That button has expired — it's from an older message.\n\nType *hi* to start fresh!`;
 
-export const PAYMENT_PENDING =
-  `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType *back*, *menu*, or *home* to cancel and start over.`;
+export const PAYMENT_PENDING = `⏳ *Payment Pending*\n\nPlease complete your payment using the link we sent you.\n\nType *back*, *menu*, or *home* to cancel and start over.`;
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 
-export const GOING_BACK =
-  `↩️ Going back…`;
+export const GOING_BACK = `↩️ Going back…`;
 
-export const LOCATION_BACK =
-  `📍 *Where should we deliver?*\n\nTap the button below to share your location, or type your area / neighbourhood name.`;
+export const LOCATION_BACK = `📍 *Where should we deliver?*\n\nTap the button below to share your location, or type your area / neighbourhood name.`;
 
-export const LOCATION_BACK_FALLBACK =
-  `📍 *Where should we deliver?*\n\nType your area / neighbourhood name.`;
+export const LOCATION_BACK_FALLBACK = `📍 *Where should we deliver?*\n\nType your area / neighbourhood name.`;
 
 // ─── Plan Expiry Notices ─────────────────────────────────────────────────────
 
@@ -339,8 +340,6 @@ export function kitchenClosed({ date, reasonLine, remaining }) {
 
 // ─── Menu Unavailable ────────────────────────────────────────────────────────
 
-export const MENU_UNAVAILABLE =
-  `Sorry, the menu is unavailable right now. Please try again later.`;
+export const MENU_UNAVAILABLE = `Sorry, the menu is unavailable right now. Please try again later.`;
 
-export const CHANGE_MEAL_LIST_ALT =
-  `🔄 *Change your meal*\n\nPick from today's options:`;
+export const CHANGE_MEAL_LIST_ALT = `🔄 *Change your meal*\n\nPick from today's options:`;

@@ -534,17 +534,214 @@
       `;
       }
 
+      function formatLocation(loc) {
+        if (!loc) return "—";
+        if (typeof loc === "string") return loc;
+        if (typeof loc.areaName === "string") return loc.areaName;
+        if (typeof loc.locationName === "string") return loc.locationName;
+        if (loc.latitude && loc.longitude)
+          return `${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`;
+        return "—";
+      }
+
       function renderProfile(data) {
         const el = document.getElementById("profile-info");
+        const addresses = data.addresses || [];
         el.innerHTML = `
         <div class="profile-grid">
           <div class="profile-field"><div class="profile-label">Phone</div><div class="profile-value">${data.phone}</div></div>
-          <div class="profile-field"><div class="profile-label">Name</div><div class="profile-value">${data.name || "—"}</div></div>
-          <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value">${data.email || "—"}</div></div>
-          <div class="profile-field"><div class="profile-label">Area</div><div class="profile-value">${data.location || "—"}</div></div>
-          <div class="profile-field"><div class="profile-label">Address</div><div class="profile-value">${data.address || "—"}</div></div>
+          <div class="profile-field"><div class="profile-label">Name</div><div class="profile-value" id="profile-name-display">${data.name || "—"}</div></div>
+          <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="profile-email-display">${data.email || "—"}</div></div>
+        </div>
+        <button class="btn btn-secondary" id="btn-edit-profile" style="margin-top:12px;">Edit Profile</button>
+
+        <div id="profile-edit-form" style="display:none;margin-top:12px;">
+          <div class="profile-field" style="margin-bottom:10px;">
+            <div class="profile-label">Full Name</div>
+            <input type="text" id="edit-name" value="${data.name || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
+          </div>
+          <div class="profile-field" style="margin-bottom:10px;">
+            <div class="profile-label">Email</div>
+            <input type="email" id="edit-email" value="${data.email || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" id="btn-save-profile" style="flex:1;">Save</button>
+            <button class="btn btn-secondary" id="btn-cancel-profile" style="flex:1;">Cancel</button>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;border-top:1px solid var(--gray-100);padding-top:16px;">
+          <div class="profile-label" style="margin-bottom:8px;">Saved Addresses</div>
+          <div id="addresses-list">
+            ${
+              addresses.length
+                ? addresses
+                    .map(
+                      (a) => `
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <strong style="font-size:0.9rem;">${a.label || "Home"}</strong>
+                    <span>
+                      ${
+                        a.is_default
+                          ? '<span class="plan-type" style="margin-right:6px;">Default</span>'
+                          : `<button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;" data-set-default="${a.id}">Set Default</button>`
+                      }
+                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;margin-left:6px;" data-delete-address="${a.id}">Delete</button>
+                    </span>
+                  </div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:6px;">${a.address}</div>
+                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">${formatLocation(a.location)}</div>
+                </div>
+              `,
+                    )
+                    .join("")
+                : '<p style="font-size:0.82rem;color:var(--gray-500);">No saved addresses yet.</p>'
+            }
+          </div>
+          <button class="btn btn-secondary" id="btn-add-address" style="margin-top:8px;">+ Add Address</button>
+          <div id="add-address-form" style="display:none;margin-top:12px;">
+            <input type="text" id="new-address-label" placeholder="Label (e.g. Home, Office)" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;margin-bottom:8px;" />
+            <input type="text" id="new-address-area" placeholder="Area / Neighbourhood" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;margin-bottom:8px;" />
+            <textarea id="new-address-text" placeholder="Flat/House No., Street, Landmark, City, PIN" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;margin-bottom:8px;min-height:64px;"></textarea>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary" id="btn-save-address" style="flex:1;">Save Address</button>
+              <button class="btn btn-secondary" id="btn-cancel-address" style="flex:1;">Cancel</button>
+            </div>
+          </div>
         </div>
       `;
+
+        document
+          .getElementById("btn-edit-profile")
+          .addEventListener("click", () => {
+            document.getElementById("profile-edit-form").style.display =
+              "block";
+            document.getElementById("btn-edit-profile").style.display = "none";
+          });
+        document
+          .getElementById("btn-cancel-profile")
+          .addEventListener("click", () => {
+            document.getElementById("profile-edit-form").style.display = "none";
+            document.getElementById("btn-edit-profile").style.display =
+              "inline-flex";
+          });
+        document
+          .getElementById("btn-save-profile")
+          .addEventListener("click", async () => {
+            const name = document.getElementById("edit-name").value.trim();
+            const email = document.getElementById("edit-email").value.trim();
+            try {
+              const res = await fetch(`${API_BASE}/me`, {
+                method: "PATCH",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email }),
+              });
+              if (!res.ok) throw new Error("Failed to update profile");
+              document.getElementById("profile-name-display").textContent =
+                name || "—";
+              document.getElementById("profile-email-display").textContent =
+                email || "—";
+              document.getElementById("profile-edit-form").style.display =
+                "none";
+              document.getElementById("btn-edit-profile").style.display =
+                "inline-flex";
+              document.getElementById("user-name").textContent =
+                name || data.phone;
+            } catch (err) {
+              console.error("[DASHBOARD] Profile save failed:", err);
+              alert("Could not save profile. Please try again.");
+            }
+          });
+
+        document
+          .getElementById("btn-add-address")
+          .addEventListener("click", () => {
+            document.getElementById("add-address-form").style.display = "block";
+            document.getElementById("btn-add-address").style.display = "none";
+          });
+        document
+          .getElementById("btn-cancel-address")
+          .addEventListener("click", () => {
+            document.getElementById("add-address-form").style.display = "none";
+            document.getElementById("btn-add-address").style.display =
+              "inline-flex";
+          });
+        document
+          .getElementById("btn-save-address")
+          .addEventListener("click", async () => {
+            const label = document
+              .getElementById("new-address-label")
+              .value.trim();
+            const area = document
+              .getElementById("new-address-area")
+              .value.trim();
+            const address = document
+              .getElementById("new-address-text")
+              .value.trim();
+            if (!address) {
+              alert("Please enter the full address");
+              return;
+            }
+            try {
+              const res = await fetch(`${API_BASE}/addresses`, {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  label: label || "Home",
+                  address,
+                  location: area || undefined,
+                }),
+              });
+              if (!res.ok) throw new Error("Failed to add address");
+              const updated = await res.json();
+              renderProfile({ ...data, addresses: updated.addresses });
+            } catch (err) {
+              console.error("[DASHBOARD] Add address failed:", err);
+              alert("Could not save address. Please try again.");
+            }
+          });
+
+        document.querySelectorAll("[data-set-default]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.setDefault;
+            try {
+              const res = await fetch(`${API_BASE}/addresses/${id}`, {
+                method: "PATCH",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ is_default: true }),
+              });
+              if (!res.ok) throw new Error("Failed to set default");
+              const updated = await res.json();
+              renderProfile({ ...data, addresses: updated.addresses });
+            } catch (err) {
+              console.error("[DASHBOARD] Set default failed:", err);
+              alert("Could not update default address.");
+            }
+          });
+        });
+
+        document.querySelectorAll("[data-delete-address]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.dataset.deleteAddress;
+            if (!confirm("Delete this saved address?")) return;
+            try {
+              const res = await fetch(`${API_BASE}/addresses/${id}`, {
+                method: "DELETE",
+                credentials: "include",
+              });
+              if (!res.ok) throw new Error("Failed to delete address");
+              const updated = await res.json();
+              renderProfile({ ...data, addresses: updated.addresses });
+            } catch (err) {
+              console.error("[DASHBOARD] Delete address failed:", err);
+              alert("Could not delete address.");
+            }
+          });
+        });
       }
 
       async function loadDashboard() {
