@@ -4,7 +4,8 @@
   "description": "WhatsApp Cloud API bot on Vercel serverless",
   "type": "module",
   "scripts": {
-    "dev": "vercel dev --local"
+    "dev": "vercel dev --local",
+    "format": "prettier --write"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
@@ -12,6 +13,7 @@
   },
   "devDependencies": {
     "dotenv": "^17.4.2",
+    "prettier": "^3.5.3",
     "supabase": "^2.92.1",
     "vercel": "^51.7.0"
   }
