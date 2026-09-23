@@ -19,8 +19,8 @@
           <a href="/#how-it-works" class="nav-link">How It Works</a>
           <a href="/#plans" class="nav-link">Plans</a>
           <a href="/#why" class="nav-link">Why FitFuel</a>
-          <div id="nav-auth" class="nav-auth"></div>
           <a href="/single-meals" class="nav-link">Single Meals</a>
+          <div id="nav-auth" class="nav-auth"></div>
           <a href="/order" class="nav-cta">Order Now</a>
         </div>
       </div>
