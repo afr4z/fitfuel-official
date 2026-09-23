@@ -269,12 +269,14 @@ export async function handleIncoming(phone, message) {
 
         // Look up the subscription to filter menu items by meal plan
         let mealPlanId;
+        let orderSlot;
         try {
           const { data: ord } = await supabase
             .from("orders")
-            .select("subscription_id")
+            .select("subscription_id, slot")
             .eq("id", orderId)
             .single();
+          orderSlot = ord?.slot;
           if (ord?.subscription_id) {
             const { data: sub } = await supabase
               .from("meal_plan_subscriptions")
@@ -287,7 +289,7 @@ export async function handleIncoming(phone, message) {
 
         let items = [];
         try {
-          const fetched = await getMenuItems({ mealPlanId });
+          const fetched = await getMenuItems({ mealPlanId, slot: orderSlot });
           if (fetched.length) items = fetched;
         } catch (e) {
           console.error("[DB] Error fetching menu:", e.message);

@@ -111,7 +111,7 @@ CREATE TABLE dishes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   meal_plan_id UUID NOT NULL REFERENCES meal_plans(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  description TEXT,
+  categoryname TEXT,
   is_veg BOOLEAN NOT NULL DEFAULT true,
   price DECIMAL(10,2) NOT NULL,
   is_available BOOLEAN NOT NULL DEFAULT true,
