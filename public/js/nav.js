@@ -43,7 +43,7 @@
     () => {
       navEl?.classList.toggle("scrolled", window.scrollY > 20);
     },
-    { passive: true }
+    { passive: true },
   );
 
   // ── Auth-aware rendering ────────────────────────────────────────────
@@ -63,7 +63,9 @@
             <a href="/dashboard" class="nav-link">My Orders</a>
             <button id="btn-logout" class="nav-logout" style="border:none;background:none;color:var(--gray-600);font-size:0.8rem;font-weight:600;padding:8px 12px;cursor:pointer;transition:color 0.2s;">Logout</button>
           `;
-          document.getElementById("btn-logout")?.addEventListener("click", handleLogout);
+          document
+            .getElementById("btn-logout")
+            ?.addEventListener("click", handleLogout);
           return;
         }
       }
@@ -75,7 +77,10 @@
 
   async function handleLogout() {
     try {
-      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
       window.location.href = "/";
     } catch (e) {
       console.error("[nav] logout failed:", e);
