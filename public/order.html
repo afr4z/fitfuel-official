@@ -1,600 +1,1194 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Your Plan – FitFuel Nutrition</title>
-  <meta name="description" content="Select your meal plan, duration, and meals per day. Secure checkout via Razorpay." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/nav.css" />
-  <link rel="stylesheet" href="/css/main.css" />
-  <style>
-    /* brand palette lives in /css/main.css (single source of truth) */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--font); color: var(--gray-800); background: #fff; line-height: 1.6; min-height: 100vh; }
-    a { color: inherit; text-decoration: none; }
-    .container { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
-    .progress { display: flex; gap: 8px; margin: 24px 0; }
-    .progress-step { flex: 1; height: 4px; background: var(--gray-200); border-radius: 2px; overflow: hidden; position: relative; }
-    .progress-step.active::after { content: ""; position: absolute; inset: 0; background: var(--green-500); transform: translateX(-100%); animation: fill 0.4s var(--ease-out) forwards; }
-    .progress-step.completed::after { content: ""; position: absolute; inset: 0; background: var(--green-500); }
-    @keyframes fill { to { transform: translateX(0); } }
-    .step-label { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
-    .step-label span.active { color: var(--green-600); }
-    .step-label span.completed { color: var(--green-600); }
-    .form-step { display: none; animation: fadeIn 0.3s var(--ease-out); }
-    .form-step.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .card { background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
-    .card-header { margin-bottom: 20px; }
-    .card-title { font-size: 1.25rem; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
-    .card-subtitle { font-size: 0.9rem; color: var(--gray-500); }
-    .plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    @media (max-width: 480px) { .plan-grid { grid-template-columns: 1fr; } }
-    .plan-option { position: relative; border: 2px solid var(--gray-200); border-radius: var(--radius-md); padding: 16px; cursor: pointer; transition: all 0.2s var(--ease-base); background: #fff; }
-    .plan-option:hover { border-color: var(--green-300); box-shadow: var(--shadow-sm); }
-    .plan-option.selected { border-color: var(--green-500); background: var(--green-50); box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
-    .plan-option input { position: absolute; opacity: 0; pointer-events: none; }
-    .plan-emoji { font-size: 1.5rem; margin-bottom: 8px; }
-    .plan-name { font-weight: 700; color: var(--gray-900); font-size: 0.95rem; }
-    .plan-tag { display: inline-block; font-size: 0.65rem; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); margin-top: 6px; }
-    .tag-veg { background: var(--green-100); color: var(--green-800); }
-    .tag-nonveg { background: #fef3c7; color: #92400e; }
-    .plan-desc { font-size: 0.75rem; color: var(--gray-500); margin-top: 8px; line-height: 1.4; }
-    .radio-group { display: flex; flex-wrap: wrap; gap: 10px; }
-    .radio-btn { position: relative; }
-    .radio-btn input { position: absolute; opacity: 0; pointer-events: none; }
-    .radio-btn label { display: inline-flex; align-items: center; justify-content: center; min-width: 80px; padding: 12px 16px; border: 2px solid var(--gray-200); border-radius: var(--radius-sm); font-weight: 600; color: var(--gray-700); cursor: pointer; transition: all 0.2s var(--ease-base); background: #fff; }
-    .radio-btn input:checked + label { border-color: var(--green-500); background: var(--green-50); color: var(--green-800); box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
-    .radio-btn label:hover { border-color: var(--green-300); }
-    .form-group { margin-bottom: 18px; }
-    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
-    .form-label .required { color: var(--red-500); margin-left: 2px; }
-    .form-input, .form-textarea { width: 100%; padding: 12px 14px; font-size: 0.95rem; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius-sm); background: #fff; color: var(--gray-900); transition: all 0.15s var(--ease-base); }
-    .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
-    .form-input::placeholder, .form-textarea::placeholder { color: var(--gray-400); }
-    .form-input.error, .form-textarea.error { border-color: var(--red-500); }
-    .form-error { font-size: 0.75rem; color: var(--red-500); margin-top: 4px; display: none; }
-    .form-error.visible { display: block; }
-    .form-textarea { min-height: 80px; resize: vertical; }
-    .price-summary { background: var(--green-50); border: 1px solid var(--green-100); border-radius: var(--radius-md); padding: 16px; margin-top: 20px; }
-    .price-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.9rem; }
-    .price-row:not(:last-child) { border-bottom: 1px solid var(--green-200); }
-    .price-row.total { font-weight: 700; font-size: 1.05rem; color: var(--green-800); margin-top: 4px; padding-top: 10px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; font-size: 1rem; font-weight: 600; border-radius: var(--radius-md); border: none; cursor: pointer; transition: all 0.2s var(--ease-base); font-family: inherit; }
-    .btn-primary { background: var(--green-500); color: #fff; width: 100%; box-shadow: 0 2px 8px rgba(34,197,94,0.25); }
-    .btn-primary:hover:not(:disabled) { background: var(--green-600); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(34,197,94,0.35); }
-    .btn-primary:disabled { background: var(--gray-300); color: var(--gray-500); cursor: not-allowed; transform: none; box-shadow: none; }
-    .btn-secondary { background: #fff; color: var(--green-700); border: 2px solid var(--green-200); width: 100%; }
-    .btn-secondary:hover:not(:disabled) { border-color: var(--green-400); background: var(--green-50); }
-    .btn-secondary:disabled { border-color: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
-    .btn-row { display: flex; gap: 12px; margin-top: 24px; }
-    .btn-row .btn { flex: 1; }
-    .loading { display: none; align-items: center; justify-content: center; gap: 10px; }
-    .loading.visible { display: flex; }
-    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .error-banner { background: #fef2f2; border: 1px solid #fecaca; color: var(--red-600); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem; display: none; }
-    .error-banner.visible { display: block; }
-    .success-banner { background: var(--green-50); border: 1px solid var(--green-100); color: var(--green-700); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem; display: none; }
-    .success-banner.visible { display: block; }
-    .success-state { text-align: center; padding: 40px 20px; }
-    .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--green-500), var(--green-600)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 8px 32px rgba(34,197,94,0.35); }
-    .success-icon svg { width: 40px; height: 40px; color: #fff; }
-    .success-title { font-size: 1.5rem; font-weight: 800; color: var(--green-800); margin-bottom: 8px; }
-    .success-text { color: var(--gray-600); margin-bottom: 24px; }
-    .plan-summary { background: var(--gray-50); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; text-align: left; }
-    .plan-summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.9rem; }
-    .plan-summary-row:not(:last-child) { border-bottom: 1px solid var(--gray-200); }
-    .footer-note { text-align: center; font-size: 0.75rem; color: var(--gray-400); margin-top: 32px; }
-    .footer-note a { color: var(--green-600); font-weight: 500; }
-  </style>
-</head>
-<body>
-  <div id="nav-placeholder"></div>
-
-  <div class="container">
-    <div class="progress" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="3" aria-label="Order progress">
-      <div class="progress-step active" id="step1-prog"></div>
-      <div class="progress-step" id="step2-prog"></div>
-      <div class="progress-step" id="step3-prog"></div>
-    </div>
-    <div class="step-label">
-      <span class="active" id="step1-label">Plan</span>
-      <span id="step2-label">Details</span>
-      <span id="step3-label">Checkout</span>
-    </div>
-
-    <div class="error-banner" id="error-banner" role="alert"></div>
-    <div class="success-banner" id="success-banner" role="status"></div>
-
-    <form id="order-form" novalidate>
-      <div class="form-step active" id="step1" data-step="1">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Choose Your Plan</h2>
-            <p class="card-subtitle">Select the nutrition plan that matches your goal</p>
-          </div>
-          <div class="plan-grid" id="plan-grid" role="radiogroup" aria-label="Meal plans"></div>
-        </div>
-      </div>
-
-      <div class="form-step" id="step2" data-step="2">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Customize Your Plan</h2>
-            <p class="card-subtitle">Select duration and meals per day</p>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Duration</label>
-            <div class="radio-group" role="radiogroup" aria-label="Plan duration">
-              <div class="radio-btn">
-                <input type="radio" name="days" value="3" id="days-3" required>
-                <label for="days-3">3 Days</label>
-              </div>
-              <div class="radio-btn">
-                <input type="radio" name="days" value="7" id="days-7" checked>
-                <label for="days-7">7 Days</label>
-              </div>
-              <div class="radio-btn">
-                <input type="radio" name="days" value="14" id="days-14">
-                <label for="days-14">14 Days</label>
-              </div>
-              <div class="radio-btn">
-                <input type="radio" name="days" value="30" id="days-30">
-                <label for="days-30">30 Days</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Meals Per Day</label>
-            <div class="radio-group" role="radiogroup" aria-label="Meals per day">
-              <div class="radio-btn">
-                <input type="radio" name="mealsPerDay" value="1" id="meals-1" required>
-                <label for="meals-1">🌅 Breakfast Only</label>
-              </div>
-              <div class="radio-btn">
-                <input type="radio" name="mealsPerDay" value="2" id="meals-2" checked>
-                <label for="meals-2">🍽️ Lunch + Dinner</label>
-              </div>
-              <div class="radio-btn">
-                <input type="radio" name="mealsPerDay" value="3" id="meals-3">
-                <label for="meals-3">🌟 All 3 Meals</label>
-              </div>
-            </div>
-            <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 8px;">Note: Sundays are a kitchen holiday — no deliveries. Your plan extends by a day for each Sunday.</p>
-          </div>
-
-          <div class="price-summary" id="price-summary" aria-live="polite">
-            <div class="price-row"><span>Plan</span><span id="summary-plan">—</span></div>
-            <div class="price-row"><span>Duration</span><span id="summary-days">—</span></div>
-            <div class="price-row"><span>Meals/Day</span><span id="summary-meals">—</span></div>
-            <div class="price-row total"><span>Total</span><span id="summary-total">₹0</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-step" id="step3" data-step="3">
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">Delivery & Payment Details</h2>
-            <p class="card-subtitle">We'll send the payment link to your WhatsApp</p>
-          </div>
-
-          <div class="plan-summary" id="final-summary"></div>
-
-          <div class="form-group">
-            <label class="form-label">Full Name <span class="required">*</span></label>
-            <input type="text" class="form-input" name="name" id="name" placeholder="Your full name" required autocomplete="name">
-            <div class="form-error" id="name-error">Please enter your name</div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Phone Number <span class="required">*</span></label>
-            <input type="tel" class="form-input" name="phone" id="phone" placeholder="9876543210" required autocomplete="tel" pattern="[0-9]{10}" maxlength="10">
-            <div class="form-error" id="phone-error">Enter a valid 10-digit Indian mobile number</div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-input" name="email" id="email" placeholder="you@example.com" autocomplete="email">
-            <div class="form-error" id="email-error">Enter a valid email address</div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Delivery Area / Neighbourhood <span class="required">*</span></label>
-            <div style="display:flex;gap:8px;">
-              <input type="text" class="form-input" name="location" id="location" placeholder="e.g. Koramangala, Indiranagar" required autocomplete="address-level2" style="flex:1;">
-              <button type="button" class="btn btn-secondary" id="btn-get-location" style="width:auto;padding:12px 16px;white-space:nowrap;" title="Use current location">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
-              </button>
-            </div>
-            <div class="form-error" id="location-error">Please enter your area/neighbourhood</div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Full Address <span class="required">*</span></label>
-            <textarea class="form-textarea" name="address" id="address" placeholder="Flat/House No., Street, Landmark, City, PIN" required autocomplete="street-address"></textarea>
-            <div class="form-error" id="address-error">Please enter your full delivery address</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="btn-row" id="btn-row">
-        <button type="button" class="btn btn-secondary" id="btn-back" style="display:none;">Back</button>
-        <button type="button" class="btn btn-primary" id="btn-next">
-          <span id="btn-next-label">Continue</span>
-          <div class="loading" id="btn-loading"><div class="spinner"></div><span>Processing...</span></div>
-        </button>
-      </div>
-    </form>
-
-    <p class="footer-note">By ordering, you agree to our <a href="/privacy-policy">Privacy Policy</a>. Secure payments powered by <strong>Razorpay</strong>.</p>
-  </div>
-
-  <script>
-    const API_PLANS = '/api/plans';
-    const API_WEB_ORDER = '/api/web-order';
-
-    let plans = [];
-    let selectedPlanId = null;
-    let currentStep = 1;
-    const totalSteps = 3;
-
-    const stepElements = {
-      1: document.getElementById('step1'),
-      2: document.getElementById('step2'),
-      3: document.getElementById('step3')
-    };
-    const progElements = {
-      1: document.getElementById('step1-prog'),
-      2: document.getElementById('step2-prog'),
-      3: document.getElementById('step3-prog')
-    };
-    const labelElements = {
-      1: document.getElementById('step1-label'),
-      2: document.getElementById('step2-label'),
-      3: document.getElementById('step3-label')
-    };
-
-    const btnNext = document.getElementById('btn-next');
-    const btnNextLabel = document.getElementById('btn-next-label');
-    const btnBack = document.getElementById('btn-back');
-    const btnLoading = document.getElementById('btn-loading');
-    const errorBanner = document.getElementById('error-banner');
-    const planGrid = document.getElementById('plan-grid');
-    const priceSummary = document.getElementById('price-summary');
-    const finalSummary = document.getElementById('final-summary');
-
-    async function loadPlans() {
-      try {
-        const res = await fetch(API_PLANS);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to load plans');
-        plans = data.plans || [];
-        renderPlans();
-      } catch (err) {
-        console.error('[ORDER] Failed to load plans:', err);
-        showError('Unable to load plans. Please refresh or try again later.');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Your Plan – FitFuel Nutrition</title>
+    <meta
+      name="description"
+      content="Select your meal plan, duration, and meals per day. Secure checkout via Razorpay."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/nav.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <style>
+      /* brand palette lives in /css/main.css (single source of truth) */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
       }
-    }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font);
+        color: var(--gray-800);
+        background: #fff;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+      .progress {
+        display: flex;
+        gap: 8px;
+        margin: 24px 0;
+      }
+      .progress-step {
+        flex: 1;
+        height: 4px;
+        background: var(--gray-200);
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+      }
+      .progress-step.active::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--green-500);
+        transform: translateX(-100%);
+        animation: fill 0.4s var(--ease-out) forwards;
+      }
+      .progress-step.completed::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--green-500);
+      }
+      @keyframes fill {
+        to {
+          transform: translateX(0);
+        }
+      }
+      .step-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--gray-400);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+      }
+      .step-label span.active {
+        color: var(--green-600);
+      }
+      .step-label span.completed {
+        color: var(--green-600);
+      }
+      .form-step {
+        display: none;
+        animation: fadeIn 0.3s var(--ease-out);
+      }
+      .form-step.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+      }
+      .card-header {
+        margin-bottom: 20px;
+      }
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 4px;
+      }
+      .card-subtitle {
+        font-size: 0.9rem;
+        color: var(--gray-500);
+      }
+      .plan-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      @media (max-width: 480px) {
+        .plan-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .plan-option {
+        position: relative;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s var(--ease-base);
+        background: #fff;
+      }
+      .plan-option:hover {
+        border-color: var(--green-300);
+        box-shadow: var(--shadow-sm);
+      }
+      .plan-option.selected {
+        border-color: var(--green-500);
+        background: var(--green-50);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+      }
+      .plan-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .plan-emoji {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+      }
+      .plan-name {
+        font-weight: 700;
+        color: var(--gray-900);
+        font-size: 0.95rem;
+      }
+      .plan-tag {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: var(--radius-full);
+        margin-top: 6px;
+      }
+      .tag-veg {
+        background: var(--green-100);
+        color: var(--green-800);
+      }
+      .tag-nonveg {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .plan-desc {
+        font-size: 0.75rem;
+        color: var(--gray-500);
+        margin-top: 8px;
+        line-height: 1.4;
+      }
+      .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .radio-btn {
+        position: relative;
+      }
+      .radio-btn input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .radio-btn label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+        padding: 12px 16px;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        color: var(--gray-700);
+        cursor: pointer;
+        transition: all 0.2s var(--ease-base);
+        background: #fff;
+      }
+      .radio-btn input:checked + label {
+        border-color: var(--green-500);
+        background: var(--green-50);
+        color: var(--green-800);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+      }
+      .radio-btn label:hover {
+        border-color: var(--green-300);
+      }
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 6px;
+      }
+      .form-label .required {
+        color: var(--red-500);
+        margin-left: 2px;
+      }
+      .form-input,
+      .form-textarea {
+        width: 100%;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        background: #fff;
+        color: var(--gray-900);
+        transition: all 0.15s var(--ease-base);
+      }
+      .form-input:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: var(--green-500);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+      }
+      .form-input::placeholder,
+      .form-textarea::placeholder {
+        color: var(--gray-400);
+      }
+      .form-input.error,
+      .form-textarea.error {
+        border-color: var(--red-500);
+      }
+      .form-error {
+        font-size: 0.75rem;
+        color: var(--red-500);
+        margin-top: 4px;
+        display: none;
+      }
+      .form-error.visible {
+        display: block;
+      }
+      .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .price-summary {
+        background: var(--green-50);
+        border: 1px solid var(--green-100);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-top: 20px;
+      }
+      .price-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 0.9rem;
+      }
+      .price-row:not(:last-child) {
+        border-bottom: 1px solid var(--green-200);
+      }
+      .price-row.total {
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: var(--green-800);
+        margin-top: 4px;
+        padding-top: 10px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s var(--ease-base);
+        font-family: inherit;
+      }
+      .btn-primary {
+        background: var(--green-500);
+        color: #fff;
+        width: 100%;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: var(--green-600);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+      }
+      .btn-primary:disabled {
+        background: var(--gray-300);
+        color: var(--gray-500);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .btn-secondary {
+        background: #fff;
+        color: var(--green-700);
+        border: 2px solid var(--green-200);
+        width: 100%;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        border-color: var(--green-400);
+        background: var(--green-50);
+      }
+      .btn-secondary:disabled {
+        border-color: var(--gray-200);
+        color: var(--gray-400);
+        cursor: not-allowed;
+      }
+      .btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      .btn-row .btn {
+        flex: 1;
+      }
+      .loading {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .loading.visible {
+        display: flex;
+      }
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .error-banner {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: var(--red-600);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 16px;
+        font-size: 0.85rem;
+        display: none;
+      }
+      .error-banner.visible {
+        display: block;
+      }
+      .success-banner {
+        background: var(--green-50);
+        border: 1px solid var(--green-100);
+        color: var(--green-700);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 16px;
+        font-size: 0.85rem;
+        display: none;
+      }
+      .success-banner.visible {
+        display: block;
+      }
+      .success-state {
+        text-align: center;
+        padding: 40px 20px;
+      }
+      .success-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--green-500), var(--green-600));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 8px 32px rgba(34, 197, 94, 0.35);
+      }
+      .success-icon svg {
+        width: 40px;
+        height: 40px;
+        color: #fff;
+      }
+      .success-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--green-800);
+        margin-bottom: 8px;
+      }
+      .success-text {
+        color: var(--gray-600);
+        margin-bottom: 24px;
+      }
+      .plan-summary {
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+      .plan-summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 0.9rem;
+      }
+      .plan-summary-row:not(:last-child) {
+        border-bottom: 1px solid var(--gray-200);
+      }
+      .footer-note {
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--gray-400);
+        margin-top: 32px;
+      }
+      .footer-note a {
+        color: var(--green-600);
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="nav-placeholder"></div>
 
-    function renderPlans() {
-      planGrid.innerHTML = plans.map((plan, idx) => `
+    <div class="container">
+      <div
+        class="progress"
+        role="progressbar"
+        aria-valuenow="1"
+        aria-valuemin="1"
+        aria-valuemax="3"
+        aria-label="Order progress"
+      >
+        <div class="progress-step active" id="step1-prog"></div>
+        <div class="progress-step" id="step2-prog"></div>
+        <div class="progress-step" id="step3-prog"></div>
+      </div>
+      <div class="step-label">
+        <span class="active" id="step1-label">Plan</span>
+        <span id="step2-label">Details</span>
+        <span id="step3-label">Checkout</span>
+      </div>
+
+      <div class="error-banner" id="error-banner" role="alert"></div>
+      <div class="success-banner" id="success-banner" role="status"></div>
+
+      <form id="order-form" novalidate>
+        <div class="form-step active" id="step1" data-step="1">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Choose Your Plan</h2>
+              <p class="card-subtitle">
+                Select the nutrition plan that matches your goal
+              </p>
+            </div>
+            <div
+              class="plan-grid"
+              id="plan-grid"
+              role="radiogroup"
+              aria-label="Meal plans"
+            ></div>
+          </div>
+        </div>
+
+        <div class="form-step" id="step2" data-step="2">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Customize Your Plan</h2>
+              <p class="card-subtitle">Select duration and meals per day</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Duration</label>
+              <div
+                class="radio-group"
+                role="radiogroup"
+                aria-label="Plan duration"
+              >
+                <div class="radio-btn">
+                  <input
+                    type="radio"
+                    name="days"
+                    value="3"
+                    id="days-3"
+                    required
+                  />
+                  <label for="days-3">3 Days</label>
+                </div>
+                <div class="radio-btn">
+                  <input
+                    type="radio"
+                    name="days"
+                    value="7"
+                    id="days-7"
+                    checked
+                  />
+                  <label for="days-7">7 Days</label>
+                </div>
+                <div class="radio-btn">
+                  <input type="radio" name="days" value="14" id="days-14" />
+                  <label for="days-14">14 Days</label>
+                </div>
+                <div class="radio-btn">
+                  <input type="radio" name="days" value="30" id="days-30" />
+                  <label for="days-30">30 Days</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Meals Per Day</label>
+              <div
+                class="radio-group"
+                role="radiogroup"
+                aria-label="Meals per day"
+              >
+                <div class="radio-btn">
+                  <input
+                    type="radio"
+                    name="mealsPerDay"
+                    value="1"
+                    id="meals-1"
+                    required
+                  />
+                  <label for="meals-1">🌅 Breakfast Only</label>
+                </div>
+                <div class="radio-btn">
+                  <input
+                    type="radio"
+                    name="mealsPerDay"
+                    value="2"
+                    id="meals-2"
+                    checked
+                  />
+                  <label for="meals-2">🍽️ Lunch + Dinner</label>
+                </div>
+                <div class="radio-btn">
+                  <input
+                    type="radio"
+                    name="mealsPerDay"
+                    value="3"
+                    id="meals-3"
+                  />
+                  <label for="meals-3">🌟 All 3 Meals</label>
+                </div>
+              </div>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  color: var(--gray-500);
+                  margin-top: 8px;
+                "
+              >
+                Note: Sundays are a kitchen holiday — no deliveries. Your plan
+                extends by a day for each Sunday.
+              </p>
+            </div>
+
+            <div class="price-summary" id="price-summary" aria-live="polite">
+              <div class="price-row">
+                <span>Plan</span><span id="summary-plan">—</span>
+              </div>
+              <div class="price-row">
+                <span>Duration</span><span id="summary-days">—</span>
+              </div>
+              <div class="price-row">
+                <span>Meals/Day</span><span id="summary-meals">—</span>
+              </div>
+              <div class="price-row total">
+                <span>Total</span><span id="summary-total">₹0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-step" id="step3" data-step="3">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Delivery & Payment Details</h2>
+              <p class="card-subtitle">
+                We'll send the payment link to your WhatsApp
+              </p>
+            </div>
+
+            <div class="plan-summary" id="final-summary"></div>
+
+            <div class="form-group">
+              <label class="form-label"
+                >Full Name <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                class="form-input"
+                name="name"
+                id="name"
+                placeholder="Your full name"
+                required
+                autocomplete="name"
+              />
+              <div class="form-error" id="name-error">
+                Please enter your name
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label"
+                >Phone Number <span class="required">*</span></label
+              >
+              <input
+                type="tel"
+                class="form-input"
+                name="phone"
+                id="phone"
+                placeholder="9876543210"
+                required
+                autocomplete="tel"
+                pattern="[0-9]{10}"
+                maxlength="10"
+              />
+              <div class="form-error" id="phone-error">
+                Enter a valid 10-digit Indian mobile number
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-input"
+                name="email"
+                id="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+              <div class="form-error" id="email-error">
+                Enter a valid email address
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label"
+                >Delivery Area / Neighbourhood
+                <span class="required">*</span></label
+              >
+              <div style="display: flex; gap: 8px">
+                <input
+                  type="text"
+                  class="form-input"
+                  name="location"
+                  id="location"
+                  placeholder="e.g. Koramangala, Indiranagar"
+                  required
+                  autocomplete="address-level2"
+                  style="flex: 1"
+                />
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="btn-get-location"
+                  style="width: auto; padding: 12px 16px; white-space: nowrap"
+                  title="Use current location"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+                  </svg>
+                </button>
+              </div>
+              <div class="form-error" id="location-error">
+                Please enter your area/neighbourhood
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label"
+                >Full Address <span class="required">*</span></label
+              >
+              <textarea
+                class="form-textarea"
+                name="address"
+                id="address"
+                placeholder="Flat/House No., Street, Landmark, City, PIN"
+                required
+                autocomplete="street-address"
+              ></textarea>
+              <div class="form-error" id="address-error">
+                Please enter your full delivery address
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row" id="btn-row">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="btn-back"
+            style="display: none"
+          >
+            Back
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-next">
+            <span id="btn-next-label">Continue</span>
+            <div class="loading" id="btn-loading">
+              <div class="spinner"></div>
+              <span>Processing...</span>
+            </div>
+          </button>
+        </div>
+      </form>
+
+      <p class="footer-note">
+        By ordering, you agree to our
+        <a href="/privacy-policy">Privacy Policy</a>. Secure payments powered by
+        <strong>Razorpay</strong>.
+      </p>
+    </div>
+
+    <script>
+      const API_PLANS = "/api/plans";
+      const API_WEB_ORDER = "/api/web-order";
+
+      let plans = [];
+      let selectedPlanId = null;
+      let currentStep = 1;
+      const totalSteps = 3;
+
+      const stepElements = {
+        1: document.getElementById("step1"),
+        2: document.getElementById("step2"),
+        3: document.getElementById("step3"),
+      };
+      const progElements = {
+        1: document.getElementById("step1-prog"),
+        2: document.getElementById("step2-prog"),
+        3: document.getElementById("step3-prog"),
+      };
+      const labelElements = {
+        1: document.getElementById("step1-label"),
+        2: document.getElementById("step2-label"),
+        3: document.getElementById("step3-label"),
+      };
+
+      const btnNext = document.getElementById("btn-next");
+      const btnNextLabel = document.getElementById("btn-next-label");
+      const btnBack = document.getElementById("btn-back");
+      const btnLoading = document.getElementById("btn-loading");
+      const errorBanner = document.getElementById("error-banner");
+      const planGrid = document.getElementById("plan-grid");
+      const priceSummary = document.getElementById("price-summary");
+      const finalSummary = document.getElementById("final-summary");
+
+      async function loadPlans() {
+        try {
+          const res = await fetch(API_PLANS);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Failed to load plans");
+          plans = data.plans || [];
+          renderPlans();
+        } catch (err) {
+          console.error("[ORDER] Failed to load plans:", err);
+          showError("Unable to load plans. Please refresh or try again later.");
+        }
+      }
+
+      function renderPlans() {
+        planGrid.innerHTML = plans
+          .map(
+            (plan, idx) => `
         <div class="plan-option" data-plan-id="${plan.id}" role="radio" aria-checked="false" tabindex="0">
-          <input type="radio" name="plan" value="${plan.id}" id="plan-${plan.id}" ${idx === 0 ? 'checked' : ''}>
-          <div class="plan-emoji">${plan.title.split(' ')[0]}</div>
-          <div class="plan-name">${plan.title.replace(/^[\s\S]*?\s/, '')}</div>
-          <span class="plan-tag ${plan.tag === 'Veg' ? 'tag-veg' : 'tag-nonveg'}">${plan.tag}</span>
+          <input type="radio" name="plan" value="${plan.id}" id="plan-${plan.id}" ${idx === 0 ? "checked" : ""}>
+          <div class="plan-emoji">${plan.title.split(" ")[0]}</div>
+          <div class="plan-name">${plan.title.replace(/^[\s\S]*?\s/, "")}</div>
+          <span class="plan-tag ${plan.tag === "Veg" ? "tag-veg" : "tag-nonveg"}">${plan.tag}</span>
           <div class="plan-desc">${plan.description}</div>
         </div>
-      `).join('');
+      `,
+          )
+          .join("");
 
-      if (plans.length) {
-        selectPlan(plans[0].id);
+        if (plans.length) {
+          selectPlan(plans[0].id);
+        }
+
+        planGrid.querySelectorAll(".plan-option").forEach((el) => {
+          el.addEventListener("click", () => selectPlan(el.dataset.planId));
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              selectPlan(el.dataset.planId);
+            }
+          });
+        });
       }
 
-      planGrid.querySelectorAll('.plan-option').forEach(el => {
-        el.addEventListener('click', () => selectPlan(el.dataset.planId));
-        el.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            selectPlan(el.dataset.planId);
-          }
+      function selectPlan(planId) {
+        selectedPlanId = planId;
+        planGrid.querySelectorAll(".plan-option").forEach((el) => {
+          const isSel = el.dataset.planId === planId;
+          el.classList.toggle("selected", isSel);
+          el.setAttribute("aria-checked", isSel);
+          el.querySelector("input").checked = isSel;
         });
-      });
-    }
+        updatePriceSummary();
+        validateStep1();
+      }
 
-    function selectPlan(planId) {
-      selectedPlanId = planId;
-      planGrid.querySelectorAll('.plan-option').forEach(el => {
-        const isSel = el.dataset.planId === planId;
-        el.classList.toggle('selected', isSel);
-        el.setAttribute('aria-checked', isSel);
-        el.querySelector('input').checked = isSel;
-      });
-      updatePriceSummary();
-      validateStep1();
-    }
+      function getSelectedPlan() {
+        return plans.find((p) => p.id === selectedPlanId);
+      }
 
-    function getSelectedPlan() {
-      return plans.find(p => p.id === selectedPlanId);
-    }
+      function getSelectedDays() {
+        return parseInt(
+          document.querySelector('input[name="days"]:checked')?.value || "7",
+        );
+      }
 
-    function getSelectedDays() {
-      return parseInt(document.querySelector('input[name="days"]:checked')?.value || '7');
-    }
+      function getSelectedMeals() {
+        return parseInt(
+          document.querySelector('input[name="mealsPerDay"]:checked')?.value ||
+            "2",
+        );
+      }
 
-    function getSelectedMeals() {
-      return parseInt(document.querySelector('input[name="mealsPerDay"]:checked')?.value || '2');
-    }
+      function calcTotal() {
+        const plan = getSelectedPlan();
+        const days = getSelectedDays();
+        const meals = getSelectedMeals();
+        if (!plan || !plan.pricing[days]) return 0;
+        return Math.round(plan.pricing[days] * meals * days);
+      }
 
-    function calcTotal() {
-      const plan = getSelectedPlan();
-      const days = getSelectedDays();
-      const meals = getSelectedMeals();
-      if (!plan || !plan.pricing[days]) return 0;
-      return Math.round(plan.pricing[days] * meals * days);
-    }
+      function updatePriceSummary() {
+        const plan = getSelectedPlan();
+        const days = getSelectedDays();
+        const meals = getSelectedMeals();
+        const total = calcTotal();
 
-    function updatePriceSummary() {
-      const plan = getSelectedPlan();
-      const days = getSelectedDays();
-      const meals = getSelectedMeals();
-      const total = calcTotal();
+        const mealLabel =
+          meals === 1
+            ? "Breakfast Only"
+            : meals === 2
+              ? "Lunch + Dinner"
+              : "All 3 Meals";
+        const dayLabel = `${days} Days`;
 
-      const mealLabel = meals === 1 ? 'Breakfast Only' : meals === 2 ? 'Lunch + Dinner' : 'All 3 Meals';
-      const dayLabel = `${days} Days`;
+        document.getElementById("summary-plan").textContent =
+          plan?.title || "—";
+        document.getElementById("summary-days").textContent = dayLabel;
+        document.getElementById("summary-meals").textContent = mealLabel;
+        document.getElementById("summary-total").textContent =
+          `₹${total.toLocaleString()}`;
+      }
 
-      document.getElementById('summary-plan').textContent = plan?.title || '—';
-      document.getElementById('summary-days').textContent = dayLabel;
-      document.getElementById('summary-meals').textContent = mealLabel;
-      document.getElementById('summary-total').textContent = `₹${total.toLocaleString()}`;
-    }
+      function updateFinalSummary() {
+        const plan = getSelectedPlan();
+        const days = getSelectedDays();
+        const meals = getSelectedMeals();
+        const total = calcTotal();
+        const mealLabel =
+          meals === 1
+            ? "Breakfast Only"
+            : meals === 2
+              ? "Lunch + Dinner"
+              : "All 3 Meals";
+        const dayLabel = `${days} Days`;
 
-    function updateFinalSummary() {
-      const plan = getSelectedPlan();
-      const days = getSelectedDays();
-      const meals = getSelectedMeals();
-      const total = calcTotal();
-      const mealLabel = meals === 1 ? 'Breakfast Only' : meals === 2 ? 'Lunch + Dinner' : 'All 3 Meals';
-      const dayLabel = `${days} Days`;
-
-      finalSummary.innerHTML = `
-        <div class="plan-summary-row"><span>Plan</span><span>${plan?.title || '—'}</span></div>
+        finalSummary.innerHTML = `
+        <div class="plan-summary-row"><span>Plan</span><span>${plan?.title || "—"}</span></div>
         <div class="plan-summary-row"><span>Duration</span><span>${dayLabel}</span></div>
         <div class="plan-summary-row"><span>Meals/Day</span><span>${mealLabel}</span></div>
         <div class="plan-summary-row" style="font-weight:700;color:var(--green-800);"><span>Total</span><span>₹${total.toLocaleString()}</span></div>
       `;
-    }
-
-    function validateStep1() {
-      const valid = !!selectedPlanId;
-      btnNext.disabled = !valid;
-      return valid;
-    }
-
-    function validateStep2() {
-      return true;
-    }
-
-    function validateStep3() {
-      const name = document.getElementById('name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const location = document.getElementById('location').value.trim();
-      const address = document.getElementById('address').value.trim();
-
-      let valid = true;
-      clearErrors();
-
-      if (!name) { showFieldError('name'); valid = false; }
-      if (!/^[0-9]{10}$/.test(phone)) { showFieldError('phone'); valid = false; }
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('email'); valid = false; }
-      if (!location) { showFieldError('location'); valid = false; }
-      if (!address) { showFieldError('address'); valid = false; }
-
-      btnNext.disabled = !valid;
-      return valid;
-    }
-
-    function showFieldError(field) {
-      document.getElementById(field).classList.add('error');
-      document.getElementById(`${field}-error`).classList.add('visible');
-    }
-
-    function clearErrors() {
-      ['name','phone','email','location','address'].forEach(f => {
-        document.getElementById(f).classList.remove('error');
-        document.getElementById(`${f}-error`).classList.remove('visible');
-      });
-    }
-
-    function showError(msg) {
-      errorBanner.textContent = msg;
-      errorBanner.classList.add('visible');
-    }
-
-    function hideError() {
-      errorBanner.classList.remove('visible');
-    }
-
-    function showSuccess(msg) {
-      const el = document.getElementById('success-banner');
-      el.textContent = msg;
-      el.classList.add('visible');
-      setTimeout(() => el.classList.remove('visible'), 4000);
-    }
-
-    function goToStep(step) {
-      if (step < 1 || step > totalSteps) return;
-      stepElements[currentStep].classList.remove('active');
-      progElements[currentStep].classList.remove('active');
-      labelElements[currentStep].classList.remove('active');
-
-      if (step > currentStep) {
-        progElements[currentStep].classList.add('completed');
-        labelElements[currentStep].classList.add('completed');
-      } else if (step < currentStep) {
-        progElements[step].classList.remove('completed');
-        labelElements[step].classList.remove('completed');
-        progElements[step].classList.add('active');
-        labelElements[step].classList.add('active');
       }
 
-      currentStep = step;
-      stepElements[currentStep].classList.add('active');
-      progElements[currentStep].classList.add('active');
-      labelElements[currentStep].classList.add('active');
-
-      btnBack.style.display = currentStep > 1 ? 'flex' : 'none';
-      btnNextLabel.textContent = currentStep === totalSteps ? 'Pay Now' : 'Continue';
-      btnNext.disabled = false;
-
-      if (currentStep === 2) updatePriceSummary();
-      if (currentStep === 3) updateFinalSummary();
-      hideError();
-    }
-
-    function validateCurrentStep() {
-      if (currentStep === 1) return validateStep1();
-      if (currentStep === 2) return validateStep2();
-      if (currentStep === 3) return validateStep3();
-      return false;
-    }
-
-    async function submitOrder() {
-      const plan = getSelectedPlan();
-      const days = getSelectedDays();
-      const mealsPerDay = getSelectedMeals();
-
-      const payload = {
-        planId: plan.id,
-        days,
-        mealsPerDay,
-        phone: document.getElementById('phone').value.trim(),
-        name: document.getElementById('name').value.trim(),
-        email: document.getElementById('email').value.trim() || undefined,
-        address: document.getElementById('address').value.trim(),
-        location: document.getElementById('location').value.trim(),
-      };
-
-      btnNext.disabled = true;
-      btnLoading.classList.add('visible');
-      hideError();
-
-      try {
-        const res = await fetch(API_WEB_ORDER, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to create order');
-
-        // Go straight to Razorpay on this click — no intermediate screen or
-        // extra button. Nothing is written to the database until the webhook
-        // confirms the payment.
-        window.location.href = data.paymentUrl;
-      } catch (err) {
-        console.error('[ORDER] Submit failed:', err);
-        showError(err.message || 'Something went wrong. Please try again.');
-        btnNext.disabled = false;
-      } finally {
-        btnLoading.classList.remove('visible');
+      function validateStep1() {
+        const valid = !!selectedPlanId;
+        btnNext.disabled = !valid;
+        return valid;
       }
-    }
 
-    btnNext.addEventListener('click', () => {
-      if (!validateCurrentStep()) return;
-      if (currentStep < totalSteps) {
-        goToStep(currentStep + 1);
-      } else {
-        submitOrder();
+      function validateStep2() {
+        return true;
       }
-    });
 
-    btnBack.addEventListener('click', () => {
-      if (currentStep > 1) goToStep(currentStep - 1);
-    });
+      function validateStep3() {
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const location = document.getElementById("location").value.trim();
+        const address = document.getElementById("address").value.trim();
 
-    document.querySelectorAll('input[name="days"], input[name="mealsPerDay"]').forEach(input => {
-      input.addEventListener('change', () => {
-        updatePriceSummary();
-      });
-    });
+        let valid = true;
+        clearErrors();
 
-    ['name','phone','email','location','address'].forEach(field => {
-      document.getElementById(field).addEventListener('input', () => {
-        if (currentStep === 3) validateStep3();
-      });
-      document.getElementById(field).addEventListener('blur', () => {
-        if (currentStep === 3) validateStep3();
-      });
-    });
-
-    // Geolocation button
-    document.getElementById('btn-get-location').addEventListener('click', async () => {
-      const btn = document.getElementById('btn-get-location');
-      const locationInput = document.getElementById('location');
-      if (!navigator.geolocation) {
-        alert('Geolocation is not supported by your browser');
-        return;
-      }
-      btn.disabled = true;
-      btn.innerHTML = '<svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 100" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></svg>';
-      try {
-        const pos = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 });
-        });
-        const { latitude, longitude } = pos.coords;
-        // Reverse geocode using a simple approach - we'll use a free API or just store coords
-        // For now, store coords and let user edit the area name
-        locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-        locationInput.dispatchEvent(new Event('input'));
-        showSuccess('Location captured! You can edit the area name if needed.');
-      } catch (err) {
-        console.error('Geolocation error:', err);
-        if (err.code === 1) showError('Location permission denied. Please enter area manually.');
-        else if (err.code === 2) showError('Location unavailable. Please enter area manually.');
-        else if (err.code === 3) showError('Location request timed out. Please enter area manually.');
-        else showError('Failed to get location. Please enter area manually.');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
-      }
-    });
-
-    loadPlans();
-
-    function planToSlug(plan) {
-      return plan.tag.toLowerCase().replace(/_/g, '-');
-    }
-
-    // Pre-select plan from URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const preselectPlan = urlParams.get('plan');
-    if (preselectPlan) {
-      // Wait for plans to load, then select
-      const checkPlans = setInterval(() => {
-        if (plans.length) {
-          const plan = plans.find(p => planToSlug(p) === preselectPlan);
-          if (plan) {
-            selectPlan(plan.id);
-            goToStep(2); // Skip to details step
-          }
-          clearInterval(checkPlans);
+        if (!name) {
+          showFieldError("name");
+          valid = false;
         }
-      }, 100);
-    }
-  </script>
-  <script src="/js/nav.js" defer></script>
-</body>
+        if (!/^[0-9]{10}$/.test(phone)) {
+          showFieldError("phone");
+          valid = false;
+        }
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          showFieldError("email");
+          valid = false;
+        }
+        if (!location) {
+          showFieldError("location");
+          valid = false;
+        }
+        if (!address) {
+          showFieldError("address");
+          valid = false;
+        }
+
+        btnNext.disabled = !valid;
+        return valid;
+      }
+
+      function showFieldError(field) {
+        document.getElementById(field).classList.add("error");
+        document.getElementById(`${field}-error`).classList.add("visible");
+      }
+
+      function clearErrors() {
+        ["name", "phone", "email", "location", "address"].forEach((f) => {
+          document.getElementById(f).classList.remove("error");
+          document.getElementById(`${f}-error`).classList.remove("visible");
+        });
+      }
+
+      function showError(msg) {
+        errorBanner.textContent = msg;
+        errorBanner.classList.add("visible");
+      }
+
+      function hideError() {
+        errorBanner.classList.remove("visible");
+      }
+
+      function showSuccess(msg) {
+        const el = document.getElementById("success-banner");
+        el.textContent = msg;
+        el.classList.add("visible");
+        setTimeout(() => el.classList.remove("visible"), 4000);
+      }
+
+      function goToStep(step) {
+        if (step < 1 || step > totalSteps) return;
+        stepElements[currentStep].classList.remove("active");
+        progElements[currentStep].classList.remove("active");
+        labelElements[currentStep].classList.remove("active");
+
+        if (step > currentStep) {
+          progElements[currentStep].classList.add("completed");
+          labelElements[currentStep].classList.add("completed");
+        } else if (step < currentStep) {
+          progElements[step].classList.remove("completed");
+          labelElements[step].classList.remove("completed");
+          progElements[step].classList.add("active");
+          labelElements[step].classList.add("active");
+        }
+
+        currentStep = step;
+        stepElements[currentStep].classList.add("active");
+        progElements[currentStep].classList.add("active");
+        labelElements[currentStep].classList.add("active");
+
+        btnBack.style.display = currentStep > 1 ? "flex" : "none";
+        btnNextLabel.textContent =
+          currentStep === totalSteps ? "Pay Now" : "Continue";
+        btnNext.disabled = false;
+
+        if (currentStep === 2) updatePriceSummary();
+        if (currentStep === 3) updateFinalSummary();
+        hideError();
+      }
+
+      function validateCurrentStep() {
+        if (currentStep === 1) return validateStep1();
+        if (currentStep === 2) return validateStep2();
+        if (currentStep === 3) return validateStep3();
+        return false;
+      }
+
+      async function submitOrder() {
+        const plan = getSelectedPlan();
+        const days = getSelectedDays();
+        const mealsPerDay = getSelectedMeals();
+
+        const payload = {
+          planId: plan.id,
+          days,
+          mealsPerDay,
+          phone: document.getElementById("phone").value.trim(),
+          name: document.getElementById("name").value.trim(),
+          email: document.getElementById("email").value.trim() || undefined,
+          address: document.getElementById("address").value.trim(),
+          location: document.getElementById("location").value.trim(),
+        };
+
+        btnNext.disabled = true;
+        btnLoading.classList.add("visible");
+        hideError();
+
+        try {
+          const res = await fetch(API_WEB_ORDER, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Failed to create order");
+
+          // Go straight to Razorpay on this click — no intermediate screen or
+          // extra button. Nothing is written to the database until the webhook
+          // confirms the payment.
+          window.location.href = data.paymentUrl;
+        } catch (err) {
+          console.error("[ORDER] Submit failed:", err);
+          showError(err.message || "Something went wrong. Please try again.");
+          btnNext.disabled = false;
+        } finally {
+          btnLoading.classList.remove("visible");
+        }
+      }
+
+      btnNext.addEventListener("click", () => {
+        if (!validateCurrentStep()) return;
+        if (currentStep < totalSteps) {
+          goToStep(currentStep + 1);
+        } else {
+          submitOrder();
+        }
+      });
+
+      btnBack.addEventListener("click", () => {
+        if (currentStep > 1) goToStep(currentStep - 1);
+      });
+
+      document
+        .querySelectorAll('input[name="days"], input[name="mealsPerDay"]')
+        .forEach((input) => {
+          input.addEventListener("change", () => {
+            updatePriceSummary();
+          });
+        });
+
+      ["name", "phone", "email", "location", "address"].forEach((field) => {
+        document.getElementById(field).addEventListener("input", () => {
+          if (currentStep === 3) validateStep3();
+        });
+        document.getElementById(field).addEventListener("blur", () => {
+          if (currentStep === 3) validateStep3();
+        });
+      });
+
+      // Geolocation button
+      document
+        .getElementById("btn-get-location")
+        .addEventListener("click", async () => {
+          const btn = document.getElementById("btn-get-location");
+          const locationInput = document.getElementById("location");
+          if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+          }
+          btn.disabled = true;
+          btn.innerHTML =
+            '<svg class="spinner" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 100" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></svg>';
+          try {
+            const pos = await new Promise((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+              });
+            });
+            const { latitude, longitude } = pos.coords;
+            // Reverse geocode using a simple approach - we'll use a free API or just store coords
+            // For now, store coords and let user edit the area name
+            locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            locationInput.dispatchEvent(new Event("input"));
+            showSuccess(
+              "Location captured! You can edit the area name if needed.",
+            );
+          } catch (err) {
+            console.error("Geolocation error:", err);
+            if (err.code === 1)
+              showError(
+                "Location permission denied. Please enter area manually.",
+              );
+            else if (err.code === 2)
+              showError("Location unavailable. Please enter area manually.");
+            else if (err.code === 3)
+              showError(
+                "Location request timed out. Please enter area manually.",
+              );
+            else
+              showError("Failed to get location. Please enter area manually.");
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML =
+              '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
+          }
+        });
+
+      loadPlans();
+
+      function planToSlug(plan) {
+        return plan.tag.toLowerCase().replace(/_/g, "-");
+      }
+
+      // Pre-select plan from URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const preselectPlan = urlParams.get("plan");
+      if (preselectPlan) {
+        // Wait for plans to load, then select
+        const checkPlans = setInterval(() => {
+          if (plans.length) {
+            const plan = plans.find((p) => planToSlug(p) === preselectPlan);
+            if (plan) {
+              selectPlan(plan.id);
+              goToStep(2); // Skip to details step
+            }
+            clearInterval(checkPlans);
+          }
+        }, 100);
+      }
+    </script>
+    <script src="/js/nav.js" defer></script>
+  </body>
 </html>

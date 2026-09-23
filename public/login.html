@@ -1,334 +1,566 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login – FitFuel Nutrition</title>
-  <meta name="description" content="Sign in to FitFuel Nutrition to manage your meal plans and orders." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/nav.css" />
-  <link rel="stylesheet" href="/css/main.css" />
-  <style>
-    /* Page background — matches the hero gradient used on the homepage */
-    .login-page {
-      min-height: calc(100vh - 64px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 16px 56px;
-      background: linear-gradient(160deg, var(--green-50) 0%, #fff 40%, var(--green-100) 100%);
-    }
-
-    /* Glassy card — same treatment as the payment-success card */
-    .auth-card {
-      width: 100%;
-      max-width: 440px;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(16px) saturate(1.4);
-      -webkit-backdrop-filter: blur(16px) saturate(1.4);
-      border: 1px solid rgba(229, 231, 235, 0.6);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-      padding: 40px 36px;
-      animation: card-in 0.4s var(--ease-out) both;
-    }
-    @keyframes card-in {
-      from { opacity: 0; transform: translateY(12px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    .auth-logo { text-align: center; margin-bottom: 28px; }
-    .auth-logo a { font-size: 1.35rem; font-weight: 800; color: var(--green-800); letter-spacing: -0.02em; text-decoration: none; }
-    .auth-logo .accent { color: var(--green-500); }
-
-    .auth-title { font-size: 1.5rem; font-weight: 800; color: var(--gray-900); text-align: center; margin-bottom: 8px; letter-spacing: -0.02em; }
-    .auth-subtitle { text-align: center; color: var(--gray-500); margin-bottom: 28px; font-size: 0.95rem; }
-
-    .step { display: none; }
-    .step.active { display: block; animation: fadeIn 0.3s var(--ease-out); }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-    .form-group { margin-bottom: 20px; }
-    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
-    .form-input, .otp-input {
-      width: 100%; padding: 14px 16px; font-size: 1rem; font-family: inherit;
-      border: 1px solid var(--gray-300); border-radius: var(--radius-md);
-      background: #fff; color: var(--gray-900); transition: all 0.15s var(--ease-base);
-    }
-    .form-input:focus, .otp-input:focus { outline: none; border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
-    .form-input::placeholder { color: var(--gray-400); }
-    .form-input.error { border-color: var(--red-500); }
-    .otp-input { letter-spacing: 0.5rem; text-align: center; font-size: 1.25rem; font-weight: 600; }
-    .form-error { font-size: 0.8rem; color: var(--red-500); margin-top: 6px; display: none; }
-    .form-error.visible { display: block; }
-
-    /* Full-width pill CTAs — matches the site's main button style */
-    .auth-actions .btn-primary, .auth-actions .btn-secondary { width: 100%; justify-content: center; }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-    .error-banner { background: #fef2f2; border: 1px solid #fecaca; color: var(--red-600); padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 20px; font-size: 0.85rem; display: none; }
-    .error-banner.visible { display: block; }
-    .success-banner { background: var(--green-50); border: 1px solid var(--green-100); color: var(--green-700); padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 20px; font-size: 0.85rem; display: none; }
-    .success-banner.visible { display: block; }
-
-    .resend { text-align: center; margin-top: 16px; font-size: 0.85rem; color: var(--gray-500); }
-    .resend button { background: none; border: none; color: var(--green-600); font-weight: 600; cursor: pointer; font-size: inherit; font-family: inherit; padding: 0; }
-    .resend button:disabled { color: var(--gray-400); cursor: not-allowed; }
-
-    .loading { display: none; align-items: center; justify-content: center; gap: 8px; }
-    .loading.visible { display: flex; }
-    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .auth-security { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; font-size: 0.8rem; color: var(--gray-500); }
-    .auth-security svg { color: var(--green-500); flex-shrink: 0; }
-    .auth-footer { text-align: center; margin-top: 16px; font-size: 0.78rem; color: var(--gray-400); }
-    .auth-footer a { color: var(--green-600); font-weight: 500; }
-
-    @media (max-width: 480px) {
-      .login-page { padding: 24px 16px 40px; }
-      .auth-card { padding: 32px 24px; border-radius: var(--radius-md); }
-    }
-  </style>
-</head>
-<body>
-  <div id="nav-placeholder"></div>
-
-  <div class="login-page">
-    <div class="auth-card">
-      <div class="auth-logo">
-        <a href="/">Fit<span class="accent">Fuel</span> Nutrition</a>
-      </div>
-
-      <div class="error-banner" id="error-banner" role="alert"></div>
-      <div class="success-banner" id="success-banner"></div>
-
-      <div class="step active" id="step-phone" data-step="1">
-        <h1 class="auth-title">Welcome back</h1>
-        <p class="auth-subtitle">Enter your phone number to receive a login code via WhatsApp</p>
-        <form id="phone-form">
-          <div class="form-group">
-            <label class="form-label" for="phone">Phone Number</label>
-            <input type="tel" class="form-input" id="phone" placeholder="9876543210" autocomplete="tel" pattern="[0-9]{10}" maxlength="10" required>
-            <div class="form-error" id="phone-error">Enter a valid 10-digit Indian mobile number</div>
-          </div>
-          <div class="auth-actions">
-            <button type="submit" class="btn-primary" id="btn-send-otp">
-              <span>Send OTP via WhatsApp</span>
-              <div class="loading" id="loading-send"><div class="spinner"></div></div>
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div class="step" id="step-otp" data-step="2">
-        <h1 class="auth-title">Verify Code</h1>
-        <p class="auth-subtitle">We sent a 6-digit code to <strong id="phone-display"></strong></p>
-        <form id="otp-form">
-          <div class="form-group">
-            <label class="form-label" for="otp">Enter OTP</label>
-            <input type="text" class="otp-input" id="otp" placeholder="000000" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
-            <div class="form-error" id="otp-error">Invalid or expired code</div>
-          </div>
-          <div class="auth-actions">
-            <button type="submit" class="btn-primary" id="btn-verify-otp">
-              <span>Verify &amp; Sign In</span>
-              <div class="loading" id="loading-verify"><div class="spinner"></div></div>
-            </button>
-          </div>
-        </form>
-        <div class="resend">
-          Didn't receive it? <button type="button" id="btn-resend" disabled>Resend in <span id="resend-timer">30</span>s</button>
-        </div>
-        <div class="auth-actions" style="margin-top: 12px;">
-          <button type="button" class="btn-secondary" id="btn-back-phone">← Change number</button>
-        </div>
-      </div>
-
-      <div class="auth-security">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Secure login via WhatsApp
-      </div>
-
-      <p class="auth-footer">New here? <a href="/order">Continue to order</a></p>
-    </div>
-  </div>
-
-  <script>
-    const API_BASE = '/api/auth';
-    let resendCountdown = 30;
-    let resendTimer = null;
-
-    const stepPhone = document.getElementById('step-phone');
-    const stepOtp = document.getElementById('step-otp');
-    const phoneInput = document.getElementById('phone');
-    const otpInput = document.getElementById('otp');
-    const phoneDisplay = document.getElementById('phone-display');
-    const btnSendOtp = document.getElementById('btn-send-otp');
-    const btnVerifyOtp = document.getElementById('btn-verify-otp');
-    const btnResend = document.getElementById('btn-resend');
-    const btnBackPhone = document.getElementById('btn-back-phone');
-    const loadingSend = document.getElementById('loading-send');
-    const loadingVerify = document.getElementById('loading-verify');
-    const resendTimerEl = document.getElementById('resend-timer');
-    const errorBanner = document.getElementById('error-banner');
-    const successBanner = document.getElementById('success-banner');
-
-    function showError(msg) {
-      errorBanner.textContent = msg;
-      errorBanner.classList.add('visible');
-      successBanner.classList.remove('visible');
-    }
-    function showSuccess(msg) {
-      successBanner.textContent = msg;
-      successBanner.classList.add('visible');
-      errorBanner.classList.remove('visible');
-    }
-    function hideMessages() {
-      errorBanner.classList.remove('visible');
-      successBanner.classList.remove('visible');
-    }
-    function setLoading(btn, loading, loadingEl) {
-      btn.disabled = loading;
-      if (loading) {
-        btn.querySelector('span').style.display = 'none';
-        loadingEl.classList.add('visible');
-      } else {
-        btn.querySelector('span').style.display = 'inline';
-        loadingEl.classList.remove('visible');
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login – FitFuel Nutrition</title>
+    <meta
+      name="description"
+      content="Sign in to FitFuel Nutrition to manage your meal plans and orders."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/nav.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <style>
+      /* Page background — matches the hero gradient used on the homepage */
+      .login-page {
+        min-height: calc(100vh - 64px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 16px 56px;
+        background: linear-gradient(
+          160deg,
+          var(--green-50) 0%,
+          #fff 40%,
+          var(--green-100) 100%
+        );
       }
-    }
-    function showStep(step) {
-      stepPhone.classList.toggle('active', step === 1);
-      stepOtp.classList.toggle('active', step === 2);
-    }
-    function startResendCountdown() {
-      resendCountdown = 30;
-      btnResend.disabled = true;
-      resendTimerEl.textContent = resendCountdown;
-      resendTimer = setInterval(() => {
-        resendCountdown--;
-        resendTimerEl.textContent = resendCountdown;
-        if (resendCountdown <= 0) {
-          clearInterval(resendTimer);
-          btnResend.disabled = false;
-          resendTimerEl.textContent = '30';
+
+      /* Glassy card — same treatment as the payment-success card */
+      .auth-card {
+        width: 100%;
+        max-width: 440px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(16px) saturate(1.4);
+        -webkit-backdrop-filter: blur(16px) saturate(1.4);
+        border: 1px solid rgba(229, 231, 235, 0.6);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 40px 36px;
+        animation: card-in 0.4s var(--ease-out) both;
+      }
+      @keyframes card-in {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
         }
-      }, 1000);
-    }
-    function formatPhone(phone) {
-      return phone.replace(/(\d{5})(\d{5})/, '$1 $2');
-    }
-
-    document.getElementById('phone-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideMessages();
-      const phone = phoneInput.value.trim();
-      if (!/^[0-9]{10}$/.test(phone)) {
-        phoneInput.classList.add('error');
-        document.getElementById('phone-error').classList.add('visible');
-        return;
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
       }
-      phoneInput.classList.remove('error');
-      document.getElementById('phone-error').classList.remove('visible');
 
-      setLoading(btnSendOtp, true, loadingSend);
-      try {
-        const res = await fetch(`${API_BASE}/send-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone })
+      .auth-logo {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+      .auth-logo a {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--green-800);
+        letter-spacing: -0.02em;
+        text-decoration: none;
+      }
+      .auth-logo .accent {
+        color: var(--green-500);
+      }
+
+      .auth-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--gray-900);
+        text-align: center;
+        margin-bottom: 8px;
+        letter-spacing: -0.02em;
+      }
+      .auth-subtitle {
+        text-align: center;
+        color: var(--gray-500);
+        margin-bottom: 28px;
+        font-size: 0.95rem;
+      }
+
+      .step {
+        display: none;
+      }
+      .step.active {
+        display: block;
+        animation: fadeIn 0.3s var(--ease-out);
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 8px;
+      }
+      .form-input,
+      .otp-input {
+        width: 100%;
+        padding: 14px 16px;
+        font-size: 1rem;
+        font-family: inherit;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-md);
+        background: #fff;
+        color: var(--gray-900);
+        transition: all 0.15s var(--ease-base);
+      }
+      .form-input:focus,
+      .otp-input:focus {
+        outline: none;
+        border-color: var(--green-500);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+      }
+      .form-input::placeholder {
+        color: var(--gray-400);
+      }
+      .form-input.error {
+        border-color: var(--red-500);
+      }
+      .otp-input {
+        letter-spacing: 0.5rem;
+        text-align: center;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+      .form-error {
+        font-size: 0.8rem;
+        color: var(--red-500);
+        margin-top: 6px;
+        display: none;
+      }
+      .form-error.visible {
+        display: block;
+      }
+
+      /* Full-width pill CTAs — matches the site's main button style */
+      .auth-actions .btn-primary,
+      .auth-actions .btn-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .error-banner {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: var(--red-600);
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        display: none;
+      }
+      .error-banner.visible {
+        display: block;
+      }
+      .success-banner {
+        background: var(--green-50);
+        border: 1px solid var(--green-100);
+        color: var(--green-700);
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        display: none;
+      }
+      .success-banner.visible {
+        display: block;
+      }
+
+      .resend {
+        text-align: center;
+        margin-top: 16px;
+        font-size: 0.85rem;
+        color: var(--gray-500);
+      }
+      .resend button {
+        background: none;
+        border: none;
+        color: var(--green-600);
+        font-weight: 600;
+        cursor: pointer;
+        font-size: inherit;
+        font-family: inherit;
+        padding: 0;
+      }
+      .resend button:disabled {
+        color: var(--gray-400);
+        cursor: not-allowed;
+      }
+
+      .loading {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .loading.visible {
+        display: flex;
+      }
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .auth-security {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 24px;
+        font-size: 0.8rem;
+        color: var(--gray-500);
+      }
+      .auth-security svg {
+        color: var(--green-500);
+        flex-shrink: 0;
+      }
+      .auth-footer {
+        text-align: center;
+        margin-top: 16px;
+        font-size: 0.78rem;
+        color: var(--gray-400);
+      }
+      .auth-footer a {
+        color: var(--green-600);
+        font-weight: 500;
+      }
+
+      @media (max-width: 480px) {
+        .login-page {
+          padding: 24px 16px 40px;
+        }
+        .auth-card {
+          padding: 32px 24px;
+          border-radius: var(--radius-md);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="nav-placeholder"></div>
+
+    <div class="login-page">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <a href="/">Fit<span class="accent">Fuel</span> Nutrition</a>
+        </div>
+
+        <div class="error-banner" id="error-banner" role="alert"></div>
+        <div class="success-banner" id="success-banner"></div>
+
+        <div class="step active" id="step-phone" data-step="1">
+          <h1 class="auth-title">Welcome back</h1>
+          <p class="auth-subtitle">
+            Enter your phone number to receive a login code via WhatsApp
+          </p>
+          <form id="phone-form">
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone Number</label>
+              <input
+                type="tel"
+                class="form-input"
+                id="phone"
+                placeholder="9876543210"
+                autocomplete="tel"
+                pattern="[0-9]{10}"
+                maxlength="10"
+                required
+              />
+              <div class="form-error" id="phone-error">
+                Enter a valid 10-digit Indian mobile number
+              </div>
+            </div>
+            <div class="auth-actions">
+              <button type="submit" class="btn-primary" id="btn-send-otp">
+                <span>Send OTP via WhatsApp</span>
+                <div class="loading" id="loading-send">
+                  <div class="spinner"></div>
+                </div>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="step" id="step-otp" data-step="2">
+          <h1 class="auth-title">Verify Code</h1>
+          <p class="auth-subtitle">
+            We sent a 6-digit code to <strong id="phone-display"></strong>
+          </p>
+          <form id="otp-form">
+            <div class="form-group">
+              <label class="form-label" for="otp">Enter OTP</label>
+              <input
+                type="text"
+                class="otp-input"
+                id="otp"
+                placeholder="000000"
+                autocomplete="one-time-code"
+                pattern="[0-9]{6}"
+                maxlength="6"
+                required
+              />
+              <div class="form-error" id="otp-error">
+                Invalid or expired code
+              </div>
+            </div>
+            <div class="auth-actions">
+              <button type="submit" class="btn-primary" id="btn-verify-otp">
+                <span>Verify &amp; Sign In</span>
+                <div class="loading" id="loading-verify">
+                  <div class="spinner"></div>
+                </div>
+              </button>
+            </div>
+          </form>
+          <div class="resend">
+            Didn't receive it?
+            <button type="button" id="btn-resend" disabled>
+              Resend in <span id="resend-timer">30</span>s
+            </button>
+          </div>
+          <div class="auth-actions" style="margin-top: 12px">
+            <button type="button" class="btn-secondary" id="btn-back-phone">
+              ← Change number
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-security">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          Secure login via WhatsApp
+        </div>
+
+        <p class="auth-footer">
+          New here? <a href="/order">Continue to order</a>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "/api/auth";
+      let resendCountdown = 30;
+      let resendTimer = null;
+
+      const stepPhone = document.getElementById("step-phone");
+      const stepOtp = document.getElementById("step-otp");
+      const phoneInput = document.getElementById("phone");
+      const otpInput = document.getElementById("otp");
+      const phoneDisplay = document.getElementById("phone-display");
+      const btnSendOtp = document.getElementById("btn-send-otp");
+      const btnVerifyOtp = document.getElementById("btn-verify-otp");
+      const btnResend = document.getElementById("btn-resend");
+      const btnBackPhone = document.getElementById("btn-back-phone");
+      const loadingSend = document.getElementById("loading-send");
+      const loadingVerify = document.getElementById("loading-verify");
+      const resendTimerEl = document.getElementById("resend-timer");
+      const errorBanner = document.getElementById("error-banner");
+      const successBanner = document.getElementById("success-banner");
+
+      function showError(msg) {
+        errorBanner.textContent = msg;
+        errorBanner.classList.add("visible");
+        successBanner.classList.remove("visible");
+      }
+      function showSuccess(msg) {
+        successBanner.textContent = msg;
+        successBanner.classList.add("visible");
+        errorBanner.classList.remove("visible");
+      }
+      function hideMessages() {
+        errorBanner.classList.remove("visible");
+        successBanner.classList.remove("visible");
+      }
+      function setLoading(btn, loading, loadingEl) {
+        btn.disabled = loading;
+        if (loading) {
+          btn.querySelector("span").style.display = "none";
+          loadingEl.classList.add("visible");
+        } else {
+          btn.querySelector("span").style.display = "inline";
+          loadingEl.classList.remove("visible");
+        }
+      }
+      function showStep(step) {
+        stepPhone.classList.toggle("active", step === 1);
+        stepOtp.classList.toggle("active", step === 2);
+      }
+      function startResendCountdown() {
+        resendCountdown = 30;
+        btnResend.disabled = true;
+        resendTimerEl.textContent = resendCountdown;
+        resendTimer = setInterval(() => {
+          resendCountdown--;
+          resendTimerEl.textContent = resendCountdown;
+          if (resendCountdown <= 0) {
+            clearInterval(resendTimer);
+            btnResend.disabled = false;
+            resendTimerEl.textContent = "30";
+          }
+        }, 1000);
+      }
+      function formatPhone(phone) {
+        return phone.replace(/(\d{5})(\d{5})/, "$1 $2");
+      }
+
+      document
+        .getElementById("phone-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          hideMessages();
+          const phone = phoneInput.value.trim();
+          if (!/^[0-9]{10}$/.test(phone)) {
+            phoneInput.classList.add("error");
+            document.getElementById("phone-error").classList.add("visible");
+            return;
+          }
+          phoneInput.classList.remove("error");
+          document.getElementById("phone-error").classList.remove("visible");
+
+          setLoading(btnSendOtp, true, loadingSend);
+          try {
+            const res = await fetch(`${API_BASE}/send-otp`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ phone }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+            phoneDisplay.textContent = formatPhone(phone);
+            showSuccess(data.message);
+            showStep(2);
+            otpInput.focus();
+            startResendCountdown();
+          } catch (err) {
+            showError(err.message);
+          } finally {
+            setLoading(btnSendOtp, false, loadingSend);
+          }
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
-        phoneDisplay.textContent = formatPhone(phone);
-        showSuccess(data.message);
-        showStep(2);
-        otpInput.focus();
-        startResendCountdown();
-      } catch (err) {
-        showError(err.message);
-      } finally {
-        setLoading(btnSendOtp, false, loadingSend);
-      }
-    });
 
-    document.getElementById('otp-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideMessages();
-      const phone = phoneInput.value.trim();
-      const otp = otpInput.value.trim();
-      if (!/^[0-9]{6}$/.test(otp)) {
-        otpInput.classList.add('error');
-        document.getElementById('otp-error').classList.add('visible');
-        return;
-      }
-      otpInput.classList.remove('error');
-      document.getElementById('otp-error').classList.remove('visible');
+      document
+        .getElementById("otp-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          hideMessages();
+          const phone = phoneInput.value.trim();
+          const otp = otpInput.value.trim();
+          if (!/^[0-9]{6}$/.test(otp)) {
+            otpInput.classList.add("error");
+            document.getElementById("otp-error").classList.add("visible");
+            return;
+          }
+          otpInput.classList.remove("error");
+          document.getElementById("otp-error").classList.remove("visible");
 
-      setLoading(btnVerifyOtp, true, loadingVerify);
-      try {
-        const res = await fetch(`${API_BASE}/verify-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, otp })
+          setLoading(btnVerifyOtp, true, loadingVerify);
+          try {
+            const res = await fetch(`${API_BASE}/verify-otp`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ phone, otp }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Verification failed");
+            showSuccess("Signed in successfully!");
+            setTimeout(() => (window.location.href = "/dashboard"), 800);
+          } catch (err) {
+            showError(err.message);
+            otpInput.value = "";
+            otpInput.focus();
+          } finally {
+            setLoading(btnVerifyOtp, false, loadingVerify);
+          }
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Verification failed');
-        showSuccess('Signed in successfully!');
-        setTimeout(() => window.location.href = '/dashboard', 800);
-      } catch (err) {
-        showError(err.message);
-        otpInput.value = '';
-        otpInput.focus();
-      } finally {
-        setLoading(btnVerifyOtp, false, loadingVerify);
-      }
-    });
 
-    btnResend.addEventListener('click', async () => {
-      hideMessages();
-      const phone = phoneInput.value.trim();
-      setLoading(btnSendOtp, true, loadingSend);
-      btnResend.disabled = true;
-      try {
-        const res = await fetch(`${API_BASE}/send-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to resend OTP');
-        showSuccess(data.message);
-        startResendCountdown();
-        otpInput.value = '';
-        otpInput.focus();
-      } catch (err) {
-        showError(err.message);
-        btnResend.disabled = false;
-      } finally {
-        setLoading(btnSendOtp, false, loadingSend);
-      }
-    });
+      btnResend.addEventListener("click", async () => {
+        hideMessages();
+        const phone = phoneInput.value.trim();
+        setLoading(btnSendOtp, true, loadingSend);
+        btnResend.disabled = true;
+        try {
+          const res = await fetch(`${API_BASE}/send-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Failed to resend OTP");
+          showSuccess(data.message);
+          startResendCountdown();
+          otpInput.value = "";
+          otpInput.focus();
+        } catch (err) {
+          showError(err.message);
+          btnResend.disabled = false;
+        } finally {
+          setLoading(btnSendOtp, false, loadingSend);
+        }
+      });
 
-    btnBackPhone.addEventListener('click', () => {
-      hideMessages();
-      clearInterval(resendTimer);
-      showStep(1);
-      phoneInput.focus();
-    });
+      btnBackPhone.addEventListener("click", () => {
+        hideMessages();
+        clearInterval(resendTimer);
+        showStep(1);
+        phoneInput.focus();
+      });
 
-    phoneInput.addEventListener('input', () => {
-      phoneInput.classList.remove('error');
-      document.getElementById('phone-error').classList.remove('visible');
-    });
-    otpInput.addEventListener('input', () => {
-      otpInput.classList.remove('error');
-      document.getElementById('otp-error').classList.remove('visible');
-    });
-  </script>
-  <script src="/js/nav.js" defer></script>
-</body>
+      phoneInput.addEventListener("input", () => {
+        phoneInput.classList.remove("error");
+        document.getElementById("phone-error").classList.remove("visible");
+      });
+      otpInput.addEventListener("input", () => {
+        otpInput.classList.remove("error");
+        document.getElementById("otp-error").classList.remove("visible");
+      });
+    </script>
+    <script src="/js/nav.js" defer></script>
+  </body>
 </html>
