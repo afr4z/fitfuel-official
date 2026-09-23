@@ -6,6 +6,11 @@ Load with /js/nav.js on any page:
 nav.js injects markup using exactly the classes below — keep them in sync.
 */
 
+/* Unwrap the injection point so .nav's parent is effectively <body> —
+   otherwise the placeholder is exactly nav-height tall and gives
+   position: sticky zero range to travel (nav would scroll away). */
+#nav-placeholder { display: contents; }
+
 /* ── Shell ─────────────────────────────────────────────────────────── */
 .nav {
   position: sticky; top: 0; z-index: 100;
