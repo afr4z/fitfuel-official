@@ -9,6 +9,7 @@ import {
   handlePlanCategory,
   handleDaySelection,
   handleMealSlotSelection,
+  handleAddressChoice,
   handleLocation,
   handleAddress,
   startSubscription,
@@ -76,6 +77,12 @@ async function handleBack(phone, session, setSession) {
       return handleDaySelection(phone, session, dayId, setSession);
     }
 
+    case STATES.SELECTING_ADDRESS: {
+      // Back to meals-per-day selection — reconstruct the day option id
+      const dayId = `DAYS_${session.data.days}`;
+      return handleDaySelection(phone, session, dayId, setSession);
+    }
+
     case STATES.AWAITING_ADDRESS: {
       // Back to location prompt
       await setSession(phone, { ...session, state: STATES.AWAITING_LOCATION });
@@ -125,7 +132,9 @@ function isOrderAction(input) {
 }
 
 export async function handleIncoming(phone, message) {
-  console.log(`[HANDLER] Incoming: phone=${phone} type=${message.type} msgTs=${message.timestamp}`);
+  console.log(
+    `[HANDLER] Incoming: phone=${phone} type=${message.type} msgTs=${message.timestamp}`,
+  );
   const session = await getSession(phone);
   console.log(`[HANDLER] Session state=${session.state}`);
 
@@ -140,9 +149,13 @@ export async function handleIncoming(phone, message) {
   // MUST work regardless of session state — the user may have an expired
   // onboarding session but still needs to respond to a meal notification.
   if (isOrderAction(input)) {
-    console.log(`[HANDLER] Order action received: phone=${phone} input=${input} msgTs=${message.timestamp}`);
+    console.log(
+      `[HANDLER] Order action received: phone=${phone} input=${input} msgTs=${message.timestamp}`,
+    );
     if (isStale(message, ORDER_BUTTON_TTL_SECONDS)) {
-      console.log(`[HANDLER] Stale order button rejected: phone=${phone} input=${input}`);
+      console.log(
+        `[HANDLER] Stale order button rejected: phone=${phone} input=${input}`,
+      );
       await sendText(phone, BUTTON_EXPIRED);
       return;
     }
@@ -221,6 +234,9 @@ export async function handleIncoming(phone, message) {
   ) {
     return handleMealSlotSelection(phone, session, input, setSession);
   }
+  if (input.startsWith("ADDR_") && session.state === STATES.SELECTING_ADDRESS) {
+    return handleAddressChoice(phone, session, input, setSession);
+  }
 
   switch (session.state) {
     case STATES.GREETING:
@@ -230,7 +246,9 @@ export async function handleIncoming(phone, message) {
       return handleMainMenu(phone, session, input, setSession);
 
     case STATES.CHANGING_MEAL:
-      console.log(`[HANDLER] CHANGING_MEAL state: routing text input to handleOrderAction for phone=${phone}`);
+      console.log(
+        `[HANDLER] CHANGING_MEAL state: routing text input to handleOrderAction for phone=${phone}`,
+      );
       return handleOrderAction(
         phone,
         session,
@@ -285,12 +303,9 @@ export async function handleIncoming(phone, message) {
           title: item.itemname.substring(0, 24),
           description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
         }));
-        await sendList(
-          phone,
-          CHANGE_MEAL_LIST_ALT,
-          "View Menu",
-          [{ title: "Menu", rows }],
-        );
+        await sendList(phone, CHANGE_MEAL_LIST_ALT, "View Menu", [
+          { title: "Menu", rows },
+        ]);
         return;
       }
       return resetToGreeting(phone, session, setSession);

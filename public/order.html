@@ -283,6 +283,15 @@
       .form-error.visible {
         display: block;
       }
+      .address-option:hover {
+        border-color: var(--green-300);
+      }
+      .address-option.selected {
+        border-color: var(--green-500);
+        background: var(--green-50);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        color: var(--gray-900);
+      }
       .form-textarea {
         min-height: 80px;
         resize: vertical;
@@ -628,124 +637,228 @@
         <div class="form-step" id="step3" data-step="3">
           <div class="card">
             <div class="card-header">
-              <h2 class="card-title">Delivery & Payment Details</h2>
+              <h2 class="card-title">Delivery Details</h2>
               <p class="card-subtitle">
-                We'll send the payment link to your WhatsApp
+                Verify your number, then pick a saved address or add a new one
               </p>
             </div>
 
             <div class="plan-summary" id="final-summary"></div>
 
-            <div class="form-group">
-              <label class="form-label"
-                >Full Name <span class="required">*</span></label
-              >
-              <input
-                type="text"
-                class="form-input"
-                name="name"
-                id="name"
-                placeholder="Your full name"
-                required
-                autocomplete="name"
-              />
-              <div class="form-error" id="name-error">
-                Please enter your name
+            <!-- OTP verification gate -->
+            <div id="auth-section">
+              <div class="form-group">
+                <label class="form-label"
+                  >Phone Number <span class="required">*</span></label
+                >
+                <div style="display: flex; gap: 8px">
+                  <input
+                    type="tel"
+                    class="form-input"
+                    name="auth-phone"
+                    id="auth-phone"
+                    placeholder="9876543210"
+                    required
+                    autocomplete="tel"
+                    pattern="[0-9]{10}"
+                    maxlength="10"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="btn-send-otp"
+                    style="width: auto; padding: 12px 16px; white-space: nowrap"
+                  >
+                    Send OTP
+                  </button>
+                </div>
+                <div class="form-error" id="auth-phone-error">
+                  Enter a valid 10-digit Indian mobile number
+                </div>
+              </div>
+
+              <div class="form-group" id="otp-group" style="display: none">
+                <label class="form-label"
+                  >Enter OTP <span class="required">*</span></label
+                >
+                <div style="display: flex; gap: 8px">
+                  <input
+                    type="tel"
+                    class="form-input"
+                    name="otp"
+                    id="otp-input"
+                    placeholder="6-digit OTP"
+                    pattern="[0-9]{6}"
+                    maxlength="6"
+                    inputmode="numeric"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="btn-verify-otp"
+                    style="width: auto; padding: 12px 16px; white-space: nowrap"
+                  >
+                    Verify
+                  </button>
+                </div>
+                <div class="form-error" id="otp-error">
+                  Enter the 6-digit OTP sent to your WhatsApp
+                </div>
+                <p
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--gray-500);
+                    margin-top: 8px;
+                  "
+                >
+                  The OTP is sent to your WhatsApp. One-time password expires in
+                  5 minutes.
+                </p>
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label"
-                >Phone Number <span class="required">*</span></label
+            <!-- Shown after OTP verification -->
+            <div id="checkout-section" style="display: none">
+              <div
+                class="success-banner"
+                id="verified-banner"
+                style="display: block"
               >
-              <input
-                type="tel"
-                class="form-input"
-                name="phone"
-                id="phone"
-                placeholder="9876543210"
-                required
-                autocomplete="tel"
-                pattern="[0-9]{10}"
-                maxlength="10"
-              />
-              <div class="form-error" id="phone-error">
-                Enter a valid 10-digit Indian mobile number
+                ✅ Phone verified!
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Email</label>
-              <input
-                type="email"
-                class="form-input"
-                name="email"
-                id="email"
-                placeholder="you@example.com"
-                autocomplete="email"
-              />
-              <div class="form-error" id="email-error">
-                Enter a valid email address
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label"
-                >Delivery Area / Neighbourhood
-                <span class="required">*</span></label
-              >
-              <div style="display: flex; gap: 8px">
+              <div class="form-group">
+                <label class="form-label"
+                  >Full Name <span class="required">*</span></label
+                >
                 <input
                   type="text"
                   class="form-input"
-                  name="location"
-                  id="location"
-                  placeholder="e.g. Koramangala, Indiranagar"
+                  name="name"
+                  id="name"
+                  placeholder="Your full name"
                   required
-                  autocomplete="address-level2"
-                  style="flex: 1"
+                  autocomplete="name"
                 />
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  id="btn-get-location"
-                  style="width: auto; padding: 12px 16px; white-space: nowrap"
-                  title="Use current location"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
-                  </svg>
-                </button>
+                <div class="form-error" id="name-error">
+                  Please enter your name
+                </div>
               </div>
-              <div class="form-error" id="location-error">
-                Please enter your area/neighbourhood
-              </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label"
-                >Full Address <span class="required">*</span></label
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-input"
+                  name="email"
+                  id="email"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                />
+                <div class="form-error" id="email-error">
+                  Enter a valid email address
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Saved Addresses</label>
+                <div id="saved-addresses"></div>
+                <p
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--gray-500);
+                    margin-top: 8px;
+                  "
+                >
+                  Pick a saved address, or choose "Use a different address"
+                  below to enter delivery details manually.
+                </p>
+              </div>
+
+              <div class="form-group" id="manual-address-section">
+                <label class="form-label">Use a different address</label>
+                <div>
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      font-size: 0.85rem;
+                      color: var(--gray-600);
+                    "
+                  >
+                    <input type="checkbox" id="use-new-address" />
+                    Enter a new delivery address
+                  </label>
+                </div>
+              </div>
+
+              <div
+                class="form-group"
+                id="new-address-fields"
+                style="display: none"
               >
-              <textarea
-                class="form-textarea"
-                name="address"
-                id="address"
-                placeholder="Flat/House No., Street, Landmark, City, PIN"
-                required
-                autocomplete="street-address"
-              ></textarea>
-              <div class="form-error" id="address-error">
-                Please enter your full delivery address
+                <label class="form-label"
+                  >Delivery Area / Neighbourhood
+                  <span class="required">*</span></label
+                >
+                <div style="display: flex; gap: 8px">
+                  <input
+                    type="text"
+                    class="form-input"
+                    name="location"
+                    id="location"
+                    placeholder="e.g. Koramangala, Indiranagar"
+                    autocomplete="address-level2"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="btn-get-location"
+                    style="width: auto; padding: 12px 16px; white-space: nowrap"
+                    title="Use current location"
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="form-error" id="location-error">
+                  Please enter your area/neighbourhood
+                </div>
+              </div>
+
+              <div
+                class="form-group"
+                id="new-address-fields-2"
+                style="display: none"
+              >
+                <label class="form-label"
+                  >Full Address <span class="required">*</span></label
+                >
+                <textarea
+                  class="form-textarea"
+                  name="address"
+                  id="address"
+                  placeholder="Flat/House No., Street, Landmark, City, PIN"
+                  autocomplete="street-address"
+                ></textarea>
+                <div class="form-error" id="address-error">
+                  Please enter your full delivery address
+                </div>
               </div>
             </div>
           </div>
@@ -780,10 +893,13 @@
     <script>
       const API_PLANS = "/api/plans";
       const API_WEB_ORDER = "/api/web-order";
+      const API_AUTH = "/api/auth";
 
       let plans = [];
       let selectedPlanId = null;
       let currentStep = 1;
+      let authVerified = false;
+      let selectedAddressId = null;
       const totalSteps = 3;
 
       const stepElements = {
@@ -945,9 +1061,15 @@
       }
 
       function validateStep3() {
+        // Step 3 first requires a verified phone
+        if (!authVerified) {
+          btnNext.disabled = true;
+          return false;
+        }
+
         const name = document.getElementById("name").value.trim();
-        const phone = document.getElementById("phone").value.trim();
         const email = document.getElementById("email").value.trim();
+        const useNew = document.getElementById("use-new-address").checked;
         const location = document.getElementById("location").value.trim();
         const address = document.getElementById("address").value.trim();
 
@@ -958,20 +1080,20 @@
           showFieldError("name");
           valid = false;
         }
-        if (!/^[0-9]{10}$/.test(phone)) {
-          showFieldError("phone");
-          valid = false;
-        }
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
           showFieldError("email");
           valid = false;
         }
-        if (!location) {
-          showFieldError("location");
-          valid = false;
-        }
-        if (!address) {
-          showFieldError("address");
+        if (useNew) {
+          if (!location) {
+            showFieldError("location");
+            valid = false;
+          }
+          if (!address) {
+            showFieldError("address");
+            valid = false;
+          }
+        } else if (!selectedAddressId) {
           valid = false;
         }
 
@@ -981,13 +1103,24 @@
 
       function showFieldError(field) {
         document.getElementById(field).classList.add("error");
-        document.getElementById(`${field}-error`).classList.add("visible");
+        const errId = field === "otp-input" ? "otp" : field;
+        document.getElementById(`${errId}-error`).classList.add("visible");
       }
 
       function clearErrors() {
-        ["name", "phone", "email", "location", "address"].forEach((f) => {
-          document.getElementById(f).classList.remove("error");
-          document.getElementById(`${f}-error`).classList.remove("visible");
+        [
+          "name",
+          "email",
+          "location",
+          "address",
+          "auth-phone",
+          "otp-input",
+        ].forEach((f) => {
+          document.getElementById(f)?.classList.remove("error");
+          const errEl = document.getElementById(
+            `${f === "otp-input" ? "otp" : f}-error`,
+          );
+          errEl?.classList.remove("visible");
         });
       }
 
@@ -1034,7 +1167,13 @@
         btnNext.disabled = false;
 
         if (currentStep === 2) updatePriceSummary();
-        if (currentStep === 3) updateFinalSummary();
+        if (currentStep === 3) {
+          updateFinalSummary();
+          // Disable Pay Now until the phone is OTP-verified and an address is
+          // chosen, then try to auto-authenticate returning users.
+          validateStep3();
+          tryAutoAuthenticate();
+        }
         hideError();
       }
 
@@ -1050,15 +1189,22 @@
         const days = getSelectedDays();
         const mealsPerDay = getSelectedMeals();
 
+        const useNew = document.getElementById("use-new-address").checked;
         const payload = {
           planId: plan.id,
           days,
           mealsPerDay,
-          phone: document.getElementById("phone").value.trim(),
           name: document.getElementById("name").value.trim(),
           email: document.getElementById("email").value.trim() || undefined,
-          address: document.getElementById("address").value.trim(),
-          location: document.getElementById("location").value.trim(),
+          // Phone is NOT sent — the server reads it from the verified OTP
+          // session cookie. Saved address (addressId) OR a new one
+          // (location + address) are supported.
+          ...(useNew
+            ? {
+                address: document.getElementById("address").value.trim(),
+                location: document.getElementById("location").value.trim(),
+              }
+            : { addressId: selectedAddressId }),
         };
 
         btnNext.disabled = true;
@@ -1108,13 +1254,218 @@
           });
         });
 
-      ["name", "phone", "email", "location", "address"].forEach((field) => {
-        document.getElementById(field).addEventListener("input", () => {
+      ["name", "email", "location", "address"].forEach((field) => {
+        const el = document.getElementById(field);
+        if (!el) return;
+        el.addEventListener("input", () => {
           if (currentStep === 3) validateStep3();
         });
-        document.getElementById(field).addEventListener("blur", () => {
+        el.addEventListener("blur", () => {
           if (currentStep === 3) validateStep3();
         });
+      });
+
+      // "Use a different address" toggle — reveals the manual fields
+      document
+        .getElementById("use-new-address")
+        .addEventListener("change", (e) => {
+          const useNew = e.target.checked;
+          document.getElementById("new-address-fields").style.display = useNew
+            ? "block"
+            : "none";
+          document.getElementById("new-address-fields-2").style.display = useNew
+            ? "block"
+            : "none";
+          if (useNew) selectedAddressId = null;
+          // Clear the saved-address selection highlight when switching
+          document
+            .querySelectorAll("#saved-addresses .address-option")
+            .forEach((el) => {
+              el.classList.remove("selected");
+              el.querySelector("input").checked = false;
+            });
+          if (currentStep === 3) validateStep3();
+        });
+
+      // ─── OTP authentication for the checkout ────────────────────────────────
+      const btnSendOtp = document.getElementById("btn-send-otp");
+      const btnVerifyOtp = document.getElementById("btn-verify-otp");
+      const authPhone = document.getElementById("auth-phone");
+
+      function authPhoneValid() {
+        return /^[0-9]{10}$/.test(authPhone.value.trim());
+      }
+
+      async function sendOtp() {
+        hideError();
+        if (!authPhoneValid()) {
+          showFieldError("auth-phone");
+          return;
+        }
+        clearErrors();
+        btnSendOtp.disabled = true;
+        btnSendOtp.textContent = "Sending…";
+        try {
+          const res = await fetch(`${API_AUTH}/send-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: authPhone.value.trim() }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+          document.getElementById("otp-group").style.display = "block";
+          showSuccess("OTP sent to your WhatsApp!");
+          document.getElementById("otp-input").focus();
+        } catch (err) {
+          console.error("[ORDER] Send OTP failed:", err);
+          showFieldError("auth-phone");
+          showError(err.message || "Failed to send OTP. Please try again.");
+        } finally {
+          btnSendOtp.disabled = false;
+          btnSendOtp.textContent = "Send OTP";
+        }
+      }
+
+      async function verifyOtp() {
+        hideError();
+        clearErrors();
+        const otp = document.getElementById("otp-input").value.trim();
+        if (!/^[0-9]{6}$/.test(otp)) {
+          showFieldError("otp-input");
+          return;
+        }
+        btnVerifyOtp.disabled = true;
+        btnVerifyOtp.textContent = "Verifying…";
+        try {
+          const res = await fetch(`${API_AUTH}/verify-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              phone: authPhone.value.trim(),
+              otp,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Invalid OTP");
+          await onPhoneVerified(data);
+        } catch (err) {
+          console.error("[ORDER] Verify OTP failed:", err);
+          showFieldError("otp-input");
+          showError(err.message || "Invalid OTP. Please try again.");
+        } finally {
+          btnVerifyOtp.disabled = false;
+          btnVerifyOtp.textContent = "Verify";
+        }
+      }
+
+      // Called after a successful OTP verify — loads the customer profile
+      // (name/email/saved addresses) from the session cookie.
+      async function onPhoneVerified() {
+        authVerified = true;
+        document.getElementById("verified-banner")?.classList.add("visible");
+        try {
+          const res = await fetch(`${API_AUTH}/me`, {
+            credentials: "include",
+          });
+          const data = res.ok ? await res.json() : {};
+          afterAuthLoaded(data);
+        } catch (err) {
+          console.error("[ORDER] Failed to load profile:", err);
+        }
+        document.getElementById("auth-section").style.display = "none";
+        document.getElementById("checkout-section").style.display = "block";
+        if (currentStep === 3) validateStep3();
+      }
+
+      // If the user already has a valid session cookie, jump straight to the
+      // profile/address form instead of showing the OTP screen.
+      async function tryAutoAuthenticate() {
+        if (authVerified) return;
+        try {
+          const res = await fetch(`${API_AUTH}/me`, { credentials: "include" });
+          if (res.ok) {
+            const data = await res.json();
+            authVerified = true;
+            afterAuthLoaded(data);
+            document.getElementById("auth-section").style.display = "none";
+            document.getElementById("checkout-section").style.display = "block";
+            if (currentStep === 3) validateStep3();
+          }
+        } catch (err) {
+          // No session — stay on the OTP screen
+          console.error("[ORDER] No existing session:", err);
+        }
+      }
+
+      // Prefill name/email and render saved addresses for an authenticated
+      // user. With no saved addresses, the manual fields are shown directly.
+      function afterAuthLoaded(data) {
+        if (data.name) document.getElementById("name").value = data.name;
+        if (data.email) document.getElementById("email").value = data.email;
+        const addresses = data.addresses || [];
+        renderSavedAddresses(addresses);
+        if (!addresses.length) {
+          document.getElementById("use-new-address").checked = true;
+          document.getElementById("new-address-fields").style.display = "block";
+          document.getElementById("new-address-fields-2").style.display =
+            "block";
+        }
+      }
+
+      function renderSavedAddresses(addresses) {
+        const container = document.getElementById("saved-addresses");
+        if (!addresses.length) {
+          container.innerHTML = `
+            <p style="font-size:0.82rem;color:var(--gray-500);margin-top:4px">
+              No saved addresses yet — use "Use a different address" below.
+            </p>`;
+          return;
+        }
+        container.innerHTML = addresses
+          .map(
+            (a) => `
+          <label class="address-option" style="display:flex;gap:10px;align-items:flex-start;padding:12px;border:2px solid var(--gray-200);border-radius:var(--radius-md);margin-bottom:8px;cursor:pointer;transition:border-color .15s">
+            <input type="radio" name="saved-address" value="${a.id}" style="margin-top:4px" />
+            <span style="font-size:0.85rem;line-height:1.5">
+              <strong>${a.label || "Home"}</strong>
+              ${a.is_default ? ' <span style="background:var(--green-100);color:var(--green-800);font-size:0.7rem;padding:2px 6px;border-radius:999px">Default</span>' : ""}
+              <br />${a.address}
+            </span>
+          </label>`,
+          )
+          .join("");
+
+        container
+          .querySelectorAll('input[name="saved-address"]')
+          .forEach((el) => {
+            el.addEventListener("change", () => {
+              selectedAddressId = el.value;
+              // Deselect the "different address" option when a saved one is picked
+              document.getElementById("use-new-address").checked = false;
+              document.getElementById("new-address-fields").style.display =
+                "none";
+              document.getElementById("new-address-fields-2").style.display =
+                "none";
+              container.querySelectorAll(".address-option").forEach((opt) => {
+                opt.classList.toggle(
+                  "selected",
+                  opt.querySelector("input").checked,
+                );
+              });
+              if (currentStep === 3) validateStep3();
+            });
+          });
+      }
+
+      btnSendOtp.addEventListener("click", sendOtp);
+      btnVerifyOtp.addEventListener("click", verifyOtp);
+      authPhone.addEventListener("input", () => {
+        document.getElementById("auth-phone").classList.remove("error");
+        document.getElementById("auth-phone-error").classList.remove("visible");
+      });
+      document.getElementById("otp-input").addEventListener("input", () => {
+        document.getElementById("otp-input").classList.remove("error");
+        document.getElementById("otp-error").classList.remove("visible");
       });
 
       // Geolocation button

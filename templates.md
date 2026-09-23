@@ -6,18 +6,18 @@ All templates must be created in **Meta Business Manager → WhatsApp Manager �
 
 All template names are configurable via environment variables with sensible defaults.
 
-| Purpose | Env Var | Default Name | Category | Language |
-|---------|---------|--------------|----------|----------|
-| Breakfast notification | `WHATSAPP_BREAKFAST_TEMPLATE` | `breakfast_notification` | UTILITY | en |
-| Lunch notification | `WHATSAPP_LUNCH_TEMPLATE` | `lunch_notification` | UTILITY | en |
-| Dinner notification | `WHATSAPP_DINNER_TEMPLATE` | `dinner_notification` | UTILITY | en |
-| Rescheduled meal | `WHATSAPP_RESCHEDULED_TEMPLATE` | `rescheduled_meal` | UTILITY | en |
-| Expiry reminder | `WHATSAPP_EXPIRY_TEMPLATE` | `expiry_reminder` | MARKETING | en |
-| Session expired | `WHATSAPP_SESSION_EXPIRED_TEMPLATE` | `session_expired` | UTILITY | en |
-| OTP code | `WHATSAPP_OTP_TEMPLATE` | `otp_code` | AUTHENTICATION | en |
-| Payment failed | `WHATSAPP_PAYMENT_FAILED_TEMPLATE` | `payment_failed` | UTILITY | en |
-| Payment confirmed | `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE` | `payment_confirmed` | UTILITY | en |
-| Kitchen closed | `WHATSAPP_KITCHEN_CLOSED_TEMPLATE` | `kitchen_closed` | UTILITY | en |
+| Purpose                | Env Var                               | Default Name             | Category       | Language |
+| ---------------------- | ------------------------------------- | ------------------------ | -------------- | -------- |
+| Breakfast notification | `WHATSAPP_BREAKFAST_TEMPLATE`         | `breakfast_notification` | UTILITY        | en       |
+| Lunch notification     | `WHATSAPP_LUNCH_TEMPLATE`             | `lunch_notification`     | UTILITY        | en       |
+| Dinner notification    | `WHATSAPP_DINNER_TEMPLATE`            | `dinner_notification`    | UTILITY        | en       |
+| Rescheduled meal       | `WHATSAPP_RESCHEDULED_TEMPLATE`       | `rescheduled_meal`       | UTILITY        | en       |
+| Expiry reminder        | `WHATSAPP_EXPIRY_TEMPLATE`            | `expiry_reminder`        | MARKETING      | en       |
+| Session expired        | `WHATSAPP_SESSION_EXPIRED_TEMPLATE`   | `session_expired`        | UTILITY        | en       |
+| OTP code               | `WHATSAPP_OTP_TEMPLATE`               | `otp_code`               | AUTHENTICATION | en       |
+| Payment failed         | `WHATSAPP_PAYMENT_FAILED_TEMPLATE`    | `payment_failed`         | UTILITY        | en       |
+| Payment confirmed      | `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE` | `payment_confirmed`      | UTILITY        | en       |
+| Kitchen closed         | `WHATSAPP_KITCHEN_CLOSED_TEMPLATE`    | `kitchen_closed`         | UTILITY        | en       |
 
 ---
 
@@ -28,21 +28,21 @@ All template names are configurable via environment variables with sensible defa
 
 ### Variables (Body - 5 parameters)
 
-| Index | Name | Type | Example | Description |
-|-------|------|------|---------|-------------|
-| {{1}} | `delivery_date` | String | "15 Jan 2025" | Delivery date for breakfast |
-| {{2}} | `item_line` | String | "🌅 *Breakfast*: Idli Sambar" | Meal emoji + label + item name |
-| {{3}} | `time_str` | String | "08:00" | Delivery time (HH:MM) |
-| {{4}} | `deadline_msg` | String | "You can confirm, skip, or change until *10pm tonight*." | Action deadline |
-| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in *2* delivery day(s)!" | Plan expiry warning (can be empty) |
+| Index | Name            | Type   | Example                                                  | Description                        |
+| ----- | --------------- | ------ | -------------------------------------------------------- | ---------------------------------- |
+| {{1}} | `delivery_date` | String | "15 Jan 2025"                                            | Delivery date for breakfast        |
+| {{2}} | `item_line`     | String | "🌅 _Breakfast_: Idli Sambar"                            | Meal emoji + label + item name     |
+| {{3}} | `time_str`      | String | "08:00"                                                  | Delivery time (HH:MM)              |
+| {{4}} | `deadline_msg`  | String | "You can confirm, skip, or change until _10pm tonight_." | Action deadline                    |
+| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in _2_ delivery day(s)!"           | Plan expiry warning (can be empty) |
 
 ### Buttons (Quick Reply - 3 buttons)
 
 | Button Text | Payload (returned in webhook) |
-|-------------|-------------------------------|
-| ✅ Confirm | `CONFIRM_<order_id>` |
-| 🔄 Change | `CHANGE_<order_id>` |
-| ⏭️ Skip | `SKIP_<order_id>` |
+| ----------- | ----------------------------- |
+| ✅ Confirm  | `CONFIRM_<order_id>`          |
+| 🔄 Change   | `CHANGE_<order_id>`           |
+| ⏭️ Skip     | `SKIP_<order_id>`             |
 
 ### Sample Body Text
 
@@ -59,25 +59,35 @@ You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires i
 ## 2. Lunch Notification (`lunch_notification`)
 
 **Category:** UTILITY  
-**Use:** Daily lunch notification sent via cron at ~3:00 AM IST
+**Use:** Daily lunch notification sent via cron at ~8:30 AM IST (for today's lunch)
 
 ### Variables (Body - 5 parameters)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
-| {{1}} | `delivery_date` | String | "15 Jan 2025" |
-| {{2}} | `item_line` | String | "☀️ *Lunch*: Chicken Biryani" |
-| {{3}} | `time_str` | String | "12:30" |
-| {{4}} | `deadline_msg` | String | "⏰ Respond by *9:30am* — changes close after that." |
-| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in *2* delivery day(s)!" |
+| Index | Name            | Type   | Example                                              | Description                        |
+| ----- | --------------- | ------ | ---------------------------------------------------- | ---------------------------------- |
+| {{1}} | `delivery_date` | String | "15 Jan 2025"                                        | Delivery date for lunch            |
+| {{2}} | `item_line`     | String | "☀️ _Lunch_: Chicken Biryani"                        | Meal emoji + label + item name     |
+| {{3}} | `time_str`      | String | "12:30"                                              | Delivery time (HH:MM)              |
+| {{4}} | `deadline_msg`  | String | "⏰ Respond by _9:30am_ — changes close after that." | Action deadline                    |
+| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in _2_ delivery day(s)!"       | Plan expiry warning (can be empty) |
 
 ### Buttons (Quick Reply - 3 buttons)
 
-| Button Text | Payload |
-|-------------|---------|
-| ✅ Confirm | `CONFIRM_<order_id>` |
-| 🔄 Change | `CHANGE_<order_id>` |
-| ⏭️ Skip | `SKIP_<order_id>` |
+| Button Text | Payload (returned in webhook) |
+| ----------- | ----------------------------- |
+| ✅ Confirm  | `CONFIRM_<order_id>`          |
+| 🔄 Change   | `CHANGE_<order_id>`           |
+| ⏭️ Skip     | `SKIP_<order_id>`             |
+
+### Sample Body Text
+
+```
+🍽️ *Today's Lunch (15 Jan 2025)*
+
+☀️ *Lunch*: Chicken Biryani (12:30)
+
+⏰ Respond by *9:30am* — changes close after that.⚠️ Your plan expires in *2* delivery day(s)!
+```
 
 ---
 
@@ -88,21 +98,21 @@ You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires i
 
 ### Variables (Body - 5 parameters)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
-| {{1}} | `delivery_date` | String | "15 Jan 2025" |
-| {{2}} | `item_line` | String | "🌙 *Dinner*: Dal Makhani + Roti" |
-| {{3}} | `time_str` | String | "19:30" |
-| {{4}} | `deadline_msg` | String | "⏰ Respond by *5pm* — changes close after that." |
-| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in *2* delivery day(s)!" |
+| Index | Name            | Type   | Example                                           |
+| ----- | --------------- | ------ | ------------------------------------------------- |
+| {{1}} | `delivery_date` | String | "15 Jan 2025"                                     |
+| {{2}} | `item_line`     | String | "🌙 _Dinner_: Dal Makhani + Roti"                 |
+| {{3}} | `time_str`      | String | "19:30"                                           |
+| {{4}} | `deadline_msg`  | String | "⏰ Respond by _5pm_ — changes close after that." |
+| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in _2_ delivery day(s)!"    |
 
 ### Buttons (Quick Reply - 3 buttons)
 
-| Button Text | Payload |
-|-------------|---------|
-| ✅ Confirm | `CONFIRM_<order_id>` |
-| 🔄 Change | `CHANGE_<order_id>` |
-| ⏭️ Skip | `SKIP_<order_id>` |
+| Button Text | Payload              |
+| ----------- | -------------------- |
+| ✅ Confirm  | `CONFIRM_<order_id>` |
+| 🔄 Change   | `CHANGE_<order_id>`  |
+| ⏭️ Skip     | `SKIP_<order_id>`    |
 
 ---
 
@@ -113,19 +123,19 @@ You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires i
 
 ### Variables (Body - 3 parameters)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
-| {{1}} | `slot_label` | String | "Lunch" |
-| {{2}} | `slot_emoji` | String | "☀️" |
-| {{3}} | `item_name` | String | "Chicken Biryani" |
+| Index | Name         | Type   | Example           |
+| ----- | ------------ | ------ | ----------------- |
+| {{1}} | `slot_label` | String | "Lunch"           |
+| {{2}} | `slot_emoji` | String | "☀️"              |
+| {{3}} | `item_name`  | String | "Chicken Biryani" |
 
 ### Buttons (Quick Reply - 3 buttons)
 
-| Button Text | Payload |
-|-------------|---------|
-| ✅ Confirm | `CONFIRM_<order_id>` |
-| 🔄 Change | `CHANGE_<order_id>` |
-| ⏭️ Skip | `SKIP_<order_id>` |
+| Button Text | Payload              |
+| ----------- | -------------------- |
+| ✅ Confirm  | `CONFIRM_<order_id>` |
+| 🔄 Change   | `CHANGE_<order_id>`  |
+| ⏭️ Skip     | `SKIP_<order_id>`    |
 
 ### Sample Body Text
 
@@ -146,16 +156,16 @@ You skipped this meal earlier — it's being delivered today.
 
 ### Variables (Body - 2 parameters)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
+| Index | Name         | Type   | Example                   |
+| ----- | ------------ | ------ | ------------------------- |
 | {{1}} | `plan_label` | String | "🥗 Healthy Diet Non-Veg" |
-| {{2}} | `threshold` | String | "2" |
+| {{2}} | `threshold`  | String | "2"                       |
 
 ### Buttons (Quick Reply - 2 buttons)
 
-| Button Text | Payload |
-|-------------|---------|
-| 🔄 Renew Plan | `ORDER_NOW` |
+| Button Text   | Payload      |
+| ------------- | ------------ |
+| 🔄 Renew Plan | `ORDER_NOW`  |
 | 📞 Contact Us | `CONTACT_US` |
 
 ### Sample Body Text
@@ -200,9 +210,9 @@ Type *hi* to start again!
 
 ### Variables (Body - 2 parameters)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
-| {{1}} | `otp_code` | String | "482917" |
+| Index | Name       | Type   | Example     |
+| ----- | ---------- | ------ | ----------- |
+| {{1}} | `otp_code` | String | "482917"    |
 | {{2}} | `validity` | String | "5 minutes" |
 
 ### Buttons
@@ -216,6 +226,7 @@ Your FitFuel login code is: 482917. Valid for 5 minutes.
 ```
 
 **Note:** For Authentication category, Meta requires:
+
 - Add "OTP" button type (not quick reply)
 - Set "OTP length" to 6
 - Package name for Android auto-fill
@@ -229,8 +240,8 @@ Your FitFuel login code is: 482917. Valid for 5 minutes.
 
 ### Variables (Body - 1 parameter)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
+| Index | Name     | Type   | Example                                 |
+| ----- | -------- | ------ | --------------------------------------- |
 | {{1}} | `reason` | String | "Cancelled" / "Link Expired" / "Failed" |
 
 ### Buttons (Quick Reply - 0 buttons)
@@ -256,12 +267,12 @@ Please send us a message to start a new order whenever you're ready. We're here 
 
 ### Variables (Body - 5 parameters)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
-| {{1}} | `plan_title` | String | "🥗 Healthy Diet Non-Veg" |
-| {{2}} | `day_label` | String | "7 Days" |
-| {{3}} | `meal_label` | String | "Lunch + Dinner" |
-| {{4}} | `amount` | String | "₹1,540" |
+| Index | Name          | Type   | Example                      |
+| ----- | ------------- | ------ | ---------------------------- |
+| {{1}} | `plan_title`  | String | "🥗 Healthy Diet Non-Veg"    |
+| {{2}} | `day_label`   | String | "7 Days"                     |
+| {{3}} | `meal_label`  | String | "Lunch + Dinner"             |
+| {{4}} | `amount`      | String | "₹1,540"                     |
 | {{5}} | `start_label` | String | "from 16 Jan 2025" / "today" |
 
 ### Buttons
@@ -294,11 +305,11 @@ Thank you for choosing FitFuel! 💪
 
 ### Variables (Body - 3 parameters)
 
-| Index | Name | Type | Example |
-|-------|------|------|---------|
-| {{1}} | `date` | String | "26 Jan 2025" |
-| {{2}} | `reason_line` | String | "Republic Day holiday" |
-| {{3}} | `remaining_days` | String | "5" |
+| Index | Name             | Type   | Example                |
+| ----- | ---------------- | ------ | ---------------------- |
+| {{1}} | `date`           | String | "26 Jan 2025"          |
+| {{2}} | `reason_line`    | String | "Republic Day holiday" |
+| {{3}} | `remaining_days` | String | "5"                    |
 
 ### Buttons
 
@@ -342,6 +353,7 @@ WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
 ### Meta Business Manager Checklist
 
 For each template:
+
 1. Go to WhatsApp Manager → Message Templates → Create Template
 2. Select Category (Utility / Marketing / Authentication)
 3. Name: Use exact name from table above
@@ -358,6 +370,7 @@ Use Meta's test phone numbers in WhatsApp Manager to test each template before g
 ### Fallback Behavior
 
 Code automatically detects 24-hour WhatsApp session window:
+
 - **User messaged < 24h ago** → Uses interactive messages (buttons/lists) - no template needed
 - **User silent > 24h** → Uses approved template from above list
 
