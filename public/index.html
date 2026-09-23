@@ -309,6 +309,20 @@
         color: var(--gray-500);
         font-weight: 500;
       }
+      .hero-single-link {
+        display: inline-block;
+        margin-top: 24px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--green-700);
+        text-decoration: underline;
+        text-decoration-color: var(--green-300);
+        text-underline-offset: 4px;
+        transition: color 0.2s var(--ease-base);
+      }
+      .hero-single-link:hover {
+        color: var(--green-500);
+      }
 
       .section {
         padding: 80px 24px;
@@ -318,6 +332,11 @@
       }
       .section-green {
         background: linear-gradient(180deg, var(--green-50), #fff);
+      }
+      .single-meals-cta {
+        display: flex;
+        justify-content: center;
+        margin-top: 36px;
       }
       .section-title {
         text-align: center;
@@ -957,7 +976,6 @@
             </svg>
             Order Now
           </a>
-          <a href="/single-meals" class="btn-secondary">Single Meals</a>
           <a href="#plans" class="btn-secondary">View Plans ↓</a>
         </div>
         <div class="hero-trust">
@@ -973,6 +991,9 @@
             <span class="Daily">Daily</span><span>Fresh Delivery</span>
           </div>
         </div>
+        <a href="/single-meals" class="hero-single-link reveal"
+          >Prefer single dishes? Order them separately →</a
+        >
       </div>
     </section>
 
@@ -1244,6 +1265,22 @@
             >Order on Website</a
           >
         </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="single-meals">
+      <h2 class="section-title reveal">Order Single Meals</h2>
+      <p class="section-subtitle reveal">
+        No subscription needed — pick individual dishes and have them delivered
+        fresh.
+      </p>
+      <div class="single-meals-cta reveal">
+        <a href="/single-meals" class="btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+          Browse Single Meals
+        </a>
       </div>
     </section>
 
