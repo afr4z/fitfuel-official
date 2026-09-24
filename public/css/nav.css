@@ -156,19 +156,35 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   background: var(--green-600, #00833f);
 }
 
-/* Secondary — orange outline, signed-out account entry. Border
-   orange-600 = 3.7:1, label orange-700 = 5.1:1 on white. */
-.nav-login {
+/* Secondary — the orange outline. Identical for BOTH auth states: the
+   signed-out "Login" link and the signed-in "Hi, Name" chip, so the
+   control in the right-hand slot always looks the same. Nothing here is
+   grey: the greeting used to inherit --gray-500 and read as a grey
+   lozenge with one orange word in it. */
+.nav-login,
+.nav-account-trigger {
   border-color: var(--orange-600, #d96217);
   color: var(--orange-700, #b84e0f);
 }
-.nav-login:hover {
+.nav-login:hover,
+.nav-account-trigger:hover,
+.nav-account-trigger[aria-expanded="true"] {
   background: var(--orange-50, #fef3ec);
   border-color: var(--orange-700, #b84e0f);
 }
 /* Already on the login page: tint only — never a second filled button. */
 .nav-login[aria-current="page"] {
   background: var(--orange-50, #fef3ec);
+}
+
+/* Identity chip — same box and colour as Login; only the label and the
+   chevron differ. */
+.nav-account-trigger {
+  gap: 6px;
+}
+.nav-account-name {
+  color: inherit;
+  font-weight: 700;
 }
 
 /* ── Auth area (right side) ────────────────────────────────────────── */
@@ -211,22 +227,8 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 }
 
 /* ── Account menu (disclosure) ─────────────────────────────────────── */
-/* Identity chip — same box as the other two; quiet until hovered/open. */
 .nav-account {
   position: relative;
-}
-.nav-account-trigger {
-  gap: 6px;
-  color: var(--gray-500, #6b7280);
-}
-.nav-account-trigger:hover,
-.nav-account-trigger[aria-expanded="true"] {
-  background: var(--orange-50, #fef3ec);
-  border-color: var(--orange-100, #fde2cf);
-}
-.nav-account-name {
-  color: var(--orange-700, #b84e0f);
-  font-weight: 700;
 }
 .nav-account-chevron {
   transition: transform 0.2s var(--ease-base, ease);
