@@ -201,8 +201,7 @@
     }
 
     if (signedIn) {
-      // Account menu sits hard against the right edge, after the CTA.
-      authEl.classList.add("nav-auth-account");
+      // Account menu is the last item — the right edge of the bar.
       authEl.replaceChildren(accountMenu(name));
     } else {
       authEl.replaceChildren();

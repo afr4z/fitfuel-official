@@ -148,17 +148,13 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   align-items: center;
   gap: 12px;
 }
+/* The auth slot is always the last item in the bar — the right edge — in
+   both states: [Order Now] [Login] when signed out, [Order Now]
+   [Hi, Name] when signed in. The account control never moves. */
 .nav-auth {
   display: inline-flex;
   align-items: center;
   gap: 16px;
-}
-/* Empty when signed out and the account menu lives elsewhere */
-.nav-auth:empty {
-  display: none;
-}
-/* Signed in: the account menu takes the right edge, after the CTA */
-.nav-auth-account {
   order: 2;
 }
 /* Placeholder held while /api/auth/me resolves — never paints a real
@@ -386,7 +382,6 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   .nav-auth {
     width: 100%;
     justify-content: flex-start;
-    order: 2;
   }
   /* In the column the panel flows inline instead of floating — no hover
      on touch, and nothing can overflow the viewport. */
