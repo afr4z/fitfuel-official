@@ -128,7 +128,6 @@ img {
    Archivo's width axis reproduces that. Every surface that renders the
    wordmark picks it up here, so the mark is set one way everywhere. */
 .nav-brand,
-.auth-logo a,
 .footer-brand,
 .wordmark {
   font-family: var(--font-display);

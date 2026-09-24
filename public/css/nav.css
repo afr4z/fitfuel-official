@@ -61,16 +61,6 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 /* The Fit|Fuel accent colour and gap are defined once, as
    .wordmark-accent in /css/main.css. Every page that loads this nav also
    loads main.css — do not re-declare the accent here. */
-.nav-sub {
-  font-size: 0.6rem;
-  font-weight: 500;
-  /* gray-500 (not gray-400): the tagline must pass AA on white */
-  color: var(--gray-500, #6b7280);
-  letter-spacing: 0.02em;
-  margin-left: 8px;
-  vertical-align: middle;
-  white-space: nowrap;
-}
 
 /* ── Links ─────────────────────────────────────────────────────────── */
 .nav-links {
@@ -324,9 +314,6 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 
 /* ── Tighten before the burger kicks in ────────────────────────────── */
 @media (max-width: 1024px) {
-  .nav-sub {
-    display: none;
-  }
   .nav-links {
     gap: 24px;
   }
