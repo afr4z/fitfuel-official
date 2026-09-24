@@ -153,24 +153,140 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   align-items: center;
   gap: 16px;
 }
-/* Signed-in greeting — the last item in the bar, hard against the right
-   edge, after the CTA. */
-.nav-greeting {
+/* Empty when signed out and the account menu lives elsewhere */
+.nav-auth:empty {
+  display: none;
+}
+/* Signed in: the account menu takes the right edge, after the CTA */
+.nav-auth-account {
+  order: 2;
+}
+/* Placeholder held while /api/auth/me resolves — never paints a real
+   control that would then be swapped out. */
+.nav-auth-skeleton {
+  display: inline-block;
+  width: 78px;
+  height: 38px;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--gray-200, #e5e7eb);
+  animation: nav-pulse 1.4s ease-in-out infinite;
+}
+@keyframes nav-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ── Account menu (disclosure) ─────────────────────────────────────── */
+.nav-account {
+  position: relative;
+}
+.nav-account-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full, 9999px);
+  color: var(--gray-500, #6b7280);
+  font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--gray-500, #6b7280);
+  padding: 8px 12px;
+  cursor: pointer;
   white-space: nowrap;
+  transition:
+    background 0.2s var(--ease-base, ease),
+    border-color 0.2s var(--ease-base, ease);
 }
-.nav-greeting-name {
+.nav-account-trigger:hover,
+.nav-account-trigger[aria-expanded="true"] {
+  background: var(--green-50, #eef7f1);
+  border-color: var(--green-200, #b4dcc4);
+}
+.nav-account-name {
   color: var(--green-800, #005d2b);
   font-weight: 700;
 }
-/* Login and Logout share one outlined-control treatment. They are
-   different elements (Login navigates, Logout acts) but must read as
-   the same kind of control — the lower-emphasis slot opposite the
-   filled primary CTA. */
-.nav-login,
-.nav-logout {
+.nav-account-chevron {
+  transition: transform 0.2s var(--ease-base, ease);
+}
+.nav-account-trigger[aria-expanded="true"] .nav-account-chevron {
+  transform: rotate(180deg);
+}
+.nav-account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: var(--radius-md, 10px);
+  box-shadow: var(--shadow-md, 0 4px 20px rgba(0, 0, 0, 0.08));
+  padding: 6px;
+  animation: nav-menu-in 0.15s var(--ease-out, ease);
+}
+/* The author `display: flex` above would otherwise defeat [hidden] */
+.nav-account-menu[hidden] {
+  display: none;
+}
+@keyframes nav-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.nav-account-item {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: var(--radius-sm, 8px);
+  background: none;
+  color: var(--gray-700, #374151);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease-base, ease),
+    color 0.15s var(--ease-base, ease);
+}
+.nav-account-item:hover {
+  background: var(--green-50, #eef7f1);
+  color: var(--green-800, #166534);
+}
+.nav-account-item[aria-current="page"] {
+  background: var(--green-50, #eef7f1);
+  color: var(--green-800, #166534);
+  font-weight: 600;
+}
+.nav-account-sep {
+  height: 1px;
+  border: 0;
+  background: var(--gray-200, #e5e7eb);
+  margin: 5px 4px;
+}
+.nav-account-logout:hover {
+  background: var(--gray-50, #f9fafb);
+  color: var(--red-600, #dc2626);
+}
+/* Login = the outlined secondary control (an <a>, it navigates), opposite
+   the filled primary CTA. Signed-out visitors only. */
+.nav-login {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -187,8 +303,7 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   cursor: pointer;
   transition:
     background 0.2s var(--ease-base, ease),
-    border-color 0.2s var(--ease-base, ease),
-    color 0.2s var(--ease-base, ease);
+    border-color 0.2s var(--ease-base, ease);
 }
 .nav-login:hover {
   background: var(--green-50, #eef7f1);
@@ -198,12 +313,7 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 .nav-login[aria-current="page"] {
   background: var(--green-50, #eef7f1);
 }
-/* Sign-out is the exit action: flag it on hover rather than
-   colouring it as a permanent error. */
-.nav-logout:hover {
-  border-color: var(--red-600, #dc2626);
-  color: var(--red-600, #dc2626);
-}
+
 /* ── Burger (mobile only) ──────────────────────────────────────────── */
 .nav-burger {
   display: none;
@@ -276,14 +386,20 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   .nav-auth {
     width: 100%;
     justify-content: flex-start;
-    flex-wrap: wrap;
     order: 2;
   }
-  /* Greeting sits between the primary CTA and the account links */
-  .nav-greeting {
+  /* In the column the panel flows inline instead of floating — no hover
+     on touch, and nothing can overflow the viewport. */
+  .nav-account {
     width: 100%;
-    order: 1;
-    font-size: 1rem;
+  }
+  .nav-account-menu {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    margin-top: 6px;
+    box-shadow: none;
+    animation: none;
   }
   .nav-cta,
   .nav-login {

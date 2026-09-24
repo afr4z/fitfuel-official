@@ -15,11 +15,12 @@
 
   const current = (active) => (active ? ' aria-current="page"' : "");
 
-  // "Order Now" is suppressed only where it is self-referential: on /order
-  // it would just reload the checkout. Kept everywhere else, including the
-  // dashboard. Arrow (not a checkmark): it points into the order flow,
-  // matching "View Plans ↓". Decorative, so hidden from AT.
-  const cta = isOrder
+  // "Order Now" is suppressed where it is redundant: on /order it would
+  // only reload the checkout, and on /dashboard the page already carries
+  // its own order button. Arrow (not a checkmark): it points into the
+  // order flow, matching "View Plans ↓". Decorative, so hidden from AT.
+  const hideCta = isOrder || isDashboard;
+  const cta = hideCta
     ? ""
     : `<a href="/order" class="nav-cta">Order Now
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -50,7 +51,6 @@
   const burger = document.getElementById("nav-burger");
   const links = document.getElementById("nav-links");
   const navEl = document.getElementById("nav");
-  const actionsEl = document.querySelector(".nav-actions");
 
   // ── Mobile menu ──────────────────────────────────────────────────────
   function setMenu(open) {
@@ -94,6 +94,82 @@
     { passive: true },
   );
 
+  // ── Account menu ──────────────────────────────────────────────────
+  // Disclosure pattern (W3C APG "disclosure navigation"), not role="menu":
+  // these are links to pages, so they stay plain links in a list.
+  // Opens on hover for mouse users AND on click/Enter/Space for touch and
+  // keyboard — USWDS is explicit that hover must never be the only way in.
+  function accountMenu(name) {
+    const first =
+      typeof name === "string" ? name.trim().split(/\s+/)[0] || "" : "";
+    const who = first || "there";
+
+    const el = document.createElement("div");
+    el.className = "nav-account";
+    // Static template only — no interpolation. The name is server data and
+    // is set with textContent below, never innerHTML (audit.md S6).
+    el.innerHTML = `
+      <button type="button" class="nav-account-trigger" id="nav-account-trigger"
+              aria-expanded="false" aria-controls="nav-account-menu">
+        <span>Hi, <span class="nav-account-name"></span></span>
+        <svg class="nav-account-chevron" width="14" height="14" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+      <div class="nav-account-menu" id="nav-account-menu" hidden>
+        <a href="/dashboard" class="nav-account-item"${current(isDashboard)}>My Orders</a>
+        <a href="/single-meals" class="nav-account-item">Single Meals</a>
+        <hr class="nav-account-sep" />
+        <button type="button" class="nav-account-item nav-account-logout" id="btn-logout">Logout</button>
+      </div>
+    `;
+    el.querySelector(".nav-account-name").textContent = who;
+    wireAccountMenu(el);
+    return el;
+  }
+
+  function wireAccountMenu(el) {
+    const trigger = el.querySelector(".nav-account-trigger");
+    const menu = el.querySelector(".nav-account-menu");
+    let closeTimer;
+
+    const isOpen = () => trigger.getAttribute("aria-expanded") === "true";
+    const setOpen = (open) => {
+      trigger.setAttribute("aria-expanded", String(open));
+      menu.hidden = !open;
+    };
+
+    trigger.addEventListener("click", () => setOpen(!isOpen()));
+
+    // Hover is a mouse-only enhancement. The panel lives inside this
+    // element, so moving the pointer onto it keeps it open (WCAG 1.4.13).
+    el.addEventListener("mouseenter", () => {
+      clearTimeout(closeTimer);
+      setOpen(true);
+    });
+    el.addEventListener("mouseleave", () => {
+      closeTimer = setTimeout(() => setOpen(false), 150);
+    });
+
+    // Escape closes and returns focus — required for 1.4.13.
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && isOpen()) {
+        setOpen(false);
+        trigger.focus();
+      }
+    });
+    document.addEventListener("click", (e) => {
+      if (isOpen() && !el.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("focusin", (e) => {
+      if (isOpen() && !el.contains(e.target)) setOpen(false);
+    });
+
+    el.querySelector("#btn-logout")?.addEventListener("click", handleLogout);
+  }
+
   // ── Auth-aware rendering ────────────────────────────────────────────
   const authEl = document.getElementById("nav-auth");
   if (!authEl) return;
@@ -103,51 +179,36 @@
   const loginLink = () =>
     `<a href="/login" class="nav-login"${current(isLogin)}>Login</a>`;
 
-  // Static pages get a sensible default first (no flash)
-  authEl.innerHTML = loginLink();
-
-  // Greeting for the signed-in nav. The name is server data, so it is
-  // built with textContent — never innerHTML (see docs/audit.md S6).
-  // Falls back to "Hi there" for customers who signed up by phone only.
-  function greetingNode(name) {
-    const first =
-      typeof name === "string" ? name.trim().split(/\s+/)[0] || "" : "";
-    const el = document.createElement("span");
-    el.className = "nav-greeting";
-    const hi = document.createElement("span");
-    hi.className = "nav-greeting-hi";
-    hi.textContent = "Hi, ";
-    const who = document.createElement("span");
-    who.className = "nav-greeting-name";
-    who.textContent = first || "there";
-    el.append(hi, who);
-    return el;
-  }
+  // Hold the slot with a neutral placeholder instead of painting "Login"
+  // and swapping it out — that read as a flash of the wrong auth state.
+  authEl.setAttribute("aria-busy", "true");
+  authEl.innerHTML = `<span class="nav-auth-skeleton" aria-hidden="true"></span>`;
 
   async function renderAuth() {
+    let signedIn = false;
+    let name = "";
     try {
       const res = await fetch("/api/auth/me", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         if (data.phone) {
-          // Single Meals sits behind login (account-gated feature).
-          authEl.innerHTML = `
-            <a href="/single-meals" class="nav-link">Single Meals</a>
-            <a href="/dashboard" class="nav-link"${current(isDashboard)}>My Orders</a>
-            <button type="button" id="btn-logout" class="nav-logout">Logout</button>
-          `;
-          // Greeting goes last, hard against the right edge of the bar.
-          actionsEl?.append(greetingNode(data.name));
-          document
-            .getElementById("btn-logout")
-            ?.addEventListener("click", handleLogout);
-          return;
+          signedIn = true;
+          name = data.name;
         }
       }
     } catch (e) {
       console.debug("[nav] auth me check failed:", e);
     }
-    authEl.innerHTML = loginLink();
+
+    if (signedIn) {
+      // Account menu sits hard against the right edge, after the CTA.
+      authEl.classList.add("nav-auth-account");
+      authEl.replaceChildren(accountMenu(name));
+    } else {
+      authEl.replaceChildren();
+      authEl.insertAdjacentHTML("beforeend", loginLink());
+    }
+    authEl.removeAttribute("aria-busy");
   }
 
   async function handleLogout() {
