@@ -30,7 +30,7 @@ const supabaseAuth = createClient(
 );
 
 async function createMagicToken(phone, referenceId) {
-  const token = `magic_${phone}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  const token = `magic_${crypto.randomBytes(16).toString("hex")}`;
   const key = `magic:${token}`;
   const data = JSON.stringify({ phone, referenceId, createdAt: Date.now() });
   await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
@@ -201,6 +201,30 @@ export default async function handler(req, res) {
         return res.status(200).json({ status: "ignored" });
       }
 
+      // Idempotency: a given Razorpay payment id may only ever create one
+      // subscription. If this webhook has already been processed (e.g. a
+      // Razorpay retry), acknowledge the duplicate without any side effects.
+      if (razorpayPaymentId) {
+        const { data: existing } = await supabase
+          .from("meal_plan_subscriptions")
+          .select("id")
+          .eq("razorpay_payment_id", razorpayPaymentId)
+          .maybeSingle();
+
+        if (existing) {
+          console.log(
+            "[WEBHOOK] Duplicate payment_link.paid for payment:",
+            razorpayPaymentId,
+            "already processed as subscription:",
+            existing.id,
+          );
+          return res.status(200).json({
+            status: "duplicate",
+            subscription_id: existing.id,
+          });
+        }
+      }
+
       // Look the pending session up with the raw phone used when the link was
       // created (legacy web links used a bare 10-digit prefix), but persist
       // everything with the normalized international format so subscriptions
@@ -221,6 +245,28 @@ export default async function handler(req, res) {
       if (!planId || !days) {
         console.error("[WEBHOOK] No pending session found for phone:", phone);
         return res.status(200).json({ status: "ignored" });
+      }
+
+      // Validate pay amount (before any DB writes): reject when the amount on
+      // the payment record differs from what the pending session charged.
+      // Razorpay reports amounts in paise.
+      const paidPaise = payload?.payment?.entity?.amount;
+      if (
+        amount != null &&
+        paidPaise != null &&
+        Math.round(amount) * 100 !== paidPaise
+      ) {
+        console.error(
+          "[WEBHOOK] Amount mismatch: expected ₹" + amount,
+          "(" + Math.round(amount) * 100 + " paise) but payment was",
+          paidPaise,
+          "paise",
+        );
+        return res.status(400).json({
+          error: "Payment amount does not match subscription",
+          expected_paise: Math.round(amount) * 100,
+          paid_paise: paidPaise,
+        });
       }
 
       // Validate plan_type
@@ -296,6 +342,16 @@ export default async function handler(req, res) {
         .single();
 
       if (insertError) {
+        if (insertError.code === "23505") {
+          // Race: a concurrent delivery of the same webhook inserted first.
+          console.log(
+            "[WEBHOOK] Unique violation on subscription insert (duplicate webhook) for payment:",
+            razorpayPaymentId,
+          );
+          return res.status(200).json({
+            status: "duplicate",
+          });
+        }
         console.error(
           "[WEBHOOK] Subscription insert failed:",
           JSON.stringify(insertError),
