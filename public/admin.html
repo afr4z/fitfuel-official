@@ -194,6 +194,7 @@
   </head>
   <body>
     <div id="app"></div>
+    <script src="/js/esc.js"></script>
     <script>
       const API = "/api/admin/plan-defaults";
       const SLOTS = ["breakfast", "lunch", "dinner"];
@@ -293,7 +294,7 @@
           return;
         }
         el.innerHTML = `<table><thead><tr><th style="text-align:left">Date</th><th style="text-align:left">Reason</th></tr></thead><tbody>
-    ${days.map((d) => `<tr><td style="text-align:left">${d.date}</td><td style="text-align:left">${d.reason || "—"}</td></tr>`).join("")}
+    ${days.map((d) => `<tr><td style="text-align:left">${esc(d.date)}</td><td style="text-align:left">${esc(d.reason) || "—"}</td></tr>`).join("")}
   </tbody></table>`;
       }
 
@@ -371,7 +372,7 @@
         <h1>FitFuel Admin</h1>
         <div class="card">
           <div class="error" style="padding:20px;text-align:center;">
-            <strong>API Error:</strong> ${data.error}<br><br>
+            <strong>API Error:</strong> ${esc(data.error)}<br><br>
             <button class="btn btn-primary" style="width:auto;padding:8px 24px;" onclick="render()">Retry</button>
           </div>
         </div>
@@ -387,7 +388,7 @@
       <h1>FitFuel Admin</h1>
       <div class="tabs">
         <button class="tab active" id="tab-weekly" onclick="switchTab('weekly')">Weekly Schedule</button>
-        <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow${tomorrow ? " (" + tomorrow + ")" : ""}</button>
+        <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow${tomorrow ? " (" + esc(tomorrow) + ")" : ""}</button>
         <button class="tab" id="tab-kitchen" onclick="switchTab('kitchen')">🔒 Kitchen Closed</button>
       </div>
 
@@ -396,13 +397,13 @@
           <div class="scroll-wrap">
             <table>
               <thead><tr><th class="plan-name">Plan</th>
-                ${days.map((d) => `<th class="day-header">${dayLabels[d]}<br><span style="font-weight:400;font-size:11px;color:#6b7280">${SLOTS.map((s) => SLOT_LABELS[s][0]).join(" / ")}</span></th>`).join("")}
+                ${days.map((d) => `<th class="day-header">${esc(dayLabels[d])}<br><span style="font-weight:400;font-size:11px;color:#6b7280">${SLOTS.map((s) => SLOT_LABELS[s][0]).join(" / ")}</span></th>`).join("")}
               </tr></thead>
               <tbody>
                 ${plans
                   .map(
                     (plan) => `
-                  <tr><td class="plan-name">${plan.name}</td>
+                  <tr><td class="plan-name">${esc(plan.name)}</td>
                     ${days
                       .map((d) => {
                         const dayData = plan.week[d] || {};
@@ -413,7 +414,7 @@
                           <div style="display:flex;align-items:center;gap:4px;">
                             <select onchange="saveWeekly('${plan.id}',${d},'${slot}',this.value||null,document.getElementById('ws_${plan.id}_${d}_${slot}'))">
                               <option value="">—</option>
-                              ${plan.dishes.map((dish) => `<option value="${dish.id}" ${dish.id === currentId ? "selected" : ""}>${dish.name} (₹${dish.price})</option>`).join("")}
+                              ${plan.dishes.map((dish) => `<option value="${esc(dish.id)}" ${dish.id === currentId ? "selected" : ""}>${esc(dish.name)} (₹${esc(dish.price)})</option>`).join("")}
                             </select>
                             <span class="saved" id="ws_${plan.id}_${d}_${slot}">✓</span>
                           </div>
@@ -445,14 +446,14 @@
                 ${plans
                   .map(
                     (plan) => `
-                  <tr><td class="plan-name">${plan.name}</td>
+                  <tr><td class="plan-name">${esc(plan.name)}</td>
                     ${SLOTS.map((slot) => {
                       const currentId = plan.nextDay[slot] || "";
                       return `<td>
                         <div style="display:flex;align-items:center;gap:4px;justify-content:center;">
                           <select ${locked ? "disabled" : ""} onchange="saveNextDay('${plan.id}','${slot}',this.value||null,document.getElementById('nd_${plan.id}_${slot}'),'${tomorrow}')">
                             <option value="">—</option>
-                            ${plan.dishes.map((dish) => `<option value="${dish.id}" ${dish.id === currentId ? "selected" : ""}>${dish.name} (₹${dish.price})</option>`).join("")}
+                            ${plan.dishes.map((dish) => `<option value="${esc(dish.id)}" ${dish.id === currentId ? "selected" : ""}>${esc(dish.name)} (₹${esc(dish.price)})</option>`).join("")}
                           </select>
                           <span class="saved" id="nd_${plan.id}_${slot}">✓</span>
                         </div>
