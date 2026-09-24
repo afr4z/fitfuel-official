@@ -31,7 +31,7 @@
   placeholder.innerHTML = `
     <nav class="nav" id="nav" aria-label="Primary">
       <div class="nav-inner">
-        <a href="/" class="nav-brand">Fit<span class="wordmark-accent">Fuel</span> Nutrition</a>
+        <a href="/" class="nav-brand">Fit<span class="wordmark-accent">Fuel</span> Nutrition<span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
         <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>

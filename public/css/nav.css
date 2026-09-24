@@ -62,6 +62,19 @@ nav.js injects markup using exactly the classes below — keep them in sync.
    .wordmark-accent in /css/main.css. Every page that loads this nav also
    loads main.css — do not re-declare the accent here. */
 
+/* Entity attribution. It is UI text, not part of the mark, so it opts
+   out of the display face the brand inherits and sits a shade larger
+   than fine print. */
+.nav-sub {
+  font-family: var(--font, "Inter", sans-serif);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--gray-500, #6b7280);
+  letter-spacing: 0.01em;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
 /* ── Links ─────────────────────────────────────────────────────────── */
 .nav-links {
   display: flex;
@@ -314,6 +327,10 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 
 /* ── Tighten before the burger kicks in ────────────────────────────── */
 @media (max-width: 1024px) {
+  /* The attribution is the first thing to go when the bar gets tight. */
+  .nav-sub {
+    display: none;
+  }
   .nav-links {
     gap: 24px;
   }
