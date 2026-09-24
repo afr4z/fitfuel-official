@@ -228,6 +228,19 @@
         }
       }
     </style>
+    <!-- Start the auth check as early as possible. nav.js is deferred, so a
+         fetch inside it cannot start until the script has downloaded and
+         run; from <head> this request leaves while the rest of the document
+         is still downloading. It lives in <head> rather than beside the
+         nav.js tag because on script-heavy pages (/order) the parser does
+         not reach the end of <body> until ~690ms, which left the request
+         serialised behind parsing. The script blocks for ~0ms — it only
+         issues a fetch. nav.js consumes window.__ffAuth. -->
+    <script>
+      window.__ffAuth = fetch("/api/auth/me", { credentials: "include" })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+    </script>
   </head>
   <body>
     <div id="nav-placeholder"></div>
@@ -365,16 +378,6 @@
         await tryMagicLogin();
       })();
     </script>
-    <!-- Start the auth check during HTML parse. nav.js is deferred, so a
-         fetch inside it could not start until the script had downloaded
-         and run; kicking it off here overlaps the network round trip with
-         the rest of the page. nav.js consumes window.__ffAuth. -->
-    <script>
-      window.__ffAuth = fetch("/api/auth/me", { credentials: "include" })
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null);
-    </script>
-
     <script src="/js/nav.js" defer></script>
   </body>
 </html>
