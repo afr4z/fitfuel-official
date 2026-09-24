@@ -30,8 +30,10 @@
           <a href="/#how-it-works" class="nav-link">How It Works</a>
           <a href="/#plans" class="nav-link">Plans</a>
           <a href="/#why" class="nav-link">Why FitFuel</a>
-          <div id="nav-auth" class="nav-auth"></div>
-          ${cta}
+          <div class="nav-actions">
+            <div id="nav-auth" class="nav-auth"></div>
+            ${cta}
+          </div>
         </div>
       </div>
     </nav>
@@ -87,8 +89,10 @@
   const authEl = document.getElementById("nav-auth");
   if (!authEl) return;
 
+  // Outlined secondary control (not a nav link): one filled primary ("Order
+  // Now") is the only high-emphasis action in the header.
   const loginLink = () =>
-    `<a href="/login" class="nav-link nav-login"${current(isLogin)}>Login</a>`;
+    `<a href="/login" class="nav-login"${current(isLogin)}>Login</a>`;
 
   // Static pages get a sensible default first (no flash)
   authEl.innerHTML = loginLink();
