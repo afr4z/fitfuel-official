@@ -1,6 +1,8 @@
+import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { sendText, sendTemplate } from "../lib/whatsapp.js";
 import { sendNotification } from "../lib/sendNotification.js";
+import { safeEqualStrings } from "../lib/timingSafe.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -8,10 +10,18 @@ const supabase = createClient(
 );
 
 const OTP_TTL_SECONDS = 300;
-const SESSION_TTL_DAYS = 30;
+const SESSION_TTL_DAYS = 14;
+const OTP_COOLDOWN_SECONDS = 60;
+const OTP_DAILY_LIMIT = 5;
+const OTP_MAX_ATTEMPTS = 5;
+
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_HEADERS = {
+  Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+};
 
 function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 1000000).toString();
 }
 
 async function storeOTP(phone, otp) {
@@ -54,6 +64,77 @@ async function deleteOTP(phone) {
       Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
     },
   });
+}
+
+// ── OTP throttling (cooldown, daily cap, attempt lockout) ────────────────
+
+async function setOTPCooldown(phone) {
+  const key = `otp_cd:${phone}`;
+  await fetch(`${UPSTASH_URL}/set/${key}`, {
+    method: "POST",
+    headers: UPSTASH_HEADERS,
+    body: "1",
+  });
+  await fetch(`${UPSTASH_URL}/expire/${key}/${OTP_COOLDOWN_SECONDS}`, {
+    method: "POST",
+    headers: UPSTASH_HEADERS,
+  });
+}
+
+/** Seconds remaining on the per-phone resend cooldown (0 = none). */
+async function getOTPCooldownRemaining(phone) {
+  const key = `otp_cd:${phone}`;
+  const res = await fetch(`${UPSTASH_URL}/ttl/${key}`, {
+    headers: UPSTASH_HEADERS,
+  });
+  const data = await res.json();
+  return typeof data.result === "number" && data.result > 0 ? data.result : 0;
+}
+
+/** Increment the per-phone daily send counter (IST day); returns new count. */
+async function incrDailyOTP(phone) {
+  const istDate = new Date(Date.now() + 5.5 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  const key = `otp_day:${phone}:${istDate}`;
+  const res = await fetch(`${UPSTASH_URL}/incr/${key}`, {
+    method: "POST",
+    headers: UPSTASH_HEADERS,
+  });
+  const data = await res.json();
+  const count = Number(data.result ?? 0);
+  if (count === 1) {
+    await fetch(`${UPSTASH_URL}/expire/${key}/86400`, {
+      method: "POST",
+      headers: UPSTASH_HEADERS,
+    });
+  }
+  return count;
+}
+
+async function resetOTPAttempts(phone) {
+  await fetch(`${UPSTASH_URL}/del/otp_att:${phone}`, {
+    method: "POST",
+    headers: UPSTASH_HEADERS,
+  });
+}
+
+/** Increment the verify-attempt counter; returns new count. */
+async function incrOTPAttempts(phone) {
+  const key = `otp_att:${phone}`;
+  const res = await fetch(`${UPSTASH_URL}/incr/${key}`, {
+    method: "POST",
+    headers: UPSTASH_HEADERS,
+  });
+  const data = await res.json();
+  const count = Number(data.result ?? 0);
+  if (count === 1) {
+    await fetch(`${UPSTASH_URL}/expire/${key}/${OTP_TTL_SECONDS}`, {
+      method: "POST",
+      headers: UPSTASH_HEADERS,
+    });
+  }
+  return count;
 }
 
 async function getMagicToken(token) {
@@ -103,9 +184,7 @@ async function deleteMagicTokenByRef(referenceId) {
 }
 
 function createSessionToken() {
-  return `${Date.now()}_${Math.random().toString(36).slice(2)}${Math.random()
-    .toString(36)
-    .slice(2)}`;
+  return crypto.randomBytes(24).toString("hex");
 }
 
 async function storeSession(token, phone) {
@@ -148,6 +227,22 @@ async function deleteSession(token) {
       Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
     },
   });
+}
+
+/** Re-apply the session TTL (used for sliding sessions). */
+async function refreshSession(token) {
+  const key = `session:${token}`;
+  await fetch(`${UPSTASH_URL}/expire/${key}/${SESSION_TTL_DAYS * 86400}`, {
+    method: "POST",
+    headers: UPSTASH_HEADERS,
+  });
+}
+
+function setSessionCookie(res, token) {
+  res.setHeader(
+    "Set-Cookie",
+    `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
+  );
 }
 
 async function getCustomerByPhone(phone) {
@@ -295,10 +390,7 @@ async function handleMagicLoginByRef(req, res, url) {
   const sessionToken = createSessionToken();
   await storeSession(sessionToken, magic.phone);
 
-  res.setHeader(
-    "Set-Cookie",
-    `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
-  );
+  setSessionCookie(res, sessionToken);
   return res.status(200).json({ success: true, phone: magic.phone });
 }
 
@@ -318,10 +410,7 @@ async function handleMagicLogin(req, res) {
   const sessionToken = createSessionToken();
   await storeSession(sessionToken, magic.phone);
 
-  res.setHeader(
-    "Set-Cookie",
-    `session=${sessionToken}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
-  );
+  setSessionCookie(res, sessionToken);
   return res.status(200).json({
     success: true,
     phone: magic.phone,
@@ -339,8 +428,27 @@ async function handleSendOTP(req, res) {
       .json({ error: "Invalid phone number (10 digits required)" });
   }
 
+  // Throttle: one OTP per phone per 60s cooldown window.
+  const cooldownLeft = await getOTPCooldownRemaining(cleanPhone);
+  if (cooldownLeft > 0) {
+    res.setHeader("Retry-After", String(cooldownLeft));
+    return res
+      .status(429)
+      .json({ error: "Too many OTP requests. Please wait and try again." });
+  }
+
+  // Throttle: at most OTP_DAILY_LIMIT OTPs per phone per IST day.
+  const dayCount = await incrDailyOTP(cleanPhone);
+  if (dayCount > OTP_DAILY_LIMIT) {
+    return res
+      .status(429)
+      .json({ error: "Daily OTP limit reached. Please try again tomorrow." });
+  }
+
   const otp = generateOTP();
   await storeOTP(cleanPhone, otp);
+  await resetOTPAttempts(cleanPhone);
+  await setOTPCooldown(cleanPhone);
 
   try {
     const templateName = process.env.WHATSAPP_OTP_TEMPLATE || "otp_code";
@@ -377,22 +485,32 @@ async function handleVerifyOTP(req, res) {
     return res.status(400).json({ error: "Invalid OTP" });
   }
 
+  // Attempt lockout: every verify attempt increments a counter; once past
+  // OTP_MAX_ATTEMPTS the OTP is invalidated and further attempts are refused.
+  const attempt = await incrOTPAttempts(cleanPhone);
+  if (attempt > OTP_MAX_ATTEMPTS) {
+    await deleteOTP(cleanPhone);
+    res.setHeader("Retry-After", String(OTP_TTL_SECONDS));
+    return res
+      .status(429)
+      .json({ error: "Too many attempts. Request a new OTP." });
+  }
+
   const stored = await getOTP(cleanPhone);
-  if (!stored || stored.otp !== otp) {
+  if (!stored || !safeEqualStrings(stored.otp, otp)) {
+    if (attempt >= OTP_MAX_ATTEMPTS) await deleteOTP(cleanPhone);
     return res.status(401).json({ error: "Invalid or expired OTP" });
   }
 
   await deleteOTP(cleanPhone);
+  await resetOTPAttempts(cleanPhone);
 
   const token = createSessionToken();
   // Store the same international format (91XXXXXXXXXX) used everywhere else
   // so dashboard lookups also find subscriptions created via WhatsApp.
   await storeSession(token, `91${cleanPhone}`);
 
-  res.setHeader(
-    "Set-Cookie",
-    `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${SESSION_TTL_DAYS * 86400}`,
-  );
+  setSessionCookie(res, token);
   return res.status(200).json({ success: true, token });
 }
 
@@ -412,6 +530,14 @@ async function handleLogout(req, res) {
 async function handleMe(req, res) {
   const phone = await sessionPhone(req, res);
   if (!phone) return;
+
+  // Sliding session: extend the server TTL and cookie on every /me call.
+  const cookie = req.headers.cookie || "";
+  const match = cookie.match(/session=([^;]+)/);
+  if (match) {
+    await refreshSession(match[1]);
+    setSessionCookie(res, match[1]);
+  }
 
   const [customer, subscriptions, upcomingMeals, addresses] = await Promise.all(
     [

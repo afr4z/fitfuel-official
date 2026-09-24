@@ -6,6 +6,7 @@ import {
 } from "../lib/deliveryDays.js";
 import { kitchenClosed } from "../bot/config/messages.js";
 import { isPastIST, tomorrowDateStrIST } from "../lib/cronUtils.js";
+import { safeEqualStrings } from "../lib/timingSafe.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -31,7 +32,8 @@ export default async function handler(req, res) {
   const adminSecret = process.env.ADMIN_SECRET;
   if (adminSecret) {
     const auth = req.headers["authorization"] ?? "";
-    if (auth !== `Bearer ${adminSecret}`) return unauthorized(res);
+    if (!safeEqualStrings(auth, `Bearer ${adminSecret}`))
+      return unauthorized(res);
   }
 
   // Under Vercel's `/api/admin/:path*` rewrite, the route arrives as a `path`
