@@ -15,13 +15,6 @@
       type="font/woff2"
       crossorigin
     />
-    <link
-      rel="preload"
-      href="/fonts/inter-latin-var.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
@@ -552,6 +545,16 @@
         document.getElementById("otp-error").classList.remove("visible");
       });
     </script>
+    <!-- Start the auth check during HTML parse. nav.js is deferred, so a
+         fetch inside it could not start until the script had downloaded
+         and run; kicking it off here overlaps the network round trip with
+         the rest of the page. nav.js consumes window.__ffAuth. -->
+    <script>
+      window.__ffAuth = fetch("/api/auth/me", { credentials: "include" })
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null);
+    </script>
+
     <script src="/js/nav.js" defer></script>
   </body>
 </html>

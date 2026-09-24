@@ -205,17 +205,28 @@
   async function renderAuth() {
     let signedIn = false;
     let name = "";
+    // Prefer the prefetch kicked off in the page <head>, which overlaps the
+    // API round trip with the rest of the document. Fall back to fetching
+    // here if the page did not start one (or it failed).
+    let data = null;
     try {
-      const res = await fetch("/api/auth/me", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.phone) {
-          signedIn = true;
-          name = data.name;
-        }
+      // A resolved prefetch is authoritative even when it is null: null
+      // there means "the server said 401", not "no prefetch ran". Only
+      // fetch here when the page never started one, otherwise every
+      // logged-out visit would pay for two round trips.
+      if (window.__ffAuth) {
+        data = await window.__ffAuth;
+      } else {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (res.ok) data = await res.json();
       }
     } catch (e) {
       console.debug("[nav] auth me check failed:", e);
+    }
+
+    if (data && data.phone) {
+      signedIn = true;
+      name = data.name;
     }
 
     if (signedIn) {
