@@ -84,6 +84,20 @@ img {
   display: block;
 }
 
+/* ── Wordmark ──────────────────────────────────────────────────────
+   The FitFuel wordmark is the one piece of brand identity that must
+   never drift between surfaces. Every occurrence is:
+
+     Fit<span class="wordmark-accent">Fuel</span> Nutrition
+
+   The accent (orange) + the 6px Fit|Fuel gap live here, once. The
+   surrounding colour is contextual — green-800 on light surfaces,
+   green-300 on the dark footer — so it is deliberately NOT set here. */
+.wordmark-accent {
+  color: var(--orange-500);
+  margin-right: 6px;
+}
+
 .btn-primary {
   display: inline-flex;
   align-items: center;

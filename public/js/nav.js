@@ -15,10 +15,10 @@
 
   const current = (active) => (active ? ' aria-current="page"' : "");
 
-  // "Order Now" is the checkout's own CTA — linking /order → /order is a
-  // pointless reload, so drop it while the user is on the order page.
-  // Arrow (not a checkmark): it points into the order flow, matching the
-  // "View Plans ↓" directional language. Decorative, so hidden from AT.
+  // "Order Now" is suppressed only where it is self-referential: on /order
+  // it would just reload the checkout. Kept everywhere else, including the
+  // dashboard. Arrow (not a checkmark): it points into the order flow,
+  // matching "View Plans ↓". Decorative, so hidden from AT.
   const cta = isOrder
     ? ""
     : `<a href="/order" class="nav-cta">Order Now
@@ -30,7 +30,7 @@
   placeholder.innerHTML = `
     <nav class="nav" id="nav" aria-label="Primary">
       <div class="nav-inner">
-        <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition <span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
+        <a href="/" class="nav-brand">Fit<span class="wordmark-accent">Fuel</span> Nutrition <span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
         <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -105,6 +105,24 @@
   // Static pages get a sensible default first (no flash)
   authEl.innerHTML = loginLink();
 
+  // Greeting for the signed-in nav. The name is server data, so it is
+  // built with textContent — never innerHTML (see docs/audit.md S6).
+  // Falls back to "Hi there" for customers who signed up by phone only.
+  function greetingNode(name) {
+    const first =
+      typeof name === "string" ? name.trim().split(/\s+/)[0] || "" : "";
+    const el = document.createElement("span");
+    el.className = "nav-greeting";
+    const hi = document.createElement("span");
+    hi.className = "nav-greeting-hi";
+    hi.textContent = "Hi, ";
+    const who = document.createElement("span");
+    who.className = "nav-greeting-name";
+    who.textContent = first || "there";
+    el.append(hi, who);
+    return el;
+  }
+
   async function renderAuth() {
     try {
       const res = await fetch("/api/auth/me", { credentials: "include" });
@@ -117,6 +135,7 @@
             <a href="/dashboard" class="nav-link"${current(isDashboard)}>My Orders</a>
             <button type="button" id="btn-logout" class="nav-logout">Logout</button>
           `;
+          authEl.prepend(greetingNode(data.name));
           document
             .getElementById("btn-logout")
             ?.addEventListener("click", handleLogout);

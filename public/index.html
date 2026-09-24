@@ -822,9 +822,6 @@
         margin-bottom: 14px;
         letter-spacing: -0.01em;
       }
-      .footer-brand span {
-        color: var(--orange-500);
-      }
       .footer-desc {
         font-size: 0.9rem;
         color: var(--green-200);
@@ -902,9 +899,6 @@
       .footer-tagline .wordmark {
         color: var(--green-300);
         font-weight: 700;
-      }
-      .footer-tagline .wordmark span {
-        color: var(--orange-500);
       }
 
       @media (max-width: 900px) {
@@ -1435,7 +1429,9 @@
     <footer class="footer">
       <div class="footer-inner">
         <div>
-          <div class="footer-brand">Fit<span>Fuel</span> Nutrition</div>
+          <div class="footer-brand">
+            Fit<span class="wordmark-accent">Fuel</span> Nutrition
+          </div>
           <p class="footer-desc">
             Chef-prepared meals, built to your macros and delivered to your
             door, every single day.
@@ -1507,8 +1503,10 @@
       <div class="footer-bottom">
         <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
         <p class="footer-tagline">
-          <span class="wordmark">Fit<span>Fuel</span></span> &mdash; Fresh
-          meals, every day
+          <span class="wordmark"
+            >Fit<span class="wordmark-accent">Fuel</span></span
+          >
+          &mdash; Fresh meals, every day
         </p>
       </div>
     </footer>
