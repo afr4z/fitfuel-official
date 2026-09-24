@@ -22,7 +22,9 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
   border-bottom: 1px solid rgba(229, 231, 235, 0.6);
-  transition: all 0.3s var(--ease-base, ease);
+  transition:
+    background 0.3s var(--ease-base, ease),
+    box-shadow 0.3s var(--ease-base, ease);
 }
 .nav.scrolled {
   background: rgba(255, 255, 255, 0.92);
@@ -36,6 +38,12 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+}
+
+/* One visible keyboard ring for every nav control */
+.nav :focus-visible {
+  outline: 2px solid var(--green-500, #008c46);
+  outline-offset: 3px;
 }
 
 /* ── Brand ─────────────────────────────────────────────────────────── */
@@ -57,7 +65,8 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 .nav-sub {
   font-size: 0.6rem;
   font-weight: 500;
-  color: var(--gray-400, #9ca3af);
+  /* gray-500 (not gray-400): the tagline must pass AA on white */
+  color: var(--gray-500, #6b7280);
   letter-spacing: 0.02em;
   margin-left: 8px;
   vertical-align: middle;
@@ -85,7 +94,7 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   left: 0;
   width: 0;
   height: 2px;
-  background: var(--green-500, #22c55e);
+  background: var(--green-500, #008c46);
   border-radius: 1px;
   transition: width 0.3s var(--ease-base, ease);
 }
@@ -95,10 +104,17 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 .nav-link:hover::after {
   width: 100%;
 }
+/* Current page: show the underline persistently, not just on hover */
+.nav-link[aria-current="page"] {
+  color: var(--green-800, #166534);
+}
+.nav-link[aria-current="page"]::after {
+  width: 100%;
+}
 
 /* ── CTA pill (the trailing action button) ─────────────────────────── */
 .nav-cta {
-  background: var(--green-500, #22c55e);
+  background: var(--green-500, #008c46);
   color: #fff !important;
   font-size: 0.875rem;
   font-weight: 600;
@@ -124,13 +140,10 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   align-items: center;
   gap: 16px;
 }
-.nav-login {
-  order: 2;
-}
 .nav-logout {
   border: none;
   background: none;
-  padding: 6px 4px;
+  padding: 8px 12px;
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 600;
@@ -160,6 +173,16 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   transition: all 0.25s var(--ease-base, ease);
 }
 
+/* ── Tighten before the burger kicks in ────────────────────────────── */
+@media (max-width: 1024px) {
+  .nav-sub {
+    display: none;
+  }
+  .nav-links {
+    gap: 24px;
+  }
+}
+
 /* ── Mobile ────────────────────────────────────────────────────────── */
 @media (max-width: 820px) {
   .nav-burger {
@@ -169,9 +192,6 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     flex-wrap: wrap;
     padding: 12px 16px;
   }
-  .nav-sub {
-    display: none;
-  }
   .nav-links {
     display: none;
     width: 100%;
@@ -180,12 +200,29 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     gap: 14px;
     padding: 8px 0 4px;
     order: 3;
+    border-top: 1px solid rgba(229, 231, 235, 0.6);
   }
   .nav-links.open {
     display: flex;
+    animation: nav-drop 0.22s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+  @keyframes nav-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   .nav-auth {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+  }
+  /* A full-width CTA reads better than a lone pill in the column */
+  .nav-cta {
+    width: 100%;
+    text-align: center;
   }
 }

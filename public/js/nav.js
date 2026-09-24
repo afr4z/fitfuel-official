@@ -8,37 +8,73 @@
   const placeholder = document.getElementById("nav-placeholder");
   if (!placeholder) return;
 
-  const NAV_HTML = `
-    <nav class="nav" id="nav">
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const isOrder = path === "/order";
+  const isLogin = path === "/login";
+  const isDashboard = path === "/dashboard";
+
+  const current = (active) => (active ? ' aria-current="page"' : "");
+
+  // "Order Now" is the checkout's own CTA — linking /order → /order is a
+  // pointless reload, so drop it while the user is on the order page.
+  const cta = isOrder ? "" : '<a href="/order" class="nav-cta">Order Now</a>';
+
+  placeholder.innerHTML = `
+    <nav class="nav" id="nav" aria-label="Primary">
       <div class="nav-inner">
         <a href="/" class="nav-brand">Fit<span class="accent">Fuel</span> Nutrition <span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
-        <button class="nav-burger" id="nav-burger" aria-label="Menu" aria-expanded="false">
+        <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
         <div class="nav-links" id="nav-links">
           <a href="/#how-it-works" class="nav-link">How It Works</a>
           <a href="/#plans" class="nav-link">Plans</a>
           <a href="/#why" class="nav-link">Why FitFuel</a>
-          <a href="/single-meals" class="nav-link">Single Meals</a>
           <div id="nav-auth" class="nav-auth"></div>
-          <a href="/order" class="nav-cta">Order Now</a>
+          ${cta}
         </div>
       </div>
     </nav>
   `;
 
-  placeholder.innerHTML = NAV_HTML;
-
-  // ── Mobile menu toggle ──────────────────────────────────────────────
   const burger = document.getElementById("nav-burger");
   const links = document.getElementById("nav-links");
+  const navEl = document.getElementById("nav");
+
+  // ── Mobile menu ──────────────────────────────────────────────────────
+  function setMenu(open) {
+    if (!links || !burger) return;
+    links.classList.toggle("open", open);
+    burger.setAttribute("aria-expanded", String(open));
+    burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  }
+
   burger?.addEventListener("click", () => {
-    const open = links?.classList.toggle("open");
-    burger.setAttribute("aria-expanded", String(!!open));
+    setMenu(!links?.classList.contains("open"));
   });
 
+  // Close after picking a destination (mobile pattern — no sticky overlay).
+  links?.addEventListener("click", (e) => {
+    if (e.target.closest("a")) setMenu(false);
+  });
+
+  // Escape bails out of the open menu and returns focus to the burger.
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && links?.classList.contains("open")) {
+      setMenu(false);
+      burger?.focus();
+    }
+  });
+
+  // Clean up a mid-state menu if the viewport grows past the breakpoint.
+  const mq = window.matchMedia("(max-width: 820px)");
+  const onViewport = (e) => {
+    if (!e.matches) setMenu(false);
+  };
+  if (mq.addEventListener) mq.addEventListener("change", onViewport);
+  else mq.addListener(onViewport); // legacy Safari
+
   // ── Sticky scroll effect (single source of truth) ───────────────────
-  const navEl = document.getElementById("nav");
   window.addEventListener(
     "scroll",
     () => {
@@ -51,8 +87,11 @@
   const authEl = document.getElementById("nav-auth");
   if (!authEl) return;
 
+  const loginLink = () =>
+    `<a href="/login" class="nav-link nav-login"${current(isLogin)}>Login</a>`;
+
   // Static pages get a sensible default first (no flash)
-  authEl.innerHTML = `<a href="/login" class="nav-link nav-login">Login</a>`;
+  authEl.innerHTML = loginLink();
 
   async function renderAuth() {
     try {
@@ -60,9 +99,11 @@
       if (res.ok) {
         const data = await res.json();
         if (data.phone) {
+          // Single Meals sits behind login (account-gated feature).
           authEl.innerHTML = `
-            <a href="/dashboard" class="nav-link">My Orders</a>
-            <button id="btn-logout" class="nav-logout" style="border:none;background:none;color:var(--gray-600);font-size:0.8rem;font-weight:600;padding:8px 12px;cursor:pointer;transition:color 0.2s;">Logout</button>
+            <a href="/single-meals" class="nav-link">Single Meals</a>
+            <a href="/dashboard" class="nav-link"${current(isDashboard)}>My Orders</a>
+            <button type="button" id="btn-logout" class="nav-logout">Logout</button>
           `;
           document
             .getElementById("btn-logout")
@@ -73,7 +114,7 @@
     } catch (e) {
       console.debug("[nav] auth me check failed:", e);
     }
-    authEl.innerHTML = `<a href="/login" class="nav-link nav-login">Login</a>`;
+    authEl.innerHTML = loginLink();
   }
 
   async function handleLogout() {
