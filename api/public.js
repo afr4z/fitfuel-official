@@ -20,10 +20,12 @@ async function handleGetPlans(req, res) {
   try {
     const { data, error } = await supabase
       .from("meal_plans")
-      .select(`
+      .select(
+        `
         *,
         pricing:plan_pricing (days, price_per_meal_per_day)
-      `)
+      `,
+      )
       .eq("is_active", true)
       .order("created_at", { ascending: true });
 
@@ -44,6 +46,10 @@ async function handleGetPlans(req, res) {
       ),
     }));
 
+    // Plans are public, stable data (change only on menu/price sync) — let the
+    // browser cache for 60s and the Vercel edge cache for 5min so visitors
+    // don't pay the full function→DB round-trip on every page load.
+    res.setHeader("Cache-Control", "public, max-age=60, s-maxage=300");
     return res.status(200).json({ plans });
   } catch (err) {
     console.error("[PLANS] Error:", err.message, err.stack);
