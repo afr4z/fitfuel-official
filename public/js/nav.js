@@ -15,14 +15,14 @@
 
   const current = (active) => (active ? ' aria-current="page"' : "");
 
-  // "Order Now" is suppressed where it is redundant: on /order it would
-  // only reload the checkout, and on /dashboard the page already carries
-  // its own order button. Arrow (not a checkmark): it points into the
-  // order flow, matching "View Plans ↓". Decorative, so hidden from AT.
+  // One action, one name: "Start my plan" is the label in the hero, the
+  // banner and here. Suppressed where it is redundant — on /order it
+  // would only reload the checkout, and on /dashboard the page has its
+  // own order button. The arrow is decorative, so hidden from AT.
   const hideCta = isOrder || isDashboard;
   const cta = hideCta
     ? ""
-    : `<a href="/order" class="nav-cta">Order Now
+    : `<a href="/order" class="nav-cta">Start my plan
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
         </svg>
@@ -31,7 +31,7 @@
   placeholder.innerHTML = `
     <nav class="nav" id="nav" aria-label="Primary">
       <div class="nav-inner">
-        <a href="/" class="nav-brand">Fit<span class="wordmark-accent">Fuel</span> Nutrition <span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
+        <a href="/" class="nav-brand">Fit<span class="wordmark-accent">Fuel</span> Nutrition</a>
         <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
