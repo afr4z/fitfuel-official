@@ -121,7 +121,10 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   color: #fff !important;
   font-size: 0.875rem;
   font-weight: 600;
-  padding: 9px 22px;
+  /* 21px + 1px border = the same box as the outlined auth control, so
+     the two pills are exactly the same height. */
+  padding: 9px 21px;
+  border: 1px solid transparent;
   border-radius: 999px;
   text-decoration: none;
   white-space: nowrap;
@@ -161,8 +164,10 @@ nav.js injects markup using exactly the classes below — keep them in sync.
    control that would then be swapped out. */
 .nav-auth-skeleton {
   display: inline-block;
+  /* Mirrors the auth control's box (9px padding + 1px border + 22.4px
+     line box) so the slot doesn't resize when the real control lands. */
   width: 78px;
-  height: 38px;
+  height: 42px;
   border-radius: var(--radius-full, 9999px);
   background: var(--gray-200, #e5e7eb);
   animation: nav-pulse 1.4s ease-in-out infinite;
@@ -192,7 +197,8 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 500;
-  padding: 8px 12px;
+  /* 9px + 1px border, same box as the CTA and the Login pill */
+  padding: 9px 12px;
   cursor: pointer;
   white-space: nowrap;
   transition:
@@ -201,11 +207,11 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 }
 .nav-account-trigger:hover,
 .nav-account-trigger[aria-expanded="true"] {
-  background: var(--green-50, #eef7f1);
-  border-color: var(--green-200, #b4dcc4);
+  background: var(--orange-50, #fef3ec);
+  border-color: var(--orange-100, #fde2cf);
 }
 .nav-account-name {
-  color: var(--green-800, #005d2b);
+  color: var(--orange-700, #b84e0f);
   font-weight: 700;
 }
 .nav-account-chevron {
@@ -261,13 +267,15 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     background 0.15s var(--ease-base, ease),
     color 0.15s var(--ease-base, ease);
 }
+/* Menu items share the orange account identity — a green hover under an
+   orange chip reads as a mistake. */
 .nav-account-item:hover {
-  background: var(--green-50, #eef7f1);
-  color: var(--green-800, #166534);
+  background: var(--orange-50, #fef3ec);
+  color: var(--orange-700, #b84e0f);
 }
 .nav-account-item[aria-current="page"] {
-  background: var(--green-50, #eef7f1);
-  color: var(--green-800, #166534);
+  background: var(--orange-50, #fef3ec);
+  color: var(--orange-700, #b84e0f);
   font-weight: 600;
 }
 .nav-account-sep {
@@ -281,14 +289,16 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   color: var(--red-600, #dc2626);
 }
 /* Login = the outlined secondary control (an <a>, it navigates), opposite
-   the filled primary CTA. Signed-out visitors only. */
+   the filled primary CTA. Signed-out visitors only.
+   Orange carries the account/auth surface (it is the wordmark accent);
+   border orange-600 = 3.7:1, label orange-700 = 5.1:1 on white. */
 .nav-login {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid var(--green-500, #008c46);
-  color: var(--green-700, #007236);
+  border: 1px solid var(--orange-600, #d96217);
+  color: var(--orange-700, #b84e0f);
   font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;
@@ -302,12 +312,12 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     border-color 0.2s var(--ease-base, ease);
 }
 .nav-login:hover {
-  background: var(--green-50, #eef7f1);
-  border-color: var(--green-600, #00833f);
+  background: var(--orange-50, #fef3ec);
+  border-color: var(--orange-700, #b84e0f);
 }
 /* Already on the login page: tint only — never a second filled button. */
 .nav-login[aria-current="page"] {
-  background: var(--green-50, #eef7f1);
+  background: var(--orange-50, #fef3ec);
 }
 
 /* ── Burger (mobile only) ──────────────────────────────────────────── */
