@@ -224,6 +224,11 @@ CREATE TABLE meal_plan_subscriptions (
 
 CREATE INDEX idx_subscriptions_phone ON meal_plan_subscriptions(phone);
 CREATE INDEX idx_subscriptions_status ON meal_plan_subscriptions(status);
+-- One processed payment may provision at most one subscription (idempotency
+-- for Razorpay webhook retries). Multiple NULLs are allowed (WhatsApp-only
+-- subscriptions that never went through a payment).
+CREATE UNIQUE INDEX idx_subscriptions_razorpay_payment
+  ON meal_plan_subscriptions(razorpay_payment_id);
 
 -- ─── 5. subscription_slots ─────────────────────────────────────────────────────
 
