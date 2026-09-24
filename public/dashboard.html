@@ -548,7 +548,7 @@
         const el = document.getElementById("profile-info");
         const addresses = data.addresses || [];
         el.innerHTML = `
-        <div class="profile-grid">
+        <div class="profile-grid" id="profile-grid">
           <div class="profile-field"><div class="profile-label">Phone</div><div class="profile-value">${data.phone}</div></div>
           <div class="profile-field"><div class="profile-label">Name</div><div class="profile-value" id="profile-name-display">${data.name || "—"}</div></div>
           <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="profile-email-display">${data.email || "—"}</div></div>
@@ -615,6 +615,7 @@
         document
           .getElementById("btn-edit-profile")
           .addEventListener("click", () => {
+            document.getElementById("profile-grid").style.display = "none";
             document.getElementById("profile-edit-form").style.display =
               "block";
             document.getElementById("btn-edit-profile").style.display = "none";
@@ -622,6 +623,7 @@
         document
           .getElementById("btn-cancel-profile")
           .addEventListener("click", () => {
+            document.getElementById("profile-grid").style.display = "grid";
             document.getElementById("profile-edit-form").style.display = "none";
             document.getElementById("btn-edit-profile").style.display =
               "inline-flex";
@@ -643,6 +645,7 @@
                 name || "—";
               document.getElementById("profile-email-display").textContent =
                 email || "—";
+              document.getElementById("profile-grid").style.display = "grid";
               document.getElementById("profile-edit-form").style.display =
                 "none";
               document.getElementById("btn-edit-profile").style.display =
