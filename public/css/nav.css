@@ -112,35 +112,60 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   width: 100%;
 }
 
-/* ── CTA pill (the trailing action button) ─────────────────────────── */
-.nav-cta {
+/* ── Pills ────────────────────────────────────────────────────────────
+   Order Now, Login and the account chip are one control with three
+   fills. The box is declared once — padding, border, radius, weight,
+   line-height and transition all shared — so they cannot drift apart.
+   Only colour is per-control. */
+.nav-cta,
+.nav-login,
+.nav-account-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: var(--green-500, #008c46);
-  color: #fff !important;
+  justify-content: center;
+  font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
-  /* 21px + 1px border = the same box as the outlined auth control, so
-     the two pills are exactly the same height. */
-  padding: 9px 21px;
+  line-height: 1.6;
+  padding: 9px 20px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-full, 9999px);
   text-decoration: none;
   white-space: nowrap;
-  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.25);
-  transition: all 0.3s var(--ease-base, ease);
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease-base, ease),
+    border-color 0.2s var(--ease-base, ease),
+    color 0.2s var(--ease-base, ease);
+}
+
+/* Primary — the one filled control in the bar. No glow, no lift: the
+   Login pill's flat craft is the standard, so the CTA meets it. */
+.nav-cta {
+  gap: 10px;
+  background: var(--green-500, #008c46);
+  color: #fff;
 }
 .nav-cta svg {
   flex-shrink: 0;
 }
-.nav-cta::after {
-  display: none !important;
-}
 .nav-cta:hover {
-  background: var(--green-600, #16a34a);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.35);
+  background: var(--green-600, #00833f);
+}
+
+/* Secondary — orange outline, signed-out account entry. Border
+   orange-600 = 3.7:1, label orange-700 = 5.1:1 on white. */
+.nav-login {
+  border-color: var(--orange-600, #d96217);
+  color: var(--orange-700, #b84e0f);
+}
+.nav-login:hover {
+  background: var(--orange-50, #fef3ec);
+  border-color: var(--orange-700, #b84e0f);
+}
+/* Already on the login page: tint only — never a second filled button. */
+.nav-login[aria-current="page"] {
+  background: var(--orange-50, #fef3ec);
 }
 
 /* ── Auth area (right side) ────────────────────────────────────────── */
@@ -183,27 +208,13 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 }
 
 /* ── Account menu (disclosure) ─────────────────────────────────────── */
+/* Identity chip — same box as the other two; quiet until hovered/open. */
 .nav-account {
   position: relative;
 }
 .nav-account-trigger {
-  display: inline-flex;
-  align-items: center;
   gap: 6px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-full, 9999px);
   color: var(--gray-500, #6b7280);
-  font-family: inherit;
-  font-size: 0.875rem;
-  font-weight: 500;
-  /* 9px + 1px border, same box as the CTA and the Login pill */
-  padding: 9px 12px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background 0.2s var(--ease-base, ease),
-    border-color 0.2s var(--ease-base, ease);
 }
 .nav-account-trigger:hover,
 .nav-account-trigger[aria-expanded="true"] {
@@ -288,38 +299,6 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   background: var(--gray-50, #f9fafb);
   color: var(--red-600, #dc2626);
 }
-/* Login = the outlined secondary control (an <a>, it navigates), opposite
-   the filled primary CTA. Signed-out visitors only.
-   Orange carries the account/auth surface (it is the wordmark accent);
-   border orange-600 = 3.7:1, label orange-700 = 5.1:1 on white. */
-.nav-login {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 1px solid var(--orange-600, #d96217);
-  color: var(--orange-700, #b84e0f);
-  font-size: 0.875rem;
-  font-weight: 600;
-  font-family: inherit;
-  padding: 9px 18px;
-  border-radius: var(--radius-full, 9999px);
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background 0.2s var(--ease-base, ease),
-    border-color 0.2s var(--ease-base, ease);
-}
-.nav-login:hover {
-  background: var(--orange-50, #fef3ec);
-  border-color: var(--orange-700, #b84e0f);
-}
-/* Already on the login page: tint only — never a second filled button. */
-.nav-login[aria-current="page"] {
-  background: var(--orange-50, #fef3ec);
-}
-
 /* ── Burger (mobile only) ──────────────────────────────────────────── */
 .nav-burger {
   display: none;
@@ -406,9 +385,9 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     box-shadow: none;
     animation: none;
   }
+  /* Full-width buttons; the shared box already centres their content. */
   .nav-cta,
   .nav-login {
     width: 100%;
-    text-align: center;
   }
 }
