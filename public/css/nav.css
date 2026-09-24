@@ -114,6 +114,9 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 
 /* ── CTA pill (the trailing action button) ─────────────────────────── */
 .nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   background: var(--green-500, #008c46);
   color: #fff !important;
   font-size: 0.875rem;
@@ -124,6 +127,9 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   white-space: nowrap;
   box-shadow: 0 2px 12px rgba(34, 197, 94, 0.25);
   transition: all 0.3s var(--ease-base, ease);
+}
+.nav-cta svg {
+  flex-shrink: 0;
 }
 .nav-cta::after {
   display: none !important;

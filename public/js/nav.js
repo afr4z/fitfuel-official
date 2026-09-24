@@ -17,7 +17,15 @@
 
   // "Order Now" is the checkout's own CTA — linking /order → /order is a
   // pointless reload, so drop it while the user is on the order page.
-  const cta = isOrder ? "" : '<a href="/order" class="nav-cta">Order Now</a>';
+  // Arrow (not a checkmark): it points into the order flow, matching the
+  // "View Plans ↓" directional language. Decorative, so hidden from AT.
+  const cta = isOrder
+    ? ""
+    : `<a href="/order" class="nav-cta">Order Now
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
+        </svg>
+      </a>`;
 
   placeholder.innerHTML = `
     <nav class="nav" id="nav" aria-label="Primary">
