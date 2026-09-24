@@ -2,29 +2,29 @@
 
 Status last refreshed: **2026-09-24** (security hardening rounds 1–2 + S6/S7 XSS landed).
 
-| # | Finding | Severity | Status |
-|---|---------|----------|--------|
-| P0-1 | Admin API dead (500): bad imports + router mismatch | 🔴 | ✅ **FIXED** `74a4291` — imports `../lib`, `?path=` fallback |
-| P0-2 | `/single-meals` dead link | 🟠 | ⏸ **DECISION:** leave as-is (placeholder) |
-| P1 | No favicon | 🟡 | ⏸ **DECISION:** leave as-is |
-| **S1** | No OTP rate limit / lockout | 🔴 | ✅ **FIXED** (R2) — Upstash throttle, 5/day, 5-attempt lockout |
-| **S2** | `Math.random` OTP/session/magic tokens | 🔴 | ✅ **FIXED** (R2) — `crypto.randomInt` / `randomBytes` |
-| **S3** | OTP logged in plaintext | 🔴 | ⏸ **DECISION:** keep (PII logging fine in dev) |
-| **S4** | Magic-login-by-reference session forgery | 🔴 | ✅ **FIXED** (R2) — high-entropy `magic_` token |
-| **S5** | No CSP / security headers | 🟠 | ❌ **OPEN** — vercel.json has no headers block |
-| **S6** | DOM XSS via innerHTML (server/user data) | 🟠 | ✅ **FIXED** `a2a9eb4` — `js/esc.js`, all sinks escaped, runtime-verified |
-| **S7** | Admin secret exfil via S6 + sessionStorage | 🟠 | ✅ **CLOSED** via S6 (no XSS sink remains); token stays in sessionStorage |
-| **S8** | Webhook no paid-amount assert | 🟠 | ✅ **FIXED** (R2) |
-| LOW | Admin `!==` compare | 🟡 | ✅ **FIXED** (R2) — `lib/timingSafe.js` |
-| LOW | Webhook logs phone + magic token | 🟡 | ✅ **DEFERRED** (S3 decision) — magic token now random, phones kept for dev |
-| LOW | Session 30d TTL | 🟡 | ✅ **FIXED** (R2) — 14d + sliding refresh |
-| LOW | Webhook double-create window | 🟡 | ✅ **FIXED** (R2) — unique index live & enforced |
-| §3 | A11y: reduced-motion / contrast / aria | 🟠 | 🔶 **PARTIAL** — reduced-motion on 5/6 pages + main.css; contrast + aria open |
-| §4 | Render-blocking Google Fonts (6 weights) | 🟠 | ❌ **OPEN** |
-| §4 | Duplicated inline `<style>` per page | 🟡 | ❌ **OPEN** |
-| §4 | Zero cache headers | 🟡 | ❌ **OPEN** |
-| §3 | admin.html + bot-messages.html off main.css/nav.css | 🟡 | ❌ **OPEN** |
-| §6 | Stale `database_current.sql` | 🟡 | ❌ **OPEN** |
+| #      | Finding                                             | Severity | Status                                                                                                                                                     |
+| ------ | --------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P0-1   | Admin API dead (500): bad imports + router mismatch | 🔴       | ✅ **FIXED** `74a4291` — imports `../lib`, `?path=` fallback                                                                                               |
+| P0-2   | `/single-meals` dead link                           | 🟠       | ⏸ **DECISION:** leave as-is (placeholder)                                                                                                                 |
+| P1     | No favicon                                          | 🟡       | ⏸ **DECISION:** leave as-is                                                                                                                               |
+| **S1** | No OTP rate limit / lockout                         | 🔴       | ✅ **FIXED** (R2) — Upstash throttle, 5/day, 5-attempt lockout                                                                                             |
+| **S2** | `Math.random` OTP/session/magic tokens              | 🔴       | ✅ **FIXED** (R2) — `crypto.randomInt` / `randomBytes`                                                                                                     |
+| **S3** | OTP logged in plaintext                             | 🔴       | ⏸ **DECISION:** keep (PII logging fine in dev)                                                                                                            |
+| **S4** | Magic-login-by-reference session forgery            | 🔴       | ✅ **FIXED** (R2) — high-entropy `magic_` token                                                                                                            |
+| **S5** | No CSP / security headers                           | 🟠       | ❌ **OPEN** — vercel.json has no headers block                                                                                                             |
+| **S6** | DOM XSS via innerHTML (server/user data)            | 🟠       | ✅ **FIXED** `a2a9eb4` — shared `html-escape.js`, all sinks escaped, runtime-verified; renamed from `esc.js` (`b6f...`) to avoid ad-blocker filename match |
+| **S7** | Admin secret exfil via S6 + sessionStorage          | 🟠       | ✅ **CLOSED** via S6 (no XSS sink remains); token stays in sessionStorage                                                                                  |
+| **S8** | Webhook no paid-amount assert                       | 🟠       | ✅ **FIXED** (R2)                                                                                                                                          |
+| LOW    | Admin `!==` compare                                 | 🟡       | ✅ **FIXED** (R2) — `lib/timingSafe.js`                                                                                                                    |
+| LOW    | Webhook logs phone + magic token                    | 🟡       | ✅ **DEFERRED** (S3 decision) — magic token now random, phones kept for dev                                                                                |
+| LOW    | Session 30d TTL                                     | 🟡       | ✅ **FIXED** (R2) — 14d + sliding refresh                                                                                                                  |
+| LOW    | Webhook double-create window                        | 🟡       | ✅ **FIXED** (R2) — unique index live & enforced                                                                                                           |
+| §3     | A11y: reduced-motion / contrast / aria              | 🟠       | 🔶 **PARTIAL** — reduced-motion on 5/6 pages + main.css; contrast + aria open                                                                              |
+| §4     | Render-blocking Google Fonts (6 weights)            | 🟠       | ❌ **OPEN**                                                                                                                                                |
+| §4     | Duplicated inline `<style>` per page                | 🟡       | ❌ **OPEN**                                                                                                                                                |
+| §4     | Zero cache headers                                  | 🟡       | ❌ **OPEN**                                                                                                                                                |
+| §3     | admin.html + bot-messages.html off main.css/nav.css | 🟡       | ❌ **OPEN**                                                                                                                                                |
+| §6     | Stale `database_current.sql`                        | 🟡       | ❌ **OPEN**                                                                                                                                                |
 
 ---
 
@@ -64,10 +64,10 @@ S8 Webhook never asserts paid amount against expected amount — ✅ FIXED (R2).
 Admin secret compared with plain !== — ✅ FIXED (R2), lib/timingSafe.js.
 Webhook logs phone numbers and even the magic token — ✅ DEFERRED with S3 (magic token now random, low risk).
 Session cookie is HttpOnly; Secure; SameSite=Lax ✅ — ✅ FIXED (R2): 14-day TTL + sliding refresh.
-Webhook idempotency — ✅ FIXED (R2): unique index on razorpay_payment_id applied live and enforced (verified 23505 via VPS SSH).
-3. Frontend / UX / accessibility
+Webhook idempotency — ✅ FIXED (R2): unique index on razorpay_payment_id applied live and enforced (verified 23505 via VPS SSH). 3. Frontend / UX / accessibility
 Preselect plan links work ✅ (verified — see §8). Not a bug.
 A11y gaps (real):
+
 - 🔶 PARTIAL — reduced-motion guard now on index, order, login, dashboard, payment-success + main.css (admin/bot-messages still lack it). Contrast + aria still open.
 
 - Contrast: --gray-400 #9ca3af as body/help text on white ≈ 2.9:1 (fails AA); --green-400 #46a97a text on white ≈ 3.3:1. Use --gray-500/--green-600 for text.
