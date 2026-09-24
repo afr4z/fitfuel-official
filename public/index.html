@@ -172,7 +172,9 @@
         font-weight: 700;
         letter-spacing: var(--tracking-wide);
         text-transform: uppercase;
-        color: var(--leaf);
+        /* orange-700, not orange-500: at 0.78rem this needs 4.5:1 and
+           orange-500 only manages 3.0:1 on white. */
+        color: var(--orange-700, #b84e0f);
         margin-bottom: 18px;
       }
       .hero h1 {
@@ -372,7 +374,8 @@
         font-size: 2rem;
         font-weight: 800;
         font-stretch: 96%;
-        color: var(--leaf);
+        /* orange-600 clears the 3:1 bar for large text (3.7:1) */
+        color: var(--orange-600, #d96217);
         letter-spacing: -0.02em;
         line-height: 1;
         margin-bottom: 12px;
