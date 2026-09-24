@@ -1,15 +1,39 @@
+/* ── Type ──────────────────────────────────────────────────────────
+   Self-hosted variable fonts (latin subset). Archivo carries display
+   type and the wordmark; Inter carries UI and body. Two files, no
+   third-party request, and the 6-weight Google request is gone. */
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/archivo-latin-var.woff2") format("woff2");
+  font-weight: 400 900;
+  font-stretch: 62.5% 125%;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
-  /* Brand palette — extracted from the board.jpg poster (fitfuel brand board) */
-  --green-50: #eef7f1;
-  --green-100: #d7ecdd;
-  --green-200: #b4dcc4;
-  --green-300: #8cc8a5;
-  --green-400: #46a97a;
-  --green-500: #008c46;
-  --green-600: #00833f;
-  --green-700: #007236;
-  --green-800: #005d2b;
-  --green-900: #004821;
+  /* Brand palette — realigned to board.jpg. The poster's green is a
+     bright produce green, not the teal-leaning forest the site had.
+     Two greens with distinct jobs, because the bright one cannot carry
+     white button text at AA:
+       --leaf       the poster green — graphics, tints, rules, wordmark
+       --green-500  deep leaf — filled buttons with white labels (5.2:1) */
+  --leaf: #2f9e44;
+  --green-50: #f2f9f3;
+  --green-100: #e2f2e5;
+  --green-200: #c4e5cb;
+  --green-300: #96d1a3;
+  --green-400: #5ab373;
+  --green-500: #1a7d36;
+  --green-600: #166b2d;
+  --green-700: #145c27;
+  --green-800: #123f22;
+  --green-900: #0d2f1a;
   --orange-50: #fef3ec;
   --orange-100: #fde2cf;
   --orange-400: #f59a3d;
@@ -40,8 +64,11 @@
   --shadow-glow: 0 0 40px rgba(34, 197, 94, 0.25);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --font:
     "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* The poster's own device: a letterspaced caps line. */
+  --tracking-wide: 0.18em;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -96,6 +123,17 @@ img {
 .wordmark-accent {
   color: var(--orange-500);
   margin-right: 6px;
+}
+/* The mark is a wide, heavy grotesque in the poster — not the UI sans.
+   Archivo's width axis reproduces that. Every surface that renders the
+   wordmark picks it up here, so the mark is set one way everywhere. */
+.nav-brand,
+.auth-logo a,
+.footer-brand,
+.wordmark {
+  font-family: var(--font-display);
+  font-stretch: 108%;
+  letter-spacing: -0.01em;
 }
 
 .btn-primary {
