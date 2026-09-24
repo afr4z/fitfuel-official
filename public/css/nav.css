@@ -135,10 +135,45 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 }
 
 /* ── Auth area (right side) ────────────────────────────────────────── */
+/* Action group: account entry + CTA, tightened like a button pair
+   (Carbon: one high-emphasis + one lower-emphasis control). */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .nav-auth {
   display: inline-flex;
   align-items: center;
   gap: 16px;
+}
+/* Login = outlined secondary button. Still an <a> (it navigates), but
+   shaped as a control so it no longer reads as a section link.
+   Text green-700 (6.1:1) on white; border green-500 (4.3:1) ≥ 3:1. */
+.nav-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--green-500, #008c46);
+  color: var(--green-700, #007236);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: var(--radius-full, 9999px);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.2s var(--ease-base, ease),
+    border-color 0.2s var(--ease-base, ease);
+}
+.nav-login:hover {
+  background: var(--green-50, #eef7f1);
+  border-color: var(--green-600, #00833f);
+}
+/* Already on the login page: tint only — never a second filled button. */
+.nav-login[aria-current="page"] {
+  background: var(--green-50, #eef7f1);
 }
 .nav-logout {
   border: none;
@@ -216,12 +251,21 @@ nav.js injects markup using exactly the classes below — keep them in sync.
       transform: translateY(0);
     }
   }
+  /* Action group: full-width buttons, primary (Order Now) on top —
+     Carbon's vertical-stack rule. */
+  .nav-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
   .nav-auth {
     width: 100%;
     justify-content: flex-start;
+    order: 1;
   }
-  /* A full-width CTA reads better than a lone pill in the column */
-  .nav-cta {
+  .nav-cta,
+  .nav-login {
     width: 100%;
     text-align: center;
   }
