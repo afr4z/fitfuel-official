@@ -1,9 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
-import { sendText } from "../../lib/whatsapp.js";
-import { sendNotification } from "../../lib/sendNotification.js";
-import { addDeliveryDays, countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
-import { kitchenClosed } from "../../bot/config/messages.js";
-import { isPastIST, tomorrowDateStrIST } from "../../lib/cronUtils.js";
+import { sendNotification } from "../lib/sendNotification.js";
+import {
+  addDeliveryDays,
+  countRemainingDeliveryDays,
+} from "../lib/deliveryDays.js";
+import { kitchenClosed } from "../bot/config/messages.js";
+import { isPastIST, tomorrowDateStrIST } from "../lib/cronUtils.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -16,7 +18,14 @@ function unauthorized(res) {
 
 const SLOTS = ["breakfast", "lunch", "dinner"];
 const DAYS = [1, 2, 3, 4, 5, 6];
-const DAY_LABELS = { 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat" };
+const DAY_LABELS = {
+  1: "Mon",
+  2: "Tue",
+  3: "Wed",
+  4: "Thu",
+  5: "Fri",
+  6: "Sat",
+};
 
 export default async function handler(req, res) {
   const adminSecret = process.env.ADMIN_SECRET;
@@ -25,16 +34,19 @@ export default async function handler(req, res) {
     if (auth !== `Bearer ${adminSecret}`) return unauthorized(res);
   }
 
+  // Under Vercel's `/api/admin/:path*` rewrite, the route arrives as a `path`
+  // query param (`/api/admin.js?path=kitchen-closed`); when invoked directly
+  // the full pathname is present. Accept both forms, same as api/auth.js.
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const path = url.pathname;
+  const path = url.searchParams.get("path") || url.pathname;
 
   // Kitchen Closed endpoints
-  if (path === "/api/admin/kitchen-closed") {
+  if (path === "/api/admin/kitchen-closed" || path === "kitchen-closed") {
     return handleKitchenClosed(req, res);
   }
 
   // Plan Defaults endpoints
-  if (path === "/api/admin/plan-defaults") {
+  if (path === "/api/admin/plan-defaults" || path === "plan-defaults") {
     return handlePlanDefaults(req, res);
   }
 
@@ -116,12 +128,18 @@ async function handleKitchenClosed(req, res) {
         return;
       }
 
-      const remaining = await countRemainingDeliveryDays(sub.start_date, newEndStr);
+      const remaining = await countRemainingDeliveryDays(
+        sub.start_date,
+        newEndStr,
+      );
       const reasonLine = reason ? `\nReason: _${reason}_\n` : "\n";
 
       const templateParams = [
         { type: "text", text: date },
-        { type: "text", text: reasonLine.replace(/\n/g, " ").replace(/_/g, "") },
+        {
+          type: "text",
+          text: reasonLine.replace(/\n/g, " ").replace(/_/g, ""),
+        },
         { type: "text", text: remaining.toString() },
       ];
 
@@ -153,16 +171,33 @@ async function handlePlanDefaults(req, res) {
     const isLocked = isPastIST(19, 45);
 
     const [plansRes, dishesRes, weeklyRes, nextDayRes] = await Promise.all([
-      supabase.from("meal_plans").select("id, name, tag, emoji").eq("is_active", true).order("name"),
-      supabase.from("dishes").select("id, meal_plan_id, name, is_veg, price").eq("is_available", true).order("name"),
-      supabase.from("weekly_meal_schedule").select("plan_id, day_of_week, slot, dish_id"),
-      supabase.from("next_day_meals").select("plan_id, date, slot, dish_id").eq("date", tomorrow),
+      supabase
+        .from("meal_plans")
+        .select("id, name, tag, emoji")
+        .eq("is_active", true)
+        .order("name"),
+      supabase
+        .from("dishes")
+        .select("id, meal_plan_id, name, is_veg, price")
+        .eq("is_available", true)
+        .order("name"),
+      supabase
+        .from("weekly_meal_schedule")
+        .select("plan_id, day_of_week, slot, dish_id"),
+      supabase
+        .from("next_day_meals")
+        .select("plan_id, date, slot, dish_id")
+        .eq("date", tomorrow),
     ]);
 
-    if (plansRes.error) return res.status(500).json({ error: plansRes.error.message });
-    if (dishesRes.error) return res.status(500).json({ error: dishesRes.error.message });
-    if (weeklyRes.error) return res.status(500).json({ error: weeklyRes.error.message });
-    if (nextDayRes.error) return res.status(500).json({ error: nextDayRes.error.message });
+    if (plansRes.error)
+      return res.status(500).json({ error: plansRes.error.message });
+    if (dishesRes.error)
+      return res.status(500).json({ error: dishesRes.error.message });
+    if (weeklyRes.error)
+      return res.status(500).json({ error: weeklyRes.error.message });
+    if (nextDayRes.error)
+      return res.status(500).json({ error: nextDayRes.error.message });
 
     const weeklyIndex = {};
     for (const w of weeklyRes.data) {
@@ -180,12 +215,20 @@ async function handlePlanDefaults(req, res) {
       tag: p.tag,
       dishes: dishesRes.data
         .filter((d) => d.meal_plan_id === p.id)
-        .map((d) => ({ id: d.id, name: d.name, is_veg: d.is_veg, price: d.price })),
+        .map((d) => ({
+          id: d.id,
+          name: d.name,
+          is_veg: d.is_veg,
+          price: d.price,
+        })),
       week: Object.fromEntries(
         DAYS.map((dow) => [
           dow,
           Object.fromEntries(
-            SLOTS.map((slot) => [slot, weeklyIndex[`${p.id}:${dow}:${slot}`] || null]),
+            SLOTS.map((slot) => [
+              slot,
+              weeklyIndex[`${p.id}:${dow}:${slot}`] || null,
+            ]),
           ),
         ]),
       ),
@@ -207,7 +250,9 @@ async function handlePlanDefaults(req, res) {
     const { type, plan_id, day_of_week, slot, dish_id, date } = req.body ?? {};
 
     if (!plan_id || !slot || !type) {
-      return res.status(400).json({ error: "type, plan_id, and slot are required" });
+      return res
+        .status(400)
+        .json({ error: "type, plan_id, and slot are required" });
     }
 
     if (!SLOTS.includes(slot)) {
@@ -216,7 +261,9 @@ async function handlePlanDefaults(req, res) {
 
     if (type === "weekly") {
       if (![1, 2, 3, 4, 5, 6].includes(day_of_week)) {
-        return res.status(400).json({ error: "Invalid day_of_week for weekly schedule" });
+        return res
+          .status(400)
+          .json({ error: "Invalid day_of_week for weekly schedule" });
       }
 
       if (dish_id) {
@@ -232,7 +279,9 @@ async function handlePlanDefaults(req, res) {
           return res.status(500).json({ error: "Failed to save" });
         }
       } else {
-        return res.status(400).json({ error: "dish_id is required for weekly schedule" });
+        return res
+          .status(400)
+          .json({ error: "dish_id is required for weekly schedule" });
       }
 
       return res.status(200).json({ ok: true, type: "weekly" });
@@ -240,7 +289,9 @@ async function handlePlanDefaults(req, res) {
 
     if (type === "nextday") {
       if (isPastIST(19, 45)) {
-        return res.status(403).json({ error: "Tomorrow's menu is locked after 7:45pm IST" });
+        return res
+          .status(403)
+          .json({ error: "Tomorrow's menu is locked after 7:45pm IST" });
       }
 
       const targetDate = date || tomorrowDateStrIST();
@@ -274,7 +325,9 @@ async function handlePlanDefaults(req, res) {
       return res.status(200).json({ ok: true, type: "nextday" });
     }
 
-    return res.status(400).json({ error: 'Invalid type — must be "weekly" or "nextday"' });
+    return res
+      .status(400)
+      .json({ error: 'Invalid type — must be "weekly" or "nextday"' });
   }
 
   return res.status(405).json({ error: "Method not allowed" });
