@@ -50,6 +50,7 @@
   const burger = document.getElementById("nav-burger");
   const links = document.getElementById("nav-links");
   const navEl = document.getElementById("nav");
+  const actionsEl = document.querySelector(".nav-actions");
 
   // ── Mobile menu ──────────────────────────────────────────────────────
   function setMenu(open) {
@@ -135,7 +136,8 @@
             <a href="/dashboard" class="nav-link"${current(isDashboard)}>My Orders</a>
             <button type="button" id="btn-logout" class="nav-logout">Logout</button>
           `;
-          authEl.prepend(greetingNode(data.name));
+          // Greeting goes last, hard against the right edge of the bar.
+          actionsEl?.append(greetingNode(data.name));
           document
             .getElementById("btn-logout")
             ?.addEventListener("click", handleLogout);

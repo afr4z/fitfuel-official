@@ -84,6 +84,7 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   color: var(--gray-600, #4b5563);
   text-decoration: none;
   position: relative;
+  white-space: nowrap;
   transition: color 0.15s var(--ease-base, ease);
 }
 .nav-link::after {
@@ -152,9 +153,8 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   align-items: center;
   gap: 16px;
 }
-/* Signed-in greeting. Sits at the left edge of the right-hand cluster so
-   the filled CTA keeps the far-right position (it should be the last
-   thing the eye lands on). */
+/* Signed-in greeting — the last item in the bar, hard against the right
+   edge, after the CTA. */
 .nav-greeting {
   font-size: 0.875rem;
   font-weight: 500;
@@ -277,11 +277,12 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
-    order: 1;
+    order: 2;
   }
-  /* Greeting gets its own line above the account links */
+  /* Greeting sits between the primary CTA and the account links */
   .nav-greeting {
     width: 100%;
+    order: 1;
     font-size: 1rem;
   }
   .nav-cta,
