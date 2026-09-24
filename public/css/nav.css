@@ -123,12 +123,15 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* A <button> otherwise inherits the UA's ButtonFace grey; the account
+     chip rendered as a grey lozenge until this was declared. */
+  background: transparent;
+  border: 1px solid transparent;
   font-family: inherit;
   font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.6;
   padding: 9px 20px;
-  border: 1px solid transparent;
   border-radius: var(--radius-full, 9999px);
   text-decoration: none;
   white-space: nowrap;

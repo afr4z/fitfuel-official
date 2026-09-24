@@ -134,37 +134,55 @@
     const trigger = el.querySelector(".nav-account-trigger");
     const menu = el.querySelector(".nav-account-menu");
     let closeTimer;
+    // Hover only *previews* the menu. A click pins it so moving the
+    // pointer away no longer dismisses it; without this, hovering then
+    // clicking (the normal mouse path) toggled the preview shut.
+    let pinned = false;
 
     const isOpen = () => trigger.getAttribute("aria-expanded") === "true";
     const setOpen = (open) => {
       trigger.setAttribute("aria-expanded", String(open));
       menu.hidden = !open;
     };
+    const close = (refocus) => {
+      pinned = false;
+      setOpen(false);
+      if (refocus) trigger.focus();
+    };
 
-    trigger.addEventListener("click", () => setOpen(!isOpen()));
+    trigger.addEventListener("click", () => {
+      if (isOpen() && !pinned) {
+        pinned = true; // hover had it open — pin, don't slam it shut
+        return;
+      }
+      if (isOpen() && pinned) {
+        close();
+        return;
+      }
+      pinned = true; // touch / keyboard: open and stay open
+      setOpen(true);
+    });
 
     // Hover is a mouse-only enhancement. The panel lives inside this
     // element, so moving the pointer onto it keeps it open (WCAG 1.4.13).
     el.addEventListener("mouseenter", () => {
       clearTimeout(closeTimer);
-      setOpen(true);
+      if (!pinned) setOpen(true);
     });
     el.addEventListener("mouseleave", () => {
+      if (pinned) return;
       closeTimer = setTimeout(() => setOpen(false), 150);
     });
 
     // Escape closes and returns focus — required for 1.4.13.
     el.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && isOpen()) {
-        setOpen(false);
-        trigger.focus();
-      }
+      if (e.key === "Escape" && isOpen()) close(true);
     });
     document.addEventListener("click", (e) => {
-      if (isOpen() && !el.contains(e.target)) setOpen(false);
+      if (isOpen() && !el.contains(e.target)) close();
     });
     document.addEventListener("focusin", (e) => {
-      if (isOpen() && !el.contains(e.target)) setOpen(false);
+      if (isOpen() && !el.contains(e.target)) close();
     });
 
     el.querySelector("#btn-logout")?.addEventListener("click", handleLogout);
