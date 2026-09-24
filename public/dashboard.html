@@ -411,6 +411,7 @@
       </div>
     </div>
 
+    <script src="/js/esc.js"></script>
     <script>
       const API_BASE = "/api/auth";
 
@@ -473,13 +474,13 @@
           <div class="plan-card">
             <div class="plan-header">
               <div class="plan-info">
-                <span class="plan-emoji">${plan.emoji || "🥗"}</span>
+                <span class="plan-emoji">${esc(plan.emoji) || "🥗"}</span>
                 <div>
-                  <div class="plan-name">${plan.name || "Meal Plan"}</div>
-                  <span class="plan-tag ${plan.tag?.toLowerCase() === "veg" ? "tag-veg" : "tag-nonveg"}">${plan.tag || ""}</span>
+                  <div class="plan-name">${esc(plan.name) || "Meal Plan"}</div>
+                  <span class="plan-tag ${plan.tag?.toLowerCase() === "veg" ? "tag-veg" : "tag-nonveg"}">${esc(plan.tag) || ""}</span>
                 </div>
               </div>
-              <span class="plan-type">${sub.plan_type?.replace("3day", "3-Day") || sub.plan_type}</span>
+              <span class="plan-type">${esc(sub.plan_type?.replace("3day", "3-Day") || sub.plan_type)}</span>
             </div>
             <div class="plan-dates">
               <div class="plan-date">
@@ -523,9 +524,9 @@
               (m) => `
             <div class="meal-card">
               <div class="meal-date">${formatDateShort(m.delivery_date)}</div>
-              <span class="meal-slot">${m.slot}</span>
-              <div class="meal-item">${m.item_name || "<em>Menu not set</em>"}</div>
-              <span class="meal-status status-${m.status || "pending"}">${m.status || "pending"}</span>
+              <span class="meal-slot">${esc(m.slot)}</span>
+              <div class="meal-item">${m.item_name ? esc(m.item_name) : "<em>Menu not set</em>"}</div>
+              <span class="meal-status status-${esc(m.status) || "pending"}">${esc(m.status) || "pending"}</span>
             </div>
           `,
             )
@@ -549,20 +550,20 @@
         const addresses = data.addresses || [];
         el.innerHTML = `
         <div class="profile-grid" id="profile-grid">
-          <div class="profile-field"><div class="profile-label">Phone</div><div class="profile-value">${data.phone}</div></div>
-          <div class="profile-field"><div class="profile-label">Name</div><div class="profile-value" id="profile-name-display">${data.name || "—"}</div></div>
-          <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="profile-email-display">${data.email || "—"}</div></div>
+          <div class="profile-field"><div class="profile-label">Phone</div><div class="profile-value">${esc(data.phone)}</div></div>
+          <div class="profile-field"><div class="profile-label">Name</div><div class="profile-value" id="profile-name-display">${esc(data.name) || "—"}</div></div>
+          <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="profile-email-display">${esc(data.email) || "—"}</div></div>
         </div>
         <button class="btn btn-secondary" id="btn-edit-profile" style="margin-top:12px;">Edit Profile</button>
 
         <div id="profile-edit-form" style="display:none;margin-top:12px;">
           <div class="profile-field" style="margin-bottom:10px;">
             <div class="profile-label">Full Name</div>
-            <input type="text" id="edit-name" value="${data.name || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
+            <input type="text" id="edit-name" value="${esc(data.name) || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
           </div>
           <div class="profile-field" style="margin-bottom:10px;">
             <div class="profile-label">Email</div>
-            <input type="email" id="edit-email" value="${data.email || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
+            <input type="email" id="edit-email" value="${esc(data.email) || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
           </div>
           <div style="display:flex;gap:8px;">
             <button class="btn btn-primary" id="btn-save-profile" style="flex:1;">Save</button>
@@ -580,18 +581,18 @@
                       (a) => `
                 <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
                   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                    <strong style="font-size:0.9rem;">${a.label || "Home"}</strong>
+                    <strong style="font-size:0.9rem;">${esc(a.label) || "Home"}</strong>
                     <span>
                       ${
                         a.is_default
                           ? '<span class="plan-type" style="margin-right:6px;">Default</span>'
-                          : `<button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;" data-set-default="${a.id}">Set Default</button>`
+                          : `<button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;" data-set-default="${esc(a.id)}">Set Default</button>`
                       }
-                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;margin-left:6px;" data-delete-address="${a.id}">Delete</button>
+                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;margin-left:6px;" data-delete-address="${esc(a.id)}">Delete</button>
                     </span>
                   </div>
-                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:6px;">${a.address}</div>
-                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">${formatLocation(a.location)}</div>
+                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:6px;">${esc(a.address)}</div>
+                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">${esc(formatLocation(a.location))}</div>
                 </div>
               `,
                     )
