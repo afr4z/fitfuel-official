@@ -10,7 +10,6 @@
 
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   const isOrder = path === "/order";
-  const isLogin = path === "/login";
   const isDashboard = path === "/dashboard";
 
   const current = (active) => (active ? ' aria-current="page"' : "");
@@ -192,11 +191,6 @@
   const authEl = document.getElementById("nav-auth");
   if (!authEl) return;
 
-  // Outlined secondary control (not a nav link): one filled primary ("Order
-  // Now") is the only high-emphasis action in the header.
-  const loginLink = () =>
-    `<a href="/login" class="nav-login"${current(isLogin)}>Login</a>`;
-
   // Last known auth state, per tab. /me is revalidated on every page load
   // regardless, so this is only ever a first paint: it stops the control
   // visibly flipping on every navigation, it is not a source of truth.
@@ -243,23 +237,23 @@
     authEl.replaceChildren(accountMenu(name));
   }
 
+  // Signed out, the auth slot renders nothing at all. A "Login" pill in the
+  // header is a second competing call to action next to "Start my plan", and
+  // signing in is a returning-customer task, not something to advertise to
+  // first-time visitors. The footer still links to /login, and the route is
+  // unchanged, so existing customers are not locked out.
   function showSignedOut() {
     authEl.classList.remove("nav-auth-account");
     authEl.replaceChildren();
-    authEl.insertAdjacentHTML("beforeend", loginLink());
   }
 
   async function renderAuth() {
-    // Paint what we last knew straight away. With nothing cached we have no
-    // honest first paint, so hold the slot rather than guess.
+    // Paint what we last knew straight away. With no cache we do not know yet,
+    // and the slot is empty when signed out anyway, so there is nothing to
+    // reserve and no placeholder to flash.
     const cached = readAuthCache();
-    if (cached) {
-      if (cached.name) showSignedIn(cached.name);
-      else showSignedOut();
-    } else {
-      authEl.setAttribute("aria-busy", "true");
-      authEl.innerHTML = `<span class="nav-auth-skeleton" aria-hidden="true"></span>`;
-    }
+    if (cached && cached.name) showSignedIn(cached.name);
+    else showSignedOut();
 
     let signedIn = false;
     let name = "";
