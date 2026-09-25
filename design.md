@@ -1,227 +1,145 @@
-# Design — FitFuel Nutrition
+# FitFuel Nutrition — Design System (locked)
 
-A locked design system for this app. Every page redesign reads this file before
-emitting code. Do not regenerate per page — extend or amend this file when the
-system needs to grow.
+**genre:** editorial · **theme:** custom (tuned to `board.jpg`) · **system:** this file
 
-Rewrite 2 on branch `hallmark-overhaul`. The previous system (editorial /
-broadsheet, `N6` masthead) was **rejected by the owner**; this file supersedes
-it. The brand palette is **locked to `board.jpg`** — the leaf green and the
-poster orange are a given, not a preference. What changed is everything around
-them: the ground is now warm, the shapes are rounded, and the page reads as a
-friendly food app instead of a printed poster.
+Supersedes the warm-consumer system (R2). This is the dramatic, professional-grade
+rebuild: the menu as the product, hairline rules, one deep-green field, type-led
+editorial layout. No photography anywhere — the system is built for typography,
+shape, and hand-built SVG art.
 
-## Genre
+**Owner decisions (not preferences):** brand palette locked to `board.jpg`
+(leaf green, poster orange, deep green). Word markup stays recognizably
+`Fit<span class="wordmark-accent">Fuel</span> Nutrition`. Plan names render
+exactly as served by `/api/plans` — never renamed or split. WhatsApp ordering and
+web ordering (OTP → Razorpay) both remain first-class journeys.
 
-`consumer-app` — warm, rounded, tactile.
+---
 
-Reference feel: a polished food / health delivery app (think Swiggy, Zomato,
-Noom) rather than a SaaS landing page or a printed sheet. Three rules carry it:
+## 1 · Genre Fingerprint
 
-1. **Warm ground.** Paper is cream, never `#fff`, never green-tinted. Cards sit
-   *on* the cream in near-white with a soft, warm-tinted shadow.
-2. **Rounded shapes.** Radii are generous (10 / 16 / 22px) and controls are
-   pills. Nothing is sharp-edged.
-3. **One brand colour per moment.** Green is the primary (fills, active
-   states); orange is the warm accent (wordmark, prices, non-veg, flags). At no
-   point do both hold large fields on the same screen.
+- Hairline rules and squared geometry over soft cards and pills.
+- Ink is green-tinted; ground is warm cream; the deep-green field is the one
+  dramatic band (hero, closing CTA).
+- Section heads carry an editorial numeral (`01 —`), not an icon.
+- Accent (poster orange) ≤ 5% of any viewport: prices, wordmark accent, non-veg
+  marks, flags. Never a button fill, never a band.
 
-Known AI tells that stay banned even though the genre is friendlier: gradient
-text, glassmorphism, floating glow orbs, auto-scroll reveals that hide content
-without JS, animated counters, emoji as decoration, and duplicated component
-CSS across pages.
+## 2 · Macrostructure (per-page family)
 
-## Macrostructure family
-
-One base macrostructure per page type. Pages within a family share the shape
-and vary only by the listed knobs.
-
-- **Marketing pages:** `3 · Highlight + Docket` — one strong hero (the promise),
-  then the docket: How it works, Plans & prices, Why FitFuel, closing band. The
-  menu is *content*, presented as its own card in the hero and again as three
-  plan cards. Knob: hero variant.
-- **App pages:** `01 · Form` — a single measured form/card column. Friendly
-  dense, not sparse-spiritual. Function carries the page, and the card chrome
-  keeps it reachable.
-- **Content pages:** `02 · Long Document` — continuous prose, inline section
-  heads, no marketing chrome.
-
-## Nav archetype
-
-`N1a · Sticky brand bar` on every customer page, one density.
-
-- **Left:** compact two-line lockup — wordmark on top, the entity attribution
-  underneath. `by Jadpod Fitness Pvt Ltd` is brand-mandated copy and stays in
-  the nav on every page.
-- **Centre-left:** destinations (`How It Works`, `Plans`, `Why FitFuel`).
-- **Right:** the auth slot (signed out = empty) and the `Start my plan` pill.
-- **Sticky** with a translucent warm surface and a hairline rule — a consumer
-  bar sits with the user, it does not scroll away. `scroll-padding-top` on
-  `<html>` keeps in-page anchors clear of it.
-- **Mobile:** brand | account chip | burger; the links open as a soft sheet
-  under the bar and the CTA pill hides (the hero and closing band carry it).
-
-The nav's *behaviour* contract is non-negotiable and lives in `/js/nav.js`:
-APG "disclosure navigation" account menu (hover preview + click pin, Escape
-closes and refocuses, click/focus-outside dismisses), the `ff:auth`
-sessionStorage first-paint cache, the `<head>` prefetch (`window.__ffAuth`),
-and logout. Rewrites change markup classes only, never that logic.
-
-Banned: N3/N1-descendants with a login button (the header shows one action),
-masthead treatments, anything not sticky on desktop.
-
-## Footer archetype
-
-`Ft1 · Warm bar` on every page: wordmark + tagline in a left block, 2–4 small
-links beside it, a hairline, then the colophon (`© 2026 Jadpod Fitness Private
-Limited` + `Secure payments by Razorpay`). Cream ground, no gradient, no link
-columns. `/login` stays in the footer — it is the signed-out route now that the
-header no longer renders a login control.
-
-Banned: `Ft3` index columns and dark gradient grounds.
-
-## Theme
-
-Custom, brand-locked. Anchor hue **150** (the poster's leaf green), accent hue
-**45** (the poster's orange) — measured from `board.jpg`. Neutrals are warm,
-leaning to hue ~90 (cream) and ~40 (charcoal); nothing is green-tinted except
-green itself.
-
-| Token | Value | Job |
+| Page | Macro | Note |
 | --- | --- | --- |
-| `--color-paper` | `oklch(98.4% 0.014 90)` | base ground — warm cream, never `#fff` |
-| `--color-paper-2` | `oklch(95.6% 0.02 90)` | alternate section band |
-| `--color-paper-3` | `oklch(93% 0.024 90)` | deepest band / tool ground |
-| `--color-card` | `oklch(99.3% 0.006 90)` | card surface on cream |
-| `--color-rule` | `oklch(91% 0.014 90)` | hairlines, card borders |
-| `--color-rule-strong` | `oklch(82% 0.02 90)` | the one heavier rule per page |
-| `--color-ink` | `oklch(25% 0.022 42)` | body text — warm charcoal |
-| `--color-ink-display` | `oklch(18% 0.02 42)` | headings |
-| `--color-muted` | `oklch(46% 0.024 55)` | secondary text (≥ 4.5:1 on paper) |
-| `--color-faint` | `oklch(55% 0.02 55)` | captions and hints (≥ 4.5:1) |
-| `--color-brand` | `oklch(51.9% 0.138 148)` | **locked leaf green** — CTA fill, 5.2:1 with paper label |
-| `--color-brand-deep` | `oklch(27.4% 0.056 153)` | the closing band's ground |
-| `--color-brand-tint` | `oklch(95% 0.03 150)` | selected / hover fills |
-| `--color-brand-tint-2` | `oklch(89.5% 0.05 150)` | accent chips, step tracks |
-| `--color-accent` | `oklch(55.4% 0.153 44.8)` | **locked poster orange** — text-safe |
-| `--color-accent-display` | `oklch(63.4% 0.168 46.4)` | display-only orange (≥ 24px) |
-| `--color-accent-tint` | `oklch(95% 0.03 45)` | peach fills |
-| `--color-focus` | `oklch(46.4% 0.124 148)` | focus ring |
-| `--color-danger` | `oklch(48% 0.17 27)` | errors |
-| `--color-danger-tint` | `oklch(95% 0.03 27)` | error banner fill |
+| `index.html` | **Catalogue** | The menu is the product. Opens in the fold with the price docket; the plan grid is the catalogue; hairline rules everywhere. |
+| `order.html` | **Narrative Workflow** | Numbered stages `01 — Plan → 02 — Customize → 03 — Checkout`. The 3-step wizard *is* the workflow. |
+| `login.html` | **App page (functional)** | Function carries the page. Centered letterhead card, hairline form. No enrichment. |
+| `dashboard.html` | **App page (functional)** | Ledger-style: subscriptions, meals, profile as ruled entries. No enrichment. |
+| `payment-success.html` | **Letter** | A signed confirmation: seal, prose, actions, signature line. |
+| `privacy-policy.html` | **Long Document** | Continuous prose, inline heads, hairline rules. |
+| `admin.html` / `bot-messages.html` | **Functional tools** | Secret-gated. Never load the shared nav/footer. Tokens only from `main.css`. |
 
-### The green/orange contract
-
-- **Green is primary.** It fills CTAs, the active nav accent, progress fills,
-  veg chips, the closing band, and success marks. It may hold large areas.
-- **Orange is the warm accent.** Reserved for the wordmark's `Fuel`, prices,
-  non-veg chips, "Most popular" flags and numbered step tokens. It never fills
-  a button and never takes a whole band.
-- **No gradient anywhere** — including on buttons. Depth is shadow, warmth is
-  colour.
-- Shadows are warm-tinted (`oklch(35% 0.02 60 / α)`) and soft; cards carry
-  `--shadow-md`, floating panels carry `--shadow-lg`. Never a coloured glow.
-
-## Typography
-
-- Display: **Archivo** 700–800 (width axis ~102–108%), self-hosted variable
-  latin-subset woff2.
-- Body: **Inter** 400–600, same file convention.
-- Headline scale is friendly, not monumental: `--text-display:
-  clamp(2.25rem, 1.2rem + 4vw, 3.25rem)`. Section heads `clamp(1.875rem, 1.4rem
-  + 2vw, 2.5rem)`.
-- Body copy sits at `1rem`/`1.125rem` with `1.6` line-height; muted text is
-  never lighter than `--color-muted`.
-- Display tracking `-0.02em`; small caps lines `0.12em`, uppercase, weight 700.
-- Every display rule carries `overflow-wrap: anywhere; min-width: 0` (audit
-  #11). No italics — emphasis is weight or colour (`font-style: normal`).
-
-## Spacing
-
-4-point named scale, ten steps. Pages use named tokens only — never raw px.
+## 3 · Tokens (single source of truth: `public/css/main.css`)
 
 ```css
---space-3xs: 0.125rem; --space-2xs: 0.25rem; --space-xs:  0.5rem;
---space-sm:  0.75rem; --space-md:  1rem;    --space-lg:  1.5rem;
---space-xl:  2.5rem;  --space-2xl: 4rem;    --space-3xl: 6rem;
---space-4xl: 9rem;
+/* ground & ink — warm cream, green-tinted ink */
+--color-paper:        oklch(97.8% 0.014 90);
+--color-paper-2:      oklch(96.4% 0.018 88);
+--color-paper-3:      oklch(94% 0.022 88);
+--color-card:         oklch(99.2% 0.008 90);
+--color-rule:         oklch(89% 0.015 145);
+--color-rule-strong:  oklch(78% 0.025 145);
+--color-ink:          oklch(24% 0.03 152);
+--color-ink-display:  oklch(18% 0.035 152);
+--color-muted:        oklch(44% 0.025 145);
+--color-faint:        oklch(52% 0.02 145);
+
+/* brand green (locked) */
+--color-brand:        oklch(51.9% 0.138 148);
+--color-brand-deep:   oklch(27.4% 0.056 153);
+--color-brand-tint:   oklch(94.5% 0.032 150);
+--color-brand-tint-2: oklch(88% 0.05 150);
+
+/* poster orange (locked) — accent only */
+--color-accent:         oklch(55.4% 0.153 44.8);
+--color-accent-display: oklch(63.4% 0.168 46.4);
+--color-accent-tint:    oklch(94% 0.035 50);
+
+/* the field — deep green band for hero + closing CTA */
+--color-field:       oklch(27.4% 0.056 153);
+--color-field-2:     oklch(23% 0.05 152);
+--color-field-ink:   oklch(97% 0.012 90);
+--color-field-muted: oklch(82% 0.025 120);
 ```
 
-Section rhythm is **not** uniform: the closing band breathes tighter than the
-section above it, and cards inside a section use `--space-lg` gaps (audit #5).
+Focus (`oklch(46.4% 0.124 148)`), danger / warn / success keep the warm-consumer
+aliases so `admin.html` and `bot-messages.html` resolve unchanged. Legacy alias
+block (`--green-*`, `--orange-*`, `--gray-*`, `--radius-full`, `--shadow-whisper`,
+`--font`) stays until every consumer is renamed.
 
-## Motion
+## 4 · Typography (2 + outlier)
 
-- Easings: `--ease-out: cubic-bezier(0.16, 1, 0.3, 1)`; `--dur-short: 180ms`;
-  `--dur-med: 280ms`. No bounce, no elastic, no overshoot.
-- Hover may **lift 2px** on interactive cards (a consumer-app affordance) and
-  darken fills; buttons press 1px down on `:active`. No glow, no scale.
-- **No scroll-triggered reveals.** Content is present on load (audit #8).
-  Sticky nav gets no scroll listener; its surface is constant.
-- Reduced motion: opacity-only, ≤ 150ms.
+- **Display:** `"Fraunces Variable"` (self-hosted `fraunces-latin-wght-normal.woff2`,
+  preloaded on customer pages). Display headlines, section heads, numerals, the
+  letter seal. Weights 600–700, tracking `-0.022em`, line-height ~1.04.
+- **Body / UI:** `"Archivo"` (already self-hosted). All interface, body copy,
+  fields, chips. Weights 400/600/800.
+- **Outlier (wordmark):** Archivo 800 — the lockup face. The wordmark is the one
+  thing that never drifts between surfaces.
 
-## CTA voice
+Type scale (editorial, large display):
+`--text-display: clamp(2.4rem, 1.6rem + 4vw, 3.9rem)`; `--text-3xl` / `--text-2xl`
+clamped; `--tracking-caps: 0.14em` for kickers and micro-labels.
 
-- **Primary:** solid `--color-brand` pill, `--color-paper` label, weight 600,
-  `min-height: 44px` (36px in the nav). Hover darkens one step (`--color-focus`)
-  and lifts 1px. `transform: none` when `:disabled` (opacity 0.55).
-- **Secondary:** outlined pill, `--color-ink` (12% rule) border on card/paper,
-  tinted fill on hover. One definition, shared by every page — in
-  `/css/main.css`, never redeclared per page (audit #4).
+Prices use tabular figures (Fraunces or Archivo as available) with `₹` before the
+number and a muted `/day` suffix.
 
-## App-page primitives (all shared, all in `/css/main.css`)
+## 5 · Space & Geometry
 
-`.card` (near-white, `--radius-lg`, hairline + `--shadow-md`), `.field-label`,
-`.field-input` / `.field-textarea` (rounded 14px, focus = global ring),
-`.field-error`, `.banner-error` / `.banner-success` / `.banner-note`,
-`.spinner`, `.chip` (rounded status pill, `.chip-veg` green / `.chip-nonveg`
-orange), `.progress` track + `.progress-fill` (rounded, green). Pages compose
-with these; they do not re-declare them.
+- 4pt scale names (`--space-3xs` → `--space-4xl`) shared with the old system;
+  editorial pages breathe: `--space-xl` between card and rule, `--space-3xl`
+  between bands.
+- **Radius:** squared. `--radius-sm: 2px`, `--radius-md: 6px`, `--radius-lg: 12px`.
+  `--radius-pill: 9999px` exists for legacy only — chips are small squared tags
+  (`--radius-sm`), buttons are squared rectangles.
+- **Depth:** flat + hairline. No glow, no big soft shadows. Cards take a hairline
+  border and at most `--shadow-xs`; dropdowns take `--shadow-lg` but stay
+  hairline-edged.
 
-## What pages MUST share
+## 6 · Motion
 
-- The wordmark: `Fit<span class="wordmark-accent">Fuel</span> Nutrition` — one
-  component, never retyped; `Fuel` is orange.
-- The nav lockup (`by Jadpod Fitness Pvt Ltd`) and the `Ft1` warm-bar footer.
-- Archivo + Inter, the CTA voice, the shared primitives.
-- `overflow-x: clip` on **both** `html` and `body` (audit #12); focus ring on
-  the global `:where(...)` rule.
-- `<html>` `scroll-padding-top` sized to the sticky bar.
+- Motion-cut stance (matches the 2026 site). One entrance per surface; the only
+  repeated animation is the skeleton shimmer and the spinner.
+- Nav banner retracts on scroll (N12) — height tapers to 0; never a slide-and-fade
+  that fights the user.
+- `prefers-reduced-motion: reduce` zeroes all durations.
 
-## Page inventory
+## 7 · Microinteractions & Voice
 
-| Page | Type | Nav | Footer | Shape |
-| --- | --- | --- | --- | --- |
-| `/` | marketing | N1a | Ft1 | 3 Highlight + Docket |
-| `/login` | app | N1a | Ft1 | 01 Form, single card |
-| `/order` | app | N1a | Ft1 | 01 Form, 3-step wizard |
-| `/dashboard` | app | N1a | Ft1 | 01 Form, card stack |
-| `/payment-success` | app | N1a | Ft1 | 01 Form, single card |
-| `/privacy-policy` | content | N1a | Ft1 | 02 Long Document |
-| `/admin` | internal | none | none | 05 Workbench (secret-gated) |
-| `/bot-messages` | internal | none | none | 02 Long Document (secret-gated) |
+- Buttons: squared; hover = solid green fill → darker green (`--color-brand-deep`),
+  or hairline → green border. No translateY lift (editorial restraint).
+- Links: hairline underline on hover (`--color-brand`), no arrow animation.
+- Chips: squared tags; veg = green tint + green dot, non-veg = orange tint + orange
+  dot, flag = orange tint text.
+- **CTA voice:** *"Start my plan"* is the one primary action everywhere. Secondary:
+  *"See plans & prices"*, *"Order on WhatsApp"*. Confirmation: *"Start this plan"*
+  on each catalogue card.
 
-Internal tools never load the shared nav (pre-existing decision). They load
-`/css/main.css` for tokens and primitives; they stay out of the customer
-surface.
+## 8 · What every page MUST share
 
-## Preserved by contract
+- Wordmark lockup, brand green/orange/deep-green tokens, Fraunces display +
+  Archivo body, the single focus ring, the nav (N12, injected by `nav.js`), the
+  footer (Ft6 letter close), the CTA voice, the squared/hairline primitives from
+  `main.css`.
 
-Non-negotiable across the overhaul:
+## 9 · What pages MAY differ on
 
-- **Route trees, API handlers, auth, Razorpay, and all data flow are not design
-  surface.** The nav's APG disclosure account menu, the `ff:auth` sessionStorage
-  cache, the head-prefetch, Escape-to-close and focus-return all keep working.
-- **Plan titles are customer-facing and are not renamed or split.** They come
-  from the database; the design wraps them, it does not rewrite them (the
-  `/order` plan-title/emoji split that shipped earlier was reverted).
-- **Entity attribution stays.** `by Jadpod Fitness Pvt Ltd` in the nav,
-  `© 2026 Jadpod Fitness Private Limited` in the footer.
-- **No photography.** The system is typography-and-shape by construction.
+- Composition and section order (per macro family above). App pages never use
+  enrichment; marketing pages may use Tier-B hand-built SVG art.
+- `admin.html` / `bot-messages.html` are exempt from the nav/footer/type rules —
+  they are internal tools, gated, token-compatible.
 
-## Exports
+## 10 · Exports / source of truth
 
-`public/css/main.css` is the `tokens.css` of this project — the `:root` block is
-the token source of truth, plus the shared primitives. `/css/nav.css` + `/js/nav.js`
-are the single nav component. `public/index.html` carries no shared class
-redefinition, exactly one `.btn-primary`, and page composition only.
+- `public/css/main.css` — tokens + shared primitives + footer.
+- `public/css/nav.css` — N12 banner + retract styling of the `nav.js` markup.
+- `public/js/nav.js` — behavior contract unchanged; markup now wraps in
+  `.nav-wrap` with a `.nav-banner`.
+- `public/fonts/fraunces-latin-wght-normal.woff2` — display face (self-hosted).

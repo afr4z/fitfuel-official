@@ -10,6 +10,13 @@
     />
     <link
       rel="preload"
+      href="/fonts/fraunces-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
       href="/fonts/archivo-latin-var.woff2"
       as="font"
       type="font/woff2"
@@ -18,12 +25,14 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* consumer-app · macrostructure: 01 Form · system: design.md
+      /* consumer-app · macrostructure: 18 Letter · system: design.md ·
+         designed-as-editorial
          ─────────────────────────────────────────────────────────────────
-         One confirmation card on the warm ground. The mark is a real,
-         flat green check; the two actions are pill buttons revealed when
-         the magic login settles. Content grows naturally — nothing here
-         traps overflow. */
+         The confirmation reads as a letter from the kitchen: a real,
+         flat-green check pinned above a serif headline, the letter body
+         in ink, a ruled note, then two actions revealed once the magic
+         login settles. Content grows naturally — nothing traps
+         overflow. */
       .success-page {
         min-height: calc(100vh - var(--nav-height));
         padding: var(--space-3xl) var(--page-gutter);
@@ -45,7 +54,7 @@
         height: 56px;
         margin-bottom: var(--space-lg);
         background: var(--color-brand);
-        border-radius: 50%;
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -59,7 +68,7 @@
       h1 {
         font-family: var(--font-display);
         font-size: var(--text-3xl);
-        font-weight: 800;
+        font-weight: 620;
         color: var(--color-ink-display);
         margin-bottom: var(--space-xs);
         letter-spacing: var(--tracking-display);
@@ -94,7 +103,7 @@
         color: var(--color-accent);
         margin-top: 2px;
       }
-      /* The actions are pill buttons that the script reveals (from
+      /* The actions are squared buttons that the script reveals (from
          display:none) once the magic login settles — primary for
          WhatsApp, outline for the dashboard. */
       .cta {
@@ -104,7 +113,7 @@
         gap: var(--space-xs);
         margin-top: var(--space-md);
         padding: 12px 22px;
-        border-radius: var(--radius-pill);
+        border-radius: var(--radius-md);
         font-size: var(--text-sm);
         font-weight: 600;
         transition:
@@ -119,8 +128,8 @@
         border: 1px solid var(--color-brand);
       }
       .cta--primary:hover {
-        background: var(--color-focus);
-        border-color: var(--color-focus);
+        background: var(--color-brand-deep);
+        border-color: var(--color-brand-deep);
       }
       .cta--secondary {
         background: var(--color-card);
@@ -326,28 +335,27 @@
     </script>
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-mast">
-          <div>
-            <div class="footer-brand">
-              Fit<span class="wordmark-accent">Fuel</span> Nutrition
-            </div>
-            <p class="footer-tagline">Fresh meals, every day</p>
+        <div class="footer-letter">
+          <p class="footer-verse">Yours, the FitFuel kitchen.</p>
+          <div class="footer-brand">
+            Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
-          <ul class="footer-links">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/privacy-policy">Privacy Policy</a></li>
-            <li>
-              <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
-                >WhatsApp Us</a
-              >
-            </li>
-            <li>
-              <a href="mailto:hello@fitfuelnutrition.com"
-                >hello@fitfuelnutrition.com</a
-              >
-            </li>
-          </ul>
+          <p class="footer-tagline">Fresh meals, every day</p>
         </div>
+        <ul class="footer-links">
+          <li><a href="/login">Login</a></li>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li>
+            <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
+              >WhatsApp Us</a
+            >
+          </li>
+          <li>
+            <a href="mailto:hello@fitfuelnutrition.com"
+              >hello@fitfuelnutrition.com</a
+            >
+          </li>
+        </ul>
         <div class="footer-colophon">
           <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
           <p class="footer-trust">

@@ -1,0 +1,66 @@
+{
+  "project": "fitfuel-nutrition",
+  "run": "hallmark-overhaul-2026-09-25",
+  "genre": "editorial",
+  "theme": "custom-tuned (board.jpg measured in OKLCH; leaf green + poster orange locked as brand)",
+  "tokens": {
+    "brand": "oklch(51.9% 0.138 148)",
+    "accent": "oklch(55.4% 0.153 44.8)",
+    "deep-green": "oklch(27.4% 0.056 153)",
+    "paper": "oklch(97.8% 0.014 90)",
+    "ink": "oklch(24% 0.03 152)"
+  },
+  "fonts": {
+    "display": "Fraunces Variable (self-hosted /fonts/fraunces-latin-wght-normal.woff2)",
+    "body": "Archivo (self-hosted /fonts/archivo-latin-var.woff2)",
+    "wordmark": "Archivo 800 (outlier register, pinned via --font-wordmark)"
+  },
+  "geometry": "squared (--radius-sm:2px, --radius-md:6px, --radius-lg:12px) — flat + hairline, no soft cards/pills",
+  "macros": {
+    "index": "Catalogue — menu is the product, price docket in the fold, ruled inventory rows",
+    "order": "Narrative Workflow — 01 Plan → 02 Customize → 03 Checkout with numbered stage tracker",
+    "login": "Functional app — one measured card, no enrichment",
+    "dashboard": "Functional app — card stack, JS-rendered contract preserved (plan-card, meal-card, address-item, profile-grid, btn-tiny)",
+    "payment-success": "Letter — green check pinned above serif headline, letter body, ruled note, revealed actions",
+    "privacy-policy": "Long Document — one measure, hairline section rules, content preserved verbatim",
+    "admin": "Functional tool — token-compatible only, secret-gated, no shared nav/footer",
+    "bot-messages": "Functional tool — token-compatible only, secret-gated, no shared nav/footer"
+  },
+  "nav": {
+    "archetype": "N12 banner + retract",
+    "implementation": ".nav-wrap sticky wraps .nav-banner + .nav; banner collapses to max-height:0 under .nav-scrolled (passive scroll listener in nav.js, additive only)",
+    "auth": "unchanged — ff:auth sessionStorage cache, window.__ffAuth prefetch consumption, APG disclosure menu, logout, mobile burger"
+  },
+  "footer": {
+    "archetype": "Ft6 letter close",
+    "implementation": "footer-verse 'Yours, the FitFuel kitchen.' + wordmark-as-signature + tagline + minimal links + colophon '© 2026 Jadpod Fitness Private Limited' + Razorpay trust"
+  },
+  "cta-voice": "Start my plan",
+  "section-numerals": "sections carry editorial numerals (01— / 02— / 03—) on marketing page",
+  "diversification": {
+    "this-build": "N12 + Ft6, editorial + Fraunces (first claimed)",
+    "rejected-priors": "N6 masthead (failed gate), N1a nav + Ft1 footer (warm-consumer system, superseded by design.md)",
+    "stamps": "main.css and nav.css carry genre/macro/system comments; design.md supersedes warm-consumer spec"
+  },
+  "constraints-honoured": [
+    "plan titles render as-is from DB (emoji-prefixed), never split/renamed",
+    "'by Jadpod Fitness Pvt Ltd' in nav; '© 2026 Jadpod Fitness Private Limited' in footer",
+    "no Login button in nav when signed out",
+    "admin.html / bot-messages.html secret-gated, never load shared nav",
+    "no plan-title splitting on /order or /dashboard",
+    "no photography — typography/shape/hand-built SVG only",
+    "copy honest — preserved/adjusted, nothing fabricated",
+    "admin/bot token names survive: --shadow-whisper, --radius-lg, all --color-*"
+  ],
+  "pages-rebuilt": [
+    "public/index.html",
+    "public/order.html",
+    "public/dashboard.html",
+    "public/login.html",
+    "public/payment-success.html",
+    "public/privacy-policy.html"
+  ],
+  "shared-css-rebuilt": ["public/css/main.css", "public/css/nav.css"],
+  "js-touched": "public/js/nav.js (markup wrap + scroll listener only)",
+  "fonts-added": ["public/fonts/fraunces-latin-wght-normal.woff2"]
+}

@@ -1,22 +1,31 @@
-/* FitFuel Nutrition — warm consumer app system (single source of truth)
+/* FitFuel Nutrition — editorial system (single source of truth)
    ────────────────────────────────────────────────────────────────────────
-   genre: consumer-app · system: design.md · designed-as-app
+   genre: editorial · system: design.md · designed-as-editorial
 
    The :root block is the token source of truth. Every colour below is
    measured from board.jpg and expressed in OKLCH; every page references
    these names and never a raw value.
 
-   The brand palette is LOCKED (a given, not a preference): the leaf green
-   and the poster orange. What this file owns is the system around them —
-   warm cream neutrals instead of green-tinted paper, generous radii, soft
-   warm shadows, and the shared primitives (buttons, cards, forms, banners,
-   chips) so no page re-declares a component it can inherit.
+   The brand palette is LOCKED (a given, not a preference): the leaf green,
+   the poster orange and the deep green. What this file owns is the system
+   around them — warm cream neutrals with green-tinted ink, hairline rules
+   and squared geometry instead of soft pills, flat + hairline depth, and
+   the shared primitives (buttons, cards, forms, banners, chips, progress,
+   footer) so no page re-declares a component it can inherit.
 
    The legacy alias block at the bottom maps old names (--green-*, --gray-*,
-   --orange-*, --radius-full, ...) onto the new values. Delete each alias as
-   its last consumer is migrated; they exist so admin.html and anything not
-   yet touched still resolve. */
+   --orange-*, --radius-full, --shadow-whisper, ...) onto the new values.
+   Delete each alias as its last consumer is migrated; they exist so
+   admin.html / bot-messages.html and anything not yet touched still
+   resolve. */
 
+@font-face {
+  font-family: "Fraunces Variable";
+  src: url("/fonts/fraunces-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 @font-face {
   font-family: "Archivo";
   src: url("/fonts/archivo-latin-var.woff2") format("woff2");
@@ -24,43 +33,46 @@
   font-stretch: 62.5% 125%;
   font-display: swap;
 }
-@font-face {
-  font-family: "Inter";
-  src: url("/fonts/inter-latin-var.woff2") format("woff2");
-  font-weight: 100 900;
-  font-display: swap;
-}
 
 :root {
-  /* ── Warm ground & ink ────────────────────────────────────────────
-     Cream, not green-tinted paper and never pure #fff. Cards on the
-     cream are a touch lighter (--color-card). Ink is warm charcoal. */
-  --color-paper: oklch(98.4% 0.014 90);
-  --color-paper-2: oklch(95.6% 0.02 90);
-  --color-paper-3: oklch(93% 0.024 90);
-  --color-card: oklch(99.3% 0.006 90);
-  --color-rule: oklch(91% 0.014 90);
-  --color-rule-strong: oklch(82% 0.02 90);
-  --color-ink: oklch(25% 0.022 42);
-  --color-ink-display: oklch(18% 0.02 42);
-  --color-muted: oklch(46% 0.024 55);
-  --color-faint: oklch(55% 0.02 55);
+  /* ── Ground & ink ────────────────────────────────────────────────
+     Warm cream paper, never pure #fff. Cards on the cream are a touch
+     lighter. Ink is green-tinted, never pure #000. Hairlines are the
+     field's rules — green-seeded, not grey. */
+  --color-paper: oklch(97.8% 0.014 90);
+  --color-paper-2: oklch(96.4% 0.018 88);
+  --color-paper-3: oklch(94% 0.022 88);
+  --color-card: oklch(99.2% 0.008 90);
+  --color-rule: oklch(89% 0.015 145);
+  --color-rule-strong: oklch(78% 0.025 145);
+  --color-ink: oklch(24% 0.03 152);
+  --color-ink-display: oklch(18% 0.035 152);
+  --color-muted: oklch(44% 0.025 145);
+  --color-faint: oklch(52% 0.02 145);
 
-  /* ── Brand green: primary ─────────────────────────────────────────
-     Fills CTAs, progress, veg chips, success marks and the closing
-     band. The label on the fill is --color-paper (5.2:1). */
+  /* ── Brand green (locked · board.jpg) ────────────────────────────
+     Leaf green fills CTAs, progress, veg chips, success marks. Deep
+     green carries the field bands and the CTA fill on hover. The label
+     on a green fill is --color-paper (5.2:1). */
   --color-brand: oklch(51.9% 0.138 148);
   --color-brand-deep: oklch(27.4% 0.056 153);
-  --color-brand-tint: oklch(95% 0.03 150);
-  --color-brand-tint-2: oklch(89.5% 0.05 150);
+  --color-brand-tint: oklch(94.5% 0.032 150);
+  --color-brand-tint-2: oklch(88% 0.05 150);
 
-  /* ── Poster orange: warm accent ───────────────────────────────────
-     Wordmark Fuel, prices, non-veg chips, flags, step tokens. Never a
-     button fill, never a whole band. Text-safe value clears 4.5:1 on
-     paper; the display value is for type >= 24px only. */
+  /* ── Poster orange (locked · board.jpg) — accent only ────────────
+     Prices, the wordmark accent, non-veg marks, flags. Never a button
+     fill, never a whole band. Text-safe clears 4.5:1 on paper; the
+     display value is for type >= 24px only. */
   --color-accent: oklch(55.4% 0.153 44.8);
   --color-accent-display: oklch(63.4% 0.168 46.4);
-  --color-accent-tint: oklch(95% 0.03 45);
+  --color-accent-tint: oklch(94% 0.035 50);
+
+  /* ── The field — one dramatic deep-green band ────────────────────
+     Hero + closing CTA on marketing pages. Cream ink on the field. */
+  --color-field: oklch(27.4% 0.056 153);
+  --color-field-2: oklch(23% 0.05 152);
+  --color-field-ink: oklch(97% 0.012 90);
+  --color-field-muted: oklch(82% 0.025 120);
 
   --color-focus: oklch(46.4% 0.124 148);
   --color-danger: oklch(48% 0.17 27);
@@ -69,11 +81,14 @@
   --color-warn: oklch(58% 0.12 75);
 
   /* ── Type ────────────────────────────────────────────────────────
-     Archivo carries display and the mark; Inter carries UI and body.
-     Two self-hosted latin-subset files, no third-party request. */
-  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+     Fraunces Variable carries display; Archivo carries body, UI and
+     the wordmark. Two self-hosted latin files, no third-party request.
+     Inter is retired with the warm-consumer system. */
+  --font-display: "Fraunces Variable", "Times New Roman", Georgia, serif;
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  /* The wordmark's own face — Archivo 800. Set once here; the lockups
+     below reference it so the mark never drifts into the serif. */
+  --font-wordmark: "Archivo", "Helvetica Neue", Arial, sans-serif;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -81,11 +96,11 @@
   --text-lg: 1.125rem;
   --text-xl: 1.375rem;
   --text-2xl: clamp(1.5rem, 1.25rem + 1.2vw, 1.875rem);
-  --text-3xl: clamp(1.875rem, 1.45rem + 2vw, 2.5rem);
-  --text-display: clamp(2.25rem, 1.2rem + 4vw, 3.25rem);
-  --tracking-caps: 0.12em;
+  --text-3xl: clamp(2rem, 1.5rem + 2.4vw, 2.875rem);
+  --text-display: clamp(2.5rem, 1.6rem + 4vw, 4rem);
+  --tracking-caps: 0.14em;
   --tracking-wide: 0.08em;
-  --tracking-display: -0.02em;
+  --tracking-display: -0.022em;
 
   /* ── Space: 4pt scale, named by role ──────────────────────────────
      Ten steps. Pages reference these names; raw px is a review failure. */
@@ -101,34 +116,38 @@
   --space-4xl: 9rem;
   --page-gutter: clamp(1rem, 4vw, 2.5rem);
   --measure: 68ch;
-  /* The sticky bar's height + a breath. Anchors land clear of it. */
-  --nav-height: 64px;
+  /* The sticky header's height + a breath. Anchors land clear of it;
+     N12 means banner (≈40px) + bar (64px), so this accounts for both. */
+  --nav-height: 108px;
 
-  /* ── Motion: friendly, not showy ──────────────────────────────────
-     One soft entrance per surface, lift on cards, no bounce anywhere. */
+  /* ── Motion: editorial restraint ─────────────────────────────────
+     One entrance per surface, none of it showy. No lift on cards. */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-short: 180ms;
   --dur-med: 280ms;
 
-  /* ── Depth: warm-tinted shadow, never a glow ──────────────────────
-     Cards take md; floating panels take lg. One hairline for focus
-     outlines. */
-  --shadow-xs: 0 1px 2px oklch(35% 0.02 60 / 0.06);
-  --shadow-sm: 0 1px 3px oklch(35% 0.02 60 / 0.08),
-    0 1px 2px oklch(35% 0.02 60 / 0.05);
-  --shadow-md: 0 6px 16px -4px oklch(35% 0.02 60 / 0.14),
-    0 2px 6px -2px oklch(35% 0.02 60 / 0.07);
-  --shadow-lg: 0 18px 40px -12px oklch(35% 0.02 60 / 0.24),
-    0 6px 16px -6px oklch(35% 0.02 60 / 0.12);
-  --shadow-hairline: 0 0 0 1px oklch(35% 0.02 60 / 0.06);
+  /* ── Depth: flat + hairline ──────────────────────────────────────
+     Cards take at most --shadow-xs; floating panels take lg but stay
+     hairline-edged. No glow, no big soft warm shadows. */
+  --shadow-xs: 0 1px 2px oklch(26% 0.04 152 / 0.05);
+  --shadow-sm: 0 1px 3px oklch(26% 0.04 152 / 0.07),
+    0 1px 2px oklch(26% 0.04 152 / 0.04);
+  --shadow-md: 0 12px 28px -14px oklch(26% 0.04 152 / 0.2),
+    0 4px 10px -6px oklch(26% 0.04 152 / 0.08);
+  --shadow-lg: 0 24px 48px -16px oklch(26% 0.04 152 / 0.28),
+    0 8px 20px -8px oklch(26% 0.04 152 / 0.12);
+  --shadow-hairline: 0 0 0 1px var(--color-rule-strong);
   /* Skeleton loading sheen — one place alpha defines a colour. */
-  --color-skeleton-sheen: oklch(100% 0 0 / 0.7);
+  --color-skeleton-sheen: oklch(99% 0.01 90 / 0.8);
   --rule-hair: 1px;
 
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
+  /* ── Geometry: squared, editorial ────────────────────────────────
+     Small radii, sharp shoulders. --radius-pill survives for legacy
+     consumers only; current chips and buttons do not use it. */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
   --radius-pill: 9999px;
 
   /* ── Depth order: six named levels, never ad-hoc numbers ────────── */
@@ -143,7 +162,9 @@
   /* ── Legacy aliases ─────────────────────────────────────────────
      Migration shim for pages not yet moved to the names above. Each
      alias points at the new system, never a parallel ramp. Delete a
-     block as its last consumer is migrated. */
+     block as its last consumer is migrated (admin.html and
+     bot-messages.html still consume --shadow-whisper and the old
+     green/orange/gray canned ramps). */
   --leaf: var(--color-brand-tint-2);
   --green-50: var(--color-paper-2);
   --green-100: var(--color-brand-tint);
@@ -205,7 +226,7 @@
    for the sticky anchor, body as the older-Safari fallback. */
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--nav-height) + 16px);
+  scroll-padding-top: calc(var(--nav-height) + 20px);
   overflow-x: clip;
 }
 body {
@@ -251,7 +272,9 @@ button {
 
      Fit<span class="wordmark-accent">Fuel</span> Nutrition
 
-   The orange accent and the 6px Fit|Fuel gap live here, once. */
+   The orange accent and the 6px Fit|Fuel gap live here, once. The mark
+   stays in Archivo 800 (the outlier register) even though display type
+   is now Fraunces. */
 .wordmark-accent {
   color: var(--color-accent-display);
   margin-right: 6px;
@@ -259,7 +282,7 @@ button {
 .nav-brand-name,
 .footer-brand,
 .wordmark {
-  font-family: var(--font-display);
+  font-family: var(--font-wordmark);
   font-stretch: 106%;
   font-weight: 800;
   letter-spacing: var(--tracking-display);
@@ -267,9 +290,10 @@ button {
 }
 
 /* ── CTA voice ──────────────────────────────────────────────────────
-   Solid brand pill, paper label, no glow and no gradient. Hover steps
-   one shade darker and lifts 1px. One definition, shared by every
-   page — never redeclared per page. */
+   Fractional editorial buttons: squared shoulders, hairline where
+   secondary, no lift on hover. The primary fill steps to the deep
+   green on hover. One definition, shared by every page — never
+   redeclared per page. */
 .btn,
 .btn-primary,
 .btn-secondary {
@@ -279,7 +303,7 @@ button {
   gap: var(--space-xs);
   min-height: 44px;
   padding: 12px var(--space-xl);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: var(--text-md);
   font-weight: 600;
@@ -290,8 +314,7 @@ button {
   transition:
     background-color var(--dur-short) var(--ease-base),
     border-color var(--dur-short) var(--ease-base),
-    color var(--dur-short) var(--ease-base),
-    transform var(--dur-short) var(--ease-base);
+    color var(--dur-short) var(--ease-base);
 }
 .btn-primary {
   background: var(--color-brand);
@@ -299,52 +322,40 @@ button {
   border: 1px solid var(--color-brand);
 }
 .btn-primary:hover {
-  background: var(--color-focus);
-  border-color: var(--color-focus);
-  transform: translateY(-1px);
+  background: var(--color-brand-deep);
+  border-color: var(--color-brand-deep);
 }
 .btn-secondary {
-  background: var(--color-card);
+  background: transparent;
   color: var(--color-ink);
   border: 1px solid var(--color-rule-strong);
 }
 .btn-secondary:hover {
   border-color: var(--color-brand);
-  background: var(--color-brand-tint);
   color: var(--color-brand-deep);
-  transform: translateY(-1px);
-}
-.btn-primary:active,
-.btn-secondary:active {
-  transform: translateY(1px);
 }
 .btn-primary:disabled,
 .btn-secondary:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-  transform: none;
 }
 
 /* ── Cards ──────────────────────────────────────────────────────────
-   The consumer-app workhorse: near-white on cream, generous radius,
-   hairline plus a soft warm shadow. Lift 2px on hover when interactive
-   (a .card--hover affordance), never by default. */
+   Editorial surfaces: hairline edge, near-flat. Interactive cards
+   darken their hairline on hover — no lift, no glow. */
 .card {
   background: var(--color-card);
   border: 1px solid var(--color-rule);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
 }
 .card--hover {
   transition:
-    transform var(--dur-short) var(--ease-out),
-    box-shadow var(--dur-short) var(--ease-base),
-    border-color var(--dur-short) var(--ease-base);
+    border-color var(--dur-short) var(--ease-base),
+    box-shadow var(--dur-short) var(--ease-base);
 }
 .card--hover:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
   border-color: var(--color-rule-strong);
+  box-shadow: var(--shadow-xs);
 }
 
 /* ── Form primitives ──────────────────────────────────────────────── */
@@ -369,7 +380,7 @@ button {
   font-size: var(--text-md);
   font-family: inherit;
   border: 1px solid var(--color-rule-strong);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-card);
   color: var(--color-ink);
   transition:
@@ -417,7 +428,7 @@ button {
   width: 100%;
   font-family: inherit;
   border: 1px solid var(--color-rule-strong);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-card);
   color: var(--color-ink);
 }
@@ -469,7 +480,7 @@ button {
   }
 }
 
-/* ── Chip (status / diet marker) ──────────────────────────────────── */
+/* ── Chip (status / diet marker) — squared editorial tags ────────── */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -478,14 +489,14 @@ button {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 .chip::before {
   content: "";
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -513,7 +524,7 @@ button {
 
 /* ── Progress ───────────────────────────────────────────────────────
    One track + one fill, shared by the order wizard and the dashboard
-   subscription cards. */
+   subscription cards. Squared tracks, green fill. */
 .progress {
   display: flex;
   gap: var(--space-xs);
@@ -522,7 +533,7 @@ button {
   position: relative;
   flex: 1;
   height: 6px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--color-rule);
   overflow: hidden;
 }
@@ -548,7 +559,7 @@ button {
 }
 .progress-bar {
   height: 8px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--color-rule);
   overflow: hidden;
 }
@@ -601,34 +612,41 @@ button {
   display: flex;
 }
 
-/* ── Footer · Ft1 warm bar ───────────────────────────────────────────
-   One stable definition shared by every customer page (see design.md):
-   wordmark + tagline in a left block, 2–4 small links beside it, legal
-   colophon underneath. No link columns, no dark gradient. Pages only
-   supply the markup below; they never re-declare these rules. */
+/* ── Footer · Ft6 letter close ───────────────────────────────────────
+   The whole footer reads as a signed letter: a sign-off verse, the
+   wordmark as the signature, the tagline, minimal links, and the legal
+   colophon beneath in muted small type. One stable definition shared by
+   every customer page (see design.md). Pages only supply the markup
+   below; they never re-declare these rules. */
 .footer {
-  background: var(--color-paper);
+  background: var(--color-paper-2);
   border-top: 1px solid var(--color-rule);
-  padding: var(--space-2xl) var(--page-gutter) var(--space-xl);
+  padding: var(--space-3xl) var(--page-gutter) var(--space-xl);
 }
 .footer-inner {
   max-width: 1120px;
   margin: 0 auto;
 }
-.footer-mast {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-md) var(--space-xl);
+.footer-letter {
+  margin-bottom: var(--space-xl);
+}
+.footer-verse {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-lg);
+  color: var(--color-muted);
+  font-style: italic;
+  margin-bottom: var(--space-sm);
 }
 .footer-brand {
-  font-size: var(--text-2xl);
+  display: block;
+  font-size: var(--text-3xl);
   color: var(--color-ink-display);
 }
 .footer-tagline {
   font-size: var(--text-md);
   color: var(--color-muted);
+  margin-top: var(--space-2xs);
 }
 .footer-links {
   display: flex;
@@ -645,7 +663,7 @@ button {
   border-bottom: 2px solid transparent;
   transition:
     color var(--dur-short) var(--ease-base),
-    border-color var(--dur-short) var(--ease-base);
+    border-bottom-color var(--dur-short) var(--ease-base);
 }
 .footer-links a:hover {
   color: var(--color-brand-deep);
@@ -677,9 +695,12 @@ button {
   flex-shrink: 0;
 }
 @media (max-width: 768px) {
-  .footer-mast,
+  .footer-links,
   .footer-colophon {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .footer-verse {
+    font-size: var(--text-md);
   }
 }

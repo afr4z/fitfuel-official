@@ -42,31 +42,54 @@
         </svg>
       </a>`;
 
-  // N1a · Sticky brand bar. The wordmark locks left; the entity
-  // attribution is the second line of the lockup — brand-mandated copy
-  // that stays in the nav on every page.
+  // N12 · Banner + retract. The banner strip carries the brand kicker;
+  // the edge bar carries the lockup, links, auth slot and CTA. One
+  // sticky wrapper holds both; the banner retracts on scroll (listener
+  // below). The wordmark locks left, attribution beneath — brand-
+  // mandated copy that stays on every page.
   placeholder.innerHTML = `
-    <nav class="nav" id="nav" aria-label="Primary">
-      <div class="nav-inner">
-        <a href="/" class="nav-brand">
-          <span class="nav-brand-name">Fit<span class="wordmark-accent">Fuel</span> Nutrition</span>
-          <span class="nav-brand-attrib">by Jadpod Fitness Pvt Ltd</span>
-        </a>
-        <ul class="nav-links" id="nav-links">
-          <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
-          <li><a href="/#plans" class="nav-link">Plans</a></li>
-          <li><a href="/#why" class="nav-link">Why FitFuel</a></li>
-        </ul>
-        <div class="nav-actions">
-          <div id="nav-auth" class="nav-auth"></div>
-          ${cta}
-          <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
-            <span></span><span></span><span></span>
-          </button>
-        </div>
+    <div class="nav-wrap" id="nav-wrap">
+      <div class="nav-banner" id="nav-banner">
+        <p class="nav-banner-text">
+          <span class="nav-banner-kicker">Nutrition made delicious</span>
+          <span class="nav-banner-divider" aria-hidden="true">·</span>
+          <span>fresh meals, every day</span>
+        </p>
       </div>
-    </nav>
+      <nav class="nav" id="nav" aria-label="Primary">
+        <div class="nav-inner">
+          <a href="/" class="nav-brand">
+            <span class="nav-brand-name">Fit<span class="wordmark-accent">Fuel</span> Nutrition</span>
+            <span class="nav-brand-attrib">by Jadpod Fitness Pvt Ltd</span>
+          </a>
+          <ul class="nav-links" id="nav-links">
+            <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
+            <li><a href="/#plans" class="nav-link">Plans</a></li>
+            <li><a href="/#why" class="nav-link">Why FitFuel</a></li>
+          </ul>
+          <div class="nav-actions">
+            <div id="nav-auth" class="nav-auth"></div>
+            ${cta}
+            <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
+              <span></span><span></span><span></span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
   `;
+
+  // N12 · Banner retract — the strip collapses out of the way once the
+  // page scrolls, leaving the edge bar at full height. Purely additive:
+  // it touches no auth or menu logic, and the global reduced-motion cut
+  // already zeroes the transition for users who ask for it.
+  const navWrap = document.getElementById("nav-wrap");
+  if (navWrap) {
+    const onNavScroll = () =>
+      navWrap.classList.toggle("nav-scrolled", window.scrollY > 8);
+    onNavScroll();
+    window.addEventListener("scroll", onNavScroll, { passive: true });
+  }
 
   const burger = document.getElementById("nav-burger");
   const links = document.getElementById("nav-links");

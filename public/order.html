@@ -10,6 +10,13 @@
     />
     <link
       rel="preload"
+      href="/fonts/fraunces-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
       href="/fonts/archivo-latin-var.woff2"
       as="font"
       type="font/woff2"
@@ -19,23 +26,45 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* consumer-app · macrostructure: 01 Form (3-step wizard) ·
-         system: design.md · designed-as-app
+      /* consumer-app · macrostructure: 14 Narrative Workflow ·
+         system: design.md · designed-as-editorial
          ─────────────────────────────────────────────────────────────────
-         Cards, fields, banners, spinners, progress, chips and buttons all
-         come from /css/main.css. This block is the wizard's own
-         composition: the plan grid, the summary panels and the layout of
-         the three steps. */
+         The 3-step wizard IS the narrative: 01 Plan → 02 Customize →
+         03 Checkout. Fields, banners, spinners, chips and buttons come
+         from /css/main.css. This block is the wizard's own composition:
+         the editorial skeleton, the plan grid, summary panels and the
+         numbered stage tracker. */
 
       .container {
-        max-width: 720px;
+        max-width: 760px;
         margin: 0 auto;
-        padding: var(--space-xl) var(--page-gutter) var(--space-2xl);
+        padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
       }
 
-      /* ── Step tracker ─────────────────────────────────────────────── */
+      /* ── Narrative head ──────────────────────────────────────────── */
+      .wizard-title {
+        font-family: var(--font-display);
+        font-weight: 620;
+        font-size: var(--text-3xl);
+        letter-spacing: var(--tracking-display);
+        color: var(--color-ink-display);
+        line-height: 1.08;
+        margin-bottom: var(--space-2xs);
+      }
+      .wizard-lead {
+        font-size: var(--text-md);
+        color: var(--color-muted);
+        margin-bottom: var(--space-xl);
+        max-width: 40em;
+      }
+
+      /* ── Stage tracker ─────────────────────────────────────────────
+         Three numbered stages, hairline-ruled, the active one in ink.
+         The progress bar underneath is the shared primitive. */
       .wizard-head {
         margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid var(--color-rule);
       }
       .step-label {
         display: flex;
@@ -47,14 +76,20 @@
         letter-spacing: 0.06em;
         margin-bottom: var(--space-xs);
       }
+      .step-label span {
+        display: inline-flex;
+        align-items: baseline;
+        gap: var(--space-2xs);
+      }
+      .step-label span::before {
+        content: attr(data-num);
+        font-family: var(--font-display);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--color-brand);
+      }
       .step-label span.active {
         color: var(--color-ink-display);
-      }
-      .step-label span.completed {
-        color: var(--color-muted);
-      }
-      .progress {
-        margin-top: var(--space-xs);
       }
 
       /* ── Steps ────────────────────────────────────────────────────── */
@@ -80,11 +115,13 @@
       }
       .card-header {
         margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid var(--color-rule);
       }
       .card-title {
         font-family: var(--font-display);
         font-size: var(--text-2xl);
-        font-weight: 800;
+        font-weight: 620;
         letter-spacing: var(--tracking-display);
         color: var(--color-ink-display);
         margin-bottom: var(--space-2xs);
@@ -132,11 +169,18 @@
       }
       .plan-name {
         font-family: var(--font-display);
-        font-weight: 700;
+        font-weight: 620;
         font-size: var(--text-md);
         color: var(--color-ink-display);
         letter-spacing: -0.01em;
         margin-bottom: var(--space-xs);
+        padding-right: 3.2em;
+        min-height: 2.4em;
+      }
+      .plan-name + .chip {
+        position: absolute;
+        top: var(--space-md);
+        right: var(--space-md);
       }
       .plan-desc {
         font-size: var(--text-xs);
@@ -151,7 +195,7 @@
         background: var(--color-card);
       }
 
-      /* ── Duration / meals (pill radion buttons) ────────────────── */
+      /* ── Duration / meals (squared radio toggles) ────────────────── */
       .radio-group {
         display: flex;
         flex-wrap: wrap;
@@ -171,7 +215,7 @@
         justify-content: center;
         padding: 10px 18px;
         border: 1px solid var(--color-rule-strong);
-        border-radius: var(--radius-pill);
+        border-radius: var(--radius-md);
         font-weight: 600;
         font-size: var(--text-sm);
         color: var(--color-ink);
@@ -193,8 +237,8 @@
 
       /* ── Price summary (step 2) ─────────────────────────────────── */
       .price-summary {
-        background: var(--color-brand-tint);
-        border: 1px solid var(--color-brand-tint-2);
+        background: var(--color-paper-2);
+        border: 1px solid var(--color-rule);
         border-radius: var(--radius-md);
         padding: var(--space-md);
         margin-top: var(--space-lg);
@@ -227,6 +271,7 @@
       /* ── Final summary (step 3) ─────────────────────────────────── */
       .plan-summary {
         background: var(--color-paper-2);
+        border: 1px solid var(--color-rule);
         border-radius: var(--radius-md);
         padding: var(--space-md);
         margin-bottom: var(--space-lg);
@@ -375,6 +420,12 @@
     <div id="nav-placeholder"></div>
 
     <div class="container">
+      <h1 class="wizard-title">Order your plan</h1>
+      <p class="wizard-lead">
+        Three steps from goal to checkout. Your number is only asked once —
+        we use it to verify you on WhatsApp and to reconnect your dashboard.
+      </p>
+
       <div class="wizard-head">
         <div
           class="progress"
@@ -389,15 +440,14 @@
           <div class="progress-step" id="step3-prog"></div>
         </div>
         <div class="step-label">
-          <span class="active" id="step1-label">Plan</span>
-          <span id="step2-label">Details</span>
-          <span id="step3-label">Checkout</span>
+          <span class="active" id="step1-label" data-num="01">Plan</span>
+          <span id="step2-label" data-num="02">Customize</span>
+          <span id="step3-label" data-num="03">Checkout</span>
         </div>
       </div>
 
       <div class="banner-error" id="error-banner" role="alert"></div>
       <div class="banner-success" id="success-banner" role="status"></div>
-
       <form id="order-form" novalidate>
         <div class="form-step active" id="step1" data-step="1">
           <div class="card form-card">
@@ -1393,30 +1443,30 @@
         }, 100);
       }
     </script>
+
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-mast">
-          <div>
-            <div class="footer-brand">
-              Fit<span class="wordmark-accent">Fuel</span> Nutrition
-            </div>
-            <p class="footer-tagline">Fresh meals, every day</p>
+        <div class="footer-letter">
+          <p class="footer-verse">Yours, the FitFuel kitchen.</p>
+          <div class="footer-brand">
+            Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
-          <ul class="footer-links">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/privacy-policy">Privacy Policy</a></li>
-            <li>
-              <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
-                >WhatsApp Us</a
-              >
-            </li>
-            <li>
-              <a href="mailto:hello@fitfuelnutrition.com"
-                >hello@fitfuelnutrition.com</a
-              >
-            </li>
-          </ul>
+          <p class="footer-tagline">Fresh meals, every day</p>
         </div>
+        <ul class="footer-links">
+          <li><a href="/login">Login</a></li>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li>
+            <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
+              >WhatsApp Us</a
+            >
+          </li>
+          <li>
+            <a href="mailto:hello@fitfuelnutrition.com"
+              >hello@fitfuelnutrition.com</a
+            >
+          </li>
+        </ul>
         <div class="footer-colophon">
           <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
           <p class="footer-trust">

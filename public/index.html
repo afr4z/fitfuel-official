@@ -6,7 +6,14 @@
     <title>FitFuel Nutrition – Fresh Meals, Every Day</title>
     <meta
       name="description"
-      content="FitFuel Nutrition delivers fresh, customized meal plans to your doorstep. Choose from High Protein, Healthy Diet and Weight Loss meal plans. Order via WhatsApp."
+      content="FitFuel Nutrition delivers fresh, customized meal plans to your doorstep. Choose from High Protein, Healthy Diet and Weight Loss meal plans. Order via WhatsApp or online."
+    />
+    <link
+      rel="preload"
+      href="/fonts/fraunces-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
     <link
       rel="preload"
@@ -18,106 +25,117 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* consumer-app · genre: warm consumer · system: design.md ·
-         designed-as-app
+      /* consumer-app · macrostructure: 11 Catalogue · system: design.md ·
+         designed-as-editorial
          ─────────────────────────────────────────────────────────────────
-         Tokens, cards, buttons, chips, focus ring and the CTA voice all
-         live in /css/main.css. This block is page composition only. It
-         never re-declares a shared class — one definition of
+         The menu is the product. Tokens, buttons and the Ft6 letter-close
+         footer live in /css/main.css; this block is page composition only.
+         It never re-declares a shared class — one definition of
          .btn-primary, one .card, one .chip, everywhere. */
 
-      /* ── Hero ──────────────────────────────────────────────────────
-         Warm cream ground, two very soft tint washes behind the copy (a
-         green one, a peach one) — big airy colour, not floating orbs.
-         The menu itself is the hero's second half, presented as a real
-         card: rounded, near-white, soft warm shadow. */
+      /* ── Opening band — the deep-green field ────────────────────────
+         The statement sits over one green field; the "On the menu"
+         docket below it is the catalogue's first card — hairline rows,
+         orange prices, cream ink. No photography: the layout is type and
+         line only. */
       .hero {
+        background: var(--color-field);
+        color: var(--color-field-ink);
+        padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
         position: relative;
         overflow: hidden;
-        padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
       }
-      .hero-wash {
+      .hero::before {
+        /* Oversized outlined ring, bottom-right — geometric art, not
+           an image. Alpha kept tiny so it reads as texture. */
+        content: "";
         position: absolute;
+        right: -110px;
+        bottom: -140px;
+        width: 340px;
+        height: 340px;
+        border: 1px solid oklch(97% 0.012 90 / 0.14);
         border-radius: 50%;
         pointer-events: none;
-        filter: blur(60px);
       }
-      .hero-wash--green {
-        width: 420px;
-        height: 420px;
-        left: -140px;
-        top: -120px;
-        background: oklch(51.9% 0.138 148 / 0.14);
-      }
-      .hero-wash--peach {
-        width: 380px;
-        height: 380px;
-        right: -120px;
-        bottom: -140px;
-        background: oklch(63.4% 0.168 46.4 / 0.12);
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: -28px;
+        bottom: -58px;
+        width: 170px;
+        height: 170px;
+        border: 1px solid oklch(97% 0.012 90 / 0.1);
+        border-radius: 50%;
+        pointer-events: none;
       }
       .hero-inner {
-        position: relative;
-        z-index: 1;
         max-width: 1120px;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-        gap: clamp(2rem, 4vw, 4rem);
-        align-items: center;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: var(--space-2xl);
+        align-items: end;
+        position: relative;
+        z-index: 1;
       }
-      .hero-copy {
-        max-width: 600px;
+      .hero-kicker {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: var(--tracking-caps);
+        color: var(--color-accent-display);
+        margin-bottom: var(--space-sm);
       }
       .hero-badge {
         display: inline-flex;
         align-items: center;
         gap: var(--space-xs);
-        padding: 7px 14px;
-        border-radius: var(--radius-pill);
-        background: var(--color-card);
-        border: 1px solid var(--color-rule);
-        box-shadow: var(--shadow-sm);
-        color: var(--color-muted);
-        font-size: var(--text-sm);
+        font-size: var(--text-xs);
         font-weight: 600;
+        letter-spacing: 0.04em;
+        color: var(--color-field-muted);
+        border: 1px solid oklch(97% 0.012 90 / 0.22);
+        border-radius: var(--radius-pill);
+        padding: 6px 12px;
         margin-bottom: var(--space-lg);
       }
       .hero-badge .dot {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        background: var(--color-brand);
-        flex-shrink: 0;
-      }
-      .hero-kicker {
-        font-size: var(--text-xs);
-        font-weight: 700;
-        letter-spacing: var(--tracking-caps);
-        text-transform: uppercase;
-        color: var(--color-accent);
-        margin-bottom: var(--space-sm);
+        background: var(--color-accent-display);
       }
       .hero h1 {
         font-family: var(--font-display);
-        font-size: var(--text-display);
-        font-weight: 800;
-        line-height: 1.06;
+        font-weight: 620;
+        font-size: var(--text-3xl);
+        line-height: 1.08;
         letter-spacing: var(--tracking-display);
-        color: var(--color-ink-display);
+        color: var(--color-field-ink);
         margin-bottom: var(--space-md);
+        max-width: 15em;
       }
       .hero-subtitle {
         font-size: var(--text-lg);
-        color: var(--color-muted);
+        color: var(--color-field-muted);
         margin-bottom: var(--space-xl);
-        max-width: 46ch;
+        max-width: 38em;
       }
       .hero-buttons {
         display: flex;
         align-items: center;
-        gap: var(--space-lg);
         flex-wrap: wrap;
+        gap: var(--space-md) var(--space-lg);
+      }
+      .hero-buttons .btn-primary {
+        background: var(--color-paper);
+        color: var(--color-brand-deep);
+        border-color: var(--color-paper);
+      }
+      .hero-buttons .btn-primary:hover {
+        background: var(--color-brand-tint);
+        border-color: var(--color-brand-tint);
       }
       .link-arrow {
         display: inline-flex;
@@ -125,39 +143,40 @@
         gap: var(--space-xs);
         font-size: var(--text-md);
         font-weight: 600;
-        color: var(--color-ink);
-        border-bottom: 2px solid var(--color-rule-strong);
-        padding-bottom: 2px;
-        transition:
-          border-color var(--dur-short) var(--ease-base),
-          color var(--dur-short) var(--ease-base);
+        color: var(--color-field-ink);
+        border-bottom: 2px solid oklch(97% 0.012 90 / 0.3);
+        padding-bottom: 3px;
+        transition: border-color var(--dur-short) var(--ease-base);
       }
       .link-arrow:hover {
-        color: var(--color-brand-deep);
-        border-color: var(--color-brand);
+        border-color: var(--color-accent-display);
       }
 
-      /* The menu card — the thing the brand sells, as real pricing. */
+      /* ── The docket — catalogue card one, in the fold ────────────── */
       .menu-card {
+        background: oklch(23% 0.05 152 / 0.55);
+        border: 1px solid oklch(97% 0.012 90 / 0.16);
+        border-radius: var(--radius-lg);
         padding: var(--space-xl);
       }
       .menu-card-head {
         display: flex;
         align-items: baseline;
         justify-content: space-between;
-        gap: var(--space-md);
-        margin-bottom: var(--space-xs);
+        gap: var(--space-sm);
+        margin-bottom: var(--space-md);
       }
       .menu-card-title {
         font-family: var(--font-display);
-        font-size: var(--text-lg);
-        font-weight: 700;
-        color: var(--color-ink-display);
+        font-weight: 620;
+        font-size: var(--text-xl);
+        color: var(--color-field-ink);
       }
       .menu-card-head small {
         font-size: var(--text-xs);
-        color: var(--color-muted);
-        white-space: nowrap;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-field-muted);
       }
       .menu-row {
         display: flex;
@@ -165,134 +184,98 @@
         justify-content: space-between;
         gap: var(--space-md);
         padding: var(--space-md) 0;
-        border-top: 1px solid var(--color-rule);
+        border-top: 1px solid oklch(97% 0.012 90 / 0.14);
       }
       .menu-name {
-        font-family: var(--font-display);
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--color-ink);
-        letter-spacing: -0.01em;
+        font-size: var(--text-md);
+        font-weight: 600;
+        color: var(--color-field-ink);
       }
       .menu-price {
         font-family: var(--font-display);
-        font-size: 1.05rem;
         font-weight: 700;
-        color: var(--color-accent);
+        font-size: var(--text-xl);
+        color: var(--color-accent-display);
+        font-variant-numeric: tabular-nums;
         white-space: nowrap;
       }
       .menu-price small {
         font-family: var(--font-body);
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: var(--color-muted);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: var(--color-field-muted);
         margin-left: 2px;
       }
       .menu-note {
+        font-size: var(--text-xs);
+        color: var(--color-field-muted);
         margin-top: var(--space-sm);
-        padding-top: var(--space-md);
-        border-top: 1px solid var(--color-rule);
-        font-size: var(--text-sm);
-        color: var(--color-muted);
       }
 
-      /* ── Sections ──────────────────────────────────────────────────
-         One measure shared with the nav. Alternate bands run the full
-         width so the ground change reads as a band, not a panel. */
+      /* ── Section shell — editorial numbered heads ────────────────── */
       .section {
-        padding-block: var(--space-3xl);
-        padding-inline: max(var(--page-gutter), calc((100% - 1120px) / 2));
+        padding: var(--space-3xl) var(--page-gutter);
+        max-width: 1120px;
+        margin: 0 auto;
       }
-      .section-alt {
-        background: var(--color-paper-2);
+      .section-head {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: var(--space-md) var(--space-lg);
+        align-items: baseline;
+        margin-bottom: var(--space-xl);
+      }
+      .section-num {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: var(--text-lg);
+        color: var(--color-accent);
+        white-space: nowrap;
       }
       .section-title {
         font-family: var(--font-display);
-        font-size: var(--text-3xl);
-        font-weight: 800;
+        font-weight: 620;
+        font-size: var(--text-2xl);
         letter-spacing: var(--tracking-display);
         color: var(--color-ink-display);
         margin-bottom: var(--space-2xs);
-        line-height: 1.15;
       }
       .section-subtitle {
-        color: var(--color-muted);
-        font-size: var(--text-lg);
-        margin-bottom: var(--space-2xl);
-        max-width: 54ch;
-      }
-
-      /* ── Four steps as cards ─────────────────────────────────────── */
-      .steps {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: var(--space-lg);
-      }
-      .step {
-        padding: var(--space-xl);
-      }
-      .step-num {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: var(--color-brand-tint);
-        color: var(--color-brand-deep);
-        font-family: var(--font-display);
         font-size: var(--text-md);
-        font-weight: 800;
-        margin-bottom: var(--space-md);
-      }
-      .step h3 {
-        font-family: var(--font-display);
-        font-size: var(--text-lg);
-        font-weight: 700;
-        color: var(--color-ink-display);
-        margin-bottom: var(--space-2xs);
-      }
-      .step p {
-        font-size: var(--text-sm);
         color: var(--color-muted);
-        line-height: 1.55;
+        max-width: 46em;
+      }
+      .section-head .section-subtitle {
+        grid-column: 2;
+        margin-bottom: 0;
       }
 
-      /* ── Plans & pricing ───────────────────────────────────────────
-         One card per plan (the names come from the menu exactly as
-         written — the design wraps them, never rewrites them). Each
-         plan shows its veg / non-veg pair as two harness rows. */
+      /* ── The catalogue — three uniform plan cards ──────────────────
+         Identical size, hairline rules between price rows, a
+         card-internal link to the order flow. One card earns a green
+         hairline + a flag; that is the only hierarchy. */
       .plans {
-        max-width: 920px;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: var(--space-lg);
-      }
-      .plans-note {
-        font-size: var(--text-sm);
-        color: var(--color-muted);
-        margin-bottom: var(--space-lg);
-        max-width: 56ch;
       }
       .plan-card {
         padding: var(--space-xl);
+        display: flex;
+        flex-direction: column;
       }
       .plan-card--popular {
         border-color: var(--color-brand);
-      }
-      .plan-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: var(--space-lg);
+        box-shadow: var(--shadow-xs);
       }
       .plan-title {
         font-family: var(--font-display);
-        font-size: var(--text-2xl);
-        font-weight: 800;
+        font-size: var(--text-xl);
+        font-weight: 620;
         letter-spacing: var(--tracking-display);
         color: var(--color-ink-display);
-        line-height: 1.15;
+        line-height: 1.2;
         display: flex;
         align-items: center;
         gap: var(--space-sm);
@@ -301,14 +284,16 @@
       }
       .plan-desc {
         color: var(--color-muted);
-        font-size: var(--text-md);
+        font-size: var(--text-sm);
         max-width: 46em;
+        flex: 1;
       }
       .plan-order {
         display: inline-flex;
         align-items: center;
         gap: var(--space-xs);
-        flex-shrink: 0;
+        align-self: flex-start;
+        margin-top: var(--space-md);
         font-size: var(--text-sm);
         font-weight: 600;
         color: var(--color-brand-deep);
@@ -328,29 +313,23 @@
       }
       .plan-variant {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: var(--space-sm);
-        padding: var(--space-xs) 0;
+        padding: var(--space-sm) 0;
         border-top: 1px solid var(--color-rule);
-        flex-wrap: wrap;
       }
       .plan-variant .chip {
-        flex-shrink: 0;
+        align-self: flex-start;
       }
       .price-tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
-        margin-left: auto;
+        gap: 4px 8px;
       }
       .price-tag {
         display: inline-flex;
         align-items: baseline;
         gap: 4px;
-        background: var(--color-paper-2);
-        border: 1px solid var(--color-rule);
-        border-radius: var(--radius-pill);
-        padding: 4px 10px;
         font-family: var(--font-display);
         font-size: var(--text-sm);
         font-weight: 700;
@@ -362,29 +341,66 @@
         font-family: var(--font-body);
         font-size: 0.6875rem;
         font-weight: 600;
-        color: var(--color-muted);
+        color: var(--color-faint);
         letter-spacing: 0.04em;
       }
 
-      /* ── Six reasons as cards with line icons ────────────────────── */
+      /* ── How it works — a ruled numbered index, not soft cards ───── */
+      .steps {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        counter-reset: step;
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 4.5rem 1fr;
+        gap: var(--space-md) var(--space-lg);
+        padding: var(--space-lg) 0;
+        border-top: 1px solid var(--color-rule);
+      }
+      .step:last-child {
+        border-bottom: 1px solid var(--color-rule);
+      }
+      .step-num {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: var(--text-2xl);
+        color: var(--color-brand);
+        line-height: 1;
+      }
+      .step h3 {
+        font-family: var(--font-display);
+        font-weight: 620;
+        font-size: var(--text-lg);
+        color: var(--color-ink-display);
+        margin-bottom: var(--space-2xs);
+      }
+      .step p {
+        font-size: var(--text-md);
+        color: var(--color-muted);
+        max-width: 44em;
+      }
+      .steps-note {
+        margin-top: var(--space-md);
+      }
+
+      /* ── Six reasons — two-column ruled catalogue rows ───────────── */
       .features-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: var(--space-lg);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 var(--space-2xl);
       }
       .feature {
-        padding: var(--space-xl);
+        display: grid;
+        grid-template-columns: 2.5rem 1fr;
+        gap: var(--space-md);
+        padding: var(--space-lg) 0;
+        border-top: 1px solid var(--color-rule);
       }
       .feature-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        background: var(--color-brand-tint);
-        color: var(--color-brand-deep);
-        margin-bottom: var(--space-md);
+        color: var(--color-brand);
+        padding-top: 4px;
       }
       .feature-icon svg {
         width: 22px;
@@ -392,8 +408,8 @@
       }
       .feature h3 {
         font-family: var(--font-display);
+        font-weight: 620;
         font-size: var(--text-lg);
-        font-weight: 700;
         color: var(--color-ink-display);
         margin-bottom: var(--space-2xs);
       }
@@ -404,32 +420,34 @@
         max-width: 36em;
       }
 
-      /* ── Closing band ──────────────────────────────────────────────
-         Flat brand-deep ground, the one green field the page ends on.
-         Cream text, cream pill — the inverted CTA. */
+      /* ── Closing band — flat field, the page's echo of the opening ─ */
       .cta-banner {
-        background: var(--color-brand-deep);
-        color: var(--color-paper);
-        padding: var(--space-2xl) max(var(--page-gutter), calc((100% - 1120px) / 2));
+        background: var(--color-field);
+        color: var(--color-field-ink);
+        padding: var(--space-3xl) max(var(--page-gutter), calc((100% - 1120px) / 2));
+        position: relative;
+        overflow: hidden;
       }
       .cta-banner-inner {
         max-width: 1120px;
         margin: 0 auto;
+        position: relative;
+        z-index: 1;
       }
       .cta-banner h2 {
         font-family: var(--font-display);
+        font-weight: 620;
         font-size: var(--text-3xl);
-        font-weight: 800;
         letter-spacing: var(--tracking-display);
-        color: var(--color-paper);
+        color: var(--color-field-ink);
         margin-bottom: var(--space-xs);
         line-height: 1.12;
       }
       .cta-sub {
-        color: oklch(88% 0.035 150);
+        color: var(--color-field-muted);
         font-size: var(--text-lg);
         margin-bottom: var(--space-xl);
-        max-width: 46ch;
+        max-width: 40ch;
       }
       .cta-banner .btn-primary {
         background: var(--color-paper);
@@ -440,34 +458,38 @@
         background: var(--color-brand-tint);
         border-color: var(--color-brand-tint);
       }
-
-      /* ── Footer — warm bar ─────────────────────────────────────────
-         Ft1 lives in /css/main.css (one definition, every customer
-         page); only the markup stays here. */
+      .cta-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+        margin-left: var(--space-lg);
+        font-size: var(--text-md);
+        font-weight: 600;
+        color: var(--color-field-ink);
+        border-bottom: 2px solid oklch(97% 0.012 90 / 0.3);
+        padding-bottom: 3px;
+        transition: border-color var(--dur-short) var(--ease-base);
+      }
+      .cta-whatsapp:hover {
+        border-color: var(--color-accent-display);
+      }
 
       /* ── Responsive ──────────────────────────────────────────────── */
       @media (max-width: 900px) {
-        .steps {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+        .hero-inner {
+          grid-template-columns: 1fr;
+          gap: var(--space-xl);
         }
-        .features-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+        .plans {
+          grid-template-columns: 1fr;
         }
         .plan-variants {
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
       }
       @media (max-width: 768px) {
         .hero {
           padding: var(--space-xl) var(--page-gutter) var(--space-2xl);
-        }
-        .hero-inner {
-          grid-template-columns: 1fr;
-          gap: var(--space-xl);
-        }
-        .plan-head {
-          flex-direction: column;
-          gap: var(--space-sm);
         }
         .section {
           padding: var(--space-2xl) var(--page-gutter);
@@ -475,17 +497,31 @@
         .cta-banner {
           padding: var(--space-xl) var(--page-gutter);
         }
-      }
-      @media (max-width: 560px) {
-        .steps {
-          grid-template-columns: 1fr;
-        }
         .features-grid {
           grid-template-columns: 1fr;
+        }
+        .step {
+          grid-template-columns: 3rem 1fr;
+        }
+      }
+      @media (max-width: 560px) {
+        .section-head {
+          grid-template-columns: 1fr;
+          gap: var(--space-2xs);
+        }
+        .section-head .section-subtitle {
+          grid-column: 1;
         }
         .plan-card,
         .menu-card {
           padding: var(--space-lg);
+        }
+        .plan-variants {
+          grid-template-columns: 1fr;
+        }
+        .cta-whatsapp {
+          margin-left: 0;
+          margin-top: var(--space-md);
         }
       }
     </style>
@@ -506,9 +542,10 @@
   <body>
     <div id="nav-placeholder"></div>
 
-    <section class="hero">
-      <div class="hero-wash hero-wash--green" aria-hidden="true"></div>
-      <div class="hero-wash hero-wash--peach" aria-hidden="true"></div>
+    <!-- 01 · The statement and the menu, in the fold. The docket is
+         catalogue card one; the page grids the rest of the inventory
+         below. -->
+    <section class="hero" id="top">
       <div class="hero-inner">
         <div class="hero-copy">
           <p class="hero-badge">
@@ -537,7 +574,7 @@
             <a href="#plans" class="link-arrow">See plans &amp; prices</a>
           </div>
         </div>
-        <aside class="card menu-card" aria-label="Plans and prices per day">
+        <aside class="menu-card" aria-label="Plans and prices per day">
           <div class="menu-card-head">
             <h2 class="menu-card-title">On the menu</h2>
             <small>per meal, per day</small>
@@ -561,85 +598,31 @@
       </div>
     </section>
 
-    <section class="section section-alt" id="how-it-works">
-      <h2 class="section-title">How FitFuel Works</h2>
-      <p class="section-subtitle">
-        From first message to first bite, here's what to expect.
-      </p>
-      <div class="steps">
-        <div class="card card--hover step">
-          <div class="step-num" aria-hidden="true">01</div>
-          <h3>Say Hello</h3>
-          <p>
-            Message us on WhatsApp and our guided assistant sets up your
-            account in minutes.
-          </p>
-        </div>
-        <div class="card card--hover step">
-          <div class="step-num" aria-hidden="true">02</div>
-          <h3>Build Your Plan</h3>
-          <p>
-            Choose from our macro-balanced meal plans, pick your subscription
-            length (3 to 30 days), and set your meals per day.
-          </p>
-        </div>
-        <div class="card card--hover step">
-          <div class="step-num" aria-hidden="true">03</div>
-          <h3>Check Out Securely</h3>
-          <p>
-            Pay through Razorpay with UPI, cards, or net banking. Fully
-            encrypted, fully supported.
-          </p>
-        </div>
-        <div class="card card--hover step">
-          <div class="step-num" aria-hidden="true">04</div>
-          <h3>Eat Fresh, Daily</h3>
-          <p>
-            Confirm or skip each meal from a WhatsApp reminder. We cook and
-            deliver, every day, on time.
-          </p>
-        </div>
-      </div>
-    </section>
-
+    <!-- 02 · The catalogue — three plans, uniform cards, hairline rows.
+         The menu IS the product. -->
     <section class="section" id="plans">
-      <h2 class="section-title">Meal Plans & Pricing</h2>
-      <p class="section-subtitle">
-        Every plan is macro-balanced and chef-designed, with a veg and a
-        non-veg option. The longer you subscribe, the more you save per meal.
-      </p>
-      <p class="plans-note">
+      <header class="section-head">
+        <span class="section-num" aria-hidden="true">01—</span>
+        <div>
+          <h2 class="section-title">Meal Plans &amp; Pricing</h2>
+          <p class="section-subtitle">
+            Every plan is macro-balanced and chef-designed, with a veg and a
+            non-veg option. The longer you subscribe, the more you save per
+            meal.
+          </p>
+        </div>
+      </header>
+      <p class="plans-note steps-note">
         Price per meal, per day. Each day you can take breakfast (1), lunch
         and dinner (2), or all three (3).
       </p>
       <div class="plans">
         <article class="card plan-card">
-          <div class="plan-head">
-            <div>
-              <h3 class="plan-title">Healthy Diet Meal Plan</h3>
-              <p class="plan-desc">
-                Everyday nutrition, balanced across vegetarian and
-                non-vegetarian dishes to keep your energy steady.
-              </p>
-            </div>
-            <a href="/order?plan=healthy-nonveg" class="plan-order"
-              >Start this plan
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
+          <h3 class="plan-title">Healthy Diet Meal Plan</h3>
+          <p class="plan-desc">
+            Everyday nutrition, balanced across vegetarian and
+            non-vegetarian dishes to keep your energy steady.
+          </p>
           <div class="plan-variants">
             <div class="plan-variant">
               <span class="chip chip-nonveg">Non-veg</span>
@@ -660,37 +643,36 @@
               </span>
             </div>
           </div>
+          <a
+            href="/order?plan=healthy-nonveg"
+            class="plan-order"
+            aria-label="Order the Healthy Diet Meal Plan"
+            >Start this plan
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </a>
         </article>
         <article class="card card--popular plan-card plan-card--popular">
-          <div class="plan-head">
-            <div>
-              <h3 class="plan-title">
-                High Protein Meal Plan
-                <span class="chip chip-flag">Most popular</span>
-              </h3>
-              <p class="plan-desc">
-                Protein-forward meals engineered for recovery and strength,
-                built for lean muscle and satiety.
-              </p>
-            </div>
-            <a href="/order?plan=high-protein-nonveg" class="plan-order"
-              >Start this plan
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
+          <h3 class="plan-title">
+            High Protein Meal Plan
+            <span class="chip chip-flag">Most popular</span>
+          </h3>
+          <p class="plan-desc">
+            Protein-forward meals engineered for recovery and strength, built
+            for lean muscle and satiety.
+          </p>
           <div class="plan-variants">
             <div class="plan-variant">
               <span class="chip chip-nonveg">Non-veg</span>
@@ -711,34 +693,33 @@
               </span>
             </div>
           </div>
+          <a
+            href="/order?plan=high-protein-nonveg"
+            class="plan-order"
+            aria-label="Order the High Protein Meal Plan"
+            >Start this plan
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </a>
         </article>
         <article class="card plan-card">
-          <div class="plan-head">
-            <div>
-              <h3 class="plan-title">Weight Loss Meal Plan</h3>
-              <p class="plan-desc">
-                Calorie-controlled meals with lean protein, low-oil cooking
-                and portioned staples for steady fat loss.
-              </p>
-            </div>
-            <a href="/order?plan=weight-loss-nonveg" class="plan-order"
-              >Start this plan
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
+          <h3 class="plan-title">Weight Loss Meal Plan</h3>
+          <p class="plan-desc">
+            Calorie-controlled meals with lean protein, low-oil cooking and
+            portioned staples for steady fat loss.
+          </p>
           <div class="plan-variants">
             <div class="plan-variant">
               <span class="chip chip-nonveg">Non-veg</span>
@@ -759,18 +740,99 @@
               </span>
             </div>
           </div>
+          <a
+            href="/order?plan=weight-loss-nonveg"
+            class="plan-order"
+            aria-label="Order the Weight Loss Meal Plan"
+            >Start this plan
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </a>
         </article>
       </div>
     </section>
 
-    <section class="section section-alt" id="why">
-      <h2 class="section-title">Why FitFuel?</h2>
-      <p class="section-subtitle">
-        More than a meal delivery service. A dedicated partner in your
-        nutrition.
-      </p>
+    <!-- 03 · How it works — a numbered editorial index, hairline-ruled. -->
+    <section class="section section-alt" id="how-it-works">
+      <header class="section-head">
+        <span class="section-num" aria-hidden="true">02—</span>
+        <div>
+          <h2 class="section-title">How FitFuel Works</h2>
+          <p class="section-subtitle">
+            From first message to first bite, here's what to expect.
+          </p>
+        </div>
+      </header>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num" aria-hidden="true">01</span>
+          <div>
+            <h3>Say Hello</h3>
+            <p>
+              Message us on WhatsApp and our guided assistant sets up your
+              account in minutes.
+            </p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num" aria-hidden="true">02</span>
+          <div>
+            <h3>Build Your Plan</h3>
+            <p>
+              Choose from our macro-balanced meal plans, pick your
+              subscription length (3 to 30 days), and set your meals per day.
+            </p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num" aria-hidden="true">03</span>
+          <div>
+            <h3>Check Out Securely</h3>
+            <p>
+              Pay through Razorpay with UPI, cards, or net banking. Fully
+              encrypted, fully supported.
+            </p>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-num" aria-hidden="true">04</span>
+          <div>
+            <h3>Eat Fresh, Daily</h3>
+            <p>
+              Confirm or skip each meal from a WhatsApp reminder. We cook and
+              deliver, every day, on time.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 04 · Why FitFuel — two-column ruled catalogue rows. -->
+    <section class="section" id="why">
+      <header class="section-head">
+        <span class="section-num" aria-hidden="true">03—</span>
+        <div>
+          <h2 class="section-title">Why FitFuel?</h2>
+          <p class="section-subtitle">
+            More than a meal delivery service. A dedicated partner in your
+            nutrition.
+          </p>
+        </div>
+      </header>
       <div class="features-grid">
-        <div class="card card--hover feature">
+        <div class="feature">
           <div class="feature-icon" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
@@ -784,13 +846,15 @@
               <path d="M11 4c1.5 2.5 1.5 5 0 7.5" />
             </svg>
           </div>
-          <h3>Cooked Fresh, Every Day</h3>
-          <p>
-            Every meal is prepared the day it ships. Nothing frozen, nothing
-            reheated.
-          </p>
+          <div>
+            <h3>Cooked Fresh, Every Day</h3>
+            <p>
+              Every meal is prepared the day it ships. Nothing frozen, nothing
+              reheated.
+            </p>
+          </div>
         </div>
-        <div class="card card--hover feature">
+        <div class="feature">
           <div class="feature-icon" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
@@ -803,13 +867,15 @@
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z" />
             </svg>
           </div>
-          <h3>WhatsApp-First Experience</h3>
-          <p>
-            No app to download. Message us on WhatsApp and our assistant
-            handles the rest.
-          </p>
+          <div>
+            <h3>WhatsApp-First Experience</h3>
+            <p>
+              No app to download. Message us on WhatsApp and our assistant
+              handles the rest.
+            </p>
+          </div>
         </div>
-        <div class="card card--hover feature">
+        <div class="feature">
           <div class="feature-icon" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
@@ -825,13 +891,15 @@
               <path d="M21 13v2a4 4 0 0 1-4 4H3" />
             </svg>
           </div>
-          <h3>Skip or Swap Anytime</h3>
-          <p>
-            Plans change. Skip or swap any meal directly from your WhatsApp
-            reminder, no penalties.
-          </p>
+          <div>
+            <h3>Skip or Swap Anytime</h3>
+            <p>
+              Plans change. Skip or swap any meal directly from your WhatsApp
+              reminder, no penalties.
+            </p>
+          </div>
         </div>
-        <div class="card card--hover feature">
+        <div class="feature">
           <div class="feature-icon" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
@@ -846,13 +914,15 @@
               <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
             </svg>
           </div>
-          <h3>Plans Built Around Goals</h3>
-          <p>
-            Lose weight, build muscle, or simply eat better. Each plan is
-            designed around a clear outcome.
-          </p>
+          <div>
+            <h3>Plans Built Around Goals</h3>
+            <p>
+              Lose weight, build muscle, or simply eat better. Each plan is
+              designed around a clear outcome.
+            </p>
+          </div>
         </div>
-        <div class="card card--hover feature">
+        <div class="feature">
           <div class="feature-icon" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
@@ -862,19 +932,19 @@
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <path d="M1 3h15v13H1z" />
-              <path d="M16 8h4l3 3v5h-7V8z" />
-              <circle cx="5.5" cy="18.5" r="2.5" />
-              <circle cx="18.5" cy="18.5" r="2.5" />
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3 3" />
             </svg>
           </div>
-          <h3>Delivered Daily, On Time</h3>
-          <p>
-            Fresh meals reach your door every day of your subscription, rain
-            or shine.
-          </p>
+          <div>
+            <h3>Delivered Daily, On Time</h3>
+            <p>
+              Fresh meals reach your door every day of your subscription, rain
+              or shine.
+            </p>
+          </div>
         </div>
-        <div class="card card--hover feature">
+        <div class="feature">
           <div class="feature-icon" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
@@ -888,15 +958,18 @@
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
           </div>
-          <h3>Bank-Grade Payment Security</h3>
-          <p>
-            Every transaction runs through Razorpay, trusted by leading Indian
-            brands for secure checkout.
-          </p>
+          <div>
+            <h3>Bank-Grade Payment Security</h3>
+            <p>
+              Every transaction runs through Razorpay, trusted by leading
+              Indian brands for secure checkout.
+            </p>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- 05 · Closing band — the field returns, the one action repeats. -->
     <section class="cta-banner">
       <div class="cta-banner-inner">
         <h2>Ready to Eat Better?</h2>
@@ -916,38 +989,44 @@
             <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
           </svg>
         </a>
+        <a
+          href="https://wa.me/916300159766"
+          target="_blank"
+          rel="noopener"
+          class="cta-whatsapp"
+          >Order on WhatsApp</a
+        >
       </div>
     </section>
 
-    <!-- Ft1 · Warm bar. The wordmark anchors one horizontal band; utility
-         and legal links sit beside it; the colophon runs underneath. No
-         link columns, no dark gradient. /login stays here: it is the only
-         route to it for signed-out visitors now that the header no longer
-         renders a login control. -->
+    <!-- Ft6 · Letter close. The footer reads as a signed letter: a
+         sign-off verse, the wordmark as the signature, minimal links,
+         and the legal colophon beneath in muted small type. /login stays
+         here: it is the only route to it for signed-out visitors now that
+         the header no longer renders a login control. -->
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-mast">
-          <div>
-            <div class="footer-brand">
-              Fit<span class="wordmark-accent">Fuel</span> Nutrition
-            </div>
-            <p class="footer-tagline">Fresh meals, every day</p>
+        <div class="footer-letter">
+          <p class="footer-verse">Yours, the FitFuel kitchen.</p>
+          <div class="footer-brand">
+            Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
-          <ul class="footer-links">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/privacy-policy">Privacy Policy</a></li>
-            <li>
-              <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
-                >WhatsApp Us</a
-              >
-            </li>
-            <li>
-              <a href="mailto:hello@fitfuelnutrition.com"
-                >hello@fitfuelnutrition.com</a
-              >
-            </li>
-          </ul>
+          <p class="footer-tagline">Fresh meals, every day</p>
         </div>
+        <ul class="footer-links">
+          <li><a href="/login">Login</a></li>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li>
+            <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
+              >WhatsApp Us</a
+            >
+          </li>
+          <li>
+            <a href="mailto:hello@fitfuelnutrition.com"
+              >hello@fitfuelnutrition.com</a
+            >
+          </li>
+        </ul>
         <div class="footer-colophon">
           <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
           <p class="footer-trust">

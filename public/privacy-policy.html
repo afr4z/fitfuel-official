@@ -10,6 +10,13 @@
     />
     <link
       rel="preload"
+      href="/fonts/fraunces-latin-wght-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
       href="/fonts/archivo-latin-var.woff2"
       as="font"
       type="font/woff2"
@@ -19,11 +26,13 @@
     <link rel="stylesheet" href="/css/main.css" />
     <style>
       /* consumer-app · macrostructure: 02 Long Document · system: design.md
+         · designed-as-editorial
          ─────────────────────────────────────────────────────────────────
          One measure, left-aligned, warm ground, no card chrome — the
          policy reads like a page, not a modal. Section heads close on a
          hairline; bullet dots borrow the brand green; the contact card is
-         a quiet tinted box. */
+         a quiet tinted box. Content is preserved verbatim from the legal
+         copy — this file owns typography and layout only. */
       .container {
         max-width: 68ch;
         width: 100%;
@@ -40,7 +49,7 @@
       .header h1 {
         font-family: var(--font-display);
         font-size: var(--text-3xl);
-        font-weight: 800;
+        font-weight: 620;
         color: var(--color-ink-display);
         margin-bottom: var(--space-2xs);
         letter-spacing: var(--tracking-display);
@@ -59,7 +68,7 @@
       .content h2 {
         font-family: var(--font-display);
         font-size: var(--text-xl);
-        font-weight: 700;
+        font-weight: 620;
         color: var(--color-ink-display);
         margin-top: var(--space-xl);
         margin-bottom: var(--space-sm);
@@ -365,28 +374,27 @@
     </div>
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-mast">
-          <div>
-            <div class="footer-brand">
-              Fit<span class="wordmark-accent">Fuel</span> Nutrition
-            </div>
-            <p class="footer-tagline">Fresh meals, every day</p>
+        <div class="footer-letter">
+          <p class="footer-verse">Yours, the FitFuel kitchen.</p>
+          <div class="footer-brand">
+            Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
-          <ul class="footer-links">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/privacy-policy">Privacy Policy</a></li>
-            <li>
-              <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
-                >WhatsApp Us</a
-              >
-            </li>
-            <li>
-              <a href="mailto:hello@fitfuelnutrition.com"
-                >hello@fitfuelnutrition.com</a
-              >
-            </li>
-          </ul>
+          <p class="footer-tagline">Fresh meals, every day</p>
         </div>
+        <ul class="footer-links">
+          <li><a href="/login">Login</a></li>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li>
+            <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
+              >WhatsApp Us</a
+            >
+          </li>
+          <li>
+            <a href="mailto:hello@fitfuelnutrition.com"
+              >hello@fitfuelnutrition.com</a
+            >
+          </li>
+        </ul>
         <div class="footer-colophon">
           <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
           <p class="footer-trust">
