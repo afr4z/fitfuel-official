@@ -680,7 +680,12 @@ input[type="number"] {
   border-color: var(--color-danger);
   color: var(--color-danger);
 }
-.banner-error.visible {
+.banner-error,
+.banner-success {
+  display: none;
+}
+.banner-error.visible,
+.banner-success.visible {
   display: block;
 }
 .banner-success {
@@ -802,6 +807,14 @@ input[type="number"] {
   text-align: center;
   padding: var(--space-2xl) var(--space-md);
   color: var(--color-muted);
+}
+/* The mark is decorative and carries no intrinsic size — give it one and
+   centre it as a unit with the copy beneath. */
+.empty-state svg {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto var(--space-md);
+  color: var(--color-faint);
 }
 .empty-state h3 {
   margin-bottom: var(--space-2xs);
