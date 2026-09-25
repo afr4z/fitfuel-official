@@ -14,336 +14,361 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* brand palette lives in /css/main.css (single source of truth) */
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.01ms !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family: var(--font);
-        color: var(--gray-800);
-        background: var(--gray-50);
-        line-height: 1.6;
-        min-height: 100vh;
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 20px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        border-radius: var(--radius-md);
-        border: none;
-        cursor: pointer;
-        transition:
-          background-color var(--dur-short) var(--ease-base),
-          border-color var(--dur-short) var(--ease-base),
-          color var(--dur-short) var(--ease-base);
-        font-family: inherit;
-      }
-      .btn-secondary {
-        background: var(--color-paper);
-        color: var(--green-700);
-        border: 2px solid var(--green-200);
-      }
-      .btn-secondary:hover {
-        border-color: var(--green-400);
-        background: var(--green-50);
-      }
-      .btn-ghost {
-        background: transparent;
-        color: var(--gray-600);
-        border: none;
-        padding: 8px 12px;
-      }
-      .btn-ghost:hover {
-        color: var(--red-500);
-        background: var(--color-danger-tint);
-        border-radius: var(--radius-sm);
-      }
+      /* consumer-app · macrostructure: 01 Form (card stack) ·
+         system: design.md · designed-as-app
+         ─────────────────────────────────────────────────────────────────
+         Cards, chips, buttons, progress, fields and spinners come from
+         /css/main.css. This block is the dashboard's composition: the
+         card shell, the subscription cards and the meal / profile rows
+         that the page's JS renders. */
+
       .container {
         max-width: 1120px;
         margin: 0 auto;
-        padding: 32px 24px;
+        padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
       }
       .page-header {
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: space-between;
-        margin-bottom: 32px;
+        margin-bottom: var(--space-xl);
         flex-wrap: wrap;
-        gap: 16px;
+        gap: var(--space-md);
       }
       .page-title {
-        font-size: 1.75rem;
+        font-family: var(--font-display);
+        font-size: var(--text-3xl);
         font-weight: 800;
-        color: var(--gray-900);
+        letter-spacing: var(--tracking-display);
+        color: var(--color-ink-display);
+        line-height: 1.15;
       }
       .page-subtitle {
-        color: var(--gray-500);
-        margin-top: 4px;
+        color: var(--color-muted);
+        margin-top: var(--space-2xs);
+        font-size: var(--text-md);
       }
-      .card {
-        background: var(--color-paper);
-        border: 1px solid var(--gray-200);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
+
+      .section {
+        margin-bottom: var(--space-xl);
       }
       .card-header {
-        padding: 20px 24px;
-        border-bottom: 1px solid var(--gray-200);
+        padding: var(--space-lg) var(--space-xl);
+        border-bottom: 1px solid var(--color-rule);
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: var(--space-sm);
       }
       .card-title {
-        font-size: 1.1rem;
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
         font-weight: 700;
-        color: var(--gray-900);
+        color: var(--color-ink-display);
+        letter-spacing: -0.01em;
       }
       .card-content {
-        padding: 24px;
+        padding: var(--space-xl);
       }
-      .section {
-        margin-bottom: 32px;
+
+      .loading-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-2xl);
+        gap: var(--space-sm);
+        color: var(--color-muted);
+        font-size: var(--text-sm);
       }
+      .loading-state .spinner {
+        width: 24px;
+        height: 24px;
+      }
+
       .empty-state {
         text-align: center;
-        padding: 48px 24px;
-        color: var(--gray-500);
+        padding: var(--space-2xl) var(--space-lg);
+        color: var(--color-muted);
       }
       .empty-state svg {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 12px;
-        opacity: 0.5;
+        width: 44px;
+        height: 44px;
+        margin-bottom: var(--space-sm);
+        opacity: 0.55;
       }
       .empty-state h3 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 4px;
+        font-family: var(--font-display);
+        font-size: var(--text-lg);
+        font-weight: 700;
+        color: var(--color-ink-display);
+        margin-bottom: var(--space-2xs);
       }
       .empty-state p {
-        font-size: 0.85rem;
+        font-size: var(--text-sm);
+        color: var(--color-muted);
       }
+
+      /* ── Subscription cards (JS-rendered) ────────────────────────── */
       .plan-card {
+        background: var(--color-paper-2);
         border: 1px solid var(--color-rule);
         border-radius: var(--radius-md);
-        padding: var(--space-md);
+        padding: var(--space-lg);
+        margin-bottom: var(--space-md);
         transition: border-color var(--dur-short) var(--ease-base);
       }
       .plan-card:hover {
-        border-color: var(--color-brand);
+        border-color: var(--color-brand-tint-2);
       }
       .plan-header {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 16px;
+        gap: var(--space-md);
+        margin-bottom: var(--space-md);
         flex-wrap: wrap;
       }
       .plan-info {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: var(--space-sm);
       }
       .plan-emoji {
-        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        background: var(--color-card);
+        border: 1px solid var(--color-rule);
+        border-radius: var(--radius-md);
+        font-size: 1.5rem;
+        line-height: 1;
       }
       .plan-name {
+        font-family: var(--font-display);
         font-weight: 700;
-        color: var(--gray-900);
-        font-size: 1.1rem;
-      }
-      .plan-tag {
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 3px 10px;
-        border-radius: var(--radius-full);
-      }
-      .tag-veg {
-        background: var(--green-100);
-        color: var(--green-800);
-      }
-      .tag-nonveg {
-        background: var(--color-accent-tint);
-        color: var(--color-accent);
+        font-size: var(--text-lg);
+        color: var(--color-ink-display);
+        letter-spacing: -0.01em;
+        margin-bottom: var(--space-2xs);
       }
       .plan-type {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--green-600);
-        background: var(--green-50);
-        padding: 4px 10px;
-        border-radius: var(--radius-full);
+        display: inline-flex;
+        align-items: center;
+        font-size: var(--text-xs);
+        font-weight: 700;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
+        color: var(--color-brand-deep);
+        background: var(--color-brand-tint);
+        padding: 5px 12px;
+        border-radius: var(--radius-pill);
+        white-space: nowrap;
+        align-self: flex-start;
       }
       .plan-dates {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin-bottom: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-sm);
+        margin-bottom: var(--space-md);
       }
       .plan-date {
-        background: var(--gray-50);
+        background: var(--color-card);
+        border: 1px solid var(--color-rule);
         border-radius: var(--radius-sm);
-        padding: 10px 12px;
+        padding: var(--space-sm) var(--space-md);
       }
       .plan-date-label {
-        font-size: 0.7rem;
+        font-size: var(--text-xs);
         font-weight: 600;
-        color: var(--gray-400);
+        color: var(--color-faint);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.06em;
         margin-bottom: 2px;
       }
       .plan-date-value {
         font-weight: 600;
-        color: var(--gray-900);
+        color: var(--color-ink);
       }
       .plan-progress {
-        margin-bottom: 16px;
-      }
-      .progress-bar {
-        height: 6px;
-        background: var(--gray-200);
-        border-radius: 3px;
-        overflow: hidden;
-      }
-      .progress-fill {
-        height: 100%;
-        background: var(--green-500);
-        border-radius: 3px;
-        transition: width 0.4s var(--ease-out);
+        margin-bottom: var(--space-md);
       }
       .progress-text {
         display: flex;
         justify-content: space-between;
-        font-size: 0.8rem;
-        color: var(--gray-500);
-        margin-top: 6px;
+        font-size: var(--text-xs);
+        color: var(--color-muted);
+        margin-top: var(--space-xs);
       }
-      .plan-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
+      .plan-actions .btn {
+        flex: 1;
       }
+
+      /* ── Meal cards (JS-rendered) ────────────────────────────────── */
       .meal-list {
         display: grid;
-        gap: 12px;
+        gap: var(--space-sm);
       }
       .meal-card {
         display: flex;
         align-items: center;
-        gap: 16px;
-        padding: 16px;
-        background: var(--gray-50);
+        gap: var(--space-md);
+        padding: var(--space-sm) var(--space-md);
+        background: var(--color-paper-2);
         border-radius: var(--radius-md);
-        border: 1px solid var(--gray-200);
+        border: 1px solid var(--color-rule);
+        flex-wrap: wrap;
       }
       .meal-date {
         font-weight: 700;
-        color: var(--gray-900);
+        color: var(--color-ink-display);
         white-space: nowrap;
-        font-size: 0.9rem;
+        font-size: var(--text-sm);
+        min-width: 84px;
       }
       .meal-slot {
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: var(--green-600);
-        background: var(--green-50);
-        padding: 3px 10px;
-        border-radius: var(--radius-full);
+        display: inline-flex;
+        font-size: var(--text-xs);
+        font-weight: 700;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
+        color: var(--color-brand-deep);
+        background: var(--color-brand-tint);
+        padding: 4px 10px;
+        border-radius: var(--radius-pill);
         white-space: nowrap;
       }
       .meal-item {
         flex: 1;
-        color: var(--gray-700);
+        min-width: 0;
+        color: var(--color-ink);
+        font-size: var(--text-sm);
+        overflow-wrap: anywhere;
       }
       .meal-status {
-        font-size: 0.75rem;
+        display: inline-flex;
+        font-size: var(--text-xs);
         font-weight: 600;
         padding: 4px 10px;
-        border-radius: var(--radius-full);
+        border-radius: var(--radius-pill);
         text-transform: capitalize;
+        white-space: nowrap;
       }
       .status-pending {
         background: var(--color-accent-tint);
         color: var(--color-accent);
       }
       .status-confirmed {
-        background: var(--green-100);
-        color: var(--green-800);
+        background: var(--color-brand-tint);
+        color: var(--color-brand-deep);
       }
       .status-skipped {
-        background: var(--gray-100);
-        color: var(--gray-600);
+        background: var(--color-paper-3);
+        color: var(--color-muted);
       }
+
+      /* ── Profile (JS-rendered) ───────────────────────────────────── */
       .profile-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: var(--space-sm);
       }
       .profile-field {
-        background: var(--gray-50);
+        background: var(--color-paper-2);
+        border: 1px solid var(--color-rule);
         border-radius: var(--radius-md);
-        padding: 16px;
+        padding: var(--space-md);
       }
       .profile-label {
-        font-size: 0.7rem;
+        font-size: var(--text-xs);
         font-weight: 600;
-        color: var(--gray-400);
+        color: var(--color-faint);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
-        margin-bottom: 4px;
+        letter-spacing: 0.06em;
+        margin-bottom: var(--space-2xs);
       }
       .profile-value {
         font-weight: 600;
-        color: var(--gray-900);
+        color: var(--color-ink);
       }
-      .loading-state {
+      .mt-sm {
+        margin-top: var(--space-sm);
+      }
+      .form-actions {
         display: flex;
+        gap: var(--space-xs);
+      }
+      .form-actions .btn {
+        flex: 1;
+      }
+      .address-item {
+        background: var(--color-paper-2);
+        border: 1px solid var(--color-rule);
+        border-radius: var(--radius-md);
+        padding: var(--space-sm) var(--space-md);
+        margin-bottom: var(--space-xs);
+      }
+      .address-item-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-xs);
+        flex-wrap: wrap;
+      }
+      .address-item-head strong {
+        font-size: var(--text-sm);
+        color: var(--color-ink-display);
+      }
+      .address-actions {
+        display: inline-flex;
+        gap: var(--space-2xs);
+        flex-wrap: wrap;
+      }
+      .btn-tiny {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 48px;
-        gap: 12px;
-        color: var(--gray-500);
+        padding: 6px 12px;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--color-rule-strong);
+        background: var(--color-card);
+        color: var(--color-ink);
+        cursor: pointer;
+        font-family: inherit;
+        transition:
+          border-color var(--dur-short) var(--ease-base),
+          background-color var(--dur-short) var(--ease-base),
+          color var(--dur-short) var(--ease-base);
       }
-      .spinner {
-        width: 24px;
-        height: 24px;
-        border: 2px solid var(--gray-200);
-        border-top-color: var(--green-500);
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+      .btn-tiny:hover {
+        border-color: var(--color-brand);
+        background: var(--color-brand-tint);
+        color: var(--color-brand-deep);
       }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
+      .btn-tiny--danger:hover {
+        border-color: var(--color-danger);
+        background: var(--color-danger-tint);
+        color: var(--color-danger);
       }
+      .address-item-body {
+        font-size: var(--text-sm);
+        color: var(--color-ink);
+        margin-top: var(--space-2xs);
+      }
+      .address-item-loc {
+        font-size: var(--text-xs);
+        color: var(--color-muted);
+        margin-top: 2px;
+      }
+
       @media (max-width: 768px) {
         .container {
-          padding: 24px 16px;
+          padding: var(--space-xl) var(--page-gutter) var(--space-2xl);
         }
         .page-header {
           flex-direction: column;
@@ -351,6 +376,9 @@
         }
         .plan-dates {
           grid-template-columns: 1fr;
+        }
+        .card-content {
+          padding: var(--space-lg);
         }
       }
     </style>
@@ -493,7 +521,7 @@
                 <span class="plan-emoji">${esc(plan.emoji) || "🥗"}</span>
                 <div>
                   <div class="plan-name">${esc(plan.name) || "Meal Plan"}</div>
-                  <span class="plan-tag ${plan.tag?.toLowerCase() === "veg" ? "tag-veg" : "tag-nonveg"}">${esc(plan.tag) || ""}</span>
+                  <span class="chip ${plan.tag?.toLowerCase() === "veg" ? "chip-veg" : "chip-nonveg"}">${esc(plan.tag) || ""}</span>
                 </div>
               </div>
               <span class="plan-type">${esc(sub.plan_type?.replace("3day", "3-Day") || sub.plan_type)}</span>
@@ -513,7 +541,7 @@
               <div class="progress-text"><span>${progress}% complete</span><span>${progress >= 100 ? "Ended" : "Active"}</span></div>
             </div>
             <div class="plan-actions">
-              <a href="/order" class="btn btn-secondary" style="flex:1;text-align:center;">Renew / New Plan</a>
+              <a href="/order" class="btn btn-secondary">Renew / New Plan</a>
             </div>
           </div>
         `;
@@ -570,60 +598,69 @@
           <div class="profile-field"><div class="profile-label">Name</div><div class="profile-value" id="profile-name-display">${esc(data.name) || "—"}</div></div>
           <div class="profile-field"><div class="profile-label">Email</div><div class="profile-value" id="profile-email-display">${esc(data.email) || "—"}</div></div>
         </div>
-        <button class="btn btn-secondary" id="btn-edit-profile" style="margin-top:12px;">Edit Profile</button>
+        <button class="btn btn-secondary mt-sm" id="btn-edit-profile">Edit Profile</button>
 
-        <div id="profile-edit-form" style="display:none;margin-top:12px;">
-          <div class="profile-field" style="margin-bottom:10px;">
-            <div class="profile-label">Full Name</div>
-            <input type="text" id="edit-name" value="${esc(data.name) || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
+        <div id="profile-edit-form" class="mt-sm" style="display:none;">
+          <div class="field">
+            <label class="field-label" for="edit-name">Full Name</label>
+            <input type="text" class="field-input" id="edit-name" value="${esc(data.name) || ""}" />
           </div>
-          <div class="profile-field" style="margin-bottom:10px;">
-            <div class="profile-label">Email</div>
-            <input type="email" id="edit-email" value="${esc(data.email) || ""}" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;" />
+          <div class="field">
+            <label class="field-label" for="edit-email">Email</label>
+            <input type="email" class="field-input" id="edit-email" value="${esc(data.email) || ""}" />
           </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-primary" id="btn-save-profile" style="flex:1;">Save</button>
-            <button class="btn btn-secondary" id="btn-cancel-profile" style="flex:1;">Cancel</button>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="btn-save-profile">Save</button>
+            <button class="btn btn-secondary" id="btn-cancel-profile">Cancel</button>
           </div>
         </div>
 
-        <div style="margin-top:20px;border-top:1px solid var(--gray-100);padding-top:16px;">
-          <div class="profile-label" style="margin-bottom:8px;">Saved Addresses</div>
+        <div class="mt-sm addresses-block">
+          <div class="profile-label" style="margin-bottom: var(--space-xs);">Saved Addresses</div>
           <div id="addresses-list">
             ${
               addresses.length
                 ? addresses
                     .map(
                       (a) => `
-                <div style="border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-                    <strong style="font-size:0.9rem;">${esc(a.label) || "Home"}</strong>
-                    <span>
+                <div class="address-item">
+                  <div class="address-item-head">
+                    <strong>${esc(a.label) || "Home"}</strong>
+                    <span class="address-actions">
                       ${
                         a.is_default
-                          ? '<span class="plan-type" style="margin-right:6px;">Default</span>'
-                          : `<button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;" data-set-default="${esc(a.id)}">Set Default</button>`
+                          ? '<span class="chip chip-veg">Default</span>'
+                          : `<button class="btn-tiny" data-set-default="${esc(a.id)}">Set Default</button>`
                       }
-                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.75rem;margin-left:6px;" data-delete-address="${esc(a.id)}">Delete</button>
+                      <button class="btn-tiny btn-tiny--danger" data-delete-address="${esc(a.id)}">Delete</button>
                     </span>
                   </div>
-                  <div style="font-size:0.8rem;color:var(--gray-600);margin-top:6px;">${esc(a.address)}</div>
-                  <div style="font-size:0.75rem;color:var(--gray-400);margin-top:2px;">${esc(formatLocation(a.location))}</div>
+                  <div class="address-item-body">${esc(a.address)}</div>
+                  <div class="address-item-loc">${esc(formatLocation(a.location))}</div>
                 </div>
               `,
                     )
                     .join("")
-                : '<p style="font-size:0.82rem;color:var(--gray-500);">No saved addresses yet.</p>'
+                : '<p class="field-note">No saved addresses yet.</p>'
             }
           </div>
-          <button class="btn btn-secondary" id="btn-add-address" style="margin-top:8px;">+ Add Address</button>
-          <div id="add-address-form" style="display:none;margin-top:12px;">
-            <input type="text" id="new-address-label" placeholder="Label (e.g. Home, Office)" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;margin-bottom:8px;" />
-            <input type="text" id="new-address-area" placeholder="Area / Neighbourhood" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;margin-bottom:8px;" />
-            <textarea id="new-address-text" placeholder="Flat/House No., Street, Landmark, City, PIN" style="width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.9rem;margin-bottom:8px;min-height:64px;"></textarea>
-            <div style="display:flex;gap:8px;">
-              <button class="btn btn-primary" id="btn-save-address" style="flex:1;">Save Address</button>
-              <button class="btn btn-secondary" id="btn-cancel-address" style="flex:1;">Cancel</button>
+          <button class="btn btn-secondary mt-sm" id="btn-add-address">+ Add Address</button>
+          <div id="add-address-form" class="mt-sm" style="display:none;">
+            <div class="field">
+              <label class="field-label" for="new-address-label">Label</label>
+              <input type="text" class="field-input" id="new-address-label" placeholder="e.g. Home, Office" />
+            </div>
+            <div class="field">
+              <label class="field-label" for="new-address-area">Area / Neighbourhood</label>
+              <input type="text" class="field-input" id="new-address-area" placeholder="e.g. Koramangala, Indiranagar" />
+            </div>
+            <div class="field">
+              <label class="field-label" for="new-address-text">Full Address</label>
+              <textarea class="field-textarea" id="new-address-text" placeholder="Flat/House No., Street, Landmark, City, PIN"></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-primary" id="btn-save-address">Save Address</button>
+              <button class="btn btn-secondary" id="btn-cancel-address">Cancel</button>
             </div>
           </div>
         </div>
@@ -785,6 +822,52 @@
 
       loadDashboard();
     </script>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-mast">
+          <div>
+            <div class="footer-brand">
+              Fit<span class="wordmark-accent">Fuel</span> Nutrition
+            </div>
+            <p class="footer-tagline">Fresh meals, every day</p>
+          </div>
+          <ul class="footer-links">
+            <li><a href="/login">Login</a></li>
+            <li><a href="/privacy-policy">Privacy Policy</a></li>
+            <li>
+              <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
+                >WhatsApp Us</a
+              >
+            </li>
+            <li>
+              <a href="mailto:hello@fitfuelnutrition.com"
+                >hello@fitfuelnutrition.com</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="footer-colophon">
+          <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
+          <p class="footer-trust">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2.5"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Secure payments by Razorpay
+          </p>
+        </div>
+      </div>
+    </footer>
     <script src="/js/nav.js" defer></script>
   </body>
 </html>

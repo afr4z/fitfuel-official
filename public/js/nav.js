@@ -2,7 +2,21 @@
 // Usage on any page:
 //   <div id="nav-placeholder"></div>
 //   <script src="/js/nav.js" defer></script>
-// The component injects the full nav (brand, links, auth state) into the placeholder.
+// The component injects the full nav (brand lockup, links, auth state,
+// CTA) into the placeholder.
+//
+// Behaviour contract (do not regress — this is the whole point of the
+// component):
+//   - APG "disclosure navigation" account menu: opens on hover for mouse
+//     users AND on click/Enter/Space for touch and keyboard; hover only
+//     previews, a click pins; Escape closes and returns focus; click or
+//     focus moving outside dismisses.
+//   - `ff:auth` sessionStorage cache: last known state paints immediately,
+//     /me revalidates on every load regardless.
+//   - `window.__ffAuth` head prefetch is consumed when the page started
+//     one; a fetch here is only the fallback for pages without it.
+//   - Logout: cache cleared first, POST /api/auth/logout, redirect "/".
+// Rewriting this file changes markup classes only, never the logic above.
 
 (function () {
   const placeholder = document.getElementById("nav-placeholder");
@@ -17,7 +31,8 @@
   // One action, one name: "Start my plan" is the label in the hero, the
   // banner and here. Suppressed where it is redundant — on /order it
   // would only reload the checkout, and on /dashboard the page has its
-  // own order button. The arrow is decorative, so hidden from AT.
+  // own order button. Hidden by CSS under the mobile breakpoint. The
+  // arrow is decorative, so hidden from AT.
   const hideCta = isOrder || isDashboard;
   const cta = hideCta
     ? ""
@@ -27,21 +42,17 @@
         </svg>
       </a>`;
 
-  // N6 · Newspaper masthead. The mark sits on the centre axis and the real
-  // entity attribution takes the letterspaced line above it — the one place
-  // in a masthead where an attribution belongs. The bar beneath carries the
-  // destinations, the auth slot and the CTA.
+  // N1a · Sticky brand bar. The wordmark locks left; the entity
+  // attribution is the second line of the lockup — brand-mandated copy
+  // that stays in the nav on every page.
   placeholder.innerHTML = `
     <nav class="nav" id="nav" aria-label="Primary">
-      <div class="mast">
-        <p class="mast-attrib">by Jadpod Fitness Pvt Ltd</p>
-        <a href="/" class="mast-name">Fit<span class="wordmark-accent">Fuel</span> Nutrition</a>
-      </div>
-      <div class="mast-bar">
-        <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-        <ul class="mast-links" id="nav-links">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <span class="nav-brand-name">Fit<span class="wordmark-accent">Fuel</span> Nutrition</span>
+          <span class="nav-brand-attrib">by Jadpod Fitness Pvt Ltd</span>
+        </a>
+        <ul class="nav-links" id="nav-links">
           <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
           <li><a href="/#plans" class="nav-link">Plans</a></li>
           <li><a href="/#why" class="nav-link">Why FitFuel</a></li>
@@ -49,9 +60,11 @@
         <div class="nav-actions">
           <div id="nav-auth" class="nav-auth"></div>
           ${cta}
+          <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
         </div>
       </div>
-      <hr class="mast-rule" aria-hidden="true" />
     </nav>
   `;
 
@@ -70,7 +83,8 @@
     setMenu(!links?.classList.contains("open"));
   });
 
-  // Close after picking a destination (mobile pattern — no sticky overlay).
+  // Close after picking a destination (mobile pattern — the sheet is not
+  // an overlay).
   links?.addEventListener("click", (e) => {
     if (e.target.closest("a")) setMenu(false);
   });
@@ -110,7 +124,7 @@
               aria-expanded="false" aria-controls="nav-account-menu">
         <span>Hi, <span class="nav-account-name"></span></span>
         <svg class="nav-account-chevron" width="14" height="14" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2"
+             fill="none" stroke="currentColor" stroke-width="2.2"
              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M6 9l6 6 6-6" />
         </svg>

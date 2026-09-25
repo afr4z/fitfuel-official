@@ -18,42 +18,23 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* brand palette lives in /css/main.css (single source of truth) */
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.01ms !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        background: var(--color-paper);
-        font-family: var(--font-body);
-        color: var(--color-ink);
-        line-height: 1.7;
-        -webkit-font-smoothing: antialiased;
-      }
-      /* Long Document: one measure, left-aligned, no card chrome. The
-         policy used to float inside a centred, shadowed, 20px-radius
-         panel over a gradient — a document is not a modal. */
+      /* consumer-app · macrostructure: 02 Long Document · system: design.md
+         ─────────────────────────────────────────────────────────────────
+         One measure, left-aligned, warm ground, no card chrome — the
+         policy reads like a page, not a modal. Section heads close on a
+         hairline; bullet dots borrow the brand green; the contact card is
+         a quiet tinted box. */
       .container {
         max-width: 68ch;
         width: 100%;
-        padding: var(--space-3xl) var(--page-gutter);
+        margin: 0 auto;
+        padding: var(--space-3xl) var(--page-gutter) var(--space-2xl);
       }
       .header {
         background: transparent;
         padding: 0 0 var(--space-xl);
         margin-bottom: var(--space-2xl);
-        border-bottom: 2px solid var(--color-ink-display);
+        border-bottom: 1px solid var(--color-rule-strong);
         text-align: left;
       }
       .header h1 {
@@ -69,7 +50,7 @@
         color: var(--color-muted);
       }
       .header .meta strong {
-        color: var(--gray-600);
+        color: var(--color-ink);
       }
       .content {
         background: transparent;
@@ -82,7 +63,7 @@
         color: var(--color-ink-display);
         margin-top: var(--space-xl);
         margin-bottom: var(--space-sm);
-        padding-bottom: var(--space-2xs);
+        padding-bottom: var(--space-xs);
         border-bottom: 1px solid var(--color-rule);
       }
       .content h2:first-child {
@@ -95,8 +76,9 @@
         margin-bottom: var(--space-sm);
       }
       .content ul {
-        margin: 0 0 16px 0;
+        margin: 0 0 var(--space-md) 0;
         list-style: none;
+        padding: 0;
       }
       .content li {
         font-size: var(--text-md);
@@ -109,20 +91,24 @@
         content: "";
         position: absolute;
         left: 6px;
-        top: 9px;
+        top: 10px;
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: var(--color-accent);
+        background: var(--color-brand);
       }
       .content a {
-        color: var(--color-accent);
+        color: var(--color-brand-deep);
         text-decoration: underline;
+        text-decoration-color: var(--color-brand-tint-2);
         text-underline-offset: 2px;
-        transition: color var(--dur-short) var(--ease-base);
+        transition:
+          color var(--dur-short) var(--ease-base),
+          text-decoration-color var(--dur-short) var(--ease-base);
       }
       .content a:hover {
-        color: var(--color-ink);
+        color: var(--color-brand);
+        text-decoration-color: var(--color-brand);
       }
       .content strong {
         color: var(--color-ink);
@@ -130,24 +116,11 @@
       .contact-box {
         background: var(--color-brand-tint);
         border: 1px solid var(--color-rule);
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius-md);
         padding: var(--space-md);
         margin-top: var(--space-2xs);
-      }
-      /* Ft2 · Inline-rule: the colophon closes the document. */
-      .brand {
-        text-align: left;
-        margin-top: var(--space-2xl);
-        padding-top: var(--space-md);
-        border-top: 1px solid var(--color-rule);
-        font-size: var(--text-xs);
-        color: var(--color-faint);
-        font-weight: 500;
-      }
-      .brand strong {
         color: var(--color-ink);
       }
-
       @media (max-width: 480px) {
         .container {
           padding: var(--space-2xl) var(--page-gutter);
@@ -389,12 +362,53 @@
           WhatsApp: Message us directly on our FitFuel WhatsApp number
         </div>
       </div>
-
-      <p class="brand">
-        <strong>Fit<span class="wordmark-accent">Fuel</span></strong> Nutrition
-        &mdash; Fresh meals, every day
-      </p>
     </div>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-mast">
+          <div>
+            <div class="footer-brand">
+              Fit<span class="wordmark-accent">Fuel</span> Nutrition
+            </div>
+            <p class="footer-tagline">Fresh meals, every day</p>
+          </div>
+          <ul class="footer-links">
+            <li><a href="/login">Login</a></li>
+            <li><a href="/privacy-policy">Privacy Policy</a></li>
+            <li>
+              <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
+                >WhatsApp Us</a
+              >
+            </li>
+            <li>
+              <a href="mailto:hello@fitfuelnutrition.com"
+                >hello@fitfuelnutrition.com</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="footer-colophon">
+          <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
+          <p class="footer-trust">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2.5"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Secure payments by Razorpay
+          </p>
+        </div>
+      </div>
+    </footer>
     <script src="/js/nav.js" defer></script>
   </body>
 </html>

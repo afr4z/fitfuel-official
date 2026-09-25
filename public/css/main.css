@@ -1,14 +1,21 @@
-/* Hallmark · genre: editorial · macrostructure: per-family (design.md) ·
-   design-system: design.md · designed-as-app
+/* FitFuel Nutrition — warm consumer app system (single source of truth)
    ────────────────────────────────────────────────────────────────────────
-   The token source of truth for FitFuel. Every colour below is measured
-   from board.jpg and expressed in OKLCH; every page references these names
-   and never a raw value.
+   genre: consumer-app · system: design.md · designed-as-app
 
-   The brand palette is LOCKED (it is a given, not a preference). What this
-   overhaul changes is the *system* around it: neutrals tinted to the anchor
-   hue, the accent given a real budget, spacing put on a named scale, and
-   the accent/fill contract made explicit so the two stop swapping jobs. */
+   The :root block is the token source of truth. Every colour below is
+   measured from board.jpg and expressed in OKLCH; every page references
+   these names and never a raw value.
+
+   The brand palette is LOCKED (a given, not a preference): the leaf green
+   and the poster orange. What this file owns is the system around them —
+   warm cream neutrals instead of green-tinted paper, generous radii, soft
+   warm shadows, and the shared primitives (buttons, cards, forms, banners,
+   chips) so no page re-declares a component it can inherit.
+
+   The legacy alias block at the bottom maps old names (--green-*, --gray-*,
+   --orange-*, --radius-full, ...) onto the new values. Delete each alias as
+   its last consumer is migrated; they exist so admin.html and anything not
+   yet touched still resolve. */
 
 @font-face {
   font-family: "Archivo";
@@ -25,38 +32,35 @@
 }
 
 :root {
-  /* ── Paper & ink ────────────────────────────────────────────────
-     Paper is the existing green-50 measured in OKLCH: a tinted white,
-     never #fff (editorial bans pure extremes). Ink is a deep, faintly
-     green-black rather than a flat grey. */
-  --color-paper: oklch(97.5% 0.011 150);
-  --color-paper-2: oklch(94.6% 0.014 150);
-  --color-paper-3: oklch(91% 0.016 150);
-  --color-rule: oklch(86% 0.01 150);
-  --color-rule-strong: oklch(74% 0.012 150);
-  --color-ink: oklch(22% 0.012 152);
-  --color-ink-display: oklch(16% 0.01 152);
-  --color-muted: oklch(46% 0.01 150);
-  --color-faint: oklch(58% 0.009 150);
+  /* ── Warm ground & ink ────────────────────────────────────────────
+     Cream, not green-tinted paper and never pure #fff. Cards on the
+     cream are a touch lighter (--color-card). Ink is warm charcoal. */
+  --color-paper: oklch(98.4% 0.014 90);
+  --color-paper-2: oklch(95.6% 0.02 90);
+  --color-paper-3: oklch(93% 0.024 90);
+  --color-card: oklch(99.3% 0.006 90);
+  --color-rule: oklch(91% 0.014 90);
+  --color-rule-strong: oklch(82% 0.02 90);
+  --color-ink: oklch(25% 0.022 42);
+  --color-ink-display: oklch(18% 0.02 42);
+  --color-muted: oklch(46% 0.024 55);
+  --color-faint: oklch(55% 0.02 55);
 
-  /* ── The accent, with a budget ──────────────────────────────────
-     Orange is the accent and is capped at 3% of any viewport. It marks
-     the wordmark, kickers, prices, step numerals and the active nav
-     item — that is the entire allowance. The text-safe value clears
-     4.5:1 on paper; the display value is for type >= 24px only. */
+  /* ── Brand green: primary ─────────────────────────────────────────
+     Fills CTAs, progress, veg chips, success marks and the closing
+     band. The label on the fill is --color-paper (5.2:1). */
+  --color-brand: oklch(51.9% 0.138 148);
+  --color-brand-deep: oklch(27.4% 0.056 153);
+  --color-brand-tint: oklch(95% 0.03 150);
+  --color-brand-tint-2: oklch(89.5% 0.05 150);
+
+  /* ── Poster orange: warm accent ───────────────────────────────────
+     Wordmark Fuel, prices, non-veg chips, flags, step tokens. Never a
+     button fill, never a whole band. Text-safe value clears 4.5:1 on
+     paper; the display value is for type >= 24px only. */
   --color-accent: oklch(55.4% 0.153 44.8);
   --color-accent-display: oklch(63.4% 0.168 46.4);
   --color-accent-tint: oklch(95% 0.03 45);
-
-  /* ── Brand green: structural, not accent ────────────────────────
-     Green may hold area only as the poster's dark ground on the
-     closing band. It is never a decorative fill, and it never carries
-     the white button label at the bright leaf value. */
-  --color-brand: oklch(51.9% 0.138 148);
-  --color-brand-deep: oklch(27.4% 0.056 153);
-  --color-brand-tint: oklch(94.6% 0.024 151);
-  --color-brand-tint-2: oklch(89% 0.045 151);
-  --color-brand-on-deep: oklch(88% 0.035 150);
 
   --color-focus: oklch(46.4% 0.124 148);
   --color-danger: oklch(48% 0.17 27);
@@ -76,12 +80,11 @@
   --text-md: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.375rem;
-  --text-2xl: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
-  --text-3xl: clamp(1.875rem, 1.4rem + 2.2vw, 2.75rem);
-  /* Sized for the hero column, which is deliberately narrower than the
-     measure. A larger ceiling pushed the headline to four lines. */
-  --text-display: clamp(2.5rem, 1.4rem + 4.4vw, 3.5rem);
-  --tracking-caps: 0.18em;
+  --text-2xl: clamp(1.5rem, 1.25rem + 1.2vw, 1.875rem);
+  --text-3xl: clamp(1.875rem, 1.45rem + 2vw, 2.5rem);
+  --text-display: clamp(2.25rem, 1.2rem + 4vw, 3.25rem);
+  --tracking-caps: 0.12em;
+  --tracking-wide: 0.08em;
   --tracking-display: -0.02em;
 
   /* ── Space: 4pt scale, named by role ──────────────────────────────
@@ -96,28 +99,36 @@
   --space-2xl: 4rem;
   --space-3xl: 6rem;
   --space-4xl: 9rem;
-  --page-gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --page-gutter: clamp(1rem, 4vw, 2.5rem);
   --measure: 68ch;
+  /* The sticky bar's height + a breath. Anchors land clear of it. */
+  --nav-height: 64px;
 
-  /* ── Motion: quiet ───────────────────────────────────────────────
-     One orchestrated entrance, no bounce, no overshoot, anywhere. */
+  /* ── Motion: friendly, not showy ──────────────────────────────────
+     One soft entrance per surface, lift on cards, no bounce anywhere. */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
   --dur-short: 180ms;
   --dur-med: 280ms;
 
-  /* ── Depth: weight and scale, not shadow ────────────────────────
-     One whisper, one hairline. Never stacked, never a coloured glow. */
-  --shadow-whisper: 0 1px 2px oklch(20% 0.01 150 / 0.05);
-  --shadow-hairline: 0 0 0 1px oklch(30% 0.01 150 / 0.06);
-  /* The one place alpha defines a colour: the skeleton loading sheen, which
-     has to be translucent to read as a sweep across the placeholder. */
-  --color-skeleton-sheen: oklch(100% 0 0 / 0.75);
+  /* ── Depth: warm-tinted shadow, never a glow ──────────────────────
+     Cards take md; floating panels take lg. One hairline for focus
+     outlines. */
+  --shadow-xs: 0 1px 2px oklch(35% 0.02 60 / 0.06);
+  --shadow-sm: 0 1px 3px oklch(35% 0.02 60 / 0.08),
+    0 1px 2px oklch(35% 0.02 60 / 0.05);
+  --shadow-md: 0 6px 16px -4px oklch(35% 0.02 60 / 0.14),
+    0 2px 6px -2px oklch(35% 0.02 60 / 0.07);
+  --shadow-lg: 0 18px 40px -12px oklch(35% 0.02 60 / 0.24),
+    0 6px 16px -6px oklch(35% 0.02 60 / 0.12);
+  --shadow-hairline: 0 0 0 1px oklch(35% 0.02 60 / 0.06);
+  /* Skeleton loading sheen — one place alpha defines a colour. */
+  --color-skeleton-sheen: oklch(100% 0 0 / 0.7);
   --rule-hair: 1px;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 14px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
   --radius-pill: 9999px;
 
   /* ── Depth order: six named levels, never ad-hoc numbers ────────── */
@@ -130,19 +141,19 @@
   --z-tooltip: 600;
 
   /* ── Legacy aliases ─────────────────────────────────────────────
-     Migration shim for pages not yet moved to the names above. Each one
-     is an alias onto the new system, never a parallel ramp. Delete a
+     Migration shim for pages not yet moved to the names above. Each
+     alias points at the new system, never a parallel ramp. Delete a
      block as its last consumer is migrated. */
   --leaf: var(--color-brand-tint-2);
-  --green-50: var(--color-paper);
+  --green-50: var(--color-paper-2);
   --green-100: var(--color-brand-tint);
   --green-200: var(--color-brand-tint-2);
-  --green-300: oklch(82% 0.06 150);
+  --green-300: oklch(83% 0.065 150);
   --green-400: oklch(70% 0.09 149);
   --green-500: var(--color-brand);
   --green-600: var(--color-focus);
   --green-700: oklch(41.9% 0.109 148);
-  --green-800: oklch(32.8% 0.071 152);
+  --green-800: oklch(33% 0.08 152);
   --green-900: var(--color-brand-deep);
   --orange-50: var(--color-accent-tint);
   --orange-100: oklch(90% 0.07 45);
@@ -150,13 +161,13 @@
   --orange-500: var(--color-accent);
   --orange-600: var(--color-accent-display);
   --orange-700: oklch(55.4% 0.153 44.8);
-  --gray-50: var(--color-paper);
+  --gray-50: var(--color-paper-2);
   --gray-100: var(--color-paper-2);
   --gray-200: var(--color-rule);
-  --gray-300: oklch(78% 0.01 150);
+  --gray-300: oklch(81% 0.014 60);
   --gray-400: var(--color-faint);
   --gray-500: var(--color-muted);
-  --gray-600: oklch(38% 0.011 151);
+  --gray-600: oklch(42% 0.022 45);
   --gray-700: var(--color-ink);
   --gray-800: var(--color-ink);
   --gray-900: var(--color-ink-display);
@@ -165,12 +176,9 @@
   --red-500: var(--color-danger);
   --red-600: var(--color-danger);
   --radius-full: var(--radius-pill);
-  --shadow-sm: var(--shadow-whisper);
-  --shadow-md: var(--shadow-whisper);
-  --shadow-lg: var(--shadow-hairline);
+  --shadow-whisper: var(--shadow-xs);
   --shadow-glow: none;
   --font: var(--font-body);
-  --tracking-wide: var(--tracking-caps);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -197,6 +205,7 @@
    for the sticky anchor, body as the older-Safari fallback. */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-height) + 16px);
   overflow-x: clip;
 }
 body {
@@ -216,12 +225,15 @@ img {
   max-width: 100%;
   display: block;
 }
+button {
+  font-family: inherit;
+  color: inherit;
+}
 
-/* One focus treatment for the whole app, promoted out of the nav so the
-   hero, the plan links and the footer stop falling back to the UA ring. */
+/* One focus treatment for the whole app. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--color-focus);
-  outline-offset: 3px;
+  outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
@@ -244,21 +256,21 @@ img {
   color: var(--color-accent-display);
   margin-right: 6px;
 }
-.nav-brand,
+.nav-brand-name,
 .footer-brand,
 .wordmark {
   font-family: var(--font-display);
-  font-stretch: 108%;
+  font-stretch: 106%;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-display);
   color: inherit;
 }
 
 /* ── CTA voice ──────────────────────────────────────────────────────
    Solid brand pill, paper label, no glow and no gradient. Hover steps
-   one shade darker and nothing else — colour and rules only, never a
-   translate or a scale. One definition, shared by every page; the
-   homepage's divergent copy was deleted rather than kept in sync. */
+   one shade darker and lifts 1px. One definition, shared by every
+   page — never redeclared per page. */
+.btn,
 .btn-primary,
 .btn-secondary {
   display: inline-flex;
@@ -266,7 +278,7 @@ img {
   justify-content: center;
   gap: var(--space-xs);
   min-height: 44px;
-  padding: 13px var(--space-lg);
+  padding: 12px var(--space-xl);
   border-radius: var(--radius-pill);
   font-family: var(--font-body);
   font-size: var(--text-md);
@@ -274,6 +286,12 @@ img {
   line-height: 1.2;
   cursor: pointer;
   text-align: center;
+  text-decoration: none;
+  transition:
+    background-color var(--dur-short) var(--ease-base),
+    border-color var(--dur-short) var(--ease-base),
+    color var(--dur-short) var(--ease-base),
+    transform var(--dur-short) var(--ease-base);
 }
 .btn-primary {
   background: var(--color-brand);
@@ -283,17 +301,385 @@ img {
 .btn-primary:hover {
   background: var(--color-focus);
   border-color: var(--color-focus);
+  transform: translateY(-1px);
 }
 .btn-secondary {
-  background: transparent;
-  color: var(--color-brand);
+  background: var(--color-card);
+  color: var(--color-ink);
   border: 1px solid var(--color-rule-strong);
 }
 .btn-secondary:hover {
   border-color: var(--color-brand);
   background: var(--color-brand-tint);
+  color: var(--color-brand-deep);
+  transform: translateY(-1px);
 }
 .btn-primary:active,
 .btn-secondary:active {
   transform: translateY(1px);
+}
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────
+   The consumer-app workhorse: near-white on cream, generous radius,
+   hairline plus a soft warm shadow. Lift 2px on hover when interactive
+   (a .card--hover affordance), never by default. */
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+.card--hover {
+  transition:
+    transform var(--dur-short) var(--ease-out),
+    box-shadow var(--dur-short) var(--ease-base),
+    border-color var(--dur-short) var(--ease-base);
+}
+.card--hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-rule-strong);
+}
+
+/* ── Form primitives ──────────────────────────────────────────────── */
+.field {
+  margin-bottom: var(--space-md);
+}
+.field-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-display);
+  margin-bottom: var(--space-2xs);
+}
+.field-label .required {
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+.field-input,
+.field-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: var(--text-md);
+  font-family: inherit;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 14px;
+  background: var(--color-card);
+  color: var(--color-ink);
+  transition:
+    border-color var(--dur-short) var(--ease-base),
+    background var(--dur-short) var(--ease-base);
+}
+.field-input::placeholder,
+.field-textarea::placeholder {
+  color: var(--color-faint);
+}
+.field-input:focus-visible,
+.field-textarea:focus-visible {
+  border-color: var(--color-focus);
+}
+.field-input.error,
+.field-textarea.error {
+  border-color: var(--color-danger);
+}
+.field-error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+  margin-top: var(--space-2xs);
+  display: none;
+}
+.field-error.visible {
+  display: block;
+}
+.field-note {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  margin-top: var(--space-2xs);
+}
+.field-textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+/* Phone/OTP fields — centred digits, roomy. */
+.otp-input {
+  letter-spacing: 0.5rem;
+  text-align: center;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  padding: 14px;
+  width: 100%;
+  font-family: inherit;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 14px;
+  background: var(--color-card);
+  color: var(--color-ink);
+}
+
+/* ── Banners ──────────────────────────────────────────────────────── */
+.banner-error,
+.banner-success,
+.banner-note {
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-md);
+  display: none;
+}
+.banner-error.visible,
+.banner-success.visible,
+.banner-note.visible {
+  display: block;
+}
+.banner-error {
+  background: var(--color-danger-tint);
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+.banner-success {
+  background: var(--color-brand-tint);
+  border: 1px solid var(--color-brand);
+  color: var(--color-brand-deep);
+}
+.banner-note {
+  background: var(--color-brand-tint);
+  border: 1px solid var(--color-rule);
+  color: var(--color-ink);
+}
+
+/* ── Spinner (real state, inherits surrounding ink where possible) ── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Chip (status / diet marker) ──────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chip-veg {
+  background: var(--color-brand-tint);
+  color: var(--color-brand-deep);
+}
+.chip-veg::before {
+  background: var(--color-brand);
+}
+.chip-nonveg {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+.chip-nonveg::before {
+  background: var(--color-accent);
+}
+.chip-flag {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+.chip-flag::before {
+  display: none;
+}
+
+/* ── Progress ───────────────────────────────────────────────────────
+   One track + one fill, shared by the order wizard and the dashboard
+   subscription cards. */
+.progress {
+  display: flex;
+  gap: var(--space-xs);
+}
+.progress-step {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-rule);
+  overflow: hidden;
+}
+.progress-step.active::after,
+.progress-step.completed::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-brand);
+  border-radius: inherit;
+}
+.progress-step.active::after {
+  transform: translateX(-100%);
+  animation: fill 0.4s var(--ease-out) forwards;
+}
+.progress-step.completed::after {
+  transform: translateX(0);
+}
+@keyframes fill {
+  to {
+    transform: translateX(0);
+  }
+}
+.progress-bar {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-rule);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand);
+  transition: width 0.4s var(--ease-out);
+}
+
+/* ── Loading-state primitive (skeleton) ──────────────────────────── */
+.skeleton-block {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-rule);
+  border-radius: var(--radius-sm);
+}
+.skeleton-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-skeleton-sheen),
+    transparent
+  );
+  animation: skeleton-shimmer 1.3s infinite var(--ease-base);
+}
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block::after {
+    animation: none;
+  }
+}
+
+/* ── Loading row inside a button (label swaps for a spinner) ─────── */
+.loading {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+.loading.visible {
+  display: flex;
+}
+
+/* ── Footer · Ft1 warm bar ───────────────────────────────────────────
+   One stable definition shared by every customer page (see design.md):
+   wordmark + tagline in a left block, 2–4 small links beside it, legal
+   colophon underneath. No link columns, no dark gradient. Pages only
+   supply the markup below; they never re-declare these rules. */
+.footer {
+  background: var(--color-paper);
+  border-top: 1px solid var(--color-rule);
+  padding: var(--space-2xl) var(--page-gutter) var(--space-xl);
+}
+.footer-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.footer-mast {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-xl);
+}
+.footer-brand {
+  font-size: var(--text-2xl);
+  color: var(--color-ink-display);
+}
+.footer-tagline {
+  font-size: var(--text-md);
+  color: var(--color-muted);
+}
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md) var(--space-lg);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-links a {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-muted);
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--dur-short) var(--ease-base),
+    border-color var(--dur-short) var(--ease-base);
+}
+.footer-links a:hover {
+  color: var(--color-brand-deep);
+  border-bottom-color: var(--color-brand);
+}
+.footer-colophon {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-lg);
+}
+.footer-colophon p {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+.footer-trust {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+.footer-trust svg {
+  color: var(--color-brand);
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .footer-mast,
+  .footer-colophon {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
