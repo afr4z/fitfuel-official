@@ -121,7 +121,6 @@ nav.js injects markup using exactly the classes below — keep them in sync.
    line-height and transition all shared — so they cannot drift apart.
    Only colour is per-control. */
 .nav-cta,
-.nav-login,
 .nav-account-trigger {
   display: inline-flex;
   align-items: center;
@@ -145,8 +144,8 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     color 0.2s var(--ease-base, ease);
 }
 
-/* Primary — the one filled control in the bar. No glow, no lift: the
-   Login pill's flat craft is the standard, so the CTA meets it. */
+/* Primary — the one filled control in the bar, and now the only call to
+   action in the header when signed out. No glow, no lift. */
 .nav-cta {
   gap: 10px;
   background: var(--green-500, #008c46);
@@ -159,25 +158,17 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   background: var(--green-600, #00833f);
 }
 
-/* Secondary — the orange outline. Identical for BOTH auth states: the
-   signed-out "Login" link and the signed-in "Hi, Name" chip, so the
-   control in the right-hand slot always looks the same. Nothing here is
-   grey: the greeting used to inherit --gray-500 and read as a grey
-   lozenge with one orange word in it. */
-.nav-login,
+/* Account chip — orange outline, the lower-emphasis slot opposite the
+   filled CTA. Not grey: the greeting used to inherit --gray-500 and read
+   as a grey lozenge with one orange word in it. */
 .nav-account-trigger {
   border-color: var(--orange-600, #d96217);
   color: var(--orange-700, #b84e0f);
 }
-.nav-login:hover,
 .nav-account-trigger:hover,
 .nav-account-trigger[aria-expanded="true"] {
   background: var(--orange-50, #fef3ec);
   border-color: var(--orange-700, #b84e0f);
-}
-/* Already on the login page: tint only — never a second filled button. */
-.nav-login[aria-current="page"] {
-  background: var(--orange-50, #fef3ec);
 }
 
 /* Identity chip — same box and colour as Login; only the label and the
@@ -198,35 +189,18 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   align-items: center;
   gap: 12px;
 }
-/* The auth slot is always the last item in the bar — the right edge — in
-   both states: [Order Now] [Login] when signed out, [Order Now]
-   [Hi, Name] when signed in. The account control never moves. */
+/* The auth slot is the last item in the bar — the right edge — and only
+   holds anything when signed in. Signed out it is empty, so the CTA simply
+   takes the corner. */
 .nav-auth {
   display: inline-flex;
   align-items: center;
   gap: 16px;
   order: 2;
 }
-/* Placeholder held while /api/auth/me resolves — never paints a real
-   control that would then be swapped out. */
-.nav-auth-skeleton {
-  display: inline-block;
-  /* Mirrors the auth control's box (9px padding + 1px border + 22.4px
-     line box) so the slot doesn't resize when the real control lands. */
-  width: 78px;
-  height: 42px;
-  border-radius: var(--radius-full, 9999px);
-  background: var(--gray-200, #e5e7eb);
-  animation: nav-pulse 1.4s ease-in-out infinite;
-}
-@keyframes nav-pulse {
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
+/* Collapses the flex gap so an empty slot leaves no dead space */
+.nav-auth:empty {
+  display: none;
 }
 
 /* ── Account menu (disclosure) ─────────────────────────────────────── */
@@ -394,9 +368,8 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     box-shadow: none;
     animation: none;
   }
-  /* Full-width buttons; the shared box already centres their content. */
-  .nav-cta,
-  .nav-login {
+  /* Full-width button; the shared box already centres its content. */
+  .nav-cta {
     width: 100%;
   }
 }
