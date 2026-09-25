@@ -1,56 +1,58 @@
 {
   "project": "fitfuel-nutrition",
   "run": "hallmark-overhaul-2026-09-25",
-  "genre": "editorial",
-  "theme": "custom-tuned (board.jpg measured in OKLCH; leaf green + poster orange locked as brand)",
+  "genre": "fresh / health-tech",
+  "theme": "swapnow.in reference (owner redirect: 'I don't like this theme — do something else, try swapnow.in') — airy gradient ground + colour blobs, glassy surfaces, rounded pills, soft lifts",
   "tokens": {
-    "brand": "oklch(51.9% 0.138 148)",
-    "accent": "oklch(55.4% 0.153 44.8)",
-    "deep-green": "oklch(27.4% 0.056 153)",
-    "paper": "oklch(97.8% 0.014 90)",
-    "ink": "oklch(24% 0.03 152)"
+    "brand": "#199e41 (swapnow primary-600)",
+    "accent": "#f78757 (swapnow primary-500), small-text variant --color-accent-deep #d95f2b",
+    "display-ink": "#063847 (swapnow primary-700 deep teal)",
+    "ground": "linear-gradient(#f7fbf8, #f2f5ff) + radial blobs (indigo rgba(114,114,242,.14), green rgba(25,158,65,.12), coral rgba(247,135,87,.13)), background-attachment fixed",
+    "ink": "#1a1e2a",
+    "rule": "#dfe4ec"
   },
   "fonts": {
-    "display": "Fraunces Variable (self-hosted /fonts/fraunces-latin-wght-normal.woff2)",
-    "body": "Archivo (self-hosted /fonts/archivo-latin-var.woff2)",
-    "wordmark": "Archivo 800 (outlier register, pinned via --font-wordmark)"
+    "display": "Outfit 100-900 (self-hosted /fonts/outfit-latin-var.woff2, preloaded)",
+    "body": "Inter 100-900 (self-hosted /fonts/inter-latin-var.woff2, preloaded)",
+    "wordmark": "Outfit 800 — 'Fuel' in green→teal text-gradient (.wordmark-accent)"
   },
-  "geometry": "squared (--radius-sm:2px, --radius-md:6px, --radius-lg:12px) — flat + hairline, no soft cards/pills",
+  "geometry": "rounded — --radius-sm:8px, --radius-md:12px, --radius-lg:18px, --radius-xl:24px, --radius-pill:999px; cards 12-18px, chips/buttons/toggles are pills; soft teal-seeded shadows, hover-lift",
   "macros": {
-    "index": "Catalogue — menu is the product, price docket in the fold, ruled inventory rows",
-    "order": "Narrative Workflow — 01 Plan → 02 Customize → 03 Checkout with numbered stage tracker",
-    "login": "Functional app — one measured card, no enrichment",
-    "dashboard": "Functional app — card stack, JS-rendered contract preserved (plan-card, meal-card, address-item, profile-grid, btn-tiny)",
-    "payment-success": "Letter — green check pinned above serif headline, letter body, ruled note, revealed actions",
+    "index": "Catalogue — centred statement hero (badge/h1-accent/sub/2 buttons/trust pills), glass 'On the menu' docket, uniform rounded plan cards (emoji tiles 🥗/🍗/⚖️, exact API titles + prices), numbered step cards, 3-col feature cards, deep-teal rounded closing band",
+    "order": "Narrative Workflow — 1 → 2 → 3 shared progress track, pill radio toggles, price summary, JS/form verbatim",
+    "login": "Functional app — one measured card on transparent ground, no enrichment",
+    "dashboard": "Functional app — card stack, JS-rendered contract preserved (plan-card, meal-card, address-item, profile-grid, btn-tiny, pill chips)",
+    "payment-success": "Letter — gradient circular check seal, strong headline, note, revealed pill actions",
     "privacy-policy": "Long Document — one measure, hairline section rules, content preserved verbatim",
     "admin": "Functional tool — token-compatible only, secret-gated, no shared nav/footer",
     "bot-messages": "Functional tool — token-compatible only, secret-gated, no shared nav/footer"
   },
   "nav": {
     "archetype": "N12 banner + retract",
-    "implementation": ".nav-wrap sticky wraps .nav-banner + .nav; banner collapses to max-height:0 under .nav-scrolled (passive scroll listener in nav.js, additive only)",
+    "implementation": ".nav-wrap sticky wraps .nav-banner + .nav; glassy bar (blur 12px, rgba(247,251,248,.88)) with pill links that fill on hover; banner as green→coral gradient announcement strip; retracts to max-height:0 under .nav-scrolled (passive scroll listener in nav.js, additive only)",
     "auth": "unchanged — ff:auth sessionStorage cache, window.__ffAuth prefetch consumption, APG disclosure menu, logout, mobile burger"
   },
   "footer": {
     "archetype": "Ft6 letter close",
-    "implementation": "footer-verse 'Yours, the FitFuel kitchen.' + wordmark-as-signature + tagline + minimal links + colophon '© 2026 Jadpod Fitness Private Limited' + Razorpay trust"
+    "implementation": "glass footer (rgba(255,255,255,.55) + blur) — footer-verse 'Yours, the FitFuel kitchen.' + wordmark-as-signature + tagline + minimal links + colophon '© 2026 Jadpod Fitness Private Limited' + Razorpay trust"
   },
   "cta-voice": "Start my plan",
-  "section-numerals": "sections carry editorial numerals (01— / 02— / 03—) on marketing page",
+  "kickers": "uppercase micro-kickers (HOW IT WORKS / ON THE MENU / WHY FITFUEL) with --tracking-caps — section numerals retired with the editorial genre",
   "diversification": {
-    "this-build": "N12 + Ft6, editorial + Fraunces (first claimed)",
-    "rejected-priors": "N6 masthead (failed gate), N1a nav + Ft1 footer (warm-consumer system, superseded by design.md)",
-    "stamps": "main.css and nav.css carry genre/macro/system comments; design.md supersedes warm-consumer spec"
+    "this-build": "N12 + Ft6, fresh/health-tech + Outfit/Inter (supersedes R2 editorial + Fraunces/Archivo)",
+    "rejected-priors": "editorial build (071a2ed — board.jpg oklch ramp, Fraunces/Archivo, squared hairline, deep-green bands) rejected by owner; N6 masthead (failed gate); N1a nav + Ft1 footer (warm-consumer R1)",
+    "stamps": "main.css and nav.css carry genre/macro/system comments; design.md (fresh) supersedes editorial and warm-consumer specs"
   },
   "constraints-honoured": [
-    "plan titles render as-is from DB (emoji-prefixed), never split/renamed",
+    "plan titles render as-is from DB, never split/renamed",
     "'by Jadpod Fitness Pvt Ltd' in nav; '© 2026 Jadpod Fitness Private Limited' in footer",
     "no Login button in nav when signed out",
     "admin.html / bot-messages.html secret-gated, never load shared nav",
     "no plan-title splitting on /order or /dashboard",
-    "no photography — typography/shape/hand-built SVG only",
+    "no photography — emoji tiles + type + gradient art only",
     "copy honest — preserved/adjusted, nothing fabricated",
-    "admin/bot token names survive: --shadow-whisper, --radius-lg, all --color-*"
+    "admin/bot token names survive: --shadow-whisper, --radius-lg, all --color-*, legacy alias block",
+    "probes all green after re-theme: smoke (0 overflow), final-gates (rings 17-18/18, hero fits fold, lede 66ch), audit-brand (Jadpod/Login/account/titles/gates), order-wizard (-> Razorpay URL), customer-final (dashboard+OTP+footer)"
   ],
   "pages-rebuilt": [
     "public/index.html",
@@ -61,6 +63,7 @@
     "public/privacy-policy.html"
   ],
   "shared-css-rebuilt": ["public/css/main.css", "public/css/nav.css"],
-  "js-touched": "public/js/nav.js (markup wrap + scroll listener only)",
-  "fonts-added": ["public/fonts/fraunces-latin-wght-normal.woff2"]
+  "js-touched": "public/js/nav.js (markup wrap + scroll listener only; untouched in re-theme)",
+  "fonts-added": ["public/fonts/outfit-latin-var.woff2"],
+  "fonts-retired": ["public/fonts/fraunces-latin-wght-normal.woff2 (R2 display face, unreferenced after re-theme)"]
 }

@@ -10,14 +10,14 @@
     />
     <link
       rel="preload"
-      href="/fonts/fraunces-latin-wght-normal.woff2"
+      href="/fonts/outfit-latin-var.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="preload"
-      href="/fonts/archivo-latin-var.woff2"
+      href="/fonts/inter-latin-var.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -27,12 +27,12 @@
     <link rel="stylesheet" href="/css/main.css" />
     <style>
       /* consumer-app · macrostructure: 14 Narrative Workflow ·
-         system: design.md · designed-as-editorial
+         system: design.md · designed-as-healthtech
          ─────────────────────────────────────────────────────────────────
          The 3-step wizard IS the narrative: 01 Plan → 02 Customize →
          03 Checkout. Fields, banners, spinners, chips and buttons come
          from /css/main.css. This block is the wizard's own composition:
-         the editorial skeleton, the plan grid, summary panels and the
+         the pill stage toggles, the plan grid, summary panels and the
          numbered stage tracker. */
 
       .container {
@@ -44,7 +44,7 @@
       /* ── Narrative head ──────────────────────────────────────────── */
       .wizard-title {
         font-family: var(--font-display);
-        font-weight: 620;
+        font-weight: 700;
         font-size: var(--text-3xl);
         letter-spacing: var(--tracking-display);
         color: var(--color-ink-display);
@@ -59,8 +59,8 @@
       }
 
       /* ── Stage tracker ─────────────────────────────────────────────
-         Three numbered stages, hairline-ruled, the active one in ink.
-         The progress bar underneath is the shared primitive. */
+         Three numbered stages, the active one in ink, over the shared
+         progress bar. */
       .wizard-head {
         margin-bottom: var(--space-lg);
         padding-bottom: var(--space-md);
@@ -121,7 +121,7 @@
       .card-title {
         font-family: var(--font-display);
         font-size: var(--text-2xl);
-        font-weight: 620;
+        font-weight: 700;
         letter-spacing: var(--tracking-display);
         color: var(--color-ink-display);
         margin-bottom: var(--space-2xs);
@@ -169,7 +169,7 @@
       }
       .plan-name {
         font-family: var(--font-display);
-        font-weight: 620;
+        font-weight: 700;
         font-size: var(--text-md);
         color: var(--color-ink-display);
         letter-spacing: -0.01em;
@@ -195,7 +195,7 @@
         background: var(--color-card);
       }
 
-      /* ── Duration / meals (squared radio toggles) ────────────────── */
+      /* ── Duration / meals (pill radio toggles) ──────────────────── */
       .radio-group {
         display: flex;
         flex-wrap: wrap;
@@ -215,7 +215,7 @@
         justify-content: center;
         padding: 10px 18px;
         border: 1px solid var(--color-rule-strong);
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-pill);
         font-weight: 600;
         font-size: var(--text-sm);
         color: var(--color-ink);
