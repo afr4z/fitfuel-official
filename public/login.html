@@ -18,60 +18,46 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* Page background — matches the hero gradient used on the homepage */
+      /* Hallmark · genre: editorial · macrostructure: 05 Workbench ·
+         design-system: design.md · designed-as-app
+         ─────────────────────────────────────────────────────────────────
+         An app page carries function, not theatre. One measure, labelled
+         fields, hairline rules, no gradient, no glass, no entrance
+         animation. The block is anchored to the left measure rather than
+         floated in the centre of the viewport — the asymmetry is the point. */
       .login-page {
-        min-height: calc(100vh - 64px);
+        min-height: calc(100vh - 135px);
+        padding: var(--space-3xl) var(--page-gutter);
+        padding-inline: max(var(--page-gutter), calc((100% - 1120px) / 2));
         display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 16px 56px;
-        background: linear-gradient(
-          160deg,
-          var(--green-50) 0%,
-          #fff 40%,
-          var(--green-100) 100%
-        );
+        align-items: flex-start;
+        background: var(--color-paper);
       }
-
-      /* Glassy card — same treatment as the payment-success card */
       .auth-card {
         width: 100%;
-        max-width: 440px;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(16px) saturate(1.4);
-        -webkit-backdrop-filter: blur(16px) saturate(1.4);
-        border: 1px solid rgba(229, 231, 235, 0.6);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
-        padding: 40px 36px;
-        animation: card-in 0.4s var(--ease-out) both;
+        max-width: 420px;
+        background: transparent;
+        border: 0;
+        border-top: 2px solid var(--color-ink-display);
+        border-radius: 0;
+        padding: var(--space-xl) 0 0;
       }
-      @keyframes card-in {
-        from {
-          opacity: 0;
-          transform: translateY(12px) scale(0.98);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-      }
-
       .auth-title {
         font-family: var(--font-display);
-        font-size: 1.7rem;
+        font-size: var(--text-3xl);
         font-weight: 800;
         font-stretch: 103%;
-        color: var(--green-900);
-        text-align: center;
-        margin-bottom: 8px;
-        letter-spacing: -0.02em;
+        color: var(--color-ink-display);
+        text-align: left;
+        margin-bottom: var(--space-2xs);
+        letter-spacing: var(--tracking-display);
       }
       .auth-subtitle {
-        text-align: center;
-        color: var(--gray-500);
-        margin-bottom: 28px;
-        font-size: 0.95rem;
+        text-align: left;
+        color: var(--color-muted);
+        margin-bottom: var(--space-xl);
+        font-size: var(--text-md);
+        max-width: 38ch;
       }
 
       .step {
@@ -79,102 +65,93 @@
       }
       .step.active {
         display: block;
-        animation: fadeIn 0.3s var(--ease-out);
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
       }
 
       .form-group {
-        margin-bottom: 20px;
+        margin-bottom: var(--space-md);
       }
       .form-label {
         display: block;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 8px;
+        font-size: var(--text-xs);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-muted);
+        margin-bottom: var(--space-2xs);
       }
       .form-input,
       .otp-input {
         width: 100%;
-        padding: 14px 16px;
-        font-size: 1rem;
+        padding: 13px var(--space-md);
+        font-size: var(--text-md);
         font-family: inherit;
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius-md);
-        background: #fff;
-        color: var(--gray-900);
-        transition: all 0.15s var(--ease-base);
+        border: 1px solid var(--color-rule-strong);
+        border-radius: var(--radius-sm);
+        background: var(--color-paper);
+        color: var(--color-ink);
+        transition:
+          border-color var(--dur-short) var(--ease-base),
+          background var(--dur-short) var(--ease-base);
       }
-      .form-input:focus,
-      .otp-input:focus {
-        outline: none;
-        border-color: var(--green-500);
-        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+      /* The focus ring is the global one from main.css — no coloured glow. */
+      .form-input:focus-visible,
+      .otp-input:focus-visible {
+        border-color: var(--color-focus);
       }
       .form-input::placeholder {
-        color: var(--gray-400);
+        color: var(--color-faint);
       }
       .form-input.error {
-        border-color: var(--red-500);
+        border-color: var(--color-danger);
       }
       .otp-input {
         letter-spacing: 0.5rem;
         text-align: center;
-        font-size: 1.25rem;
+        font-size: var(--text-xl);
         font-weight: 600;
       }
       .form-error {
-        font-size: 0.8rem;
-        color: var(--red-500);
-        margin-top: 6px;
+        font-size: var(--text-xs);
+        color: var(--color-danger);
+        margin-top: var(--space-2xs);
         display: none;
       }
       .form-error.visible {
         display: block;
       }
 
-      /* Full-width pill CTAs — matches the site's main button style */
       .auth-actions .btn-primary,
       .auth-actions .btn-secondary {
         width: 100%;
         justify-content: center;
       }
       .btn-primary:disabled {
-        opacity: 0.6;
+        opacity: 0.55;
         cursor: not-allowed;
         transform: none;
       }
 
       .error-banner {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: var(--red-600);
-        padding: 12px 16px;
-        border-radius: var(--radius-md);
-        margin-bottom: 20px;
-        font-size: 0.85rem;
+        background: var(--color-danger-tint);
+        border: 1px solid var(--color-danger);
+        color: var(--color-danger);
+        padding: var(--space-sm) var(--space-md);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-md);
+        font-size: var(--text-sm);
         display: none;
       }
       .error-banner.visible {
         display: block;
       }
       .success-banner {
-        background: var(--green-50);
-        border: 1px solid var(--green-100);
-        color: var(--green-700);
-        padding: 12px 16px;
-        border-radius: var(--radius-md);
-        margin-bottom: 20px;
-        font-size: 0.85rem;
+        background: var(--color-brand-tint);
+        border: 1px solid var(--color-brand);
+        color: var(--color-ink);
+        padding: var(--space-sm) var(--space-md);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-md);
+        font-size: var(--text-sm);
         display: none;
       }
       .success-banner.visible {
@@ -182,15 +159,15 @@
       }
 
       .resend {
-        text-align: center;
-        margin-top: 16px;
-        font-size: 0.85rem;
-        color: var(--gray-500);
+        text-align: left;
+        margin-top: var(--space-md);
+        font-size: var(--text-sm);
+        color: var(--color-muted);
       }
       .resend button {
         background: none;
         border: none;
-        color: var(--green-600);
+        color: var(--color-accent);
         font-weight: 600;
         cursor: pointer;
         font-size: inherit;
@@ -198,24 +175,26 @@
         padding: 0;
       }
       .resend button:disabled {
-        color: var(--gray-400);
+        color: var(--color-faint);
         cursor: not-allowed;
       }
 
+      /* A spinner is a real state, not decoration, so it stays — but it
+         inherits the button's own ink rather than hard-coded white. */
       .loading {
         display: none;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: var(--space-xs);
       }
       .loading.visible {
         display: flex;
       }
       .spinner {
-        width: 18px;
-        height: 18px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top-color: #fff;
+        width: 16px;
+        height: 16px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
@@ -228,34 +207,34 @@
       .auth-security {
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 24px;
-        font-size: 0.8rem;
-        color: var(--gray-500);
+        gap: var(--space-2xs);
+        margin-top: var(--space-lg);
+        padding-top: var(--space-md);
+        border-top: 1px solid var(--color-rule);
+        font-size: var(--text-xs);
+        color: var(--color-muted);
       }
       .auth-security svg {
-        color: var(--green-500);
+        color: var(--color-accent);
         flex-shrink: 0;
       }
       .auth-footer {
-        text-align: center;
-        margin-top: 16px;
-        font-size: 0.78rem;
-        color: var(--gray-400);
+        text-align: left;
+        margin-top: var(--space-sm);
+        font-size: var(--text-xs);
+        color: var(--color-faint);
       }
       .auth-footer a {
-        color: var(--green-600);
+        color: var(--color-accent);
         font-weight: 500;
       }
 
       @media (max-width: 480px) {
         .login-page {
-          padding: 24px 16px 40px;
+          padding: var(--space-2xl) var(--page-gutter);
         }
         .auth-card {
-          padding: 32px 24px;
-          border-radius: var(--radius-md);
+          padding-top: var(--space-lg);
         }
       }
     </style>

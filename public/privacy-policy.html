@@ -35,75 +35,73 @@
         padding: 0;
       }
       body {
-        min-height: 100vh;
-        background: linear-gradient(180deg, var(--green-50) 0%, #fff 100%);
-        font-family: var(--font);
-        color: var(--gray-800);
+        background: var(--color-paper);
+        font-family: var(--font-body);
+        color: var(--color-ink);
         line-height: 1.7;
         -webkit-font-smoothing: antialiased;
       }
+      /* Long Document: one measure, left-aligned, no card chrome. The
+         policy used to float inside a centred, shadowed, 20px-radius
+         panel over a gradient — a document is not a modal. */
       .container {
-        max-width: 760px;
+        max-width: 68ch;
         width: 100%;
-        margin: 0 auto;
-        padding: 32px 16px 64px;
+        padding: var(--space-3xl) var(--page-gutter);
       }
       .header {
-        background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-        padding: 44px 40px 36px;
-        margin-bottom: 24px;
-        border: 1px solid rgba(229, 231, 235, 0.6);
-        text-align: center;
+        background: transparent;
+        padding: 0 0 var(--space-xl);
+        margin-bottom: var(--space-2xl);
+        border-bottom: 2px solid var(--color-ink-display);
+        text-align: left;
       }
       .header h1 {
-        font-size: 2rem;
+        font-family: var(--font-display);
+        font-size: var(--text-3xl);
         font-weight: 800;
-        color: var(--green-800);
-        margin-bottom: 8px;
-        letter-spacing: -0.02em;
+        color: var(--color-ink-display);
+        margin-bottom: var(--space-2xs);
+        letter-spacing: var(--tracking-display);
       }
       .header .meta {
-        font-size: 0.85rem;
-        color: var(--gray-500);
+        font-size: var(--text-sm);
+        color: var(--color-muted);
       }
       .header .meta strong {
         color: var(--gray-600);
       }
       .content {
-        background: #fff;
-        border-radius: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-        padding: 44px 40px;
-        border: 1px solid rgba(229, 231, 235, 0.6);
+        background: transparent;
+        padding: 0;
       }
       .content h2 {
-        font-size: 1.15rem;
+        font-family: var(--font-display);
+        font-size: var(--text-xl);
         font-weight: 700;
-        color: var(--green-800);
-        margin-top: 36px;
-        margin-bottom: 12px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--green-100);
+        color: var(--color-ink-display);
+        margin-top: var(--space-xl);
+        margin-bottom: var(--space-sm);
+        padding-bottom: var(--space-2xs);
+        border-bottom: 1px solid var(--color-rule);
       }
       .content h2:first-child {
         margin-top: 0;
         padding-top: 0;
       }
       .content p {
-        font-size: 0.95rem;
-        color: var(--gray-600);
-        margin-bottom: 14px;
+        font-size: var(--text-md);
+        color: var(--color-muted);
+        margin-bottom: var(--space-sm);
       }
       .content ul {
         margin: 0 0 16px 0;
         list-style: none;
       }
       .content li {
-        font-size: 0.92rem;
-        color: var(--gray-600);
-        margin-bottom: 10px;
+        font-size: var(--text-md);
+        color: var(--color-muted);
+        margin-bottom: var(--space-xs);
         padding-left: 26px;
         position: relative;
       }
@@ -112,46 +110,47 @@
         position: absolute;
         left: 6px;
         top: 9px;
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-        background: var(--green-400);
+        background: var(--color-accent);
       }
       .content a {
-        color: var(--green-600);
+        color: var(--color-accent);
         text-decoration: underline;
         text-underline-offset: 2px;
-        transition: color 0.2s var(--ease-base);
+        transition: color var(--dur-short) var(--ease-base);
       }
       .content a:hover {
-        color: var(--green-500);
+        color: var(--color-ink);
       }
       .content strong {
-        color: var(--gray-800);
+        color: var(--color-ink);
       }
       .contact-box {
-        background: var(--green-50);
-        border: 1px solid var(--green-100);
-        border-radius: 14px;
-        padding: 20px 24px;
-        margin-top: 8px;
+        background: var(--color-brand-tint);
+        border: 1px solid var(--color-rule);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+        margin-top: var(--space-2xs);
       }
+      /* Ft2 · Inline-rule: the colophon closes the document. */
       .brand {
-        text-align: center;
-        margin-top: 40px;
-        font-size: 0.8rem;
-        color: var(--gray-400);
+        text-align: left;
+        margin-top: var(--space-2xl);
+        padding-top: var(--space-md);
+        border-top: 1px solid var(--color-rule);
+        font-size: var(--text-xs);
+        color: var(--color-faint);
         font-weight: 500;
       }
       .brand strong {
-        color: var(--green-800);
+        color: var(--color-ink);
       }
 
       @media (max-width: 480px) {
-        .header,
-        .content {
-          padding: 32px 24px;
-          border-radius: 16px;
+        .container {
+          padding: var(--space-2xl) var(--page-gutter);
         }
       }
     </style>

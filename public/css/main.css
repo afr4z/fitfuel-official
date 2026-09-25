@@ -1,7 +1,15 @@
-/* ── Type ──────────────────────────────────────────────────────────
-   Self-hosted variable fonts (latin subset). Archivo carries display
-   type and the wordmark; Inter carries UI and body. Two files, no
-   third-party request, and the 6-weight Google request is gone. */
+/* Hallmark · genre: editorial · macrostructure: per-family (design.md) ·
+   design-system: design.md · designed-as-app
+   ────────────────────────────────────────────────────────────────────────
+   The token source of truth for FitFuel. Every colour below is measured
+   from board.jpg and expressed in OKLCH; every page references these names
+   and never a raw value.
+
+   The brand palette is LOCKED (it is a given, not a preference). What this
+   overhaul changes is the *system* around it: neutrals tinted to the anchor
+   hue, the accent given a real budget, spacing put on a named scale, and
+   the accent/fill contract made explicit so the two stop swapping jobs. */
+
 @font-face {
   font-family: "Archivo";
   src: url("/fonts/archivo-latin-var.woff2") format("woff2");
@@ -17,58 +25,152 @@
 }
 
 :root {
-  /* Brand palette — realigned to board.jpg. The poster's green is a
-     bright produce green, not the teal-leaning forest the site had.
-     Two greens with distinct jobs, because the bright one cannot carry
-     white button text at AA:
-       --leaf       the poster green — graphics, tints, rules, wordmark
-       --green-500  deep leaf — filled buttons with white labels (5.2:1) */
-  --leaf: #2f9e44;
-  --green-50: #f2f9f3;
-  --green-100: #e2f2e5;
-  --green-200: #c4e5cb;
-  --green-300: #96d1a3;
-  --green-400: #5ab373;
-  --green-500: #1a7d36;
-  --green-600: #166b2d;
-  --green-700: #145c27;
-  --green-800: #123f22;
-  --green-900: #0d2f1a;
-  --orange-50: #fef3ec;
-  --orange-100: #fde2cf;
-  --orange-400: #f59a3d;
-  --orange-500: #ee701c;
-  --orange-600: #d96217;
-  --orange-700: #b84e0f;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
-  --gray-700: #374151;
-  --gray-800: #1f2937;
-  --gray-900: #111827;
-  --amber-400: #fbbf24;
-  --amber-500: #f59e0b;
-  --red-500: #ef4444;
-  --red-600: #dc2626;
-  --radius-full: 9999px;
-  --radius-lg: 16px;
-  --radius-md: 10px;
-  --radius-sm: 8px;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 40px rgba(34, 197, 94, 0.25);
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+  /* ── Paper & ink ────────────────────────────────────────────────
+     Paper is the existing green-50 measured in OKLCH: a tinted white,
+     never #fff (editorial bans pure extremes). Ink is a deep, faintly
+     green-black rather than a flat grey. */
+  --color-paper: oklch(97.5% 0.011 150);
+  --color-paper-2: oklch(94.6% 0.014 150);
+  --color-paper-3: oklch(91% 0.016 150);
+  --color-rule: oklch(86% 0.01 150);
+  --color-rule-strong: oklch(74% 0.012 150);
+  --color-ink: oklch(22% 0.012 152);
+  --color-ink-display: oklch(16% 0.01 152);
+  --color-muted: oklch(46% 0.01 150);
+  --color-faint: oklch(58% 0.009 150);
+
+  /* ── The accent, with a budget ──────────────────────────────────
+     Orange is the accent and is capped at 3% of any viewport. It marks
+     the wordmark, kickers, prices, step numerals and the active nav
+     item — that is the entire allowance. The text-safe value clears
+     4.5:1 on paper; the display value is for type >= 24px only. */
+  --color-accent: oklch(55.4% 0.153 44.8);
+  --color-accent-display: oklch(63.4% 0.168 46.4);
+  --color-accent-tint: oklch(95% 0.03 45);
+
+  /* ── Brand green: structural, not accent ────────────────────────
+     Green may hold area only as the poster's dark ground on the
+     closing band. It is never a decorative fill, and it never carries
+     the white button label at the bright leaf value. */
+  --color-brand: oklch(51.9% 0.138 148);
+  --color-brand-deep: oklch(27.4% 0.056 153);
+  --color-brand-tint: oklch(94.6% 0.024 151);
+  --color-brand-tint-2: oklch(89% 0.045 151);
+  --color-brand-on-deep: oklch(88% 0.035 150);
+
+  --color-focus: oklch(46.4% 0.124 148);
+  --color-danger: oklch(48% 0.17 27);
+  --color-danger-tint: oklch(95% 0.03 27);
+  --color-success: oklch(45% 0.11 150);
+  --color-warn: oklch(58% 0.12 75);
+
+  /* ── Type ────────────────────────────────────────────────────────
+     Archivo carries display and the mark; Inter carries UI and body.
+     Two self-hosted latin-subset files, no third-party request. */
   --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  /* The poster's own device: a letterspaced caps line. */
-  --tracking-wide: 0.18em;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  --text-3xl: clamp(1.875rem, 1.4rem + 2.2vw, 2.75rem);
+  /* Sized for the hero column, which is deliberately narrower than the
+     measure. A larger ceiling pushed the headline to four lines. */
+  --text-display: clamp(2.5rem, 1.4rem + 4.4vw, 3.5rem);
+  --tracking-caps: 0.18em;
+  --tracking-display: -0.02em;
+
+  /* ── Space: 4pt scale, named by role ──────────────────────────────
+     Ten steps. Pages reference these names; raw px is a review failure. */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+  --page-gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --measure: 68ch;
+
+  /* ── Motion: quiet ───────────────────────────────────────────────
+     One orchestrated entrance, no bounce, no overshoot, anywhere. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-short: 180ms;
+  --dur-med: 280ms;
+
+  /* ── Depth: weight and scale, not shadow ────────────────────────
+     One whisper, one hairline. Never stacked, never a coloured glow. */
+  --shadow-whisper: 0 1px 2px oklch(20% 0.01 150 / 0.05);
+  --shadow-hairline: 0 0 0 1px oklch(30% 0.01 150 / 0.06);
+  /* The one place alpha defines a colour: the skeleton loading sheen, which
+     has to be translucent to read as a sweep across the placeholder. */
+  --color-skeleton-sheen: oklch(100% 0 0 / 0.75);
+  --rule-hair: 1px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+
+  /* ── Depth order: six named levels, never ad-hoc numbers ────────── */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* ── Legacy aliases ─────────────────────────────────────────────
+     Migration shim for pages not yet moved to the names above. Each one
+     is an alias onto the new system, never a parallel ramp. Delete a
+     block as its last consumer is migrated. */
+  --leaf: var(--color-brand-tint-2);
+  --green-50: var(--color-paper);
+  --green-100: var(--color-brand-tint);
+  --green-200: var(--color-brand-tint-2);
+  --green-300: oklch(82% 0.06 150);
+  --green-400: oklch(70% 0.09 149);
+  --green-500: var(--color-brand);
+  --green-600: var(--color-focus);
+  --green-700: oklch(41.9% 0.109 148);
+  --green-800: oklch(32.8% 0.071 152);
+  --green-900: var(--color-brand-deep);
+  --orange-50: var(--color-accent-tint);
+  --orange-100: oklch(90% 0.07 45);
+  --orange-400: oklch(76.4% 0.15 62);
+  --orange-500: var(--color-accent);
+  --orange-600: var(--color-accent-display);
+  --orange-700: oklch(55.4% 0.153 44.8);
+  --gray-50: var(--color-paper);
+  --gray-100: var(--color-paper-2);
+  --gray-200: var(--color-rule);
+  --gray-300: oklch(78% 0.01 150);
+  --gray-400: var(--color-faint);
+  --gray-500: var(--color-muted);
+  --gray-600: oklch(38% 0.011 151);
+  --gray-700: var(--color-ink);
+  --gray-800: var(--color-ink);
+  --gray-900: var(--color-ink-display);
+  --amber-400: var(--color-warn);
+  --amber-500: var(--color-warn);
+  --red-500: var(--color-danger);
+  --red-600: var(--color-danger);
+  --radius-full: var(--radius-pill);
+  --shadow-sm: var(--shadow-whisper);
+  --shadow-md: var(--shadow-whisper);
+  --shadow-lg: var(--shadow-hairline);
+  --shadow-glow: none;
+  --font: var(--font-body);
+  --tracking-wide: var(--tracking-caps);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -76,7 +178,9 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -87,21 +191,23 @@
   margin: 0;
   padding: 0;
 }
-/* clip (not hidden): clips horizontal overflow like hidden, but does NOT
-   create a scroll container on the root — so position: sticky on the nav
-   anchors to the viewport instead of a never-scrolling html element.
-   (hidden breaks sticky on desktop engines; clip fixes it everywhere.) */
+
+/* `clip`, never `hidden` — hidden creates a scroll container on the root,
+   which breaks position:sticky on the nav. Both elements carry it: html
+   for the sticky anchor, body as the older-Safari fallback. */
 html {
   scroll-behavior: smooth;
   overflow-x: clip;
 }
 body {
-  font-family: var(--font);
-  color: var(--gray-800);
-  background: #fff;
+  overflow-x: clip;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-paper);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
+
 a {
   color: inherit;
   text-decoration: none;
@@ -111,70 +217,83 @@ img {
   display: block;
 }
 
-/* ── Wordmark ──────────────────────────────────────────────────────
-   The FitFuel wordmark is the one piece of brand identity that must
-   never drift between surfaces. Every occurrence is:
+/* One focus treatment for the whole app, promoted out of the nav so the
+   hero, the plan links and the footer stop falling back to the UA ring. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* Display type wraps inside long words — a long plan name must never
+   push the layout at 320px. */
+:where(h1, h2, h3, h4, .wordmark) {
+  overflow-wrap: anywhere;
+  min-width: 0;
+  font-style: normal;
+}
+
+/* ── Wordmark ───────────────────────────────────────────────────────
+   The one piece of brand identity that must never drift between
+   surfaces. Every occurrence is exactly:
 
      Fit<span class="wordmark-accent">Fuel</span> Nutrition
 
-   The accent (orange) + the 6px Fit|Fuel gap live here, once. The
-   surrounding colour is contextual — green-800 on light surfaces,
-   green-300 on the dark footer — so it is deliberately NOT set here. */
+   The orange accent and the 6px Fit|Fuel gap live here, once. */
 .wordmark-accent {
-  color: var(--orange-500);
+  color: var(--color-accent-display);
   margin-right: 6px;
 }
-/* The mark is a wide, heavy grotesque in the poster — not the UI sans.
-   Archivo's width axis reproduces that. Every surface that renders the
-   wordmark picks it up here, so the mark is set one way everywhere. */
 .nav-brand,
 .footer-brand,
 .wordmark {
   font-family: var(--font-display);
   font-stretch: 108%;
+  font-weight: 800;
   letter-spacing: -0.01em;
+  color: inherit;
 }
 
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--green-500);
-  color: #fff;
-  padding: 15px 34px;
-  border-radius: var(--radius-full);
-  font-size: 1.05rem;
-  font-weight: 700;
-  transition: all 0.3s var(--ease-base);
-  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  border: none;
-}
-.btn-primary:hover {
-  background: var(--green-600);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
-}
+/* ── CTA voice ──────────────────────────────────────────────────────
+   Solid brand pill, paper label, no glow and no gradient. Hover steps
+   one shade darker and nothing else — colour and rules only, never a
+   translate or a scale. One definition, shared by every page; the
+   homepage's divergent copy was deleted rather than kept in sync. */
+.btn-primary,
 .btn-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(8px);
-  color: var(--green-700);
-  padding: 15px 34px;
-  border-radius: var(--radius-full);
-  font-size: 1.05rem;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 44px;
+  padding: 13px var(--space-lg);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
   font-weight: 600;
-  border: 2px solid var(--green-200);
-  transition: all 0.3s var(--ease-base);
+  line-height: 1.2;
   cursor: pointer;
+  text-align: center;
+}
+.btn-primary {
+  background: var(--color-brand);
+  color: var(--color-paper);
+  border: 1px solid var(--color-brand);
+}
+.btn-primary:hover {
+  background: var(--color-focus);
+  border-color: var(--color-focus);
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--color-brand);
+  border: 1px solid var(--color-rule-strong);
 }
 .btn-secondary:hover {
-  border-color: var(--green-400);
-  background: #fff;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  border-color: var(--color-brand);
+  background: var(--color-brand-tint);
+}
+.btn-primary:active,
+.btn-secondary:active {
+  transform: translateY(1px);
 }

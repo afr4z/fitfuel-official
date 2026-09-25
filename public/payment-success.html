@@ -18,195 +18,119 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* brand palette lives in /css/main.css (single source of truth) */
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.01ms !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+      /* Hallmark · genre: editorial · macrostructure: 05 Workbench ·
+         design-system: design.md · designed-as-app
+         ─────────────────────────────────────────────────────────────────
+         This page used to set body{overflow:hidden} behind two floating
+         gradient orbs, a blurred glass card, a gradient check disc with a
+         green glow, and a pop animation with overshoot. All of it is a
+         named tell, and the overflow:hidden trapped any content that did
+         not fit. Flat paper, a real confirmation mark, no entrance
+         choreography — the message is the design. */
       body {
-        min-height: 100vh;
-        background: linear-gradient(
-          160deg,
-          var(--green-50) 0%,
-          #fff 50%,
-          var(--green-100) 100%
-        );
-        font-family: var(--font);
-        color: var(--gray-800);
-        overflow: hidden;
-        position: relative;
+        background: var(--color-paper);
+        font-family: var(--font-body);
+        color: var(--color-ink);
       }
-      body::before,
-      body::after {
-        content: "";
-        position: absolute;
-        border-radius: 50%;
-        animation: float-orb 18s ease-in-out infinite;
-      }
-      body::before {
-        top: -150px;
-        right: -150px;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(
-          circle,
-          rgba(34, 197, 94, 0.12) 0%,
-          transparent 70%
-        );
-      }
-      body::after {
-        bottom: -120px;
-        left: -120px;
-        width: 350px;
-        height: 350px;
-        background: radial-gradient(
-          circle,
-          rgba(74, 222, 128, 0.1) 0%,
-          transparent 70%
-        );
-        animation-delay: -9s;
-      }
-      @keyframes float-orb {
-        0%,
-        100% {
-          transform: translate(0, 0) scale(1);
-        }
-        50% {
-          transform: translate(20px, -20px) scale(1.05);
-        }
+      .success-page {
+        min-height: calc(100vh - 135px);
+        padding: var(--space-3xl) var(--page-gutter);
+        padding-inline: max(var(--page-gutter), calc((100% - 1120px) / 2));
       }
       .card {
-        position: relative;
-        z-index: 1;
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(16px) saturate(1.4);
-        -webkit-backdrop-filter: blur(16px) saturate(1.4);
-        border-radius: 24px;
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
-        max-width: 440px;
-        width: 100%;
-        margin: 64px auto;
-        padding: 56px 40px;
-        text-align: center;
-        border: 1px solid rgba(229, 231, 235, 0.6);
-        animation: card-in 0.6s var(--ease-out) 0.2s both;
-      }
-      @keyframes card-in {
-        from {
-          opacity: 0;
-          transform: translateY(24px) scale(0.98);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
+        max-width: 460px;
+        border-top: 2px solid var(--color-ink-display);
+        padding-top: var(--space-xl);
       }
       .check-wrap {
-        width: 84px;
-        height: 84px;
-        margin: 0 auto 28px;
-        background: linear-gradient(135deg, var(--green-500), var(--green-600));
+        width: 44px;
+        height: 44px;
+        margin-bottom: var(--space-lg);
+        background: var(--color-brand);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 8px 32px rgba(34, 197, 94, 0.35);
-        animation: pop 0.5s var(--ease-out) 0.1s both;
-      }
-      @keyframes pop {
-        0% {
-          transform: scale(0);
-        }
-        70% {
-          transform: scale(1.15);
-        }
-        100% {
-          transform: scale(1);
-        }
       }
       .check-wrap svg {
-        width: 44px;
-        height: 44px;
-        color: #fff;
+        width: 24px;
+        height: 24px;
+        color: var(--color-paper);
       }
       h1 {
-        font-size: 1.75rem;
+        font-family: var(--font-display);
+        font-size: var(--text-3xl);
         font-weight: 800;
-        color: var(--green-800);
-        margin-bottom: 12px;
-        letter-spacing: -0.02em;
+        color: var(--color-ink-display);
+        margin-bottom: var(--space-xs);
+        letter-spacing: var(--tracking-display);
       }
       .lead {
-        color: var(--gray-600);
-        font-size: 1rem;
+        color: var(--color-muted);
+        font-size: var(--text-lg);
         line-height: 1.6;
-        margin-bottom: 8px;
+        margin-bottom: var(--space-sm);
+        max-width: 46ch;
       }
       .lead strong {
-        color: var(--gray-800);
+        color: var(--color-ink);
       }
       .note {
-        margin-top: 28px;
-        background: var(--green-50);
-        border: 1px solid var(--green-100);
-        border-radius: 14px;
-        padding: 16px 20px;
-        color: var(--green-800);
-        font-size: 0.9rem;
+        margin-top: var(--space-lg);
+        background: var(--color-brand-tint);
+        border: 1px solid var(--color-rule);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+        color: var(--color-ink);
+        font-size: var(--text-sm);
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        gap: var(--space-sm);
         text-align: left;
       }
       .note svg {
         width: 20px;
         height: 20px;
         flex-shrink: 0;
-        color: var(--green-600);
+        color: var(--color-accent);
         margin-top: 2px;
       }
+      /* Block-level so each action takes its own line. As inline-flex they
+         ran together into one ambiguous row once the card went left-aligned. */
       .cta {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 8px;
-        margin-top: 32px;
-        color: var(--green-700);
-        font-size: 0.9rem;
+        gap: var(--space-xs);
+        margin-top: var(--space-lg);
+        color: var(--color-accent);
+        font-size: var(--text-sm);
         font-weight: 600;
-        transition: color 0.2s var(--ease-base);
+        transition: color var(--dur-short) var(--ease-base);
         text-decoration: none;
+        width: fit-content;
       }
       .cta:hover {
-        color: var(--green-500);
+        color: var(--color-ink);
       }
       .brand {
-        margin-top: 36px;
-        font-size: 0.8rem;
-        color: var(--gray-400);
+        margin-top: var(--space-xl);
+        padding-top: var(--space-md);
+        border-top: 1px solid var(--color-rule);
+        font-size: var(--text-xs);
+        color: var(--color-faint);
         font-weight: 500;
       }
       .brand strong {
-        color: var(--green-800);
+        color: var(--color-ink);
       }
       .spinner {
-        width: 20px;
-        height: 20px;
-        border: 2px solid var(--gray-200);
-        border-top-color: var(--green-500);
+        width: 18px;
+        height: 18px;
+        border: 2px solid var(--color-rule);
+        border-top-color: var(--color-brand);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
-        margin: 0 auto 16px;
+        margin: 0 0 var(--space-md);
       }
       @keyframes spin {
         to {
@@ -214,17 +138,14 @@
         }
       }
       .redirecting {
-        color: var(--gray-500);
-        font-size: 0.9rem;
+        color: var(--color-muted);
+        font-size: var(--text-sm);
+        margin-top: var(--space-lg);
       }
 
       @media (max-width: 480px) {
-        .card {
-          width: calc(100% - 32px);
-          max-width: 440px;
-          margin: 40px auto;
-          padding: 44px 28px;
-          border-radius: 20px;
+        .success-page {
+          padding: var(--space-2xl) var(--page-gutter);
         }
       }
     </style>
@@ -245,7 +166,8 @@
   <body>
     <div id="nav-placeholder"></div>
 
-    <div class="card" id="card">
+    <div class="success-page">
+      <div class="card" id="card">
       <div class="check-wrap">
         <svg
           viewBox="0 0 24 24"
@@ -330,6 +252,7 @@
         <strong>Fit<span class="wordmark-accent">Fuel</span></strong> Nutrition
         &mdash; Fresh meals, every day
       </p>
+      </div>
     </div>
 
     <script>

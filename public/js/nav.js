@@ -27,29 +27,36 @@
         </svg>
       </a>`;
 
+  // N6 · Newspaper masthead. The mark sits on the centre axis and the real
+  // entity attribution takes the letterspaced line above it — the one place
+  // in a masthead where an attribution belongs. The bar beneath carries the
+  // destinations, the auth slot and the CTA.
   placeholder.innerHTML = `
     <nav class="nav" id="nav" aria-label="Primary">
-      <div class="nav-inner">
-        <a href="/" class="nav-brand">Fit<span class="wordmark-accent">Fuel</span> Nutrition<span class="nav-sub">by Jadpod Fitness Pvt Ltd</span></a>
+      <div class="mast">
+        <p class="mast-attrib">by Jadpod Fitness Pvt Ltd</p>
+        <a href="/" class="mast-name">Fit<span class="wordmark-accent">Fuel</span> Nutrition</a>
+      </div>
+      <div class="mast-bar">
         <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
-        <div class="nav-links" id="nav-links">
-          <a href="/#how-it-works" class="nav-link">How It Works</a>
-          <a href="/#plans" class="nav-link">Plans</a>
-          <a href="/#why" class="nav-link">Why FitFuel</a>
-          <div class="nav-actions">
-            <div id="nav-auth" class="nav-auth"></div>
-            ${cta}
-          </div>
+        <ul class="mast-links" id="nav-links">
+          <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="/#plans" class="nav-link">Plans</a></li>
+          <li><a href="/#why" class="nav-link">Why FitFuel</a></li>
+        </ul>
+        <div class="nav-actions">
+          <div id="nav-auth" class="nav-auth"></div>
+          ${cta}
         </div>
       </div>
+      <hr class="mast-rule" aria-hidden="true" />
     </nav>
   `;
 
   const burger = document.getElementById("nav-burger");
   const links = document.getElementById("nav-links");
-  const navEl = document.getElementById("nav");
 
   // ── Mobile menu ──────────────────────────────────────────────────────
   function setMenu(open) {
@@ -84,15 +91,6 @@
   if (mq.addEventListener) mq.addEventListener("change", onViewport);
   else mq.addListener(onViewport); // legacy Safari
 
-  // ── Sticky scroll effect (single source of truth) ───────────────────
-  window.addEventListener(
-    "scroll",
-    () => {
-      navEl?.classList.toggle("scrolled", window.scrollY > 20);
-    },
-    { passive: true },
-  );
-
   // ── Account menu ──────────────────────────────────────────────────
   // Disclosure pattern (W3C APG "disclosure navigation"), not role="menu":
   // these are links to pages, so they stay plain links in a list.
@@ -119,7 +117,6 @@
       </button>
       <div class="nav-account-menu" id="nav-account-menu" hidden>
         <a href="/dashboard" class="nav-account-item"${current(isDashboard)}>My Orders</a>
-        <a href="/single-meals" class="nav-account-item">Single Meals</a>
         <hr class="nav-account-sep" />
         <button type="button" class="nav-account-item nav-account-logout" id="btn-logout">Logout</button>
       </div>

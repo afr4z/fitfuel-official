@@ -1,204 +1,199 @@
 /* FitFuel Nutrition — shared auth-aware nav (single source of truth)
-Load with /js/nav.js on any page:
-  <link rel="stylesheet" href="/css/nav.css" />
-  <div id="nav-placeholder"></div>
-  <script src="/js/nav.js" defer></script>
-nav.js injects markup using exactly the classes below — keep them in sync.
-*/
+ *
+ * Hallmark archetype: N6 · Newspaper masthead.
+ * Rotation rationale: the previous bar was wordmark-left / links-right /
+ * CTA-right / sticky / blurred / hairline-bottom — the canonical AI nav
+ * (audit critical #1). A masthead puts the wordmark on the page's centre
+ * axis, moves the real entity attribution into the letterspaced line where
+ * a masthead belongs, and closes on a double rule instead of a hairline.
+ *
+ * It is deliberately NOT sticky and has NO backdrop blur. Both were tells in
+ * their own right (a broadsheet masthead scrolls away; a frosted bar is
+ * glassmorphism, which the editorial genre bans outright). The CTA is
+ * repeated in the hero and the closing band, so nothing is lost.
+ *
+ * Load with /js/nav.js on any page:
+ *   <link rel="stylesheet" href="/css/nav.css" />
+ *   <div id="nav-placeholder"></div>
+ *   <script src="/js/nav.js" defer></script>
+ * nav.js injects markup using exactly the classes below — keep them in sync.
+ */
 
-/* Unwrap the injection point so .nav's parent is effectively <body> —
-   otherwise the placeholder is exactly nav-height tall and gives
-   position: sticky zero range to travel (nav would scroll away). */
+/* Unwrap the injection point so .nav's parent is effectively <body>. */
 #nav-placeholder {
   display: contents;
 }
 
 /* ── Shell ─────────────────────────────────────────────────────────── */
 .nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border-bottom: 1px solid rgba(229, 231, 235, 0.6);
-  transition:
-    background 0.3s var(--ease-base, ease),
-    box-shadow 0.3s var(--ease-base, ease);
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
-.nav.scrolled {
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
-}
-.nav-inner {
+.mast {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 14px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  padding: var(--space-md) var(--page-gutter) 0;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2xs);
+  text-align: center;
 }
 
-/* One visible keyboard ring for every nav control */
-.nav :focus-visible {
-  outline: 2px solid var(--green-500, #008c46);
-  outline-offset: 3px;
-}
-
-/* ── Brand ─────────────────────────────────────────────────────────── */
-.nav-brand {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--green-800, #166534);
-  letter-spacing: -0.02em;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  white-space: nowrap;
-}
-/* The Fit|Fuel accent colour and gap are defined once, as
-   .wordmark-accent in /css/main.css. Every page that loads this nav also
-   loads main.css — do not re-declare the accent here. */
-
-/* Entity attribution. It is UI text, not part of the mark, so it opts
-   out of the display face the brand inherits and sits a shade larger
-   than fine print. */
-.nav-sub {
-  font-family: var(--font, "Inter", sans-serif);
-  font-size: 0.7rem;
+/* The letterspaced line. This is real brand copy — the entity attribution —
+   set in the poster's own device rather than tacked on beside the mark. */
+.mast-attrib {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
   font-weight: 500;
-  color: var(--gray-500, #6b7280);
-  letter-spacing: 0.01em;
-  margin-left: 10px;
+  font-variant: small-caps;
+  letter-spacing: var(--tracking-caps);
+  text-transform: lowercase;
+  color: var(--color-muted);
+  margin: 0;
+}
+.mast-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-stretch: 108%;
+  font-size: clamp(1.625rem, 1.1rem + 2.1vw, 2.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--color-ink-display);
+  text-decoration: none;
   white-space: nowrap;
 }
 
-/* ── Links ─────────────────────────────────────────────────────────── */
-.nav-links {
+/* The double rule that closes the masthead: a hairline over a heavy ink
+   base. It is the page's strongest horizontal and replaces the old 1px
+   bottom border. */
+.mast-rule {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 3px solid var(--color-ink-display);
+  height: 3px;
+  margin: 0;
+  max-width: none;
+}
+
+/* ── The bar beneath the mark ─────────────────────────────────────── */
+.mast-bar {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-xs) var(--page-gutter);
   display: flex;
-  gap: 32px;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.mast-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 .nav-link {
-  font-size: 0.875rem;
+  display: inline-block;
+  font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--gray-600, #4b5563);
+  color: var(--color-muted);
   text-decoration: none;
   position: relative;
   white-space: nowrap;
-  transition: color 0.15s var(--ease-base, ease);
+  transition: color var(--dur-short) var(--ease-base);
 }
+/* scaleX, never width — a width transition reflows on every hover. */
 .nav-link::after {
   content: "";
   position: absolute;
   bottom: -4px;
   left: 0;
-  width: 0;
+  width: 100%;
   height: 2px;
-  background: var(--green-500, #008c46);
-  border-radius: 1px;
-  transition: width 0.3s var(--ease-base, ease);
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-med) var(--ease-out);
 }
 .nav-link:hover {
-  color: var(--green-800, #166534);
+  color: var(--color-ink);
 }
-.nav-link:hover::after {
-  width: 100%;
-}
-/* Current page: show the underline persistently, not just on hover */
-.nav-link[aria-current="page"] {
-  color: var(--green-800, #166534);
-}
+.nav-link:hover::after,
 .nav-link[aria-current="page"]::after {
-  width: 100%;
+  transform: scaleX(1);
+}
+.nav-link[aria-current="page"] {
+  color: var(--color-ink);
+  font-weight: 600;
 }
 
-/* ── Pills ────────────────────────────────────────────────────────────
-   Order Now, Login and the account chip are one control with three
-   fills. The box is declared once — padding, border, radius, weight,
-   line-height and transition all shared — so they cannot drift apart.
-   Only colour is per-control. */
+/* ── Pills ─────────────────────────────────────────────────────────────
+   The account chip and the CTA are one control in two fills. The box is
+   declared once so the two cannot drift; only colour differs. Kept because
+   the house style approved this outlined-chip treatment. */
 .nav-cta,
 .nav-account-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* A <button> otherwise inherits the UA's ButtonFace grey; the account
-     chip rendered as a grey lozenge until this was declared. */
+  gap: var(--space-xs);
   background: transparent;
   border: 1px solid transparent;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
-  line-height: 1.6;
-  padding: 9px 20px;
-  border-radius: var(--radius-full, 9999px);
+  line-height: 1.4;
+  min-height: 36px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background 0.2s var(--ease-base, ease),
-    border-color 0.2s var(--ease-base, ease),
-    color 0.2s var(--ease-base, ease);
+    background var(--dur-short) var(--ease-base),
+    border-color var(--dur-short) var(--ease-base),
+    color var(--dur-short) var(--ease-base);
 }
-
-/* Primary — the one filled control in the bar, and now the only call to
-   action in the header when signed out. No glow, no lift. */
 .nav-cta {
-  gap: 10px;
-  background: var(--green-500, #008c46);
-  color: #fff;
+  background: var(--color-brand);
+  color: var(--color-paper);
+  border-color: var(--color-brand);
+}
+.nav-cta:hover {
+  background: var(--color-focus);
+  border-color: var(--color-focus);
 }
 .nav-cta svg {
   flex-shrink: 0;
 }
-.nav-cta:hover {
-  background: var(--green-600, #00833f);
-}
 
-/* Account chip — orange outline, the lower-emphasis slot opposite the
-   filled CTA. Not grey: the greeting used to inherit --gray-500 and read
-   as a grey lozenge with one orange word in it. */
+/* Account chip — outlined, the lower-emphasis slot. */
 .nav-account-trigger {
-  border-color: var(--orange-600, #d96217);
-  color: var(--orange-700, #b84e0f);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 .nav-account-trigger:hover,
 .nav-account-trigger[aria-expanded="true"] {
-  background: var(--orange-50, #fef3ec);
-  border-color: var(--orange-700, #b84e0f);
-}
-
-/* Identity chip — same box and colour as Login; only the label and the
-   chevron differ. */
-.nav-account-trigger {
-  gap: 6px;
+  background: var(--color-accent-tint);
+  border-color: var(--color-accent);
 }
 .nav-account-name {
   color: inherit;
   font-weight: 700;
 }
 
-/* ── Auth area (right side) ────────────────────────────────────────── */
-/* Action group: account entry + CTA, tightened like a button pair
-   (Carbon: one high-emphasis + one lower-emphasis control). */
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-sm);
 }
-/* The auth slot is the last item in the bar — the right edge — and only
-   holds anything when signed in. Signed out it is empty, so the CTA simply
-   takes the corner. */
 .nav-auth {
   display: inline-flex;
   align-items: center;
-  gap: 16px;
-  order: 2;
 }
-/* Collapses the flex gap so an empty slot leaves no dead space */
 .nav-auth:empty {
   display: none;
 }
@@ -208,7 +203,7 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   position: relative;
 }
 .nav-account-chevron {
-  transition: transform 0.2s var(--ease-base, ease);
+  transition: transform var(--dur-short) var(--ease-base);
 }
 .nav-account-trigger[aria-expanded="true"] .nav-account-chevron {
   transform: rotate(180deg);
@@ -217,18 +212,17 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
-  z-index: 20;
+  z-index: var(--z-dropdown);
   min-width: 200px;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border: 1px solid var(--gray-200, #e5e7eb);
-  border-radius: var(--radius-md, 10px);
-  box-shadow: var(--shadow-md, 0 4px 20px rgba(0, 0, 0, 0.08));
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-hairline);
   padding: 6px;
-  animation: nav-menu-in 0.15s var(--ease-out, ease);
+  animation: nav-menu-in var(--dur-short) var(--ease-out);
 }
-/* The author `display: flex` above would otherwise defeat [hidden] */
 .nav-account-menu[hidden] {
   display: none;
 }
@@ -247,40 +241,38 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   width: 100%;
   padding: 9px 10px;
   border: none;
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-sm);
   background: none;
-  color: var(--gray-700, #374151);
+  color: var(--color-ink);
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   text-align: left;
   text-decoration: none;
   cursor: pointer;
   transition:
-    background 0.15s var(--ease-base, ease),
-    color 0.15s var(--ease-base, ease);
+    background var(--dur-short) var(--ease-base),
+    color var(--dur-short) var(--ease-base);
 }
-/* Menu items share the orange account identity — a green hover under an
-   orange chip reads as a mistake. */
-.nav-account-item:hover {
-  background: var(--orange-50, #fef3ec);
-  color: var(--orange-700, #b84e0f);
+.nav-account-item:hover,
+.nav-account-item[aria-current="page"] {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
 }
 .nav-account-item[aria-current="page"] {
-  background: var(--orange-50, #fef3ec);
-  color: var(--orange-700, #b84e0f);
   font-weight: 600;
 }
 .nav-account-sep {
   height: 1px;
   border: 0;
-  background: var(--gray-200, #e5e7eb);
+  background: var(--color-rule);
   margin: 5px 4px;
 }
 .nav-account-logout:hover {
-  background: var(--gray-50, #f9fafb);
-  color: var(--red-600, #dc2626);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
 }
+
 /* ── Burger (mobile only) ──────────────────────────────────────────── */
 .nav-burger {
   display: none;
@@ -294,20 +286,10 @@ nav.js injects markup using exactly the classes below — keep them in sync.
 .nav-burger span {
   width: 22px;
   height: 2px;
-  background: var(--green-800, #166534);
+  background: var(--color-ink);
   border-radius: 2px;
-  transition: all 0.25s var(--ease-base, ease);
-}
-
-/* ── Tighten before the burger kicks in ────────────────────────────── */
-@media (max-width: 1024px) {
-  /* The attribution is the first thing to go when the bar gets tight. */
-  .nav-sub {
-    display: none;
-  }
-  .nav-links {
-    gap: 24px;
-  }
+  transition: transform var(--dur-short) var(--ease-base),
+    opacity var(--dur-short) var(--ease-base);
 }
 
 /* ── Mobile ────────────────────────────────────────────────────────── */
@@ -315,23 +297,26 @@ nav.js injects markup using exactly the classes below — keep them in sync.
   .nav-burger {
     display: flex;
   }
-  .nav-inner {
-    flex-wrap: wrap;
-    padding: 12px 16px;
+  .mast {
+    padding-top: var(--space-md);
   }
-  .nav-links {
+  .mast-bar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .mast-links {
     display: none;
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
-    padding: 8px 0 4px;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0 var(--space-md);
     order: 3;
-    border-top: 1px solid rgba(229, 231, 235, 0.6);
+    border-top: 1px solid var(--color-rule);
   }
-  .nav-links.open {
+  .mast-links.open {
     display: flex;
-    animation: nav-drop 0.22s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+    animation: nav-drop var(--dur-med) var(--ease-out);
   }
   @keyframes nav-drop {
     from {
@@ -343,17 +328,8 @@ nav.js injects markup using exactly the classes below — keep them in sync.
       transform: translateY(0);
     }
   }
-  /* Action group: full-width buttons, primary (Order Now) on top —
-     Carbon's vertical-stack rule. */
   .nav-actions {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  .nav-auth {
-    width: 100%;
-    justify-content: flex-start;
+    margin-left: auto;
   }
   /* In the column the panel flows inline instead of floating — no hover
      on touch, and nothing can overflow the viewport. */
@@ -368,8 +344,17 @@ nav.js injects markup using exactly the classes below — keep them in sync.
     box-shadow: none;
     animation: none;
   }
-  /* Full-width button; the shared box already centres its content. */
-  .nav-cta {
-    width: 100%;
+}
+
+/* Narrow phones: the masthead attribution is the first thing to go when
+   the page gets tight, and the mark steps down with it. */
+@media (max-width: 420px) {
+  .mast-attrib {
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+  }
+  .nav-cta,
+  .nav-account-trigger {
+    padding: 8px 14px;
   }
 }

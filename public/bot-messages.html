@@ -12,11 +12,11 @@
       }
       body {
         min-height: 100vh;
-        background: #f0fdf4;
+        background: var(--color-brand-tint);
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         padding: 32px 16px;
-        color: #1f2937;
+        color: var(--color-ink-display);
         line-height: 1.7;
       }
       .container {
@@ -25,32 +25,32 @@
         margin: 0 auto;
       }
       .header {
-        background: #fff;
+        background: var(--color-paper);
         border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--shadow-whisper);
         padding: 40px 36px 32px;
         margin-bottom: 24px;
       }
       .header h1 {
         font-size: 1.75rem;
         font-weight: 700;
-        color: #166534;
+        color: var(--color-focus);
         margin-bottom: 8px;
       }
       .header .meta {
         font-size: 0.875rem;
-        color: #6b7280;
+        color: var(--color-muted);
       }
       .content {
-        background: #fff;
+        background: var(--color-paper);
         border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--shadow-whisper);
         padding: 36px;
       }
       .content h2 {
         font-size: 1.15rem;
         font-weight: 700;
-        color: #166534;
+        color: var(--color-focus);
         margin-top: 28px;
         margin-bottom: 10px;
       }
@@ -60,18 +60,18 @@
       .content h3 {
         font-size: 0.95rem;
         font-weight: 600;
-        color: #374151;
+        color: var(--color-ink);
         margin-top: 20px;
         margin-bottom: 6px;
       }
       .content p {
         font-size: 0.95rem;
-        color: #4b5563;
+        color: var(--color-muted);
         margin-bottom: 12px;
       }
       .content pre {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
+        background: var(--color-paper);
+        border: 1px solid var(--color-rule);
         border-radius: 8px;
         padding: 14px 16px;
         font-size: 0.9rem;
@@ -80,44 +80,44 @@
         white-space: pre-wrap;
         word-wrap: break-word;
         margin-bottom: 12px;
-        color: #374151;
+        color: var(--color-ink);
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
       .content .buttons {
         font-size: 0.85rem;
-        color: #6b7280;
+        color: var(--color-muted);
         margin-bottom: 16px;
         padding-left: 4px;
       }
       .content .note {
-        background: #fefce8;
-        border-left: 3px solid #eab308;
+        background: var(--color-accent-tint);
+        border-left: 3px solid var(--color-warn);
         padding: 10px 14px;
         border-radius: 0 8px 8px 0;
         font-size: 0.875rem;
-        color: #713f12;
+        color: var(--color-accent);
         margin-bottom: 16px;
       }
       .content .section-divider {
         border: none;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid var(--color-rule);
         margin: 28px 0 0 0;
       }
       .brand {
         text-align: center;
         margin-top: 32px;
         font-size: 0.8rem;
-        color: #9ca3af;
+        color: var(--color-faint);
       }
       .brand strong {
-        color: #005d2b;
+        color: var(--color-brand-deep);
         font-weight: 700;
       }
       /* This page doesn't load /css/main.css, so it keeps a local copy of
          the wordmark accent. Must match .wordmark-accent there. */
       .brand .accent {
-        color: #ee701c;
+        color: var(--color-accent);
         margin-right: 6px;
       }
     </style>

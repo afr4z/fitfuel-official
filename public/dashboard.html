@@ -48,11 +48,14 @@
         border-radius: var(--radius-md);
         border: none;
         cursor: pointer;
-        transition: all 0.2s var(--ease-base);
+        transition:
+          background-color var(--dur-short) var(--ease-base),
+          border-color var(--dur-short) var(--ease-base),
+          color var(--dur-short) var(--ease-base);
         font-family: inherit;
       }
       .btn-secondary {
-        background: #fff;
+        background: var(--color-paper);
         color: var(--green-700);
         border: 2px solid var(--green-200);
       }
@@ -68,7 +71,7 @@
       }
       .btn-ghost:hover {
         color: var(--red-500);
-        background: #fef2f2;
+        background: var(--color-danger-tint);
         border-radius: var(--radius-sm);
       }
       .container {
@@ -94,7 +97,7 @@
         margin-top: 4px;
       }
       .card {
-        background: #fff;
+        background: var(--color-paper);
         border: 1px solid var(--gray-200);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-sm);
@@ -141,14 +144,13 @@
         font-size: 0.85rem;
       }
       .plan-card {
-        border: 1px solid var(--gray-200);
+        border: 1px solid var(--color-rule);
         border-radius: var(--radius-md);
-        padding: 20px;
-        transition: all 0.2s var(--ease-base);
+        padding: var(--space-md);
+        transition: border-color var(--dur-short) var(--ease-base);
       }
       .plan-card:hover {
-        box-shadow: var(--shadow-md);
-        border-color: var(--green-200);
+        border-color: var(--color-brand);
       }
       .plan-header {
         display: flex;
@@ -182,8 +184,8 @@
         color: var(--green-800);
       }
       .tag-nonveg {
-        background: #fef3c7;
-        color: #92400e;
+        background: var(--color-accent-tint);
+        color: var(--color-accent);
       }
       .plan-type {
         font-size: 0.75rem;
@@ -285,8 +287,8 @@
         text-transform: capitalize;
       }
       .status-pending {
-        background: #fef3c7;
-        color: #92400e;
+        background: var(--color-accent-tint);
+        color: var(--color-accent);
       }
       .status-confirmed {
         background: var(--green-100);
