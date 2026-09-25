@@ -197,12 +197,70 @@
   const loginLink = () =>
     `<a href="/login" class="nav-login"${current(isLogin)}>Login</a>`;
 
-  // Hold the slot with a neutral placeholder instead of painting "Login"
-  // and swapping it out — that read as a flash of the wrong auth state.
-  authEl.setAttribute("aria-busy", "true");
-  authEl.innerHTML = `<span class="nav-auth-skeleton" aria-hidden="true"></span>`;
+  // Last known auth state, per tab. /me is revalidated on every page load
+  // regardless, so this is only ever a first paint: it stops the control
+  // visibly flipping on every navigation, it is not a source of truth.
+  // sessionStorage rather than localStorage so it dies with the tab and
+  // cannot leak a signed-in identity into other tabs.
+  //
+  // The signed-out answer is cached too, not just the greeting. Most visits
+  // are signed out, so caching only "Hi, Name" would leave the majority of
+  // visitors with a placeholder on every single page. A null name means
+  // "resolved, and the answer was signed out", which is distinct from no
+  // entry at all, which means "we have not asked yet".
+  const AUTH_CACHE_KEY = "ff:auth";
+
+  function readAuthCache() {
+    try {
+      const raw = sessionStorage.getItem(AUTH_CACHE_KEY);
+      if (!raw) return null;
+      const value = JSON.parse(raw);
+      return value && typeof value === "object" && "name" in value
+        ? value
+        : null;
+    } catch {
+      return null; // private mode / storage disabled
+    }
+  }
+
+  function writeAuthCache(name) {
+    try {
+      sessionStorage.setItem(
+        AUTH_CACHE_KEY,
+        JSON.stringify({ name: name || null }),
+      );
+    } catch {}
+  }
+
+  function clearAuthCache() {
+    try {
+      sessionStorage.removeItem(AUTH_CACHE_KEY);
+    } catch {}
+  }
+
+  function showSignedIn(name) {
+    authEl.classList.add("nav-auth-account");
+    authEl.replaceChildren(accountMenu(name));
+  }
+
+  function showSignedOut() {
+    authEl.classList.remove("nav-auth-account");
+    authEl.replaceChildren();
+    authEl.insertAdjacentHTML("beforeend", loginLink());
+  }
 
   async function renderAuth() {
+    // Paint what we last knew straight away. With nothing cached we have no
+    // honest first paint, so hold the slot rather than guess.
+    const cached = readAuthCache();
+    if (cached) {
+      if (cached.name) showSignedIn(cached.name);
+      else showSignedOut();
+    } else {
+      authEl.setAttribute("aria-busy", "true");
+      authEl.innerHTML = `<span class="nav-auth-skeleton" aria-hidden="true"></span>`;
+    }
+
     let signedIn = false;
     let name = "";
     // Prefer the prefetch kicked off in the page <head>, which overlaps the
@@ -226,20 +284,28 @@
 
     if (data && data.phone) {
       signedIn = true;
-      name = data.name;
+      name = typeof data.name === "string" ? data.name : "";
     }
 
     if (signedIn) {
-      // Account menu is the last item — the right edge of the bar.
-      authEl.replaceChildren(accountMenu(name));
+      writeAuthCache(name);
+      // Only touch the DOM if the revalidated state actually differs, so a
+      // repeat visit leaves the control (and any open menu) untouched.
+      if (!cached || cached.name !== name) showSignedIn(name);
     } else {
-      authEl.replaceChildren();
-      authEl.insertAdjacentHTML("beforeend", loginLink());
+      writeAuthCache(null);
+      // Render unless we are already showing the signed-out control from
+      // cache. `cached.name` truthy means the cache claimed we were signed
+      // in, so that has to be corrected.
+      if (!cached || cached.name) showSignedOut();
     }
     authEl.removeAttribute("aria-busy");
   }
 
   async function handleLogout() {
+    // Drop the cached state first: the redirect below re-enters this nav,
+    // and a stale greeting would otherwise paint before /me corrects it.
+    clearAuthCache();
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
