@@ -11,6 +11,11 @@ const supabase = createClient(
 
 const OTP_TTL_SECONDS = 300;
 const SESSION_TTL_DAYS = 14;
+// The nav calls /me on every page view, so the sliding TTL was re-asserted
+// on every request — a Redis write per page view, to extend a 14-day
+// session. Refreshing at most hourly keeps the sliding behaviour for any
+// real user while collapsing steady-state writes to zero.
+const SESSION_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const OTP_COOLDOWN_SECONDS = 60;
 const OTP_DAILY_LIMIT = 5;
 const OTP_MAX_ATTEMPTS = 5;
@@ -187,25 +192,23 @@ function createSessionToken() {
   return crypto.randomBytes(24).toString("hex");
 }
 
+/**
+ * SET with a TTL in a single command. Upstash's body-style REST form takes
+ * the whole command as a JSON array, which also sidesteps URL-encoding the
+ * value. One round trip instead of SET followed by EXPIRE.
+ */
+async function redisSetWithTTL(key, value, ttlSeconds) {
+  await fetch(UPSTASH_URL, {
+    method: "POST",
+    headers: { ...UPSTASH_HEADERS, "Content-Type": "application/json" },
+    body: JSON.stringify(["SET", key, value, "EX", ttlSeconds]),
+  });
+}
+
 async function storeSession(token, phone) {
   const key = `session:${token}`;
   const data = JSON.stringify({ phone, createdAt: Date.now() });
-  await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/${key}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
-    },
-    body: data,
-  });
-  await fetch(
-    `${process.env.UPSTASH_REDIS_REST_URL}/expire/${key}/${SESSION_TTL_DAYS * 86400}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
-      },
-    },
-  );
+  await redisSetWithTTL(key, data, SESSION_TTL_DAYS * 86400);
 }
 
 async function getSession(token) {
@@ -229,13 +232,15 @@ async function deleteSession(token) {
   });
 }
 
-/** Re-apply the session TTL (used for sliding sessions). */
-async function refreshSession(token) {
+/**
+ * Re-assert the sliding TTL. This rewrites the record rather than issuing a
+ * bare EXPIRE, so createdAt moves forward — which is what lets handleMe
+ * throttle the write to at most one per interval instead of one per request.
+ */
+async function refreshSession(token, phone) {
   const key = `session:${token}`;
-  await fetch(`${UPSTASH_URL}/expire/${key}/${SESSION_TTL_DAYS * 86400}`, {
-    method: "POST",
-    headers: UPSTASH_HEADERS,
-  });
+  const data = JSON.stringify({ phone, createdAt: Date.now() });
+  await redisSetWithTTL(key, data, SESSION_TTL_DAYS * 86400);
 }
 
 function setSessionCookie(res, token) {
@@ -528,25 +533,38 @@ async function handleLogout(req, res) {
 }
 
 async function handleMe(req, res) {
-  const phone = await sessionPhone(req, res);
-  if (!phone) return;
-
-  // Sliding session: extend the server TTL and cookie on every /me call.
-  const cookie = req.headers.cookie || "";
-  const match = cookie.match(/session=([^;]+)/);
-  if (match) {
-    await refreshSession(match[1]);
-    setSessionCookie(res, match[1]);
+  const session = await readSession(req);
+  if (!session) {
+    return res.status(401).json({ error: "Not authenticated" });
   }
+  const phone = session.phone;
 
+  // Sliding session, throttled and off the critical path. Previously this
+  // awaited an EXPIRE before any data was fetched, so every /me cost two
+  // serial Redis round trips. Now it only fires once per interval, and when
+  // it does fire it runs concurrently with the Supabase queries rather than
+  // ahead of them.
+  const isStale =
+    Date.now() - (session.createdAt || 0) >= SESSION_REFRESH_INTERVAL_MS;
+  const refresh = isStale ? refreshSession(session.token, phone) : null;
+
+  // One customer lookup, shared: the addresses branch waits on the very same
+  // in-flight promise and reuses its id, so it costs no extra latency and
+  // one fewer round trip than letting it fetch the customer again.
+  const customerPromise = getCustomerByPhone(phone);
   const [customer, subscriptions, upcomingMeals, addresses] = await Promise.all(
     [
-      getCustomerByPhone(phone),
+      customerPromise,
       getActiveSubscriptions(phone),
       getUpcomingMeals(phone),
-      getCustomerAddresses(phone),
+      customerPromise.then((c) => getCustomerAddresses(phone, c?.id)),
     ],
   );
+
+  if (refresh) {
+    await refresh;
+    setSessionCookie(res, session.token);
+  }
 
   return res.status(200).json({
     phone,
@@ -558,21 +576,28 @@ async function handleMe(req, res) {
   });
 }
 
-/** Resolve the authenticated phone from the session cookie, or 401. */
-async function sessionPhone(req, res) {
+/**
+ * Read the session record from the request cookie: { token, phone, createdAt }
+ * or null. handleMe needs createdAt to decide whether the sliding TTL is due;
+ * the other handlers only want the phone, via sessionPhone below.
+ */
+async function readSession(req) {
   const cookie = req.headers.cookie || "";
   const match = cookie.match(/session=([^;]+)/);
-  if (!match) {
-    res.status(401).json({ error: "Not authenticated" });
-    return null;
-  }
+  if (!match) return null;
+  const token = match[1];
+  const session = await getSession(token);
+  if (!session) return null;
+  return { token, ...session };
+}
 
-  const session = await getSession(match[1]);
+/** Resolve the authenticated phone from the session cookie, or 401. */
+async function sessionPhone(req, res) {
+  const session = await readSession(req);
   if (!session) {
-    res.status(401).json({ error: "Session expired" });
+    res.status(401).json({ error: "Session expired or invalid" });
     return null;
   }
-
   return session.phone;
 }
 
@@ -581,8 +606,12 @@ async function getCustomerIdByPhone(phone) {
   return customer?.id || null;
 }
 
-async function getCustomerAddresses(phone) {
-  const customerId = await getCustomerIdByPhone(phone);
+/**
+ * @param knownCustomerId pass the customer id when the caller already has
+ *   it, to avoid re-querying the same customer row.
+ */
+async function getCustomerAddresses(phone, knownCustomerId) {
+  const customerId = knownCustomerId || (await getCustomerIdByPhone(phone));
   if (!customerId) return [];
   const { data } = await supabase
     .from("customer_addresses")
