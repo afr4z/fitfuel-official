@@ -1,69 +1,45 @@
-{
-  "project": "fitfuel-nutrition",
-  "run": "hallmark-overhaul-2026-09-25",
-  "genre": "fresh / health-tech",
-  "theme": "swapnow.in reference (owner redirect: 'I don't like this theme — do something else, try swapnow.in') — airy gradient ground + colour blobs, glassy surfaces, rounded pills, soft lifts",
-  "tokens": {
-    "brand": "#199e41 (swapnow primary-600)",
-    "accent": "#f78757 (swapnow primary-500), small-text variant --color-accent-deep #d95f2b",
-    "display-ink": "#063847 (swapnow primary-700 deep teal)",
-    "ground": "linear-gradient(#f7fbf8, #f2f5ff) + radial blobs (indigo rgba(114,114,242,.14), green rgba(25,158,65,.12), coral rgba(247,135,87,.13)), background-attachment fixed",
-    "ink": "#1a1e2a",
-    "rule": "#dfe4ec"
+[
+  {
+    "date": "2026-09-25",
+    "macrostructure": "Split Studio",
+    "hero": "H2 split diptych — ratio 6/6, right=proof-column (live price board), divider=negative-space",
+    "theme": "custom",
+    "theme_axes": "light / geometric-sans / chromatic-other (green ~150°)",
+    "vibe": "clinical calm, quiet luxury, bone and leaf",
+    "enrichment": "none — typography + real tabular data (no photography exists; no invented food photos, no emoji tiles)",
+    "nav": "N9 edge-aligned minimal",
+    "footer": "Ft2 inline single line",
+    "type": "Cabinet Grotesk 700/800 (display) + Switzer 400/500/600 (body) + Geist Mono (instrument register — kickers, table headers, tenure labels, price ladder)",
+    "brief": "FitFuel Nutrition · meal-plan subscription · owner rejected the previous swapnow-influenced theme (pastel gradient blobs, pills everywhere, generic 3-up grid, rounded-geometric Outfit) and asked for Hallmark",
+    "gates": "smoke 0 overflow @320/1280 · final-gates 16-18/18 focus rings, hero fits fold (CTA 482px), lede 55ch · audit-brand Jadpod copies + no Login signed out + whole DB titles · order-wizard -> Razorpay URL · customer-final dashboard+OTP+one-line footer · slop-test 58/58 (documented deviations: mono-as-data-register, the intentional two-line brand lockup, dashboard's pre-existing signed-out redirect log)",
+    "notes": "nav.js markup changed for N9 (banner + link row + burger retired); all auth/menu behaviour untouched. All six footers unified on the same three-link single line. Old Outfit/Inter woff2 files left on disk, unreferenced — deletion needs owner confirmation."
   },
-  "fonts": {
-    "display": "Outfit 100-900 (self-hosted /fonts/outfit-latin-var.woff2, preloaded)",
-    "body": "Inter 100-900 (self-hosted /fonts/inter-latin-var.woff2, preloaded)",
-    "wordmark": "Outfit 800 — 'Fuel' in green→teal text-gradient (.wordmark-accent)"
+  {
+    "date": "2026-09-25",
+    "macrostructure": "Catalogue",
+    "hero": "centred statement + glass docket",
+    "theme": "custom",
+    "theme_axes": "light / rounded-sans / chromatic-other (green ~150° + coral ~40°)",
+    "vibe": "fresh health-tech, swapnow.in reference",
+    "enrichment": "none",
+    "nav": "N12 banner + retract",
+    "footer": "Ft6 letter close",
+    "type": "Outfit (display) + Inter (body)",
+    "brief": "FitFuel Nutrition · owner redirect: 'I don't like this theme — do something else, try swapnow.in for reference'",
+    "outcome": "rejected by owner — gradient blobs, glass, pill-everything, 3-up grid and the round-geometric face all read as template"
   },
-  "geometry": "rounded — --radius-sm:8px, --radius-md:12px, --radius-lg:18px, --radius-xl:24px, --radius-pill:999px; cards 12-18px, chips/buttons/toggles are pills; soft teal-seeded shadows, hover-lift",
-  "macros": {
-    "index": "Catalogue — centred statement hero (badge/h1-accent/sub/2 buttons/trust pills), glass 'On the menu' docket, uniform rounded plan cards (emoji tiles 🥗/🍗/⚖️, exact API titles + prices), numbered step cards, 3-col feature cards, deep-teal rounded closing band",
-    "order": "Narrative Workflow — 1 → 2 → 3 shared progress track, pill radio toggles, price summary, JS/form verbatim",
-    "login": "Functional app — one measured card on transparent ground, no enrichment",
-    "dashboard": "Functional app — card stack, JS-rendered contract preserved (plan-card, meal-card, address-item, profile-grid, btn-tiny, pill chips)",
-    "payment-success": "Letter — gradient circular check seal, strong headline, note, revealed pill actions",
-    "privacy-policy": "Long Document — one measure, hairline section rules, content preserved verbatim",
-    "admin": "Functional tool — token-compatible only, secret-gated, no shared nav/footer",
-    "bot-messages": "Functional tool — token-compatible only, secret-gated, no shared nav/footer"
-  },
-  "nav": {
-    "archetype": "N12 banner + retract",
-    "implementation": ".nav-wrap sticky wraps .nav-banner + .nav; glassy bar (blur 12px, rgba(247,251,248,.88)) with pill links that fill on hover; banner as green→coral gradient announcement strip; retracts to max-height:0 under .nav-scrolled (passive scroll listener in nav.js, additive only)",
-    "auth": "unchanged — ff:auth sessionStorage cache, window.__ffAuth prefetch consumption, APG disclosure menu, logout, mobile burger"
-  },
-  "footer": {
-    "archetype": "Ft6 letter close",
-    "implementation": "glass footer (rgba(255,255,255,.55) + blur) — footer-verse 'Yours, the FitFuel kitchen.' + wordmark-as-signature + tagline + minimal links + colophon '© 2026 Jadpod Fitness Private Limited' + Razorpay trust"
-  },
-  "cta-voice": "Start my plan",
-  "kickers": "uppercase micro-kickers (HOW IT WORKS / ON THE MENU / WHY FITFUEL) with --tracking-caps — section numerals retired with the editorial genre",
-  "diversification": {
-    "this-build": "N12 + Ft6, fresh/health-tech + Outfit/Inter (supersedes R2 editorial + Fraunces/Archivo)",
-    "rejected-priors": "editorial build (071a2ed — board.jpg oklch ramp, Fraunces/Archivo, squared hairline, deep-green bands) rejected by owner; N6 masthead (failed gate); N1a nav + Ft1 footer (warm-consumer R1)",
-    "stamps": "main.css and nav.css carry genre/macro/system comments; design.md (fresh) supersedes editorial and warm-consumer specs"
-  },
-  "constraints-honoured": [
-    "plan titles render as-is from DB, never split/renamed",
-    "'by Jadpod Fitness Pvt Ltd' in nav; '© 2026 Jadpod Fitness Private Limited' in footer",
-    "no Login button in nav when signed out",
-    "admin.html / bot-messages.html secret-gated, never load shared nav",
-    "no plan-title splitting on /order or /dashboard",
-    "no photography — emoji tiles + type + gradient art only",
-    "copy honest — preserved/adjusted, nothing fabricated",
-    "admin/bot token names survive: --shadow-whisper, --radius-lg, all --color-*, legacy alias block",
-    "probes all green after re-theme: smoke (0 overflow), final-gates (rings 17-18/18, hero fits fold, lede 66ch), audit-brand (Jadpod/Login/account/titles/gates), order-wizard (-> Razorpay URL), customer-final (dashboard+OTP+footer)"
-  ],
-  "pages-rebuilt": [
-    "public/index.html",
-    "public/order.html",
-    "public/dashboard.html",
-    "public/login.html",
-    "public/payment-success.html",
-    "public/privacy-policy.html"
-  ],
-  "shared-css-rebuilt": ["public/css/main.css", "public/css/nav.css"],
-  "js-touched": "public/js/nav.js (markup wrap + scroll listener only; untouched in re-theme)",
-  "fonts-added": ["public/fonts/outfit-latin-var.woff2"],
-  "fonts-retired": ["public/fonts/fraunces-latin-wght-normal.woff2 (R2 display face, unreferenced after re-theme)"]
-}
+  {
+    "date": "2026-09-25",
+    "macrostructure": "Catalogue",
+    "hero": "split statement + menu docket",
+    "theme": "custom",
+    "theme_axes": "light / italic-serif / chromatic-other (green ~148°)",
+    "vibe": "dramatic editorial, board.jpg measured in OKLCH",
+    "enrichment": "none",
+    "nav": "N12 banner + retract",
+    "footer": "Ft6 letter close",
+    "type": "Fraunces (display) + Archivo (body)",
+    "brief": "FitFuel Nutrition · first Hallmark overhaul",
+    "outcome": "rejected by owner — 'no i dont like this theme'"
+  }
+]

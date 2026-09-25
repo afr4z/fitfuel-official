@@ -10,14 +10,21 @@
     />
     <link
       rel="preload"
-      href="/fonts/outfit-latin-var.woff2"
+      href="/fonts/cabinet-grotesk-800.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="preload"
-      href="/fonts/inter-latin-var.woff2"
+      href="/fonts/switzer-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/geist-mono-var-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -26,11 +33,11 @@
     <link rel="stylesheet" href="/css/main.css" />
     <style>
       /* consumer-app · macrostructure: 18 Letter · system: design.md ·
-         designed-as-healthtech
+         designed-as-clinical
          ─────────────────────────────────────────────────────────────────
          The confirmation reads as a letter from the kitchen: a real,
-         gradient check seal above a strong headline, the letter body in
-         ink, a tinted note, then two pill actions revealed once the
+         brand-tinted check seal above a strong headline, the letter body
+         in ink, a tinted note, then two actions revealed once the
          magic login settles. Content grows naturally — nothing traps
          overflow. */
       .success-page {
@@ -50,15 +57,16 @@
         flex-direction: column;
       }
       .check-wrap {
-        width: 56px;
-        height: 56px;
+        width: 52px;
+        height: 52px;
         margin-bottom: var(--space-lg);
-        background: linear-gradient(135deg, #199e41, #22c55e);
-        border-radius: 50%;
+        background: var(--color-brand-tint);
+        border: 1px solid var(--color-brand-tint-2);
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 6px 20px rgba(25, 158, 65, 0.35);
+        color: var(--color-brand-deep);
       }
       .check-wrap svg {
         width: 28px;
@@ -103,17 +111,18 @@
         color: var(--color-accent);
         margin-top: 2px;
       }
-      /* The actions are pill buttons that the script reveals (from
-         display:none) once the magic login settles — primary for
-         WhatsApp, outline for the dashboard. */
+      /* The actions are tight rectangular buttons that the script reveals
+         (from display:none) once the magic login settles — primary for
+         WhatsApp, outline for the dashboard. The primary fill is the deep
+         brand green, not the accent: paper-on-accent misses 4.5:1. */
       .cta {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: var(--space-xs);
         margin-top: var(--space-md);
-        padding: 12px 22px;
-        border-radius: var(--radius-pill);
+        padding: var(--space-sm) var(--space-lg);
+        border-radius: var(--radius-md);
         font-size: var(--text-sm);
         font-weight: 600;
         transition:
@@ -123,13 +132,13 @@
         width: 100%;
       }
       .cta--primary {
-        background: var(--color-brand);
+        background: var(--color-brand-deep);
         color: var(--color-paper);
-        border: 1px solid var(--color-brand);
+        border: 1px solid var(--color-brand-deep);
       }
       .cta--primary:hover {
-        background: var(--color-brand-deep);
-        border-color: var(--color-brand-deep);
+        background: var(--color-ink-display);
+        border-color: var(--color-ink-display);
       }
       .cta--secondary {
         background: var(--color-card);
@@ -336,7 +345,6 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-letter">
-          <p class="footer-verse">Yours, the FitFuel kitchen.</p>
           <div class="footer-brand">
             Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
@@ -348,11 +356,6 @@
           <li>
             <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
               >WhatsApp Us</a
-            >
-          </li>
-          <li>
-            <a href="mailto:hello@fitfuelnutrition.com"
-              >hello@fitfuelnutrition.com</a
             >
           </li>
         </ul>
@@ -373,7 +376,7 @@
               <rect x="3" y="11" width="18" height="11" rx="2.5"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-            Secure payments by Razorpay
+            Payments by Razorpay
           </p>
         </div>
       </div>

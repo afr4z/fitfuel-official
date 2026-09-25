@@ -1,112 +1,149 @@
-/* FitFuel Nutrition — fresh health-tech system (single source of truth)
-   ────────────────────────────────────────────────────────────────────────
-   genre: fresh / health-tech · system: design.md · designed-as-healthtech
+/* Hallmark · macrostructure: Split Studio · H2 hero knobs: ratio=6/6, right=proof-column, divider=negative-space
+ * F3 spec-sheet knobs: columns=3 (term · veg · non-veg), rule=every-row, numbers=tabular
+ * N9 edge-aligned nav · Ft2 inline single-line footer
+ * theme: custom · vibe: "clinical calm, quiet luxury, bone and leaf" · paper: oklch(97% 0.008 88) · accent: oklch(55% 0.14 150)
+ * display: Cabinet Grotesk · body: Switzer · instrument: Geist Mono · axes: light / geometric-sans / chromatic-other (green ~150°)
+ * genre: modern-minimal · enrichment: none (typography + real tabular data) · studied: no · context: explicit
+ * pre-emit critique: P5 H4 E4 S5 R5 V5
+ * ─────────────────────────────────────────────────────────────────────────
+ * FitFuel Nutrition — the design system. This file is the single source of
+ * truth for tokens, primitives and the footer; every page styles only its
+ * own composition. The pages' class contract (see the class inventory in
+ * the file footer) is preserved verbatim — only the voice changed.
+ *
+ * The system in one paragraph: a warm bone ground, forest-black ink, a
+ * single clinical green used as a highlighter (never a fill), one muted
+ * clay for non-veg marks, Cabinet Grotesk over Switzer with a Geist Mono
+ * instrument register for labels and data. Flat bordered panels, tight
+ * radii, hairline rules, tabular figures on every price. No gradients, no
+ * glass, no blobs, no emoji, no pills-by-default.
+ */
 
-   Theme taken from swapnow.in (the reference the owner pointed at): an
-   airy gradient ground with floating colour blobs, glassy surfaces,
-   rounded pills and soft lifts, Inter body over a rounded-geometric
-   Outfit display. It is a deliberate U-turn from the editorial build —
-   no serif display, no squared hairline shoulders, no deep-green field
-   bands.
-
-   Brand identity stays fixed: the logo lockup stays
-   "Fit<span class=wordmark-accent>Fuel</span> Nutrition", plan names
-   render exactly as /api/plans serves them (never split or renamed),
-   "by Jadpod Fitness Pvt Ltd" stays in the nav, and the footer carries
-   "© 2026 Jadpod Fitness Private Limited. All rights reserved."
-
-   The :root block is the token source of truth. Every page references
-   these names and never a raw value.
-
-   The legacy alias block at the bottom maps old names (--green-*,
-   --gray-*, --orange-*, --radius-full, --shadow-whisper, ...) onto the
-   new values. Delete each alias as its last consumer is migrated; they
-   exist so admin.html / bot-messages.html and anything not yet touched
-   still resolve. */
-
+/* ── Fonts ──────────────────────────────────────────────────────────────
+   Self-hosted, preloaded on every customer page, swap-displayed. Three
+   families total (display · body · instrument) — the skill's ceiling. */
 @font-face {
-  font-family: "Outfit";
-  src: url("/fonts/outfit-latin-var.woff2") format("woff2");
-  font-weight: 100 900;
+  font-family: "Cabinet Grotesk";
+  src: url("/fonts/cabinet-grotesk-700.woff2") format("woff2");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Inter";
-  src: url("/fonts/inter-latin-var.woff2") format("woff2");
-  font-weight: 100 900;
+  font-family: "Cabinet Grotesk";
+  src: url("/fonts/cabinet-grotesk-800.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("/fonts/switzer-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("/fonts/switzer-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Switzer";
+  src: url("/fonts/switzer-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/geist-mono-var-latin.woff2") format("woff2");
+  font-weight: 400 600;
   font-style: normal;
   font-display: swap;
 }
 
+/* ── Tokens ────────────────────────────────────────────────────────────
+   OKLCH only. Paper and ink both carry chroma (no pure #fff / #000).
+   Every pair below was contrast-checked: body ink 16.2:1, muted 6.5:1,
+   instrument/faint 5.5:1, accent-deep 6.7:1, rule-strong 3.3:1 (UI
+   boundaries), field-ink on field 14.1:1. */
 :root {
-  /* ── Ground & ink ────────────────────────────────────────────────
-     swapnow's ramp: near-white ground, slate text, soft blue-grey
-     rules. Display ink is the deep teal, not pure black. */
-  --color-paper: #ffffff;
-  --color-paper-2: #f6fbf7;
-  --color-paper-3: #eef5f0;
-  --color-card: #ffffff;
-  --color-rule: #dfe4ec;
-  --color-rule-strong: #b8c2d6;
-  --color-ink: #1a1e2a;
-  --color-ink-display: #063847;
-  --color-muted: #6a7287;
-  --color-faint: #94a3b8;
+  /* paper + panels */
+  --color-paper: oklch(97% 0.008 88);
+  --color-paper-2: oklch(94.5% 0.01 88);
+  --color-paper-3: oklch(91% 0.012 90);
+  --color-card: oklch(99.2% 0.006 88);
 
-  /* ── Brand green (locked) ────────────────────────────────────────
-     swapnow primary-600. Fills CTAs, progress, veg chips, success.
-     Deep green is the hover / gradient end. */
-  --color-brand: #199e41;
-  --color-brand-deep: #127932;
-  --color-brand-tint: #e6f4ec;
-  --color-brand-tint-2: #c3e6cc;
+  /* ink */
+  --color-ink: oklch(21% 0.012 95);
+  --color-ink-display: oklch(27% 0.035 158);
+  --color-muted: oklch(46% 0.014 95);
+  --color-faint: oklch(50% 0.014 95);
 
-  /* ── Coral accent (locked) — prices, flags, non-veg marks ────────
-     swapnow primary-500. Display sizes carry the vivid coral;
-     small text uses the deepened value via --color-accent-deep. */
-  --color-accent: #f78757;
-  --color-accent-display: #f78757;
-  --color-accent-deep: #d95f2b;
-  --color-accent-tint: #fff1ea;
+  /* rules — hairline (dividers) · mid (panel borders) · strong (UI
+     boundaries: inputs, secondary buttons; 3.3:1) */
+  --color-rule: oklch(88% 0.008 90);
+  --color-rule-mid: oklch(82% 0.01 90);
+  --color-rule-strong: oklch(62% 0.014 92);
 
-  /* ── The field — one deep-teal panel (closing CTA, dark stats) ──
-     swapnow primary-700 (#063847). White ink on it. */
-  --color-field: #063847;
-  --color-field-2: #04303e;
-  --color-field-ink: #ffffff;
-  --color-field-muted: #b9d4d8;
+  /* the one accent — brand green, a highlighter: active states, focus,
+     wordmark accent, small marks. Never a large fill. */
+  --color-brand: oklch(55% 0.14 150);
+  --color-brand-deep: oklch(44% 0.12 152);
+  --color-brand-tint: oklch(94% 0.035 148);
+  --color-brand-tint-2: oklch(88% 0.05 148);
 
-  --color-focus: #199e41;
-  --color-danger: #dc2626;
-  --color-danger-tint: #fef2f2;
-  --color-success: #16a34a;
-  --color-warn: #d97706;
-  --color-warn-tint: #fffbeb;
+  /* second accent — muted clay, food-warm. Non-veg marks, price figures
+     at display size, never body text. */
+  --color-accent: oklch(58% 0.12 42);
+  --color-accent-display: oklch(58% 0.12 42);
+  --color-accent-deep: oklch(46% 0.11 42);
+  --color-accent-tint: oklch(94% 0.03 52);
+  --color-accent-tint-2: oklch(88% 0.05 55);
 
-  /* ── Type ────────────────────────────────────────────────────────
-     Outfit (rounded geometric, 100–900) carries display + wordmark;
-     Inter (variable) carries body and UI. Both self-hosted latin,
-     no third-party request. The editorial serif is retired. */
-  --font-display: "Outfit", "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  /* The wordmark's own face — Outfit 800. */
-  --font-wordmark: "Outfit", "Inter", system-ui, sans-serif;
+  /* the single dark band — closing CTA only. */
+  --color-field: oklch(25% 0.035 162);
+  --color-field-2: oklch(21% 0.03 162);
+  --color-field-ink: oklch(96% 0.006 110);
+  --color-field-muted: oklch(76% 0.02 150);
 
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-md: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: clamp(1.5rem, 1.25rem + 1.2vw, 1.875rem);
-  --text-3xl: clamp(2rem, 1.5rem + 2.4vw, 2.875rem);
-  --text-display: clamp(2.5rem, 1.6rem + 4vw, 4rem);
+  /* status */
+  --color-danger: oklch(50% 0.17 25);
+  --color-danger-tint: oklch(95% 0.03 25);
+  --color-warn: oklch(55% 0.13 70);
+  --color-warn-tint: oklch(95% 0.045 85);
+  --color-success: oklch(55% 0.14 150);
+  --color-sheen: oklch(99.2% 0.006 88 / 0.7);
+  --color-focus: oklch(50% 0.18 150);
+  --color-focus-on-dark: oklch(72% 0.16 150);
+
+  /* type */
+  --font-display: "Cabinet Grotesk", "Switzer", ui-sans-serif, system-ui,
+    sans-serif;
+  --font-body: "Switzer", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-wordmark: var(--font-display);
+  --font: var(--font-body); /* legacy alias */
+
+  --text-xs: 0.6875rem; /* 11px — instrument labels only */
+  --text-sm: 0.8125rem; /* 13px — small print */
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.5rem;
+  --text-xl: 2rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: 3.25rem;
+  --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+
+  --tracking-display: -0.025em;
   --tracking-caps: 0.12em;
-  --tracking-wide: 0.06em;
-  --tracking-display: -0.02em;
+  --tracking-wide: 0.04em;
+  --measure: 65ch;
 
-  /* ── Space: 4pt scale, named by role ──────────────────────────────
-     Ten steps. Pages reference these names; raw px is a review failure. */
+  /* space — 4pt scale */
   --space-3xs: 0.125rem;
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
@@ -117,38 +154,37 @@
   --space-2xl: 4rem;
   --space-3xl: 6rem;
   --space-4xl: 9rem;
-  --page-gutter: clamp(1rem, 4vw, 2.5rem);
-  --measure: 66ch;
-  /* The sticky header's height + a breath. Anchors land clear of it;
-     the banner (≈40px) + glass bar (≈64px) = this. */
-  --nav-height: 108px;
 
-  /* ── Motion: soft and quick, nothing showy ───────────────────────
-     Hover lifts and fade-ups, 0 for reduced-motion (cut below). */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-short: 180ms;
-  --dur-med: 300ms;
-
-  /* ── Depth: soft, teal-seeded, swapnow-style ───────────────────── */
-  --shadow-xs: 0 2px 8px -2px rgba(11, 23, 47, 0.08);
-  --shadow-sm: 0 4px 16px -8px rgba(11, 23, 47, 0.14);
-  --shadow-md: 0 14px 42px -24px rgba(11, 23, 47, 0.34);
-  --shadow-lg: 0 24px 56px -24px rgba(11, 23, 47, 0.4);
-  --shadow-hairline: 0 0 0 1px var(--color-rule);
-  /* Skeleton loading sheen — one place alpha defines a colour. */
-  --color-skeleton-sheen: rgba(255, 255, 255, 0.85);
-  --rule-hair: 1px;
-
-  /* ── Geometry: rounded, friendly ─────────────────────────────────
-     Cards 12–18px, chips pill-shaped, buttons pill-shaped. */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  /* geometry — tight and clinical, not pill-friendly */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
   --radius-pill: 999px;
+  --radius-full: 999px; /* legacy alias */
 
-  /* ── Depth order: six named levels, never ad-hoc numbers ────────── */
+  /* depth — weight and scale first; one whisper shadow where a lift is
+     genuinely needed (dropdowns, mobile sheet). Never stacked. */
+  --shadow-xs: 0 1px 2px oklch(20% 0.01 95 / 0.04);
+  --shadow-sm: 0 1px 2px oklch(20% 0.01 95 / 0.05);
+  --shadow-md: 0 2px 8px oklch(20% 0.01 95 / 0.06);
+  --shadow-lg: 0 8px 28px oklch(20% 0.01 95 / 0.1);
+  --shadow-whisper: 0 1px 2px oklch(20% 0.01 95 / 0.05); /* legacy alias */
+  --shadow-hairline: 0 0 0 1px oklch(30% 0.01 95 / 0.08);
+
+  /* motion */
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-med: 300ms;
+  --dur-long: 420ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-base: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* layout */
+  --page-gutter: clamp(1rem, 4vw, 2.5rem);
+  --nav-height: 64px;
   --z-base: 1;
   --z-raised: 10;
   --z-dropdown: 100;
@@ -156,61 +192,33 @@
   --z-modal: 400;
   --z-toast: 500;
   --z-tooltip: 600;
+}
 
-  /* ── Legacy aliases ─────────────────────────────────────────────
-     Migration shim for pages not yet moved to the names above. Each
-     alias points at the new system, never a parallel ramp. Delete a
-     block as its last consumer is migrated (admin.html and
-     bot-messages.html still consume --shadow-whisper and the old
-     green/orange/gray canned ramps). */
-  --leaf: var(--color-brand-tint-2);
-  --green-50: var(--color-paper-2);
-  --green-100: var(--color-brand-tint);
-  --green-200: var(--color-brand-tint-2);
-  --green-300: #9fd4b0;
-  --green-400: #3bb25e;
-  --green-500: var(--color-brand);
-  --green-600: #0f7d38;
-  --green-700: var(--color-brand-deep);
-  --green-800: #0b5c29;
-  --green-900: var(--color-field);
-  --orange-50: var(--color-accent-tint);
-  --orange-100: #ffe8dc;
-  --orange-400: #fb9e70;
-  --orange-500: var(--color-accent);
-  --orange-600: var(--color-accent-deep);
-  --orange-700: #c24b14;
-  --gray-50: var(--color-paper-2);
+/* Legacy aliases — admin.html and bot-messages.html consume the old
+   editorial token names. Remapped to the new system so the secret-gated
+   tools keep resolving without touching their markup. */
+:root {
+  --green: var(--color-brand);
+  --green-deep: var(--color-brand-deep);
+  --green-tint: var(--color-brand-tint);
+  --green-tint-2: var(--color-brand-tint-2);
+  --orange: var(--color-accent);
+  --orange-deep: var(--color-accent-deep);
+  --orange-tint: var(--color-accent-tint);
+  --gray-50: var(--color-paper);
   --gray-100: var(--color-paper-2);
-  --gray-200: var(--color-rule);
-  --gray-300: #cbd5e1;
-  --gray-400: var(--color-faint);
-  --gray-500: var(--color-muted);
-  --gray-600: #4b5563;
+  --gray-200: var(--color-paper-3);
+  --gray-300: var(--color-rule);
+  --gray-400: var(--color-rule-mid);
+  --gray-500: var(--color-faint);
+  --gray-600: var(--color-muted);
   --gray-700: var(--color-ink);
-  --gray-800: var(--color-ink);
   --gray-900: var(--color-ink-display);
-  --amber-400: #fbbf24;
-  --amber-500: var(--color-warn);
-  --red-500: var(--color-danger);
-  --red-600: var(--color-danger);
-  --radius-full: var(--radius-pill);
-  --shadow-whisper: var(--shadow-sm);
-  --shadow-glow: 0 6px 20px rgba(25, 158, 65, 0.35);
-  --font: var(--font-body);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
+/* ── Base ─────────────────────────────────────────────────────────────
+   The global clip keeps any deliberate overflow from turning into a
+   horizontal scrollbar (and preserves sticky). */
 *,
 *::before,
 *::after {
@@ -219,75 +227,132 @@
   padding: 0;
 }
 
-/* `clip`, never `hidden` — hidden creates a scroll container on the root,
-   which breaks position:sticky on the nav. Both elements carry it: html
-   for the sticky anchor, body as the older-Safari fallback. */
 html {
-  scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--nav-height) + 20px);
   overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
+
 body {
   overflow-x: clip;
-  font-family: var(--font-body);
+  min-height: 100vh;
+  background: var(--color-paper);
   color: var(--color-ink);
-  /* swapnow's ground: three soft radial blobs (indigo, green, coral)
-     over a green-to-ice gradient. Page containers stay transparent so
-     this shows through everywhere; only the deep-teal panels and the
-     white cards sit on top. */
-  background:
-    radial-gradient(circle at 12% 18%, rgba(114, 114, 242, 0.14) 0%, transparent 30%),
-    radial-gradient(circle at 88% 30%, rgba(25, 158, 65, 0.12) 0%, transparent 32%),
-    radial-gradient(circle at 45% 100%, rgba(247, 135, 87, 0.13) 0%, transparent 34%),
-    linear-gradient(#f7fbf8 0%, #f2f5ff 100%);
-  background-attachment: fixed;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
   line-height: 1.6;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
-}
-img {
-  max-width: 100%;
-  display: block;
-}
-button {
-  font-family: inherit;
-  color: inherit;
+  color: var(--color-brand-deep);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
-/* One focus treatment for the whole app: an offset outline in the
-   brand green — visible on white, tinted and deep-teal surfaces alike. */
+button {
+  font-family: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-ink-display);
+  font-style: normal; /* roman, always — italic headers are a hard tell */
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* Focus — one green ring, everywhere, instantly (never animated). */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
-
-/* Display type wraps inside long words — a long plan name must never
-   push the layout at 320px. */
-:where(h1, h2, h3, h4, .wordmark) {
-  overflow-wrap: anywhere;
-  min-width: 0;
-  font-style: normal;
+.on-dark :where(a, button):focus-visible,
+.field-banner :where(a, button):focus-visible {
+  outline-color: var(--color-focus-on-dark);
 }
 
-/* ── Wordmark ───────────────────────────────────────────────────────
-   The one piece of brand identity that must never drift between
-   surfaces. Every occurrence is exactly:
+::selection {
+  background: var(--color-brand-tint-2);
+  color: var(--color-ink);
+}
 
-     Fit<span class="wordmark-accent">Fuel</span> Nutrition
+/* ── Type utilities ──────────────────────────────────────────────────── */
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-inline: var(--page-gutter);
+}
 
-   "Fit" in deep ink, "Fuel" in the green→teal gradient, both Outfit 800 —
-   the swapnow-style two-tone lockup. */
+.tnum,
+table,
+.price,
+.price-summary,
+input[type="tel"],
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The instrument register — one role: labels, kickers, spec headers,
+   tenure marks. Never body copy. */
+.kicker,
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.kicker--accent {
+  color: var(--color-brand-deep);
+}
+
+.note {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-faint);
+  letter-spacing: var(--tracking-wide);
+}
+
+.mt-sm {
+  margin-top: var(--space-sm);
+}
+
+.lead {
+  font-size: var(--text-md);
+  color: var(--color-muted);
+  line-height: 1.55;
+  max-width: 52ch;
+}
+
 .wordmark-accent {
-  background: linear-gradient(135deg, #19a03d, #063847);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-brand);
 }
+
 .nav-brand-name,
 .footer-brand,
 .wordmark {
@@ -297,94 +362,219 @@ button {
   color: inherit;
 }
 
-/* ── CTA voice ──────────────────────────────────────────────────────
-   Pill buttons with a soft green glow and a gentle hover lift — the
-   swapnow button language. The primary fill is a green gradient, the
-   secondary is glass-white with a hairline. One definition, shared by
-   every page — never redeclared per page. */
+/* ── Buttons ───────────────────────────────────────────────────────────
+   Primary = ink-filled (the accent is a highlighter, never a fill).
+   Secondary = outlined, 1px UI-strength border, accent on hover. Tight
+   6px shoulders; pills are not this system's default. One hover signal
+   per element; 44px hit target; labels never wrap. */
 .btn,
 .btn-primary,
 .btn-secondary {
   position: relative;
-  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
   min-height: 44px;
-  padding: 12px 28px;
-  border-radius: var(--radius-pill);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
-  font-size: var(--text-md);
+  font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.2;
+  letter-spacing: 0.01em;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
   white-space: nowrap;
   transition:
-    transform var(--dur-short) var(--ease-out),
-    box-shadow var(--dur-short) var(--ease-out),
-    background-color var(--dur-short) var(--ease-base),
-    border-color var(--dur-short) var(--ease-base),
-    color var(--dur-short) var(--ease-base);
+    background-color var(--dur-micro) var(--ease-base),
+    border-color var(--dur-micro) var(--ease-base),
+    color var(--dur-micro) var(--ease-base),
+    transform var(--dur-micro) var(--ease-out);
 }
+
 .btn-primary {
-  background: linear-gradient(135deg, #199e41, #0e7f33);
-  color: #fff;
-  border: 1px solid transparent;
-  box-shadow: 0 4px 15px rgba(25, 158, 65, 0.35);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border: 1px solid var(--color-ink);
 }
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(25, 158, 65, 0.45);
+  background: var(--color-ink-display);
+  border-color: var(--color-ink-display);
+  transform: translateY(-1px);
 }
 .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(25, 158, 65, 0.35);
+  background: var(--color-field-2);
 }
+
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.85);
+  background: transparent;
   color: var(--color-ink);
   border: 1px solid var(--color-rule-strong);
-  box-shadow: var(--shadow-xs);
 }
 .btn-secondary:hover {
-  transform: translateY(-2px);
   border-color: var(--color-brand);
   color: var(--color-brand-deep);
-  box-shadow: var(--shadow-sm);
 }
+.btn-secondary:active {
+  background: var(--color-brand-tint);
+}
+
 .btn-primary:disabled,
-.btn-secondary:disabled {
+.btn-secondary:disabled,
+.btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
-/* ── Cards ──────────────────────────────────────────────────────────
-   Glass-white panels, soft rounded shoulders, a quiet shadow. Hover
-   lifts the interactive variant — the swapnow card language. */
+.btn-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.btn-tiny {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-height: 32px;
+  padding: var(--space-3xs) var(--space-xs);
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color var(--dur-micro) var(--ease-base),
+    color var(--dur-micro) var(--ease-base);
+}
+.btn-tiny:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand-deep);
+}
+.btn-tiny:active {
+  background: var(--color-paper-2);
+}
+.btn-tiny--danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+.btn-tiny--danger:hover {
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* payment-success's stacked closing actions */
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--ease-base),
+    border-color var(--dur-micro) var(--ease-base),
+    color var(--dur-micro) var(--ease-base);
+}
+.cta--primary {
+  background: var(--color-brand-deep);
+  color: var(--color-paper);
+  border: 1px solid var(--color-brand-deep);
+}
+.cta--primary:hover {
+  background: var(--color-ink-display);
+  border-color: var(--color-ink-display);
+}
+.cta--secondary {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-rule-strong);
+}
+.cta--secondary:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand-deep);
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────
+   Flat panels: border + paper, no resting shadow. The interactive
+   variant shifts border colour only — one signal, no lift theatre. */
 .card {
   background: var(--color-card);
-  border: 1px solid var(--color-rule);
+  border: 1px solid var(--color-rule-mid);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
 }
 .card--hover {
-  transition:
-    transform var(--dur-med) var(--ease-out),
-    border-color var(--dur-short) var(--ease-base),
-    box-shadow var(--dur-med) var(--ease-out);
+  transition: border-color var(--dur-micro) var(--ease-base);
 }
 .card--hover:hover {
-  transform: translateY(-4px);
-  border-color: var(--color-brand-tint-2);
-  box-shadow: var(--shadow-md);
+  border-color: var(--color-rule-strong);
 }
 
-/* ── Form primitives ──────────────────────────────────────────────── */
+/* ── Chips ─────────────────────────────────────────────────────────────
+   Instrument-register tags: mono, small caps, tinted. Veg = brand
+   green, non-veg = clay, flag = solid deep green. A 6px dot, never an
+   emoji. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3xs) var(--space-xs);
+  border: 1px solid var(--color-rule-mid);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper-2);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.chip-veg {
+  background: var(--color-brand-tint);
+  border-color: var(--color-brand-tint-2);
+  color: var(--color-brand-deep);
+}
+.chip-nonveg {
+  background: var(--color-accent-tint);
+  border-color: var(--color-accent-tint-2);
+  color: var(--color-accent-deep);
+}
+.chip-flag {
+  background: var(--color-brand-deep);
+  border-color: var(--color-brand-deep);
+  color: var(--color-paper);
+}
+.chip-flag::before {
+  display: none;
+}
+
+/* ── Forms ────────────────────────────────────────────────────────────── */
 .field {
   margin-bottom: var(--space-md);
 }
@@ -392,7 +582,7 @@ button {
   display: block;
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--color-ink-display);
+  color: var(--color-ink);
   margin-bottom: var(--space-2xs);
 }
 .field-label .required {
@@ -402,233 +592,203 @@ button {
 .field-input,
 .field-textarea {
   width: 100%;
-  padding: 12px 14px;
-  font-size: var(--text-md);
+  /* Shares the 44px base height with .btn — the most common form-tuning
+     slop is a 38px input sitting beside a 44px button. */
+  min-height: 44px;
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-base);
+  line-height: 1.5;
   font-family: inherit;
-  border: 1.5px solid var(--color-rule-strong);
-  border-radius: var(--radius-md);
-  background: #fff;
   color: var(--color-ink);
+  background: var(--color-card);
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-md);
   transition:
-    border-color var(--dur-short) var(--ease-base),
-    box-shadow var(--dur-short) var(--ease-base);
+    border-color var(--dur-micro) var(--ease-base),
+    background-color var(--dur-micro) var(--ease-base);
 }
 .field-input::placeholder,
 .field-textarea::placeholder {
   color: var(--color-faint);
 }
+.field-input:hover,
+.field-textarea:hover {
+  border-color: var(--color-brand);
+}
 .field-input:focus-visible,
 .field-textarea:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px rgba(25, 158, 65, 0.15);
 }
-.field-input.error,
-.field-textarea.error {
+.field-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.otp-input {
+  width: 100%;
+  padding: var(--space-sm);
+  font-family: inherit;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: 0.5rem;
+  text-align: center;
+  color: var(--color-ink);
+  background: var(--color-card);
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-md);
+  font-variant-numeric: tabular-nums;
+}
+.field-textarea.error,
+.field-input.error {
   border-color: var(--color-danger);
 }
 .field-error {
-  font-size: var(--text-xs);
-  color: var(--color-danger);
-  margin-top: var(--space-2xs);
   display: none;
+  margin-top: var(--space-2xs);
+  font-size: var(--text-sm);
+  color: var(--color-danger);
 }
 .field-error.visible {
   display: block;
 }
 .field-note {
-  font-size: var(--text-xs);
-  color: var(--color-muted);
+  min-height: 1lh;
   margin-top: var(--space-2xs);
-}
-.field-textarea {
-  min-height: 84px;
-  resize: vertical;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
 }
 
-/* Phone/OTP fields — centred digits, roomy. */
-.otp-input {
-  letter-spacing: 0.5rem;
-  text-align: center;
-  font-size: var(--text-xl);
-  font-weight: 600;
-  padding: 14px;
-  width: 100%;
-  font-family: inherit;
-  border: 1.5px solid var(--color-rule-strong);
+/* ── Banners ──────────────────────────────────────────────────────────── */
+.banner-note,
+.banner-error,
+.banner-success {
+  padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
-  background: #fff;
+  border: 1px solid var(--color-rule-mid);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  margin-bottom: var(--space-md);
+}
+.banner-note {
+  background: var(--color-paper-2);
   color: var(--color-ink);
 }
-
-/* ── Banners ──────────────────────────────────────────────────────── */
-.banner-error,
-.banner-success,
-.banner-note {
-  border-radius: var(--radius-md);
-  padding: var(--space-sm) var(--space-md);
-  font-size: var(--text-sm);
-  margin-bottom: var(--space-md);
-  display: none;
-}
-.banner-error.visible,
-.banner-success.visible,
-.banner-note.visible {
-  display: block;
-}
 .banner-error {
+  display: none;
   background: var(--color-danger-tint);
-  border: 1px solid #fecaca;
+  border-color: var(--color-danger);
   color: var(--color-danger);
+}
+.banner-error.visible {
+  display: block;
 }
 .banner-success {
   background: var(--color-brand-tint);
-  border: 1px solid #bbf7d0;
+  border-color: var(--color-brand-tint-2);
   color: var(--color-brand-deep);
 }
-.banner-note {
-  background: var(--color-brand-tint);
-  border: 1px solid var(--color-rule);
+
+/* ── Progress ─────────────────────────────────────────────────────────
+   Functional motion: the fill animates width (the one legal exception
+   to the transform/opacity rule), 300ms, no bounce. */
+.progress {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+.progress-step {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-faint);
+  padding-top: var(--space-2xs);
+  border-top: 2px solid var(--color-rule);
+  position: relative;
+}
+.progress-step.active {
   color: var(--color-ink);
+  border-top-color: var(--color-ink);
+}
+.progress-step.completed {
+  color: var(--color-brand-deep);
+  border-top-color: var(--color-brand);
+}
+.progress-bar {
+  height: 2px;
+  background: var(--color-rule);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: var(--space-xl);
+}
+.progress-fill {
+  height: 100%;
+  width: 0;
+  background: var(--color-brand);
+  border-radius: inherit;
+  transition: width var(--dur-med) var(--ease-out);
+}
+.progress-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  margin-bottom: var(--space-sm);
 }
 
-/* ── Spinner (real state, inherits surrounding ink where possible) ── */
+/* ── Loading ──────────────────────────────────────────────────────────
+   Skeletons over spinners; shimmer is the single orchestrated motion
+   and it stops for reduced-motion users. */
 .spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-rule-strong);
+  border-top-color: var(--color-brand);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  flex-shrink: 0;
+  animation: ff-spin 700ms linear infinite;
 }
-@keyframes spin {
+@keyframes ff-spin {
   to {
     transform: rotate(360deg);
   }
 }
-
-/* ── Chip (status / diet marker) — soft tinted pill ──────────────── */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--text-xs);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: var(--radius-pill);
-  white-space: nowrap;
-}
-.chip::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.chip-veg {
-  background: var(--color-brand-tint);
-  color: var(--color-brand-deep);
-}
-.chip-veg::before {
-  background: var(--color-brand);
-}
-.chip-nonveg {
-  background: var(--color-accent-tint);
-  color: var(--color-accent-deep);
-}
-.chip-nonveg::before {
-  background: var(--color-accent);
-}
-.chip-flag {
-  background: var(--color-brand);
-  color: #fff;
-}
-.chip-flag::before {
-  display: none;
-}
-
-/* ── Progress ───────────────────────────────────────────────────────
-   One track + one fill, shared by the order wizard and the dashboard
-   subscription cards. Rounded tracks, green fill with a soft glow. */
-.progress {
+.loading-state {
   display: flex;
-  gap: var(--space-xs);
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  padding: var(--space-md) 0;
 }
-.progress-step {
-  position: relative;
-  flex: 1;
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: var(--color-rule);
-  overflow: hidden;
-}
-.progress-step.active::after,
-.progress-step.completed::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #199e41, #22c55e);
-  border-radius: inherit;
-}
-.progress-step.active::after {
-  transform: translateX(-100%);
-  animation: fill 0.4s var(--ease-out) forwards;
-}
-.progress-step.completed::after {
-  transform: translateX(0);
-}
-@keyframes fill {
-  to {
-    transform: translateX(0);
-  }
-}
-.progress-bar {
-  height: 8px;
-  border-radius: var(--radius-pill);
-  background: var(--color-rule);
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #199e41, #22c55e);
-  transition: width 0.4s var(--ease-out);
-}
-
-/* ── Loading-state primitive (skeleton) ──────────────────────────── */
 .skeleton-block {
+  background: var(--color-paper-3);
+  border-radius: var(--radius-sm);
   position: relative;
   overflow: hidden;
-  background: var(--color-rule);
-  border-radius: var(--radius-sm);
+  min-height: 1em;
 }
 .skeleton-block::after {
   content: "";
   position: absolute;
   inset: 0;
-  transform: translateX(-100%);
   background: linear-gradient(
     90deg,
     transparent,
-    var(--color-skeleton-sheen),
+    var(--color-sheen),
     transparent
   );
-  animation: skeleton-shimmer 1.3s infinite var(--ease-base);
+  animation: ff-shimmer 1.4s var(--ease-base) infinite;
 }
-@keyframes skeleton-shimmer {
-  100% {
+@keyframes ff-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
     transform: translateX(100%);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .skeleton-block::after {
-    animation: none;
-  }
-}
-
-/* ── Loading row inside a button (label swaps for a spinner) ─────── */
 .loading {
   display: none;
   align-items: center;
@@ -638,93 +798,130 @@ button {
 .loading.visible {
   display: flex;
 }
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-md);
+  color: var(--color-muted);
+}
+.empty-state h3 {
+  margin-bottom: var(--space-2xs);
+}
 
-/* ── Footer · Ft6 letter close (fresh restyle) ──────────────────────
-   The whole footer reads as a signed letter: a sign-off verse, the
-   wordmark as the signature, the tagline, minimal links, and the legal
-   colophon beneath in muted small type. One stable definition shared by
-   every customer page (see design.md). Pages only supply the markup
-   below; they never re-declare these rules. */
+/* ── Footer · Ft2 inline single line ───────────────────────────────────
+   One row: wordmark + tagline, links, credit. Hairline above. No
+   columns, no letter-close, no glass. */
 .footer {
-  background: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  margin-top: var(--space-4xl);
   border-top: 1px solid var(--color-rule);
-  padding: var(--space-3xl) var(--page-gutter) var(--space-xl);
+  background: var(--color-paper);
 }
 .footer-inner {
   max-width: 1120px;
   margin: 0 auto;
+  padding: var(--space-lg) var(--page-gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
+  flex-wrap: wrap;
 }
 .footer-letter {
-  margin-bottom: var(--space-xl);
-}
-.footer-verse {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: var(--text-lg);
-  color: var(--color-muted);
-  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
 }
 .footer-brand {
-  display: block;
-  font-size: var(--text-3xl);
-  color: var(--color-ink-display);
+  font-size: var(--text-md);
+  color: var(--color-ink);
 }
 .footer-tagline {
-  font-size: var(--text-md);
-  color: var(--color-muted);
-  margin-top: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+  white-space: nowrap;
 }
 .footer-links {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-md) var(--space-lg);
+  align-items: center;
+  gap: var(--space-md);
   list-style: none;
-  padding: 0;
-  margin: 0;
 }
 .footer-links a {
   font-size: var(--text-sm);
-  font-weight: 500;
   color: var(--color-muted);
-  transition: color var(--dur-short) var(--ease-base);
+  text-decoration: none;
+  white-space: nowrap;
 }
 .footer-links a:hover {
   color: var(--color-brand-deep);
+  text-decoration: underline;
 }
 .footer-colophon {
-  margin-top: var(--space-xl);
-  padding-top: var(--space-md);
-  border-top: 1px solid var(--color-rule);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-sm) var(--space-lg);
+  gap: var(--space-sm);
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
-.footer-colophon p {
+.footer-colophon p,
+.footer-note {
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  color: var(--color-faint);
 }
 .footer-trust {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2xs);
+  gap: 5px;
+  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--color-muted);
+  color: var(--color-faint);
 }
-.footer-trust svg {
-  color: var(--color-brand);
-  flex-shrink: 0;
+.footer-note {
+  margin-top: var(--space-2xs);
 }
-@media (max-width: 768px) {
-  .footer-links,
-  .footer-colophon {
+@media (max-width: 640px) {
+  .footer-inner {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--space-sm);
   }
-  .footer-verse {
-    font-size: var(--text-md);
+  .footer-links {
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-md);
   }
 }
+
+/* ── Reduced motion ────────────────────────────────────────────────────
+   Spatial motion collapses; functional loaders keep running, slower. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 150ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+  }
+  .spinner,
+  .skeleton-block::after {
+    animation-iteration-count: infinite !important;
+    animation-duration: 1.6s !important;
+  }
+}
+
+/* ── Class inventory (the contract every page composes against) ────────
+   container · kicker · mono-label · tnum · note · meta · mt-sm · lead ·
+   wordmark-accent · btn · btn-primary · btn-secondary · btn-tiny(+
+   --danger) · btn-row · cta(--primary/--secondary) · card(+/--hover) ·
+   chip(+/ -veg / -nonveg / -flag) · field · field-label · field-input ·
+   field-textarea · field-note · field-error · banner-note/-error/-success ·
+   progress · progress-step · progress-bar · progress-fill ·
+   progress-text · spinner · skeleton-block · loading-state ·
+   empty-state · footer · footer-inner · footer-letter · footer-brand ·
+   footer-tagline · footer-links · footer-colophon · footer-trust ·
+   footer-note */

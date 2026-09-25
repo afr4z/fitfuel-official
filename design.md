@@ -1,155 +1,179 @@
 # FitFuel Nutrition — Design System (locked)
 
-**genre:** fresh / health-tech · **theme:** reference `swapnow.in` · **system:** this file
+**genre:** modern-minimal · **theme:** custom (tuned) · **macrostructure:** Split Studio
+**vibe:** *clinical calm, quiet luxury, bone and leaf* · **system:** this file
 
-Supersedes the editorial system (R2, `board.jpg`) and the warm-consumer system (R1).
-This is the owner-requested re-theme ("I don't like this theme — do something else,
-try swapnow.in for reference"): an airy gradient ground with floating colour blobs,
-glassy surfaces, rounded pills and soft lifts, Inter body over a rounded-geometric
-Outfit display. Editorial restraint — squared shoulders, hairline rules, serif
-display, deep-green bands — is retired.
+Supersedes the swapnow-influenced build (gradient ground, floating blobs, glassy
+surfaces, pill-everything, Outfit + Inter) and the editorial build before it
+(Fraunces + Archivo, squared shoulders, hairline editorial). The owner rejected
+both and asked for Hallmark; this is the third and current system.
 
-**Owner decisions (not preferences):** brand palette locked to the swapnow ramp:
-deep teal `#063847`, vivid green `#199e41`, coral `#f78757`, amber `#f9c041`,
-indigo `#7272f2` on a `#f6fbf7 → #f4f5ff` ground. Wordmark stays recognizably
-`Fit<span class="wordmark-accent">Fuel</span> Nutrition` — a two-tone lockup
-("Fuel" in a green→teal gradient, Outfit 800). Plan names render exactly as served
-by `/api/plans` — never renamed or split. WhatsApp ordering and web ordering
-(OTP → Razorpay) both remain first-class journeys.
+The thesis: **the menu is a clinical document.** A nutrition brand can earn
+premium trust by refusing decoration and showing the arithmetic — every plan a
+real price sheet, every number derived from the live price table, one dark band,
+one action. Restraint is the aesthetic.
+
+**Owner decisions (not preferences):** brand palette anchored on the FitFuel
+green, used as a *highlighter* only (focus rings, active states, the wordmark
+accent, veg markers) — never a large fill. Wordmark stays recognizably
+`Fit<span class="wordmark-accent">Fuel</span> Nutrition` in solid green (the
+gradient-text lockup is retired; gradient text is banned). Plan names render
+exactly as served by `/api/plans` — never renamed or split. WhatsApp ordering and
+web ordering (OTP → Razorpay) both remain first-class journeys.
 
 ---
 
-## 1 · Genre Fingerprint
+## 1 · What this build refuses
 
-- Rounded geometry, pills and soft shadows over squared hairline editorial.
-- The ground is a fixed gradient with three soft radial colour blobs (indigo,
-  green, coral) showing through everywhere — page containers stay transparent.
-- Glassy surfaces (`backdrop-filter` blur) for the nav, mobile sheet and footer.
-- Uppercase micro-kickers (`HOW IT WORKS`) with `--tracking-caps`, not numerals.
-- Deep teal `#063847` is the one dark band — the closing CTA panel — not the hero.
-- Accent (coral) carries prices and non-veg marks at display size; small text uses
-  the deepened `--color-accent-deep` so contrast holds.
-- No photography anywhere — emoji in tinted rounded tiles stand in for images.
+Every one of these was present in a prior build or is a known AI tell, and is
+now banned system-wide:
 
-## 2 · Macrostructure (per-page family)
+| Refused | Why |
+| --- | --- |
+| Gradient ground + floating colour blobs | The aurora-blob default; reads as generated |
+| Glassmorphism (nav, cards, footer) | Decoration without communicative purpose |
+| Gradient text (the wordmark's green→teal) | The single loudest AI tell |
+| Pill-shaped everything | Shape variety collapsed into one silhouette |
+| Emoji as feature icons | OS-rendered, breaks the type system's voice |
+| 3-up icon-above-heading card grid | The default feature template |
+| Link-row nav (N1/N1b) + announcement banner | The documented AI-nav fingerprint |
+| Invented metrics / testimonials | Dishonest; every number here is derived from the price table |
+| Inter / system-ui as body | On the skill's ban list |
+
+## 2 · Genre fingerprint
+
+- **Flat, quiet, data-forward.** Borders and hairlines, not shadows. Depth is
+  weight and scale.
+- **Bone ground** (`oklch(97% 0.008 88)`), forest-black ink, tight radii (3–14px).
+  Pills appear nowhere by default.
+- **The accent is a highlighter.** ≤ 3% of any viewport: focus ring, active nav
+  state, wordmark accent, veg dot, the "Most popular" chip.
+- **Roman display type only.** Emphasis via weight or colour — never italics.
+- **One eyebrow per page** (the hero kicker). Section heads are plain stacked
+  pairs; no tag-left/header-right, no chapter numbering.
+- **The one dark band** is the closing CTA. Everything else is bone.
+
+## 3 · Macrostructure (per-page family)
 
 | Page | Macro | Note |
 | --- | --- | --- |
-| `index.html` | **Catalogue** | The menu is the product. Centred statement hero, glass price docket, uniform rounded plan cards that lift on hover, numbered step cards, three-column feature cards, deep-teal closing band. |
-| `order.html` | **Narrative Workflow** | Stages `1 → 2 → 3` in the shared progress track. The 3-step wizard *is* the workflow; pill radio toggles. |
-| `login.html` | **App page (functional)** | One measured card on the gradient ground. Fields, banners, buttons from `main.css`. No enrichment. |
-| `dashboard.html` | **App page (functional)** | Card stack: subscriptions, meals, profile. JS-rendered rows keep whole plan titles. No enrichment. |
-| `payment-success.html` | **Letter** | A signed confirmation: gradient check seal, prose, note, actions, signature line. |
-| `privacy-policy.html` | **Long Document** | Continuous prose, inline heads, hairline rules. |
-| `admin.html` / `bot-messages.html` | **Functional tools** | Secret-gated. Never load the shared nav/footer. Tokens only from `main.css`. |
+| `index.html` | **Split Studio** | Hero diptych (statement \| price board) → three alternating plan bands (pitch \| F3 spec sheet) → savings strip → step sequence → protocol list → dark closing band |
+| `order.html` | **Narrative Workflow** | 1 → 2 → 3 shared progress track; compact form primitives |
+| `login.html` | **App page (functional)** | One measured card on the bone ground; OTP fields share the 44px base height |
+| `dashboard.html` | **App page (functional)** | Card stack; JS-rendered rows keep whole plan titles; chips are instrument tags |
+| `payment-success.html` | **Letter** | Brand-tinted check seal, headline, tinted note, revealed actions |
+| `privacy-policy.html` | **Long Document** | One measure, hairline section rules, legal copy verbatim |
+| `admin.html` / `bot-messages.html` | **Functional tools** | Secret-gated. No shared nav/footer. Token-compatible via the legacy alias block |
 
-## 3 · Tokens (single source of truth: `public/css/main.css`)
+## 4 · Tokens (source of truth: `public/css/main.css`)
 
 ```css
-/* ground & ink — swapnow's ramp */
---color-paper:        #ffffff;   /* text-on-brand, card fills */
---color-paper-2:      #f6fbf7;   /* soft green-white panels */
---color-paper-3:      #eef5f0;
---color-card:         #ffffff;
---color-rule:         #dfe4ec;   /* stroke-soft */
---color-rule-strong:  #b8c2d6;   /* stroke-strong */
---color-ink:          #1a1e2a;   /* text-strong */
---color-ink-display:  #063847;   /* deep teal — display heads */
---color-muted:        #6a7287;
---color-faint:        #94a3b8;
+/* paper + panels — warm bone, every neutral chroma-tinted (≥ 0.005) */
+--color-paper:   oklch(97%   0.008 88);
+--color-paper-2: oklch(94.5% 0.01  88);
+--color-paper-3: oklch(91%   0.012 90);
+--color-card:    oklch(99.2% 0.006 88);
 
-/* brand green (locked — swapnow primary-600) */
---color-brand:        #199e41;
---color-brand-deep:   #127932;
---color-brand-tint:   #e6f4ec;
---color-brand-tint-2: #c3e6cc;
+/* ink */
+--color-ink:         oklch(21% 0.012 95);   /* 16.2:1 on paper */
+--color-ink-display: oklch(27% 0.035 158);  /* deep forest-black */
+--color-muted:       oklch(46% 0.014 95);   /* 6.5:1 */
+--color-faint:       oklch(50% 0.014 95);   /* 5.5:1 — instrument labels */
 
-/* coral (locked — swapnow primary-500) — accent only */
---color-accent:         #f78757;
---color-accent-display: #f78757;
---color-accent-deep:    #d95f2b;  /* small text on tint */
---color-accent-tint:    #fff1ea;
+/* rules — hairline · panel border · UI boundary (3.3:1) */
+--color-rule:        oklch(88% 0.008 90);
+--color-rule-mid:    oklch(82% 0.01  90);
+--color-rule-strong: oklch(62% 0.014 92);
 
-/* the field — one deep-teal panel (closing CTA) */
---color-field:       #063847;
---color-field-2:     #04303e;
---color-field-ink:   #ffffff;
---color-field-muted: #b9d4d8;
+/* the one accent — highlighter only */
+--color-brand:        oklch(55% 0.14  150);
+--color-brand-deep:   oklch(44% 0.12  152);  /* 6.7:1 — small text on tint */
+--color-brand-tint:   oklch(94% 0.035 148);
+--color-brand-tint-2: oklch(88% 0.05  148);
+
+/* second accent — muted clay: non-veg marks only */
+--color-accent:       oklch(58% 0.12 42);
+--color-accent-deep:  oklch(46% 0.11 42);
+--color-accent-tint:  oklch(94% 0.03 52);
+--color-accent-tint-2:oklch(88% 0.05 55);
+
+/* the one dark band */
+--color-field:       oklch(25% 0.035 162);
+--color-field-ink:   oklch(96% 0.006 110);
+--color-field-muted: oklch(76% 0.02  150);
+
+--color-focus: oklch(50% 0.18 150);          /* 5.1:1 on paper */
 ```
 
-Focus (`--color-focus: #199e41`) is the brand-green offset outline; danger / warn /
-success keep their aliases so `admin.html` and `bot-messages.html` resolve
-unchanged. The legacy alias block (`--green-*`, `--orange-*`, `--gray-*`,
-`--radius-full`, `--shadow-whisper`, `--font`) stays until every consumer is
-renamed.
+Every pair above was contrast-checked with a WCAG script before shipping. No pure
+`#fff` / `#000`; no zero-chroma neutral; no inline colour outside the token block.
 
-## 4 · Typography (2 faces + outlier wordmark)
+## 5 · Typography (three faces — the ceiling)
 
-- **Display:** `"Outfit"` (self-hosted `outfit-latin-var.woff2`, preloaded). Display
-  headlines, section heads, step numerals, the wordmark. Weight 800, tracking
-  `-0.02em`, line-height ~1.06.
-- **Body / UI:** `"Inter"` (self-hosted `inter-latin-var.woff2`, preloaded). All
-  interface, body copy, fields, chips. Weights 400/600/700.
-- **Outlier (wordmark):** Outfit 800 — the lockup face, "Fuel" in a green→teal
-  text-gradient. The one thing that never drifts between surfaces.
+- **Display — Cabinet Grotesk** 700/800 (self-hosted). An editorial grotesque:
+  crisp, slightly condensed, decisively *not* a rounded geometric like the
+  retired Outfit. Wordmark, h1–h4, plan names, price figures, stat numbers.
+- **Body — Switzer** 400/500/600 (self-hosted). All prose and UI. Replaces Inter
+  (banned as a default).
+- **Instrument register — Geist Mono** 400–600 (self-hosted). One role, applied
+  consistently: kickers, table headers, tenure labels, step numbers, the price
+  ladder, footer credit. This is the Cobalt-style mono-as-data-register, not a
+  decorative outlier.
 
-Type scale: `--text-display: clamp(2.5rem, 1.6rem + 4vw, 4rem)`; `--text-3xl` /
-`--text-2xl` clamped; `--tracking-caps: 0.12em` for kickers and micro-labels.
-Prices use tabular figures (Inter) with `₹` before the number and a muted `/day`
-suffix.
+Scale is a 1.25 major third off 16px. Display tracking `-0.025em`; caps tracking
+`0.12em`; body measure 45–75ch (`--measure: 65ch` default, 48ch in the hero).
+All prices and table figures are `tabular-nums`.
 
-## 5 · Space & Geometry
+## 6 · Geometry, depth, motion
 
-- 4pt scale names (`--space-3xs` → `--space-4xl`) shared with the old system;
-  sections breathe: `--space-lg` between cards, `--space-3xl` between bands.
-- **Radius:** rounded and friendly. `--radius-sm: 8px`, `--radius-md: 12px`,
-  `--radius-lg: 18px`, `--radius-xl: 24px`, `--radius-pill: 999px`. Chips, buttons
-  and radio toggles are pills; cards are 12–18px.
-- **Depth:** soft, teal-seeded shadows (`--shadow-xs` → `--shadow-lg`), hairline
-  borders on cards, hover-lift `translateY(-2px…-4px)` on buttons and interactive
-  cards. The primary button carries a green glow.
+- Radius: 3 / 6 / 10 / 14 / 999 (`--radius-sm` → `--radius-pill`). Pills are
+  opt-in only; nothing in the system uses one by default.
+- Depth: one whisper shadow for overlays only (`--shadow-lg` on the account
+  menu). Panels use a 1px `--color-rule-mid` border and no resting shadow.
+- Motion-cut. Transitions name their properties (never `transition: all`), run
+  120–300ms on exponential ease-out, and animate only `transform`/`opacity`
+  (the progress bar's `width` is the one functional exception). The skeleton
+  shimmer is the only looping animation. `prefers-reduced-motion` collapses
+  spatial motion and slows the loaders.
 
-## 6 · Motion
+## 7 · Chrome
 
-- Motion-cut stance (matches the 2026 site). One entrance per surface; the only
-  repeated animation is the skeleton shimmer and the spinner.
-- Nav banner retracts on scroll (N12) — height tapers to 0; never a slide-and-fade
-  that fights the user.
-- `prefers-reduced-motion: reduce` zeroes all durations and the shimmer.
+- **Nav — N9 edge-aligned minimal.** Wordmark (with the brand-mandated
+  `by Jadpod Fitness Pvt Ltd` attribution) hard-left; the auth slot and the one
+  CTA hard-right; the space between is the design. No link row, no banner, no
+  burger — the bar is one row at every width, and the wordmark returns home from
+  every app page. The signed-in account chip keeps the full APG disclosure
+  behaviour (hover preview, click pin, Escape, outside-click/focus dismissal).
+- **Footer — Ft2 inline single line.** One row under a hairline: wordmark +
+  tagline · three links (Login · Privacy Policy · WhatsApp Us) · `© 2026 Jadpod
+  Fitness Private Limited. All rights reserved.` + Razorpay trust. All six
+  customer pages share it byte-for-byte in behaviour and render it on one line.
+  `/login` stays linked from the footer — it is the only route for signed-out
+  visitors now that the header has no link row.
 
-## 7 · Microinteractions & Voice
+## 8 · Microinteractions & voice
 
-- Buttons: pill-shaped. Primary = green gradient + glow + lift; secondary = glass
-  white pill with hairline, green border on hover. No shine sweeps.
-- Links: pill hover fills in the nav; hairline-free inline links.
-- Chips: soft tinted pills — veg = green tint + green dot, non-veg = coral tint +
-  coral dot, flag = solid green with white text.
-- **CTA voice:** *"Start my plan"* is the one primary action everywhere. Secondary:
-  *"See plans & prices"*, *"Order on WhatsApp"*. Confirmation: *"Start this plan"*
-  on each catalogue card.
+- Primary button = **ink-filled** (never accent-filled); secondary = outlined
+  with a 3:1 UI-strength border that turns brand-green on hover. Tight 6px
+  shoulders, 44px hit target, labels never wrap.
+- Chips are instrument tags: mono, small caps, tinted, with a 6px dot. Veg =
+  brand green, non-veg = clay, flag = solid `--color-brand-deep`.
+- Focus is a first-class state: one green `outline: 2px` ring, offset, never
+  animated, on every focusable element.
+- **CTA voice:** *"Start my plan"* is the one primary action everywhere.
+  Secondary: *"See plans & prices"*, *"Start this plan"*, *"Order on WhatsApp"*.
+- Copy stays honest: the savings strip's `27%` is `₹240 → ₹175` on the Weight
+  Loss plan, `₹175` is the real lowest per-meal price, and `1–3` is the real
+  meals-per-day range from the product copy. No testimonials, no invented proof.
 
-## 8 · What every page MUST share
+## 9 · Exports / source of truth
 
-- Wordmark lockup, the locked tokens, Outfit display + Inter body, the single green
-  focus ring, the nav (N12, injected by `nav.js`), the footer (Ft6 letter close),
-  the CTA voice, the rounded primitives from `main.css`, and a transparent page
-  container so the gradient ground + blobs show through.
-
-## 9 · What pages MAY differ on
-
-- Composition and section order (per macro family above). App pages never use
-  enrichment; marketing pages may use emoji tiles and Tier-B art.
-- `admin.html` / `bot-messages.html` are exempt from the nav/footer/type rules —
-  they are internal tools, gated, token-compatible.
-
-## 10 · Exports / source of truth
-
-- `public/css/main.css` — tokens + shared primitives + footer.
-- `public/css/nav.css` — N12 glassy banner + retract styling of the `nav.js` markup.
-- `public/js/nav.js` — behavior contract unchanged; markup wraps in `.nav-wrap`
-  with a `.nav-banner`.
-- `public/fonts/outfit-latin-var.woff2` — display face (self-hosted).
-- `public/fonts/inter-latin-var.woff2` — body / UI face (self-hosted).
-- Retired with R2: `fraunces-latin-wght-normal.woff2`, the Archivo body face, the
-  oklch editorial ramp, numbered section heads, squared buttons, hairline-card
-  depth.
+- `public/css/main.css` — tokens, primitives, the Ft2 footer, focus + motion
+  policy, the class inventory every page composes against.
+- `public/css/nav.css` — N9 nav styling of the `nav.js` markup.
+- `public/js/nav.js` — behaviour contract unchanged (APG menu, `ff:auth` cache,
+  head prefetch, logout); only the injected markup changed for N9.
+- `public/fonts/` — Cabinet Grotesk 700/800, Switzer 400/500/600, Geist Mono
+  variable. All self-hosted, preloaded, `font-display: swap`.
+- Retired: Outfit, Inter, Fraunces, Archivo, the gradient ground + blobs, glass
+  surfaces, the pill language, the letter-close footer, the announcement banner.

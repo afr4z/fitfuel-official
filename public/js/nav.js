@@ -2,8 +2,8 @@
 // Usage on any page:
 //   <div id="nav-placeholder"></div>
 //   <script src="/js/nav.js" defer></script>
-// The component injects the full nav (brand lockup, links, auth state,
-// CTA) into the placeholder.
+// The component injects the full nav (brand lockup, auth state, CTA)
+// into the placeholder.
 //
 // Behaviour contract (do not regress — this is the whole point of the
 // component):
@@ -28,11 +28,10 @@
 
   const current = (active) => (active ? ' aria-current="page"' : "");
 
-  // One action, one name: "Start my plan" is the label in the hero, the
-  // banner and here. Suppressed where it is redundant — on /order it
-  // would only reload the checkout, and on /dashboard the page has its
-  // own order button. Hidden by CSS under the mobile breakpoint. The
-  // arrow is decorative, so hidden from AT.
+  // One action, one name: "Start my plan" is the label in the hero and
+  // here. Suppressed where it is redundant — on /order it would only
+  // reload the checkout, and on /dashboard the page has its own order
+  // button. The arrow is decorative, so hidden from AT.
   const hideCta = isOrder || isDashboard;
   const cta = hideCta
     ? ""
@@ -42,47 +41,33 @@
         </svg>
       </a>`;
 
-  // N12 · Banner + retract. The banner strip carries the brand kicker;
-  // the edge bar carries the lockup, links, auth slot and CTA. One
-  // sticky wrapper holds both; the banner retracts on scroll (listener
-  // below). The wordmark locks left, attribution beneath — brand-
-  // mandated copy that stays on every page.
+  // N9 · Edge-aligned minimal. The wordmark locks hard-left with the
+  // brand-mandated attribution beneath it; the single CTA (plus the auth
+  // slot when signed in) sits hard-right. No link row, no announcement
+  // banner, no burger: the bar is already one row at every width, and
+  // the space between the lockup and the action is the design. The
+  // wordmark returns home from every app page.
   placeholder.innerHTML = `
     <div class="nav-wrap" id="nav-wrap">
-      <div class="nav-banner" id="nav-banner">
-        <p class="nav-banner-text">
-          <span class="nav-banner-kicker">Nutrition made delicious</span>
-          <span class="nav-banner-divider" aria-hidden="true">·</span>
-          <span>fresh meals, every day</span>
-        </p>
-      </div>
       <nav class="nav" id="nav" aria-label="Primary">
         <div class="nav-inner">
           <a href="/" class="nav-brand">
             <span class="nav-brand-name">Fit<span class="wordmark-accent">Fuel</span> Nutrition</span>
             <span class="nav-brand-attrib">by Jadpod Fitness Pvt Ltd</span>
           </a>
-          <ul class="nav-links" id="nav-links">
-            <li><a href="/#how-it-works" class="nav-link">How It Works</a></li>
-            <li><a href="/#plans" class="nav-link">Plans</a></li>
-            <li><a href="/#why" class="nav-link">Why FitFuel</a></li>
-          </ul>
           <div class="nav-actions">
             <div id="nav-auth" class="nav-auth"></div>
             ${cta}
-            <button class="nav-burger" id="nav-burger" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
-              <span></span><span></span><span></span>
-            </button>
           </div>
         </div>
       </nav>
     </div>
   `;
 
-  // N12 · Banner retract — the strip collapses out of the way once the
-  // page scrolls, leaving the edge bar at full height. Purely additive:
-  // it touches no auth or menu logic, and the global reduced-motion cut
-  // already zeroes the transition for users who ask for it.
+  // Scroll state — the bar picks up the faintest paper tint once the
+  // page moves. Passive listener, class toggle only; it touches no auth
+  // or menu logic, and the global reduced-motion cut covers the CSS
+  // transition for users who ask for it.
   const navWrap = document.getElementById("nav-wrap");
   if (navWrap) {
     const onNavScroll = () =>
@@ -90,43 +75,6 @@
     onNavScroll();
     window.addEventListener("scroll", onNavScroll, { passive: true });
   }
-
-  const burger = document.getElementById("nav-burger");
-  const links = document.getElementById("nav-links");
-
-  // ── Mobile menu ──────────────────────────────────────────────────────
-  function setMenu(open) {
-    if (!links || !burger) return;
-    links.classList.toggle("open", open);
-    burger.setAttribute("aria-expanded", String(open));
-    burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-  }
-
-  burger?.addEventListener("click", () => {
-    setMenu(!links?.classList.contains("open"));
-  });
-
-  // Close after picking a destination (mobile pattern — the sheet is not
-  // an overlay).
-  links?.addEventListener("click", (e) => {
-    if (e.target.closest("a")) setMenu(false);
-  });
-
-  // Escape bails out of the open menu and returns focus to the burger.
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && links?.classList.contains("open")) {
-      setMenu(false);
-      burger?.focus();
-    }
-  });
-
-  // Clean up a mid-state menu if the viewport grows past the breakpoint.
-  const mq = window.matchMedia("(max-width: 820px)");
-  const onViewport = (e) => {
-    if (!e.matches) setMenu(false);
-  };
-  if (mq.addEventListener) mq.addEventListener("change", onViewport);
-  else mq.addListener(onViewport); // legacy Safari
 
   // ── Account menu ──────────────────────────────────────────────────
   // Disclosure pattern (W3C APG "disclosure navigation"), not role="menu":

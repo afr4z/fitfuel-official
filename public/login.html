@@ -10,14 +10,21 @@
     />
     <link
       rel="preload"
-      href="/fonts/outfit-latin-var.woff2"
+      href="/fonts/cabinet-grotesk-800.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="preload"
-      href="/fonts/inter-latin-var.woff2"
+      href="/fonts/switzer-400.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/geist-mono-var-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -26,9 +33,9 @@
     <link rel="stylesheet" href="/css/main.css" />
     <style>
       /* consumer-app · macrostructure: 01 Form · system: design.md ·
-         designed-as-healthtech
+         designed-as-clinical
          ─────────────────────────────────────────────────────────────────
-         One measured card on the gradient ground. Fields, banners,
+         One measured card on the bone ground. Fields, banners,
          buttons and spinners come from /css/main.css — this block is
          layout and the auth page's own composition only. */
       .login-page {
@@ -130,7 +137,7 @@
         .auth-actions .btn-primary,
         .auth-back .btn-secondary {
           /* The base button padding (40px sides) plus the long
-             "Send OTP via WhatsApp" label wraps the pill at 320px;
+             "Send OTP via WhatsApp" label stays one line at 320px;
              squeeze to one line on small screens. */
           padding-inline: 24px;
           font-size: var(--text-sm);
@@ -440,7 +447,6 @@
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-letter">
-          <p class="footer-verse">Yours, the FitFuel kitchen.</p>
           <div class="footer-brand">
             Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
@@ -452,11 +458,6 @@
           <li>
             <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
               >WhatsApp Us</a
-            >
-          </li>
-          <li>
-            <a href="mailto:hello@fitfuelnutrition.com"
-              >hello@fitfuelnutrition.com</a
             >
           </li>
         </ul>
@@ -477,7 +478,7 @@
               <rect x="3" y="11" width="18" height="11" rx="2.5"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-            Secure payments by Razorpay
+            Payments by Razorpay
           </p>
         </div>
       </div>
