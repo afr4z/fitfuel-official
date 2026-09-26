@@ -94,7 +94,31 @@ page-title · page-lead · progress · progress-step · step-label · card · ca
 features-grid · menu · footer · wordmark-accent`. `admin.html` and
 `bot-messages.html` stay secret-gated and token-compatible.
 
-## 6 · Assets
+## 6 · Photography
+
+Three supporting photographs sit in the plan bands, beside the pitch, with the
+order action under each. They are **CC0 1.0 public-domain stock used as
+placeholders** — *not* photographs of FitFuel meals — sourced through the
+[Openverse](https://openverse.org) API. `public/img/CREDITS.md` records the
+creator, source page and alt text for every file.
+
+**Before launch, replace them with your own kitchen photography.** The
+filenames are stable and content-agnostic (`plan-high-protein-320.webp` …), so
+dropping in real 4:3 crops at the same sizes is the whole swap.
+
+Rules the markup follows, so replacing a file needs no code change:
+
+| | |
+| --- | --- |
+| Format | WebP, quality 80 |
+| Variants | 320w and 640w for a 220px card (1× / 2×) |
+| `srcset` + `sizes="220px"` | the browser picks; a phone fetches ~16–28 KB |
+| `width` / `height` | declared, so the card never reflows as images land |
+| `loading="lazy"` | every plan image is below the fold, so the LCP stays the h1 |
+| `aspect-ratio: 4/3` + `object-fit: cover` | any crop renders the same shape |
+| `alt` | describes the photograph, never claims it is the customer's meal |
+
+## 7 · Fonts
 
 - `public/fonts/archivo-latin-var.woff2` — display + wordmark (variable, width axis)
 - `public/fonts/inter-latin-var.woff2` — UI + body (variable)
