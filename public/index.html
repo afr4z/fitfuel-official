@@ -111,9 +111,11 @@
         color: var(--color-brand-deep);
       }
 
-      /* The proof column */
+      /* The proof column. A 2px orange top rule seals it like a priced
+         document, and the ladder figures carry the money colour. */
       .board {
         border: 1px solid var(--color-rule-mid);
+        border-top: 2px solid var(--color-accent);
         border-radius: var(--radius-lg);
         background: var(--color-card);
         padding: var(--space-lg);
@@ -153,7 +155,7 @@
         font-family: var(--font-mono);
         font-size: var(--text-sm);
         font-weight: 500;
-        color: var(--color-ink-display);
+        color: var(--color-accent-deep);
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
       }
@@ -236,7 +238,7 @@
         font-family: var(--font-display);
         font-size: var(--text-lg);
         font-weight: 700;
-        color: var(--color-ink-display);
+        color: var(--color-accent);
         font-variant-numeric: tabular-nums;
         margin-bottom: var(--space-2xs);
       }
@@ -336,7 +338,7 @@
         font-size: var(--text-2xl);
         font-weight: 800;
         letter-spacing: var(--tracking-display);
-        color: var(--color-ink-display);
+        color: var(--color-accent);
         font-variant-numeric: tabular-nums;
         line-height: 1.1;
         margin-bottom: var(--space-2xs);
@@ -436,13 +438,14 @@
         margin-bottom: var(--space-xl);
       }
       .closing .btn-primary {
-        background: var(--color-paper);
+        background: var(--color-accent);
         color: var(--color-ink);
-        border-color: var(--color-paper);
+        border-color: var(--color-accent);
       }
       .closing .btn-primary:hover {
-        background: var(--color-paper-2);
-        border-color: var(--color-paper-2);
+        background: var(--color-accent-deep);
+        border-color: var(--color-accent-deep);
+        color: var(--color-paper);
       }
       .closing .text-link {
         color: var(--color-field-ink);

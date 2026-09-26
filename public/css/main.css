@@ -96,13 +96,15 @@
   --color-brand-tint: oklch(94% 0.035 148);
   --color-brand-tint-2: oklch(88% 0.05 148);
 
-  /* second accent — muted clay, food-warm. Non-veg marks, price figures
-     at display size, never body text. */
-  --color-accent: oklch(58% 0.12 42);
-  --color-accent-display: oklch(58% 0.12 42);
-  --color-accent-deep: oklch(46% 0.11 42);
-  --color-accent-tint: oklch(94% 0.03 52);
-  --color-accent-tint-2: oklch(88% 0.05 55);
+  /* second accent — the brand orange, in two steps. Vivid orange carries
+     large figures, marks and fills (3.4:1 — large text / non-text only);
+     the deep step carries small text on paper or tint (5.9:1). The
+     system's rule: the money is orange. */
+  --color-accent: oklch(63% 0.17 48);
+  --color-accent-display: oklch(63% 0.17 48);
+  --color-accent-deep: oklch(50% 0.15 45);
+  --color-accent-tint: oklch(94% 0.045 58);
+  --color-accent-tint-2: oklch(88% 0.075 56);
 
   /* the single dark band — closing CTA only. */
   --color-field: oklch(25% 0.035 162);
@@ -202,7 +204,9 @@
   --green-deep: var(--color-brand-deep);
   --green-tint: var(--color-brand-tint);
   --green-tint-2: var(--color-brand-tint-2);
-  --orange: var(--color-accent);
+  /* the gated tools read the old names; the orange alias points at the
+     text-safe step so their small labels keep 4.5:1 */
+  --orange: var(--color-accent-deep);
   --orange-deep: var(--color-accent-deep);
   --orange-tint: var(--color-accent-tint);
   --gray-50: var(--color-paper);
@@ -566,8 +570,8 @@ input[type="number"] {
   color: var(--color-accent-deep);
 }
 .chip-flag {
-  background: var(--color-brand-deep);
-  border-color: var(--color-brand-deep);
+  background: var(--color-accent-deep);
+  border-color: var(--color-accent-deep);
   color: var(--color-paper);
 }
 .chip-flag::before {
