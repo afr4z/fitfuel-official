@@ -1,181 +1,234 @@
-/* Hallmark · macrostructure: Split Studio · nav: N9 edge-aligned minimal
- * theme: custom · vibe: "clinical calm, quiet luxury, bone and leaf"
- * display: Cabinet Grotesk · body: Switzer · instrument: Geist Mono
- * ─────────────────────────────────────────────────────────────────────────
- * FitFuel Nutrition — shared auth-aware nav.
- *
- * N9 · Edge-aligned minimal. The wordmark sits hard-left, the single CTA
- * hard-right, and the space between them is the design. There is no link
- * row, no announcement banner, no blur and no pill: the documented AI
- * nav fingerprint is wordmark-left + 4-5 inline links + button-right, and
- * this build refuses it. The wordmark returns home from every app page;
- * the page itself carries the journey.
- *
- * The *behaviour* contract lives in /js/nav.js — APG disclosure account
- * menu, the ff:auth sessionStorage cache, the head prefetch, logout. This
- * file only styles the markup nav.js injects; keep the class names in
- * sync with it.
- *
- * Load on any customer page:
- *   <link rel="stylesheet" href="/css/nav.css" />
- *   <div id="nav-placeholder"></div>
- *   <script src="/js/nav.js" defer></script>
- */
+/* FitFuel Nutrition — shared auth-aware nav (single source of truth)
+Load with /js/nav.js on any page:
+  <link rel="stylesheet" href="/css/nav.css" />
+  <div id="nav-placeholder"></div>
+  <script src="/js/nav.js" defer></script>
+nav.js injects markup using exactly the classes below — keep them in sync.
+*/
 
+/* Unwrap the injection point so .nav's parent is effectively <body> —
+   otherwise the placeholder is exactly nav-height tall and gives
+   position: sticky zero range to travel (nav would scroll away). */
 #nav-placeholder {
   display: contents;
 }
 
 /* ── Shell ─────────────────────────────────────────────────────────── */
-.nav-wrap {
+.nav {
   position: sticky;
   top: 0;
-  z-index: var(--z-sticky);
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+  transition:
+    background 0.3s var(--ease-base, ease),
+    box-shadow 0.3s var(--ease-base, ease);
 }
-.nav {
-  position: relative;
-  background: var(--color-paper);
-  border-bottom: 1px solid var(--color-rule);
-}
-/* On scroll the bar keeps its hairline and gains the faintest tint — the
-   only state change, no blur, no shadow. */
-.nav-wrap.nav-scrolled .nav {
-  background: var(--color-paper-2);
+.nav.scrolled {
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
 }
 .nav-inner {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 12px var(--page-gutter);
-  min-height: var(--nav-height);
+  padding: 14px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-lg);
+  gap: 24px;
 }
 
-/* ── Brand lockup ────────────────────────────────────────────────────
-   Wordmark over the real entity attribution — brand-mandated copy that
-   stays on every page. */
+/* One visible keyboard ring for every nav control */
+.nav :focus-visible {
+  outline: 2px solid var(--green-500, #008c46);
+  outline-offset: 3px;
+}
+
+/* ── Brand ─────────────────────────────────────────────────────────── */
 .nav-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--green-800, #166534);
+  letter-spacing: -0.02em;
   text-decoration: none;
-  flex-shrink: 0;
-}
-.nav-brand-name {
-  font-size: 1.25rem;
-  line-height: 1.1;
-  white-space: nowrap;
-  color: var(--color-ink-display);
-}
-.nav-brand-attrib {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  font-weight: 400;
-  letter-spacing: var(--tracking-wide);
-  color: var(--color-faint);
-  white-space: nowrap;
-}
-
-/* The journey lives in the page, not the bar: the link row is retired. */
-.nav-links {
-  display: none;
-}
-
-/* ── Actions (auth slot + the one CTA) ─────────────────────────────── */
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-.nav-auth {
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
 }
-.nav-auth:empty {
-  display: none;
+/* The Fit|Fuel accent colour and gap are defined once, as
+   .wordmark-accent in /css/main.css. Every page that loads this nav also
+   loads main.css — do not re-declare the accent here. */
+
+/* Entity attribution. It is UI text, not part of the mark, so it opts
+   out of the display face the brand inherits and sits a shade larger
+   than fine print. */
+.nav-sub {
+  font-family: var(--font, "Inter", sans-serif);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--gray-500, #6b7280);
+  letter-spacing: 0.01em;
+  margin-left: 10px;
+  white-space: nowrap;
 }
 
+/* ── Links ─────────────────────────────────────────────────────────── */
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+.nav-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-600, #4b5563);
+  text-decoration: none;
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.15s var(--ease-base, ease);
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--green-500, #008c46);
+  border-radius: 1px;
+  transition: width 0.3s var(--ease-base, ease);
+}
+.nav-link:hover {
+  color: var(--green-800, #166534);
+}
+.nav-link:hover::after {
+  width: 100%;
+}
+/* Current page: show the underline persistently, not just on hover */
+.nav-link[aria-current="page"] {
+  color: var(--green-800, #166534);
+}
+.nav-link[aria-current="page"]::after {
+  width: 100%;
+}
+
+/* ── Pills ────────────────────────────────────────────────────────────
+   Order Now, Login and the account chip are one control with three
+   fills. The box is declared once — padding, border, radius, weight,
+   line-height and transition all shared — so they cannot drift apart.
+   Only colour is per-control. */
 .nav-cta,
 .nav-account-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
-  min-height: 44px;
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-md);
-  font-family: var(--font-body);
-  font-size: 0.9375rem;
+  /* A <button> otherwise inherits the UA's ButtonFace grey; the account
+     chip rendered as a grey lozenge until this was declared. */
+  background: transparent;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 0.875rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.6;
+  padding: 9px 20px;
+  border-radius: var(--radius-full, 9999px);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   transition:
-    background-color var(--dur-micro) var(--ease-base),
-    border-color var(--dur-micro) var(--ease-base),
-    color var(--dur-micro) var(--ease-base);
+    background 0.2s var(--ease-base, ease),
+    border-color 0.2s var(--ease-base, ease),
+    color 0.2s var(--ease-base, ease);
 }
 
-/* One action, one name: "Start my plan" — ink-filled, the same voice as
-   .btn-primary at nav scale. Suppressed by nav.js where it is redundant
-   (/order, /dashboard). */
+/* Primary — the one filled control in the bar, and now the only call to
+   action in the header when signed out. No glow, no lift. */
 .nav-cta {
-  background: var(--color-ink);
-  color: var(--color-paper);
-  border: 1px solid var(--color-ink);
-}
-.nav-cta:hover {
-  background: var(--color-ink-display);
-  border-color: var(--color-ink-display);
+  gap: 10px;
+  background: var(--green-500, #008c46);
+  color: #fff;
 }
 .nav-cta svg {
   flex-shrink: 0;
 }
+.nav-cta:hover {
+  background: var(--green-600, #00833f);
+}
 
-/* Account chip — the lower-emphasis slot: outlined, not filled. */
+/* Account chip — orange outline, the lower-emphasis slot opposite the
+   filled CTA. Not grey: the greeting used to inherit --gray-500 and read
+   as a grey lozenge with one orange word in it. */
 .nav-account-trigger {
-  background: transparent;
-  color: var(--color-ink);
-  border: 1px solid var(--color-rule-strong);
+  border-color: var(--orange-600, #d96217);
+  color: var(--orange-700, #b84e0f);
 }
 .nav-account-trigger:hover,
 .nav-account-trigger[aria-expanded="true"] {
-  border-color: var(--color-brand);
-  color: var(--color-brand-deep);
+  background: var(--orange-50, #fef3ec);
+  border-color: var(--orange-700, #b84e0f);
+}
+
+/* Identity chip — same box and colour as Login; only the label and the
+   chevron differ. */
+.nav-account-trigger {
+  gap: 6px;
 }
 .nav-account-name {
   color: inherit;
-  font-weight: 600;
+  font-weight: 700;
+}
+
+/* ── Auth area (right side) ────────────────────────────────────────── */
+/* Action group: account entry + CTA, tightened like a button pair
+   (Carbon: one high-emphasis + one lower-emphasis control). */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* The auth slot is the last item in the bar — the right edge — and only
+   holds anything when signed in. Signed out it is empty, so the CTA simply
+   takes the corner. */
+.nav-auth {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  order: 2;
+}
+/* Collapses the flex gap so an empty slot leaves no dead space */
+.nav-auth:empty {
+  display: none;
+}
+
+/* ── Account menu (disclosure) ─────────────────────────────────────── */
+.nav-account {
+  position: relative;
 }
 .nav-account-chevron {
-  transition: transform var(--dur-short) var(--ease-out);
+  transition: transform 0.2s var(--ease-base, ease);
 }
 .nav-account-trigger[aria-expanded="true"] .nav-account-chevron {
   transform: rotate(180deg);
-}
-
-/* ── Account menu (APG disclosure) ─────────────────────────────────── */
-.nav-account {
-  position: relative;
 }
 .nav-account-menu {
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
-  z-index: var(--z-dropdown);
+  z-index: 20;
   min-width: 200px;
   display: flex;
   flex-direction: column;
-  background: var(--color-card);
-  border: 1px solid var(--color-rule-mid);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-xs);
-  animation: nav-menu-in var(--dur-short) var(--ease-out);
+  background: #fff;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: var(--radius-md, 10px);
+  box-shadow: var(--shadow-md, 0 4px 20px rgba(0, 0, 0, 0.08));
+  padding: 6px;
+  animation: nav-menu-in 0.15s var(--ease-out, ease);
 }
+/* The author `display: flex` above would otherwise defeat [hidden] */
 .nav-account-menu[hidden] {
   display: none;
 }
@@ -192,82 +245,134 @@
 .nav-account-item {
   display: block;
   width: 100%;
-  padding: var(--space-sm) var(--space-md);
+  padding: 9px 10px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-sm, 8px);
   background: none;
-  color: var(--color-ink);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
+  color: var(--gray-700, #374151);
+  font-family: inherit;
+  font-size: 0.875rem;
   font-weight: 500;
   text-align: left;
   text-decoration: none;
   cursor: pointer;
   transition:
-    background-color var(--dur-micro) var(--ease-base),
-    color var(--dur-micro) var(--ease-base);
+    background 0.15s var(--ease-base, ease),
+    color 0.15s var(--ease-base, ease);
 }
-.nav-account-item:hover,
-.nav-account-item[aria-current="page"] {
-  background: var(--color-brand-tint);
-  color: var(--color-brand-deep);
+/* Menu items share the orange account identity — a green hover under an
+   orange chip reads as a mistake. */
+.nav-account-item:hover {
+  background: var(--orange-50, #fef3ec);
+  color: var(--orange-700, #b84e0f);
 }
 .nav-account-item[aria-current="page"] {
+  background: var(--orange-50, #fef3ec);
+  color: var(--orange-700, #b84e0f);
   font-weight: 600;
 }
 .nav-account-sep {
   height: 1px;
   border: 0;
-  background: var(--color-rule);
-  margin: var(--space-2xs) var(--space-3xs);
+  background: var(--gray-200, #e5e7eb);
+  margin: 5px 4px;
 }
 .nav-account-logout:hover {
-  background: var(--color-danger-tint);
-  color: var(--color-danger);
+  background: var(--gray-50, #f9fafb);
+  color: var(--red-600, #dc2626);
 }
-
-/* The burger is retired with the link row; the rule stays so a stray
-   markup injection can never widen the bar. */
+/* ── Burger (mobile only) ──────────────────────────────────────────── */
 .nav-burger {
   display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+}
+.nav-burger span {
+  width: 22px;
+  height: 2px;
+  background: var(--green-800, #166534);
+  border-radius: 2px;
+  transition:
+    background-color 0.25s var(--ease-base, ease),
+    color 0.25s var(--ease-base, ease),
+    border-color 0.25s var(--ease-base, ease);
 }
 
-/* ── Mobile ──────────────────────────────────────────────────────────
-   N9 is already a single row: wordmark left, account + CTA right. It
-   needs no collapse — only a narrower CTA and a tighter gutter. */
-@media (max-width: 820px) {
-  .nav-inner {
-    padding: 10px var(--page-gutter);
-    min-height: 56px;
-  }
-  /* The 44px hit target stays; the extra height lives in the padding so
-     the label's line box and the button's box agree (a taller inner box
-     with a tight line-height reads as a wrapped two-line button). */
-  .nav-cta,
-  .nav-account-trigger {
-    min-height: 44px;
-    padding: var(--space-sm) var(--space-md);
-    font-size: var(--text-sm);
-    line-height: 1.4;
-  }
-  .nav-cta svg {
+/* ── Tighten before the burger kicks in ────────────────────────────── */
+@media (max-width: 1024px) {
+  /* The attribution is the first thing to go when the bar gets tight. */
+  .nav-sub {
     display: none;
   }
+  .nav-links {
+    gap: 24px;
+  }
 }
-@media (max-width: 400px) {
-  .nav-brand-name {
-    font-size: 1.0625rem;
+
+/* ── Mobile ────────────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .nav-burger {
+    display: flex;
   }
-  .nav-brand-attrib {
-    font-size: 0.5625rem;
+  .nav-inner {
+    flex-wrap: wrap;
+    padding: 12px 16px;
   }
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 8px 0 4px;
+    order: 3;
+    border-top: 1px solid rgba(229, 231, 235, 0.6);
+  }
+  .nav-links.open {
+    display: flex;
+    animation: nav-drop 0.22s var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  }
+  @keyframes nav-drop {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  /* Action group: full-width buttons, primary (Order Now) on top —
+     Carbon's vertical-stack rule. */
+  .nav-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .nav-auth {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  /* In the column the panel flows inline instead of floating — no hover
+     on touch, and nothing can overflow the viewport. */
+  .nav-account {
+    width: 100%;
+  }
+  .nav-account-menu {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    margin-top: 6px;
+    box-shadow: none;
+    animation: none;
+  }
+  /* Full-width button; the shared box already centres its content. */
   .nav-cta {
-    padding: 8px 12px;
-  }
-  .nav-account-name {
-    max-width: 72px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 100%;
   }
 }

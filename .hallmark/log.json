@@ -1,5 +1,20 @@
 [
   {
+    "date": "2026-09-26",
+    "macrostructure": "R1 warm consumer (kept) + fixes",
+    "hero": "H2 split diptych — statement left, menu card right; card carries the plate mark",
+    "theme": "custom",
+    "theme_axes": "light / geometric-grotesque (Archivo) / chromatic-other (green ~145° + orange ~45°)",
+    "vibe": "warm consumer, produce palette, generous and appetite-forward",
+    "enrichment": "Tier B hand-built SVG — the plate divided into three, at three scales (card mark, inline note, closing band); replaces R1's leaf wallpaper and the band's two drifting orbs",
+    "nav": "link-row bar (wordmark + 3 links + CTA)",
+    "footer": "3-block (brand · Your account · Get in touch)",
+    "type": "Archivo variable 62.5-125% (display + wordmark) + Inter (UI/body)",
+    "brief": "FitFuel Nutrition · owner preferred the R1 warm consumer build over three replacements, and asked for a drawn motif rather than photography",
+    "gates": "smoke 0 overflow @320/1280 (fixed a pre-existing 99px mobile overflow) · final-gates 17/17 focus rings on every page, hero fits fold at 522px, lede 65ch, no two-line clickables · audit-brand Jadpod copies on all six pages (added the missing footers), no Login in nav signed out, whole DB plan titles · order-wizard -> Razorpay URL · customer-final dashboard + OTP · zero console errors",
+    "notes": "Built on R1 rather than replacing it, per owner. Thirteen fixes on top — see design.md § 2. Includes: footers added to the four app pages, an <h1> added to /order, box-shadow focus halos replaced with real outlines, nine transition:all sites named, the order radio given an accessible name, and the mobile plan-price overflow fixed."
+  },
+  {
     "date": "2026-09-25",
     "macrostructure": "Split Studio",
     "hero": "H2 split diptych — ratio 6/6, right=proof-column (live price board), divider=negative-space",

@@ -3,28 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FitFuel Nutrition – Macro-balanced meals, cooked daily</title>
+    <title>FitFuel Nutrition – Fresh Meals, Every Day</title>
     <meta
       name="description"
-      content="FitFuel Nutrition delivers fresh, macro-balanced meal plans to your doorstep. High Protein, Healthy Diet and Weight Loss plans from ₹175 per meal. Order on WhatsApp or online."
+      content="FitFuel Nutrition delivers fresh, customized meal plans to your doorstep. Choose from High Protein, Healthy Diet and Weight Loss meal plans. Order via WhatsApp."
     />
     <link
       rel="preload"
-      href="/fonts/cabinet-grotesk-800.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/switzer-400.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/geist-mono-var-latin.woff2"
+      href="/fonts/archivo-latin-var.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -32,497 +18,862 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* Hallmark · macrostructure: Split Studio · theme: custom
-       * vibe: "clinical calm, quiet luxury, bone and leaf"
-       * H2 hero knobs: ratio=6/6, right=proof-column, divider=negative-space
-       * F3 knobs: columns=3 (term · veg · non-veg), rule=every-row, numbers=tabular
-       * F4 knobs: numbering=01/02/03/04, layout=horizontal-flow, connector=rule
-       * N9 nav · Ft2 footer — both live in their own stylesheets.
-       * This block is page composition only: the tokens and every shared
-       * primitive come from /css/main.css. No colour or font-family is
-       * declared here that isn't a token.
-       */
-
-      .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
+      /* brand palette lives in /css/main.css (single source of truth) */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+        .reveal {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
         padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-        white-space: nowrap;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 72px;
+      }
+      body {
+        font-family: var(--font);
+        color: var(--gray-800);
+        background: #fff;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      img {
+        max-width: 100%;
+        display: block;
       }
 
-      /* ── Hero · H2 split diptych, proof column ──────────────────────
-         Left: the statement. Right: the proof — the live price board,
-         the three plans and what a meal costs at 3 days versus 30.
-         No image, no gradient, no glass: the numbers are the picture. */
+      .reveal {
+        opacity: 0;
+        transform: translateY(32px);
+        transition:
+          opacity 0.8s var(--ease-out),
+          transform 0.8s var(--ease-out);
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .reveal-delay-1 {
+        transition-delay: 0.08s;
+      }
+      .reveal-delay-2 {
+        transition-delay: 0.16s;
+      }
+      .reveal-delay-3 {
+        transition-delay: 0.24s;
+      }
+      .reveal-delay-4 {
+        transition-delay: 0.32s;
+      }
+      .reveal-delay-5 {
+        transition-delay: 0.4s;
+      }
+      .reveal-delay-6 {
+        transition-delay: 0.48s;
+      }
+
+      /* Hero — the poster, rebuilt for a screen. The brand board is a
+         flat white sheet with a huge two-tone mark and a letterspaced
+         tagline, so: paper ground, no gradient, no floating orbs, and
+         the menu itself (the thing a food brand actually sells) set as
+         real type instead of a stat row. */
       .hero {
-        padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
-        border-bottom: 1px solid var(--color-rule);
+        position: relative;
+        /* Heavier bottom padding so the hero settles into the next band
+           instead of floating on top of it. */
+        padding: 84px 24px 112px;
+        overflow: hidden;
+        background: #fff;
+      }
+      /* A small echo of the mark, carried by the card it belongs to and
+         by the pricing note, where the three-meals promise is made. */
+      .motif-inline {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        color: var(--green-500);
+        vertical-align: -3px;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.55) 0%,
+          rgba(255, 255, 255, 0.88) 38%,
+          #fff 66%
+        );
+        pointer-events: none;
       }
       .hero-inner {
+        position: relative;
+        z-index: 1;
         max-width: 1120px;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: var(--space-2xl);
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        gap: 72px;
         align-items: center;
       }
-      .hero h1 {
-        font-size: clamp(2.5rem, 4vw + 0.75rem, 4rem);
-        font-weight: 800;
-        line-height: 1.04;
-        letter-spacing: -0.03em;
-        margin-bottom: var(--space-md);
-        max-width: 12ch;
+      .hero-copy {
+        max-width: 620px;
       }
-      .hero .kicker {
-        display: block;
-        margin-bottom: var(--space-md);
-      }
-      .hero-subtitle {
-        font-size: var(--text-md);
-        line-height: 1.55;
-        color: var(--color-muted);
-        max-width: 48ch;
-        margin-bottom: var(--space-xl);
-      }
-      .hero-actions {
-        display: flex;
+      .hero-badge {
+        display: inline-flex;
         align-items: center;
-        gap: var(--space-lg);
-        flex-wrap: wrap;
-      }
-      /* C3 · typographic link — a word, an arrow, an underline. */
-      .text-link {
-        font-size: 0.9375rem;
+        gap: 8px;
+        color: var(--green-700);
+        font-size: 0.78rem;
         font-weight: 600;
-        color: var(--color-ink);
-        text-decoration: underline;
-        text-decoration-thickness: 1px;
-        line-height: 1.2;
-        text-underline-offset: 3px;
-        white-space: nowrap;
-        transition: color var(--dur-micro) var(--ease-base);
+        letter-spacing: 0.04em;
+        margin-bottom: 22px;
       }
-      .text-link:hover {
-        color: var(--color-brand-deep);
-      }
-
-      /* The proof column. A 2px orange top rule seals it like a priced
-         document, and the ladder figures carry the money colour. */
-      .board {
-        border: 1px solid var(--color-rule-mid);
-        border-top: 2px solid var(--color-accent);
-        border-radius: var(--radius-lg);
-        background: var(--color-card);
-        padding: var(--space-lg);
-      }
-      .board-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: var(--space-sm);
-        padding-bottom: var(--space-sm);
-        border-bottom: 1px solid var(--color-rule);
-        margin-bottom: var(--space-xs);
-      }
-      .board-title {
-        font-family: var(--font-display);
-        font-size: var(--text-md);
-        font-weight: 700;
-        color: var(--color-ink-display);
-      }
-      .board-row {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: var(--space-md);
-        padding: var(--space-sm) 0;
-        border-bottom: 1px solid var(--color-rule);
-      }
-      .board-row:last-of-type {
-        border-bottom: 0;
-      }
-      .board-name {
-        font-size: var(--text-sm);
-        font-weight: 600;
-        color: var(--color-ink);
-      }
-      .board-ladder {
-        font-family: var(--font-mono);
-        font-size: var(--text-sm);
-        font-weight: 500;
-        color: var(--color-accent-deep);
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
-      }
-      .board-ladder .arrow {
-        color: var(--color-faint);
-        padding: 0 2px;
-      }
-      .board-note {
-        margin-top: var(--space-sm);
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        line-height: 1.5;
-        color: var(--color-faint);
-        letter-spacing: var(--tracking-wide);
-      }
-
-      /* ── Section heads — stacked, left-aligned, no eyebrows ─────────
-         The eyebrow device is retired: one kicker on the whole page
-         (the hero), and every section head is a plain stacked pair. */
-      .section {
-        max-width: 1120px;
-        margin: 0 auto;
-        padding: var(--space-3xl) var(--page-gutter) 0;
-      }
-      .section-head {
-        max-width: 58ch;
-        margin-bottom: var(--space-2xl);
-      }
-      .section-title {
-        font-size: var(--text-2xl);
-        margin-bottom: var(--space-xs);
-      }
-      .section-note {
-        font-size: var(--text-sm);
-        color: var(--color-muted);
-        line-height: 1.55;
-      }
-
-      /* ── The menu — three diptych bands, alternating direction ─────
-         Each plan gets a full band: the pitch on one side, the real
-         price sheet on the other. Direction alternates down the page
-         (band 2 and 3 flip) so the eye keeps moving. */
-      .plan {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: var(--space-2xl);
-        align-items: start;
-        padding-block: var(--space-2xl);
-        border-top: 1px solid var(--color-rule);
-      }
-      .plan:first-of-type {
-        border-top: 0;
-        padding-top: 0;
-      }
-      .plan:nth-of-type(even) .plan-copy {
-        order: 2;
-      }
-      .plan-copy h3 {
-        font-size: var(--text-xl);
-        margin-bottom: var(--space-xs);
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-        flex-wrap: wrap;
-      }
-      .plan-copy > p {
-        font-size: var(--text-sm);
-        line-height: 1.6;
-        color: var(--color-muted);
-        max-width: 46ch;
-        margin-bottom: var(--space-md);
-      }
-      .plan-chips {
-        display: flex;
-        gap: var(--space-xs);
-        flex-wrap: wrap;
-        margin-bottom: var(--space-lg);
-      }
-      .plan-price {
-        font-family: var(--font-display);
-        font-size: var(--text-lg);
-        font-weight: 700;
-        color: var(--color-accent);
-        font-variant-numeric: tabular-nums;
-        margin-bottom: var(--space-2xs);
-      }
-      .plan-price small {
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        font-weight: 500;
-        color: var(--color-faint);
-        letter-spacing: var(--tracking-wide);
-      }
-
-      /* F3 · tabular spec sheet — the clinical heart of the page. */
-      .sheet {
-        width: 100%;
-        border-collapse: collapse;
-        font-variant-numeric: tabular-nums;
-      }
-      .sheet caption {
-        text-align: left;
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        letter-spacing: var(--tracking-caps);
-        text-transform: uppercase;
-        color: var(--color-faint);
-        padding-bottom: var(--space-sm);
-      }
-      .sheet th,
-      .sheet td {
-        padding: var(--space-xs) 0;
-        border-bottom: 1px solid var(--color-rule);
-        text-align: right;
-      }
-      .sheet thead th {
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
-        font-weight: 500;
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
-        color: var(--color-muted);
-        border-bottom-color: var(--color-rule-mid);
-        padding-bottom: var(--space-2xs);
-      }
-      .sheet thead th:first-child,
-      .sheet tbody th {
-        text-align: left;
-      }
-      .sheet tbody th {
-        font-family: var(--font-body);
-        font-size: var(--text-sm);
-        font-weight: 500;
-        color: var(--color-ink);
-      }
-      .sheet td {
-        font-size: var(--text-sm);
-        font-weight: 500;
-        color: var(--color-ink);
-        width: 30%;
-      }
-      .sheet tbody tr:last-child th,
-      .sheet tbody tr:last-child td {
-        border-bottom: 0;
-      }
-      /* Veg / non-veg carry a colour dot and nothing else — the accent
-         as a marker, never a fill. */
-      .dot {
-        display: inline-block;
+      .hero-badge .pulse {
         width: 7px;
         height: 7px;
+        background: var(--leaf);
         border-radius: 50%;
-        margin-right: 6px;
-        vertical-align: baseline;
+        flex-shrink: 0;
       }
-      .dot-veg {
-        background: var(--color-brand);
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.45;
+          transform: scale(1.35);
+        }
       }
-      .dot-nonveg {
-        background: var(--color-accent);
+      /* The poster's tagline, used as the kicker. */
+      .hero-kicker {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        /* orange-700, not orange-500: at 0.78rem this needs 4.5:1 and
+           orange-500 only manages 3.0:1 on white. */
+        color: var(--orange-700, #b84e0f);
+        margin-bottom: 18px;
       }
-      .sheet-note {
-        margin-top: var(--space-sm);
-        font-size: var(--text-xs);
-        color: var(--color-faint);
-      }
-
-      /* ── Savings — T4 stat strip, every number derived from the
-         price table above it ─────────────────────────────────────── */
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: var(--space-xl);
-        padding-block: var(--space-2xl);
-        border-top: 1px solid var(--color-rule);
-      }
-      .stat b {
-        display: block;
+      .hero h1 {
         font-family: var(--font-display);
-        font-size: var(--text-2xl);
+        font-size: clamp(2.4rem, 4.6vw, 3.5rem);
         font-weight: 800;
-        letter-spacing: var(--tracking-display);
-        color: var(--color-accent);
-        font-variant-numeric: tabular-nums;
-        line-height: 1.1;
-        margin-bottom: var(--space-2xs);
+        /* Archivo's variable width axis, condensed a touch: it keeps the
+           big display size but breaks the headline onto two balanced
+           lines instead of stranding "your goals" on a third. */
+        font-stretch: 94%;
+        color: var(--green-900);
+        line-height: 1.06;
+        letter-spacing: -0.03em;
+        margin-bottom: 20px;
+        max-width: 15em;
       }
-      .stat span {
-        display: block;
-        font-size: var(--text-sm);
-        color: var(--color-muted);
-        line-height: 1.5;
-        max-width: 30ch;
+      .hero-subtitle {
+        font-size: clamp(1rem, 1.4vw, 1.1rem);
+        color: var(--gray-600);
+        margin-bottom: 30px;
+        max-width: 34em;
+      }
+      .hero-buttons {
+        display: flex;
+        gap: 22px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      /* One primary colour across the site: green carries the action,
+         orange stays the accent (wordmark, prices, the auth control). */
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--green-500);
+        color: #fff;
+        padding: 15px 30px;
+        border-radius: var(--radius-full);
+        font-size: 1.05rem;
+        font-weight: 700;
+        transition:
+          background 0.2s var(--ease-base),
+          transform 0.2s var(--ease-base);
+        cursor: pointer;
+        border: none;
+      }
+      .btn-primary:hover {
+        background: var(--green-600);
+        transform: translateY(-2px);
+      }
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+      /* The secondary action is a quiet text link, not a second pill —
+         one filled control per screen. */
+      .hero-textlink {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--green-800);
+        border-bottom: 2px solid var(--green-200);
+        padding-bottom: 3px;
+        transition: border-color 0.2s var(--ease-base);
+      }
+      .hero-textlink:hover {
+        border-color: var(--green-600);
+      }
+      .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+        backdrop-filter: blur(8px);
+        color: var(--green-700);
+        padding: 15px 34px;
+        border-radius: var(--radius-full);
+        font-size: 1.05rem;
+        font-weight: 600;
+        border: 1px solid var(--green-200);
+        transition:
+          border-color 0.2s var(--ease-base),
+          background 0.2s var(--ease-base);
+        cursor: pointer;
+      }
+      .btn-secondary:hover {
+        border-color: var(--green-400);
+        background: var(--green-50);
       }
 
-      /* ── How it works — F4 step sequence, horizontal flow ──────────
-         Numbered 01–04 in the instrument face over a hairline; the
-         connector is the rule each step sits on. */
-      .steps {
+      /* The menu, set as a menu: no card chrome, just the poster's
+         hairline rules and an ember head rule. A bordered box here
+         would be the generic card the brand should not be wearing. */
+      .hero-menu {
+        position: relative;
+        background: #fff;
+        border: 1px solid var(--green-100);
+        border-top: 2px solid var(--orange-500);
+        border-radius: var(--radius-md);
+        padding: 20px 24px 22px;
+        box-shadow: var(--shadow-md);
+      }
+      .hero-menu-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: var(--tracking-wide);
+        text-transform: uppercase;
+        color: var(--gray-500);
+        margin-bottom: 12px;
+      }
+      .hero-menu-list {
         list-style: none;
         padding: 0;
         margin: 0;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: var(--space-lg);
       }
-      .step {
-        border-top: 2px solid var(--color-rule);
-        padding-top: var(--space-sm);
+      .hero-menu-list li {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 0;
+        border-top: 1px solid var(--green-100);
       }
-      .step-num {
-        display: block;
-        font-family: var(--font-mono);
-        font-size: var(--text-xs);
+      .hero-menu-list li:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+      .hero-menu-name {
+        font-family: var(--font-display);
+        font-size: 1.08rem;
+        font-weight: 700;
+        font-stretch: 102%;
+        color: var(--green-900);
+        letter-spacing: -0.015em;
+      }
+      .hero-menu-price {
+        font-family: var(--font-display);
+        font-size: 1.08rem;
+        font-weight: 700;
+        color: var(--orange-600);
+        white-space: nowrap;
+      }
+      .hero-menu-price small {
+        font-family: var(--font);
+        font-size: 0.75rem;
         font-weight: 500;
-        letter-spacing: var(--tracking-wide);
-        color: var(--color-brand-deep);
-        margin-bottom: var(--space-xs);
+        color: var(--gray-500);
+        margin-left: 2px;
       }
-      .step h3 {
-        font-size: var(--text-md);
-        margin-bottom: var(--space-2xs);
-      }
-      .step p {
-        font-size: var(--text-sm);
-        color: var(--color-muted);
-        line-height: 1.55;
+      .hero-menu-note {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--green-100);
+        font-size: 0.78rem;
+        color: var(--gray-500);
       }
 
-      /* ── The protocol — the promises as a spec list ────────────────
-         A two-column list with a hairline over each item. No cards, no
-         icons, no emoji: the labels carry it. */
-      .protocol {
+      .section {
+        padding: 80px 24px;
+      }
+      .section-alt {
+        background: var(--gray-50);
+      }
+      .section-green {
+        background: linear-gradient(180deg, var(--green-50), #fff);
+      }
+      /* ── Section heads ──────────────────────────────────────────────
+         Left-aligned and paired with its note across two columns. R1
+         centred every head over left-aligned bodies — the accidental
+         mismatch, and the reason the page read as a stack of identical
+         centred bands. The head now sits over the content it introduces
+         and shares its 960px measure. */
+      .section-head {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0 var(--space-2xl);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 10px 64px;
+        align-items: end;
+        max-width: 960px;
+        margin: 0 auto 52px;
       }
-      .protocol-item {
-        border-top: 1px solid var(--color-rule);
-        padding-block: var(--space-md);
+      .section-title {
+        text-align: left;
+        font-family: var(--font-display);
+        font-size: clamp(1.7rem, 3.4vw, 2.3rem);
+        font-weight: 800;
+        font-stretch: 103%;
+        color: var(--green-900);
+        margin-bottom: 0;
+        letter-spacing: -0.025em;
+        line-height: 1.15;
       }
-      .protocol-item h3 {
-        font-size: var(--text-md);
-        margin-bottom: var(--space-2xs);
-      }
-      .protocol-item p {
-        font-size: var(--text-sm);
-        color: var(--color-muted);
+      .section-subtitle {
+        text-align: left;
+        color: var(--gray-500);
+        font-size: 1rem;
         line-height: 1.55;
+        margin-bottom: 0;
         max-width: 46ch;
       }
 
-      /* ── Closing — the one dark band ───────────────────────────────
-         A single action, full-bleed, square corners: a band, not a
-         floating card. The primary inverts to paper on the field. */
-      .closing {
-        margin-top: var(--space-4xl);
-        background: var(--color-field);
-        color: var(--color-field-ink);
-        padding: var(--space-3xl) var(--page-gutter);
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        max-width: 960px;
+        margin: 0 auto;
       }
-      .closing-inner {
-        max-width: 720px;
+      /* The steps are a real sequence, so a numeral is the honest
+         marker — it replaced an emoji in a rounded gradient tile. */
+      .step {
+        text-align: left;
+        border-top: 2px solid var(--green-200);
+        padding: 18px 0 0;
+      }
+      .step-num {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 800;
+        font-stretch: 96%;
+        /* orange-600 clears the 3:1 bar for large text (3.7:1) */
+        color: var(--orange-600, #d96217);
+        letter-spacing: -0.02em;
+        line-height: 1;
+        margin-bottom: 12px;
+      }
+      .step h3 {
+        font-family: var(--font-display);
+        font-size: 1.12rem;
+        font-weight: 700;
+        font-stretch: 102%;
+        color: var(--green-900);
+        letter-spacing: -0.015em;
+        margin-bottom: 6px;
+      }
+      .step p {
+        font-size: 0.88rem;
+        color: var(--gray-600);
+        line-height: 1.55;
+      }
+
+      /* Pricing — a menu, not six cards. Each plan is listed once with
+         its veg / non-veg variants side by side, because two cards
+         sharing one name and differing only by a small pill made the
+         price difference look arbitrary. Order is a quiet text link so
+         the hero keeps the page's only filled button. */
+      .plans {
+        max-width: 880px;
         margin: 0 auto;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        text-align: center;
       }
-      .closing h2 {
-        color: var(--color-field-ink);
-        font-size: var(--text-2xl);
-        margin-bottom: var(--space-xs);
+      .plan {
+        border-top: 1px solid var(--green-200);
+        padding: 30px 0 26px;
       }
-      .closing p {
-        color: var(--color-field-muted);
-        font-size: var(--text-sm);
-        line-height: 1.55;
-        max-width: 46ch;
-        margin-bottom: var(--space-xl);
+      .plan:last-child {
+        border-bottom: 1px solid var(--green-200);
       }
-      .closing .btn-primary {
-        background: var(--color-accent);
-        color: var(--color-ink);
-        border-color: var(--color-accent);
+      .plan-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
       }
-      .closing .btn-primary:hover {
-        background: var(--color-accent-deep);
-        border-color: var(--color-accent-deep);
-        color: var(--color-paper);
-      }
-      .closing .text-link {
-        color: var(--color-field-ink);
-      }
-      .closing .text-link:hover {
-        color: var(--color-field-ink);
-        text-decoration-thickness: 2px;
-      }
-      .closing-actions {
+      .plan-title {
+        font-family: var(--font-display);
+        font-size: 1.55rem;
+        font-weight: 800;
+        font-stretch: 104%;
+        color: var(--green-900);
+        letter-spacing: -0.02em;
+        line-height: 1.15;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: var(--space-lg);
+        gap: 12px;
         flex-wrap: wrap;
       }
+      .plan-flag {
+        font-family: var(--font);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--orange-700);
+        border: 1px solid var(--orange-100);
+        background: var(--orange-50);
+        padding: 3px 9px;
+        border-radius: var(--radius-full);
+      }
+      .plan-desc {
+        color: var(--gray-600);
+        font-size: 0.95rem;
+        margin-top: 6px;
+        max-width: 46em;
+      }
+      .plan-order {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--green-800);
+        border-bottom: 2px solid var(--green-200);
+        padding-bottom: 2px;
+        white-space: nowrap;
+        transition: border-color 0.2s var(--ease-base);
+      }
+      .plan-order:hover {
+        border-color: var(--green-600);
+      }
+      .plan-variants {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 32px;
+      }
+      .plan-variant {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 9px 0;
+        border-top: 1px solid var(--green-100);
+      }
+      .variant-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--gray-600);
+        white-space: nowrap;
+      }
+      .variant-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .variant-dot--veg {
+        background: var(--leaf);
+      }
+      .variant-dot--nonveg {
+        background: var(--amber-500);
+      }
+      .variant-prices {
+        display: flex;
+        gap: 18px;
+        font-family: var(--font-display);
+        font-size: 0.98rem;
+        font-weight: 700;
+        font-stretch: 102%;
+        color: var(--green-900);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .variant-prices span {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 5px;
+      }
+      .variant-prices b {
+        font-family: var(--font);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--gray-500);
+        letter-spacing: 0.04em;
+      }
+      /* The pricing note explains how the numbers below are read, so it
+         sits under the head at the head's measure, left-aligned — not
+         floating, centred, and orphaned. */
+      .plans-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        text-align: left;
+        font-size: 0.8rem;
+        line-height: 1.55;
+        color: var(--gray-500);
+        margin: -22px auto 34px;
+        max-width: 960px;
+      }
+      .plans-note .motif-inline {
+        margin-top: 1px;
+      }
 
-      /* ── Responsive ──────────────────────────────────────────────────
-         60rem: the layout breakpoint — diptychs stack, steps go 2-up.
-         40rem: the typography breakpoint — one step per row, type
-         steps down, gutters tighten. */
-      @media (max-width: 60rem) {
+      /* Six reasons as an editorial list, two columns rather than the
+         uniform 3×2 — it breaks the repetition of the four-up steps
+         above and the single-column plans below. */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 72px;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      /* Six reasons, set as an editorial list with a rule between
+         items — not six identical cards, and no decorative emoji. */
+      .feature {
+        border-top: 1px solid var(--green-200);
+        padding: 20px 0 18px;
+      }
+      .feature h3 {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-stretch: 102%;
+        color: var(--green-900);
+        letter-spacing: -0.015em;
+        margin-bottom: 6px;
+      }
+      .feature p {
+        font-size: 0.88rem;
+        color: var(--gray-600);
+        line-height: 1.55;
+        max-width: 34em;
+      }
+
+
+      /* ── The closing band ─────────────────────────────────────────
+         The plate mark, at the one scale where it reads: whole, still,
+         beside the promise. It replaces the two drifting light orbs
+         this band used to carry — ambient motion with no meaning
+         behind it. */
+      .cta-banner {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          var(--green-800) 0%,
+          var(--green-700) 50%,
+          var(--green-600) 100%
+        );
+        padding: 104px 24px;
+        text-align: center;
+      }
+      .band-motif {
+        position: absolute;
+        right: max(4%, 40px);
+        top: 50%;
+        transform: translateY(-50%);
+        width: 300px;
+        height: 300px;
+        color: #fff;
+        opacity: 0.16;
+        pointer-events: none;
+      }
+      .band-motif .hub {
+        fill: currentColor;
+        stroke: none;
+      }
+      .band-copy {
+        position: relative;
+        z-index: 1;
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      .cta-banner h2 {
+        font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+        position: relative;
+        z-index: 1;
+      }
+      .cta-banner .cta-sub {
+        color: rgba(187, 247, 208, 0.9);
+        font-size: 1.05rem;
+        margin-bottom: 36px;
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+        z-index: 1;
+      }
+      .cta-banner .btn-primary {
+        background: #fff;
+        color: var(--green-800);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 1;
+      }
+      .cta-banner .btn-primary:hover {
+        background: var(--green-50);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      }
+      .cta-banner .btn-primary svg {
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+      }
+
+      .footer {
+        background: linear-gradient(
+          165deg,
+          var(--green-800) 0%,
+          var(--green-900) 55%,
+          #003a1e 100%
+        );
+        color: var(--green-100);
+        padding: 64px 24px 36px;
+        position: relative;
+        overflow: hidden;
+      }
+      .footer::before {
+        content: "";
+        position: absolute;
+        top: -120px;
+        right: -100px;
+        width: 420px;
+        height: 420px;
+        background: radial-gradient(
+          circle,
+          rgba(238, 112, 28, 0.14) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .footer::after {
+        content: "";
+        position: absolute;
+        bottom: -140px;
+        left: -80px;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.05) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .footer-inner {
+        max-width: 1040px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 48px;
+        position: relative;
+        z-index: 1;
+      }
+      .footer-brand {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--green-300);
+        margin-bottom: 14px;
+        letter-spacing: -0.01em;
+      }
+      .footer-desc {
+        font-size: 0.9rem;
+        color: var(--green-200);
+        line-height: 1.65;
+        margin-bottom: 10px;
+        max-width: 320px;
+      }
+      .footer-company {
+        font-size: 0.78rem;
+        color: var(--green-300);
+        margin-top: 4px;
+      }
+      .footer-trust {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 18px;
+        font-size: 0.76rem;
+        color: var(--green-200);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 8px 14px;
+        border-radius: var(--radius-full);
+      }
+      .footer-trust svg {
+        color: var(--orange-400);
+        flex-shrink: 0;
+      }
+      .footer h4 {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #fff;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 20px;
+      }
+      .footer ul {
+        list-style: none;
+      }
+      .footer li {
+        margin-bottom: 12px;
+      }
+      .footer a {
+        font-size: 0.88rem;
+        color: var(--green-100);
+        transition: color 0.25s var(--ease-base);
+      }
+      .footer a:hover {
+        color: var(--orange-400);
+      }
+      .footer-bottom {
+        max-width: 1040px;
+        margin: 44px auto 0;
+        padding-top: 26px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+      }
+      .footer-bottom p {
+        font-size: 0.78rem;
+        color: var(--green-200);
+      }
+      .footer-bottom a {
+        color: var(--green-200);
+        transition: color 0.2s;
+      }
+      .footer-bottom a:hover {
+        color: var(--orange-400);
+      }
+      .footer-tagline .wordmark {
+        color: var(--green-300);
+        font-weight: 700;
+      }
+
+      @media (max-width: 900px) {
+        .features-grid,
+      }
+      @media (max-width: 768px) {
+        .steps {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .features-grid,
+        .footer-inner {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+        .hero {
+          padding: 64px 20px 56px;
+        }
         .hero-inner {
           grid-template-columns: 1fr;
-          gap: var(--space-xl);
+          gap: 40px;
         }
-        .hero h1 {
-          max-width: 14ch;
-        }
-        .plan {
-          grid-template-columns: 1fr;
-          gap: var(--space-lg);
-        }
-        .plan:nth-of-type(even) .plan-copy {
-          order: 0;
-        }
-        .steps {
-          grid-template-columns: 1fr 1fr;
-        }
-        .protocol {
-          grid-template-columns: 1fr;
-        }
-      }
-      @media (max-width: 40rem) {
-        .hero {
-          padding-block: var(--space-2xl);
-        }
-        .hero h1 {
-          font-size: 2.5rem;
-          max-width: none;
+        .plan-top {
+          flex-direction: column;
+          gap: 14px;
         }
         .section {
-          padding-top: var(--space-2xl);
+          padding: 56px 20px;
         }
-        .section-title {
-          font-size: 1.875rem;
+        .cta-banner {
+          padding: 56px 20px;
         }
-        .stats {
-          grid-template-columns: 1fr;
-          gap: var(--space-lg);
+        .footer-bottom {
+          flex-direction: column;
+          text-align: center;
         }
+      }
+      @media (max-width: 480px) {
         .steps {
           grid-template-columns: 1fr;
-          gap: var(--space-md);
         }
-        .closing {
-          padding-block: var(--space-2xl);
+        .plan-variants {
+          grid-template-columns: 1fr;
         }
-        .closing h2 {
-          font-size: 1.875rem;
+        /* Four price groups on one nowrap row are ~330px wide, so below
+           the layout breakpoint the label stacks above them and the
+           groups wrap two-by-two. Without this the plan rows push the
+           document 99px wide and the whole page scrolls sideways on a
+           phone. */
+        .plan-variant {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 6px;
+        }
+        .variant-prices {
+          flex-wrap: wrap;
+          row-gap: 6px;
+          white-space: normal;
         }
       }
     </style>
-    <!-- Start the auth check as early as possible: nav.js is deferred, so a
+    <!-- Start the auth check as early as possible. nav.js is deferred, so a
          fetch inside it cannot start until the script has downloaded and
-         run. From <head> this request leaves while the rest of the document
-         is still downloading. The script blocks for ~0ms — it only issues a
-         fetch. nav.js consumes window.__ffAuth. -->
+         run; from <head> this request leaves while the rest of the document
+         is still downloading. It lives in <head> rather than beside the
+         nav.js tag because on script-heavy pages (/order) the parser does
+         not reach the end of <body> until ~690ms, which left the request
+         serialised behind parsing. The script blocks for ~0ms — it only
+         issues a fetch. nav.js consumes window.__ffAuth. -->
     <script>
       window.__ffAuth = fetch("/api/auth/me", { credentials: "include" })
         .then((r) => (r.ok ? r.json() : null))
@@ -532,436 +883,469 @@
   <body>
     <div id="nav-placeholder"></div>
 
-    <!-- 01 · Hero — statement left, the price board right. The board is
-         the proof: what a meal costs on day one versus day thirty. -->
-    <section class="hero" id="top">
+    <section class="hero">
       <div class="hero-inner">
-        <div>
-          <span class="kicker kicker--accent">Macro-balanced · cooked the day it ships</span>
-          <h1>Meals that do the maths for you.</h1>
-          <p class="hero-subtitle">
-            Chef-cooked plans built around your goal — High Protein, Healthy
-            Diet or Weight Loss — from ₹175 a meal at 30 days. Choose a plan and
-            set your meals per day.
+        <div class="hero-copy">
+          <p class="hero-badge">
+            <span class="pulse" aria-hidden="true"></span> Now delivering in
+            your city
           </p>
-          <div class="hero-actions">
+          <p class="hero-kicker">Nutrition made delicious</p>
+          <h1>Chef-prepared meals, built around your goals</h1>
+          <p class="hero-subtitle">
+            Macro-balanced plans, tailored to you and cooked fresh every day.
+            Choose a plan, set your meals, leave the rest to us.
+          </p>
+          <div class="hero-buttons">
             <a href="/order" class="btn-primary">
               Start my plan
               <svg
-                width="16"
-                height="16"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="currentColor"
                 aria-hidden="true"
               >
-                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
+                <path
+                  d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+                />
               </svg>
             </a>
-            <a href="#plans" class="text-link">See plans &amp; prices</a>
+            <a href="#plans" class="hero-textlink">See plans &amp; prices</a>
           </div>
         </div>
-
-        <aside class="board" aria-label="Plans and prices per meal, per day">
-          <div class="board-head">
-            <span class="board-title">The menu</span>
-            <span class="mono-label">Per meal, per day</span>
-          </div>
-          <div class="board-row">
-            <span class="board-name">High Protein</span>
-            <span class="board-ladder"
-              >₹290<span class="arrow">→</span>₹220</span
+        <aside class="hero-menu" aria-label="Plans and prices per day">
+          <p class="hero-menu-title">
+            <svg
+              class="motif-inline"
+              viewBox="0 0 520 520"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="30"
+              aria-hidden="true"
+              focusable="false"
             >
-          </div>
-          <div class="board-row">
-            <span class="board-name">Healthy Diet</span>
-            <span class="board-ladder"
-              >₹250<span class="arrow">→</span>₹190</span
-            >
-          </div>
-          <div class="board-row">
-            <span class="board-name">Weight Loss</span>
-            <span class="board-ladder"
-              >₹240<span class="arrow">→</span>₹175</span
-            >
-          </div>
-          <p class="board-note">
-            3-day price → 30-day price, non-veg. Every plan also comes in a
-            vegetarian version — full tables below.
+              <circle cx="260" cy="260" r="200" />
+              <path d="M260 260V60M260 260 86.7 160M260 260l173.3-100" />
+            </svg>
+            On the menu
+          </p>
+          <ul class="hero-menu-list">
+            <li>
+              <span class="hero-menu-name">High Protein Meal Plan</span>
+              <span class="hero-menu-price">₹290<small>/day</small></span>
+            </li>
+            <li>
+              <span class="hero-menu-name">Healthy Diet Meal Plan</span>
+              <span class="hero-menu-price">₹250<small>/day</small></span>
+            </li>
+            <li>
+              <span class="hero-menu-name">Weight Loss Meal Plan</span>
+              <span class="hero-menu-price">₹240<small>/day</small></span>
+            </li>
+          </ul>
+          <p class="hero-menu-note">
+            Per meal, per day. Cooked fresh daily, delivered to your door.
           </p>
         </aside>
       </div>
     </section>
 
-    <!-- 02 · The menu — three diptych bands. Each plan's proof half is
-         the real price sheet: term × veg × non-veg, tabular figures. -->
-    <section class="section" id="plans">
-      <header class="section-head">
-        <h2 class="section-title">The menu</h2>
-        <p class="section-note">
-          Three goals, each in a vegetarian and a non-vegetarian version.
-          Prices are per meal, per day — the longer you subscribe, the less
-          each meal costs. Take one meal a day or all three.
+    <section class="section section-alt" id="how-it-works">
+      <div class="section-head">
+        <h2 class="section-title reveal">How FitFuel Works</h2>
+        <p class="section-subtitle reveal">
+          From first message to first bite, here's what to expect.
         </p>
-      </header>
-
-      <article class="plan">
-        <div class="plan-copy">
-          <h3>High Protein Meal Plan</h3>
-          <p>
-            Protein-forward meals engineered for recovery and strength —
-            built for lean muscle and satiety, with generous protein in
-            every serving.
-          </p>
-          <div class="plan-chips">
-            <span class="chip chip-nonveg">Non-veg</span>
-            <span class="chip chip-veg">Veg</span>
-            <span class="chip chip-flag">Most popular</span>
-          </div>
-          <p class="plan-price">
-            ₹220 <small>per meal · 30 days</small>
-          </p>
-          <a
-            href="/order?plan=high-protein-nonveg"
-            class="btn-secondary"
-            aria-label="Order the High Protein Meal Plan"
-            >Start this plan</a
-          >
-        </div>
-        <table class="sheet">
-          <caption>High Protein — price per meal, per day</caption>
-          <thead>
-            <tr>
-              <th scope="col">Plan length</th>
-              <th scope="col"><span class="dot dot-veg" aria-hidden="true"></span>Veg</th>
-              <th scope="col">
-                <span class="dot dot-nonveg" aria-hidden="true"></span>Non-veg
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">3 days</th>
-              <td>₹280</td>
-              <td>₹290</td>
-            </tr>
-            <tr>
-              <th scope="row">7 days</th>
-              <td>₹245</td>
-              <td>₹260</td>
-            </tr>
-            <tr>
-              <th scope="row">14 days</th>
-              <td>₹230</td>
-              <td>₹242</td>
-            </tr>
-            <tr>
-              <th scope="row">30 days</th>
-              <td>₹210</td>
-              <td>₹220</td>
-            </tr>
-          </tbody>
-        </table>
-      </article>
-
-      <article class="plan">
-        <div class="plan-copy">
-          <h3>Healthy Diet Meal Plan</h3>
-          <p>
-            Everyday nutrition, balanced across dishes to keep your energy
-            steady through the day — the plan for eating well without
-            thinking about it.
-          </p>
-          <div class="plan-chips">
-            <span class="chip chip-nonveg">Non-veg</span>
-            <span class="chip chip-veg">Veg</span>
-          </div>
-          <p class="plan-price">
-            ₹190 <small>per meal · 30 days</small>
-          </p>
-          <a
-            href="/order?plan=healthy-nonveg"
-            class="btn-secondary"
-            aria-label="Order the Healthy Diet Meal Plan"
-            >Start this plan</a
-          >
-        </div>
-        <table class="sheet">
-          <caption>Healthy Diet — price per meal, per day</caption>
-          <thead>
-            <tr>
-              <th scope="col">Plan length</th>
-              <th scope="col"><span class="dot dot-veg" aria-hidden="true"></span>Veg</th>
-              <th scope="col">
-                <span class="dot dot-nonveg" aria-hidden="true"></span>Non-veg
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">3 days</th>
-              <td>₹240</td>
-              <td>₹250</td>
-            </tr>
-            <tr>
-              <th scope="row">7 days</th>
-              <td>₹210</td>
-              <td>₹220</td>
-            </tr>
-            <tr>
-              <th scope="row">14 days</th>
-              <td>₹193</td>
-              <td>₹207</td>
-            </tr>
-            <tr>
-              <th scope="row">30 days</th>
-              <td>₹175</td>
-              <td>₹190</td>
-            </tr>
-          </tbody>
-        </table>
-      </article>
-
-      <article class="plan">
-        <div class="plan-copy">
-          <h3>Weight Loss Meal Plan</h3>
-          <p>
-            Calorie-controlled meals with lean protein, low-oil cooking and
-            portioned staples — portioned for steady, sustainable fat loss
-            rather than crash dieting.
-          </p>
-          <div class="plan-chips">
-            <span class="chip chip-nonveg">Non-veg</span>
-            <span class="chip chip-veg">Veg</span>
-          </div>
-          <p class="plan-price">
-            ₹175 <small>per meal · 30 days</small>
-          </p>
-          <a
-            href="/order?plan=weight-loss-nonveg"
-            class="btn-secondary"
-            aria-label="Order the Weight Loss Meal Plan"
-            >Start this plan</a
-          >
-        </div>
-        <table class="sheet">
-          <caption>Weight Loss — price per meal, per day</caption>
-          <thead>
-            <tr>
-              <th scope="col">Plan length</th>
-              <th scope="col"><span class="dot dot-veg" aria-hidden="true"></span>Veg</th>
-              <th scope="col">
-                <span class="dot dot-nonveg" aria-hidden="true"></span>Non-veg
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">3 days</th>
-              <td>₹240</td>
-              <td>₹240</td>
-            </tr>
-            <tr>
-              <th scope="row">7 days</th>
-              <td>₹210</td>
-              <td>₹210</td>
-            </tr>
-            <tr>
-              <th scope="row">14 days</th>
-              <td>₹197</td>
-              <td>₹194</td>
-            </tr>
-            <tr>
-              <th scope="row">30 days</th>
-              <td>₹178</td>
-              <td>₹175</td>
-            </tr>
-          </tbody>
-        </table>
-      </article>
-    </section>
-
-    <!-- 03 · Savings — three numbers, every one derived from the price
-         tables directly above. Nothing here is invented. -->
-    <section class="section" aria-label="What longer plans save">
-      <div class="stats tnum">
-        <div class="stat">
-          <b>27%</b>
-          <span>less per meal at 30 days on the Weight Loss plan — ₹240 becomes ₹175.</span>
-        </div>
-        <div class="stat">
-          <b>₹175</b>
-          <span>the lowest per-meal price on the menu, at 30 days a day.</span>
-        </div>
-        <div class="stat">
-          <b>1–3</b>
-          <span>meals a day, on your terms — breakfast, lunch and dinner, or just one.</span>
-        </div>
       </div>
-    </section>
-
-    <!-- 04 · How it works — four steps, numbered, in the instrument
-         face. The numbering here is genuinely ordinal. -->
-    <section class="section" id="how-it-works">
-      <header class="section-head">
-        <h2 class="section-title">How it works</h2>
-        <p class="section-note">
-          From first message to first bite, in four steps.
-        </p>
-      </header>
-      <ol class="steps">
-        <li class="step">
-          <span class="step-num">01</span>
-          <h3>Say hello</h3>
+      <div class="steps">
+        <div class="step reveal reveal-delay-1">
+          <div class="step-num">01</div>
+          <h3>Say Hello</h3>
           <p>
-            Message us on WhatsApp and our guided assistant sets up your
-            account in minutes.
+            Message us on WhatsApp and our guided assistant sets up your account
+            in minutes.
           </p>
-        </li>
-        <li class="step">
-          <span class="step-num">02</span>
-          <h3>Build your plan</h3>
+        </div>
+        <div class="step reveal reveal-delay-2">
+          <div class="step-num">02</div>
+          <h3>Build Your Plan</h3>
           <p>
-            Choose a macro-balanced plan, pick your subscription length
-            (3 to 30 days), and set your meals per day.
+            Choose from our macro-balanced meal plans, pick your subscription
+            length (3 to 30 days), and set your meals per day.
           </p>
-        </li>
-        <li class="step">
-          <span class="step-num">03</span>
-          <h3>Check out securely</h3>
+        </div>
+        <div class="step reveal reveal-delay-3">
+          <div class="step-num">03</div>
+          <h3>Check Out Securely</h3>
           <p>
-            Pay through Razorpay with UPI, cards or net banking. Fully
+            Pay through Razorpay with UPI, cards, or net banking. Fully
             encrypted, fully supported.
           </p>
-        </li>
-        <li class="step">
-          <span class="step-num">04</span>
-          <h3>Eat fresh, daily</h3>
+        </div>
+        <div class="step reveal reveal-delay-4">
+          <div class="step-num">04</div>
+          <h3>Eat Fresh, Daily</h3>
           <p>
             Confirm or skip each meal from a WhatsApp reminder. We cook and
             deliver, every day, on time.
           </p>
-        </li>
-      </ol>
+        </div>
+      </div>
     </section>
 
-    <!-- 05 · The protocol — the promises, as a spec list. -->
-    <section class="section" id="why">
-      <header class="section-head">
-        <h2 class="section-title">The FitFuel protocol</h2>
-        <p class="section-note">
-          What every plan includes, every day of your subscription.
+    <section class="section" id="plans">
+      <div class="section-head">
+        <h2 class="section-title reveal">Meal Plans &amp; Pricing</h2>
+        <p class="section-subtitle reveal">
+          Every plan is macro-balanced and chef-designed, with a veg and a non-veg
+          option. The longer you subscribe, the more you save per meal.
         </p>
-      </header>
-      <div class="protocol">
-        <div class="protocol-item">
-          <h3>Cooked fresh, every day</h3>
+      </div>
+      <p class="plans-note reveal">
+        <svg
+          class="motif-inline"
+          viewBox="0 0 520 520"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="34"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle cx="260" cy="260" r="200" />
+          <path d="M260 260V60M260 260 86.7 160M260 260l173.3-100" />
+        </svg>
+        Price per meal, per day. Each day you can take breakfast (1), lunch and
+        dinner (2), or all three (3).
+      </p>
+      <div class="plans">
+        <article class="plan reveal">
+          <div class="plan-top">
+            <div>
+              <h3 class="plan-title">Healthy Diet Meal Plan</h3>
+              <p class="plan-desc">
+                Everyday nutrition, balanced across vegetarian and
+                non-vegetarian dishes to keep your energy steady.
+              </p>
+            </div>
+            <a href="/order?plan=healthy-nonveg" class="plan-order"
+              >Start this plan</a
+            >
+          </div>
+          <div class="plan-variants">
+            <div class="plan-variant">
+              <span class="variant-label"
+                ><span class="variant-dot variant-dot--nonveg"></span
+                >Non-veg</span
+              >
+              <span class="variant-prices"
+                ><span><b>3d</b> ₹250</span><span><b>7d</b> ₹220</span
+                ><span><b>14d</b> ₹207</span><span><b>30d</b> ₹190</span></span
+              >
+            </div>
+            <div class="plan-variant">
+              <span class="variant-label"
+                ><span class="variant-dot variant-dot--veg"></span>Veg</span
+              >
+              <span class="variant-prices"
+                ><span><b>3d</b> ₹240</span><span><b>7d</b> ₹210</span
+                ><span><b>14d</b> ₹193</span><span><b>30d</b> ₹175</span></span
+              >
+            </div>
+          </div>
+        </article>
+        <article class="plan reveal">
+          <div class="plan-top">
+            <div>
+              <h3 class="plan-title">High Protein Meal Plan</h3>
+              <span class="plan-flag">Most popular</span>
+              <p class="plan-desc">
+                Protein-forward meals engineered for recovery and strength,
+                built for lean muscle and satiety.
+              </p>
+            </div>
+            <a href="/order?plan=high-protein-nonveg" class="plan-order"
+              >Start this plan</a
+            >
+          </div>
+          <div class="plan-variants">
+            <div class="plan-variant">
+              <span class="variant-label"
+                ><span class="variant-dot variant-dot--nonveg"></span
+                >Non-veg</span
+              >
+              <span class="variant-prices"
+                ><span><b>3d</b> ₹290</span><span><b>7d</b> ₹260</span
+                ><span><b>14d</b> ₹242</span><span><b>30d</b> ₹220</span></span
+              >
+            </div>
+            <div class="plan-variant">
+              <span class="variant-label"
+                ><span class="variant-dot variant-dot--veg"></span>Veg</span
+              >
+              <span class="variant-prices"
+                ><span><b>3d</b> ₹280</span><span><b>7d</b> ₹245</span
+                ><span><b>14d</b> ₹230</span><span><b>30d</b> ₹210</span></span
+              >
+            </div>
+          </div>
+        </article>
+        <article class="plan reveal">
+          <div class="plan-top">
+            <div>
+              <h3 class="plan-title">Weight Loss Meal Plan</h3>
+              <p class="plan-desc">
+                Calorie-controlled meals with lean protein, low-oil cooking and
+                portioned staples for steady fat loss.
+              </p>
+            </div>
+            <a href="/order?plan=weight-loss-nonveg" class="plan-order"
+              >Start this plan</a
+            >
+          </div>
+          <div class="plan-variants">
+            <div class="plan-variant">
+              <span class="variant-label"
+                ><span class="variant-dot variant-dot--nonveg"></span
+                >Non-veg</span
+              >
+              <span class="variant-prices"
+                ><span><b>3d</b> ₹240</span><span><b>7d</b> ₹210</span
+                ><span><b>14d</b> ₹194</span><span><b>30d</b> ₹175</span></span
+              >
+            </div>
+            <div class="plan-variant">
+              <span class="variant-label"
+                ><span class="variant-dot variant-dot--veg"></span>Veg</span
+              >
+              <span class="variant-prices"
+                ><span><b>3d</b> ₹240</span><span><b>7d</b> ₹210</span
+                ><span><b>14d</b> ₹197</span><span><b>30d</b> ₹178</span></span
+              >
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="why">
+      <div class="section-head">
+        <h2 class="section-title reveal">Why FitFuel?</h2>
+        <p class="section-subtitle reveal">
+          More than a meal delivery service. A dedicated partner in your
+          nutrition.
+        </p>
+      </div>
+      <div class="features-grid">
+        <div class="feature reveal reveal-delay-1">
+          <h3>Cooked Fresh, Every Day</h3>
           <p>
-            Every meal is prepared the day it ships. Nothing frozen,
-            nothing reheated.
+            Every meal is prepared the day it ships. Nothing frozen, nothing
+            reheated.
           </p>
         </div>
-        <div class="protocol-item">
-          <h3>WhatsApp-first</h3>
+        <div class="feature reveal reveal-delay-2">
+          <h3>WhatsApp-First Experience</h3>
           <p>
-            No app to download. Message us on WhatsApp and our assistant
-            handles the rest.
+            No app to download. Message us on WhatsApp and our assistant handles
+            the rest.
           </p>
         </div>
-        <div class="protocol-item">
-          <h3>Skip or swap, anytime</h3>
+        <div class="feature reveal reveal-delay-3">
+          <h3>Skip or Swap Anytime</h3>
           <p>
             Plans change. Skip or swap any meal directly from your WhatsApp
             reminder, no penalties.
           </p>
         </div>
-        <div class="protocol-item">
-          <h3>Built around your goal</h3>
+        <div class="feature reveal reveal-delay-4">
+          <h3>Plans Built Around Goals</h3>
           <p>
             Lose weight, build muscle, or simply eat better. Each plan is
             designed around a clear outcome.
           </p>
         </div>
-        <div class="protocol-item">
-          <h3>Delivered daily, on time</h3>
+        <div class="feature reveal reveal-delay-5">
+          <h3>Delivered Daily, On Time</h3>
           <p>
-            Fresh meals reach your door every day of your subscription,
-            rain or shine.
+            Fresh meals reach your door every day of your subscription, rain or
+            shine.
           </p>
         </div>
-        <div class="protocol-item">
-          <h3>Bank-grade payment security</h3>
+        <div class="feature reveal reveal-delay-6">
+          <h3>Bank-Grade Payment Security</h3>
           <p>
-            Every transaction runs through Razorpay, trusted by leading
-            Indian brands for secure checkout.
+            Every transaction runs through Razorpay, trusted by leading Indian
+            brands for secure checkout.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- 06 · Closing — the one dark band, one action. -->
-    <section class="closing">
-      <div class="closing-inner">
-        <h2>Ready when you are.</h2>
-        <p>
-          Start your plan today, or message us on WhatsApp and we'll set it
-          up together — three questions and you're done.
-        </p>
-        <div class="closing-actions">
-          <a href="/order" class="btn-primary">Start my plan</a>
-          <a
-            href="https://wa.me/916300159766"
-            target="_blank"
-            rel="noopener"
-            class="text-link"
-            >Order on WhatsApp</a
-          >
-        </div>
+    <section class="cta-banner">
+      <!-- The plate, split into three: breakfast, lunch, dinner. -->
+      <svg
+        class="band-motif"
+        viewBox="0 0 520 520"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <circle cx="260" cy="260" r="236" />
+        <path d="M260 260V24M260 260 55.5 141.5M260 260l204.5-118.5" />
+        <circle class="hub" cx="260" cy="260" r="8" />
+      </svg>
+      <div class="band-copy">
+      <h2 class="reveal">Ready to Eat Better?</h2>
+      <p class="cta-sub reveal">
+        Start your plan today. Chef-prepared, macro-balanced meals delivered to
+        your door every day.
+      </p>
+      <a href="/order" class="btn-primary reveal">
+        Start my plan
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
+        </svg>
+      </a>
       </div>
     </section>
 
-    <!-- Ft2 · Inline single line. Wordmark and tagline, the three
-         destinations, the credit — one row under a hairline. /login
-         stays reachable here: it is the only route to it for signed-out
-         visitors now that the header carries no link row. -->
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-letter">
+        <div>
           <div class="footer-brand">
             Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
-          <p class="footer-tagline">Fresh meals, every day</p>
-        </div>
-        <ul class="footer-links">
-          <li><a href="/login">Login</a></li>
-          <li><a href="/privacy-policy">Privacy Policy</a></li>
-          <li>
-            <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
-              >WhatsApp Us</a
-            >
-          </li>
-        </ul>
-        <div class="footer-colophon">
-          <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
-          <p class="footer-trust">
+          <p class="footer-desc">
+            Chef-prepared meals, built to your macros and delivered to your
+            door, every single day.
+          </p>
+          <p class="footer-company">By Jadpod Fitness Private Limited</p>
+          <div class="footer-trust">
             <svg
-              width="14"
-              height="14"
+              width="15"
+              height="15"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2.2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              aria-hidden="true"
             >
               <rect x="3" y="11" width="18" height="11" rx="2.5"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-            Payments by Razorpay
-          </p>
+            Secure payments by Razorpay
+          </div>
+        </div>
+        <div>
+          <h4>Your account</h4>
+          <ul>
+            <li><a href="/order">Start my plan</a></li>
+            <li><a href="/dashboard">My Orders</a></li>
+            <li><a href="/login">Login</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Get in touch</h4>
+          <ul>
+            <li>
+              <a
+                href="https://wa.me/916300159766"
+                target="_blank"
+                rel="noopener"
+                >WhatsApp: +91 63001 59766</a
+              >
+            </li>
+            <li>
+              <a href="mailto:hello@fitfuelnutrition.com"
+                >hello@fitfuelnutrition.com</a
+              >
+            </li>
+            <li><a href="/privacy-policy">Privacy Policy</a></li>
+          </ul>
         </div>
       </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
+        <p class="footer-tagline">
+          <span class="wordmark"
+            >Fit<span class="wordmark-accent">Fuel</span></span
+          >
+          &mdash; Fresh meals, every day
+        </p>
+      </div>
     </footer>
+    <script>
+      // ── Scroll Reveal (Intersection Observer) ─────────────────────
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (!prefersReduced) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("visible");
+                observer.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+        );
+        document
+          .querySelectorAll(".reveal")
+          .forEach((el) => observer.observe(el));
+      } else {
+        document
+          .querySelectorAll(".reveal")
+          .forEach((el) => el.classList.add("visible"));
+      }
+
+      // ── Animated Counters ─────────────────────────────────────────
+      function animateCounter(el) {
+        const target = parseInt(el.dataset.target);
+        const suffix = el.dataset.suffix || "";
+        const duration = 1200;
+        const start = performance.now();
+        function tick(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.round(eased * target) + suffix;
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+      if (!prefersReduced) {
+        const counterObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                animateCounter(e.target);
+                counterObserver.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.5 },
+        );
+        document
+          .querySelectorAll(".counter")
+          .forEach((el) => counterObserver.observe(el));
+      } else {
+        document.querySelectorAll(".counter").forEach((el) => {
+          el.textContent = el.dataset.target + (el.dataset.suffix || "");
+        });
+      }
+    </script>
     <script src="/js/nav.js" defer></script>
   </body>
 </html>

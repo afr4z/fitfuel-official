@@ -10,21 +10,7 @@
     />
     <link
       rel="preload"
-      href="/fonts/cabinet-grotesk-800.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/switzer-400.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/geist-mono-var-latin.woff2"
+      href="/fonts/archivo-latin-var.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -33,73 +19,111 @@
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* consumer-app · macrostructure: 14 Narrative Workflow ·
-         system: design.md · designed-as-clinical
-         ─────────────────────────────────────────────────────────────────
-         The 3-step wizard IS the narrative: 01 Plan → 02 Customize →
-         03 Checkout. Fields, banners, spinners, chips and buttons come
-         from /css/main.css. This block is the wizard's own composition:
-         the stage toggles, the plan grid, summary panels and the
-         numbered stage tracker. */
-
+      /* brand palette lives in /css/main.css (single source of truth) */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font);
+        color: var(--gray-800);
+        background: #fff;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
       .container {
-        max-width: 760px;
+        max-width: 720px;
         margin: 0 auto;
-        padding: var(--space-2xl) var(--page-gutter) var(--space-3xl);
+        padding: 24px 16px;
       }
-
-      /* ── Narrative head ──────────────────────────────────────────── */
-      .wizard-title {
+      /* The page's own head. R1 opened the checkout straight into the
+         progress tracker — no <h1>, no page title, nothing to orient a
+         first-time customer (or a screen reader) on the page that
+         matters most. */
+      .page-head {
+        padding-top: 20px;
+        margin-bottom: 4px;
+      }
+      .page-title {
         font-family: var(--font-display);
-        font-weight: 700;
-        font-size: var(--text-3xl);
-        letter-spacing: var(--tracking-display);
-        color: var(--color-ink-display);
+        font-size: clamp(1.8rem, 4.4vw, 2.5rem);
+        font-weight: 800;
+        font-stretch: 96%;
+        color: var(--green-900, #0d2f1a);
+        letter-spacing: -0.03em;
         line-height: 1.08;
-        margin-bottom: var(--space-2xs);
+        margin-bottom: 10px;
       }
-      .wizard-lead {
-        font-size: var(--text-md);
-        color: var(--color-muted);
-        margin-bottom: var(--space-xl);
-        max-width: 40em;
+      .page-lead {
+        font-size: 1rem;
+        line-height: 1.55;
+        color: var(--gray-600, #4b5563);
+        max-width: 52ch;
+        margin-bottom: 8px;
       }
-
-      /* ── Stage tracker ─────────────────────────────────────────────
-         Three numbered stages, the active one in ink, over the shared
-         progress bar. */
-      .wizard-head {
-        margin-bottom: var(--space-lg);
-        padding-bottom: var(--space-md);
-        border-bottom: 1px solid var(--color-rule);
+      .progress {
+        display: flex;
+        gap: 8px;
+        margin: 24px 0;
+      }
+      .progress-step {
+        flex: 1;
+        height: 4px;
+        background: var(--gray-200);
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+      }
+      .progress-step.active::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--green-500);
+        transform: translateX(-100%);
+        animation: fill 0.4s var(--ease-out) forwards;
+      }
+      .progress-step.completed::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--green-500);
+      }
+      @keyframes fill {
+        to {
+          transform: translateX(0);
+        }
       }
       .step-label {
         display: flex;
         justify-content: space-between;
-        font-size: var(--text-xs);
-        font-weight: 700;
-        color: var(--color-faint);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: var(--space-xs);
-      }
-      .step-label span {
-        display: inline-flex;
-        align-items: baseline;
-        gap: var(--space-2xs);
-      }
-      .step-label span::before {
-        content: attr(data-num);
-        font-family: var(--font-display);
-        font-size: 0.6875rem;
+        font-size: 0.7rem;
         font-weight: 600;
-        color: var(--color-brand);
+        color: var(--gray-400);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
       }
       .step-label span.active {
-        color: var(--color-ink-display);
+        color: var(--green-600);
       }
-
-      /* ── Steps ────────────────────────────────────────────────────── */
+      .step-label span.completed {
+        color: var(--green-600);
+      }
       .form-step {
         display: none;
         animation: fadeIn 0.3s var(--ease-out);
@@ -117,36 +141,33 @@
           transform: translateY(0);
         }
       }
-      .form-card {
-        padding: var(--space-xl);
+      .card {
+        background: #fff;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
       }
       .card-header {
-        margin-bottom: var(--space-lg);
-        padding-bottom: var(--space-md);
-        border-bottom: 1px solid var(--color-rule);
+        margin-bottom: 20px;
       }
       .card-title {
-        font-family: var(--font-display);
-        font-size: var(--text-2xl);
+        font-size: 1.25rem;
         font-weight: 700;
-        letter-spacing: var(--tracking-display);
-        color: var(--color-ink-display);
-        margin-bottom: var(--space-2xs);
+        color: var(--gray-900);
+        margin-bottom: 4px;
       }
       .card-subtitle {
-        font-size: var(--text-md);
-        color: var(--color-muted);
+        font-size: 0.9rem;
+        color: var(--gray-500);
       }
-
-      /* ── Plan grid (JS-rendered .plan-option cards) ─────────────── */
       .plan-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: var(--space-sm);
+        gap: 12px;
       }
-      /* An odd plan count must not leave a lone half-width card stranded
-         on its own row: when the total is odd, the last option spans the
-         full width. With an even count nothing matches. */
+      /* Three plans in two columns strands the last card at half width;
+         when the count is odd it takes the full row. */
       .plan-option:last-child:nth-child(odd) {
         grid-column: 1 / -1;
       }
@@ -157,62 +178,101 @@
       }
       .plan-option {
         position: relative;
-        border: 1px solid var(--color-rule);
+        border: 2px solid var(--gray-200);
         border-radius: var(--radius-md);
-        padding: var(--space-md);
+        padding: 16px;
         cursor: pointer;
-        background: var(--color-card);
         transition:
-          border-color var(--dur-short) var(--ease-base),
-          background-color var(--dur-short) var(--ease-base),
-          box-shadow var(--dur-short) var(--ease-base);
+          background-color 0.2s var(--ease-base),
+          border-color 0.2s var(--ease-base),
+          color 0.2s var(--ease-base),
+          transform 0.2s var(--ease-base);
+        background: #fff;
       }
       .plan-option:hover {
-        border-color: var(--color-brand-tint-2);
+        border-color: var(--green-300);
+        box-shadow: var(--shadow-sm);
       }
       .plan-option.selected {
-        border-color: var(--color-brand);
-        background: var(--color-brand-tint);
-        box-shadow: var(--shadow-sm);
+        border-color: var(--green-500);
+        background: var(--green-50);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
       }
       .plan-option input {
         position: absolute;
         opacity: 0;
         pointer-events: none;
       }
-      .plan-name {
-        font-family: var(--font-display);
-        font-weight: 700;
-        font-size: var(--text-md);
-        color: var(--color-ink-display);
-        letter-spacing: -0.01em;
-        margin-bottom: var(--space-xs);
-        padding-right: 3.2em;
-        min-height: 2.4em;
+      .plan-emoji {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
       }
-      .plan-name + .chip {
-        position: absolute;
-        top: var(--space-md);
-        right: var(--space-md);
+      .plan-name {
+        font-weight: 700;
+        color: var(--gray-900);
+        font-size: 0.95rem;
+      }
+      .plan-tag {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: var(--radius-full);
+        margin-top: 6px;
+      }
+      .tag-veg {
+        background: var(--green-100);
+        color: var(--green-800);
+      }
+      .tag-nonveg {
+        background: #fef3c7;
+        color: #92400e;
       }
       .plan-desc {
-        font-size: var(--text-xs);
-        color: var(--color-muted);
-        margin-top: var(--space-xs);
-        line-height: 1.5;
+        font-size: 0.75rem;
+        color: var(--gray-500);
+        margin-top: 8px;
+        line-height: 1.4;
       }
       .plan-skeleton {
-        border: 1px solid var(--color-rule);
+        border: 2px solid var(--gray-100);
         border-radius: var(--radius-md);
-        padding: var(--space-md);
-        background: var(--color-card);
+        padding: 16px;
+        background: #fff;
       }
-
-      /* ── Duration / meals (radio toggles) ──────────────────────── */
+      .skeleton-block {
+        position: relative;
+        overflow: hidden;
+        background: var(--gray-100);
+        border-radius: var(--radius-sm);
+      }
+      .skeleton-block::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.75),
+          transparent
+        );
+        animation: skeleton-shimmer 1.3s infinite var(--ease-base);
+      }
+      @keyframes skeleton-shimmer {
+        100% {
+          transform: translateX(100%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .skeleton-block::after {
+          animation: none;
+        }
+      }
       .radio-group {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--space-xs);
+        gap: 10px;
       }
       .radio-btn {
         position: relative;
@@ -226,193 +286,278 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 10px 18px;
-        border: 1px solid var(--color-rule-strong);
-        border-radius: var(--radius-md);
+        min-width: 80px;
+        padding: 12px 16px;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-sm);
         font-weight: 600;
-        font-size: var(--text-sm);
-        color: var(--color-ink);
+        color: var(--gray-700);
         cursor: pointer;
-        background: var(--color-card);
         transition:
-          border-color var(--dur-short) var(--ease-base),
-          background-color var(--dur-short) var(--ease-base),
-          color var(--dur-short) var(--ease-base);
-      }
-      .radio-btn label:hover {
-        border-color: var(--color-brand);
+          background-color 0.2s var(--ease-base),
+          border-color 0.2s var(--ease-base),
+          color 0.2s var(--ease-base),
+          transform 0.2s var(--ease-base);
+        background: #fff;
       }
       .radio-btn input:checked + label {
-        border-color: var(--color-brand);
-        background: var(--color-brand-tint);
-        color: var(--color-brand-deep);
+        border-color: var(--green-500);
+        background: var(--green-50);
+        color: var(--green-800);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
       }
-
-      /* ── Price summary (step 2) ─────────────────────────────────── */
+      .radio-btn label:hover {
+        border-color: var(--green-300);
+      }
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 6px;
+      }
+      .form-label .required {
+        color: var(--red-500);
+        margin-left: 2px;
+      }
+      .form-input,
+      .form-textarea {
+        width: 100%;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius-sm);
+        background: #fff;
+        color: var(--gray-900);
+        transition:
+          border-color 0.15s var(--ease-base),
+          outline-color 0.15s var(--ease-base);
+      }
+      .form-input:focus-visible,
+      .form-textarea:focus-visible {
+        outline: 2px solid var(--green-500, #1a7d36);
+        outline-offset: 1px;
+        border-color: var(--green-500);
+      }
+      .form-input::placeholder,
+      .form-textarea::placeholder {
+        color: var(--gray-400);
+      }
+      .form-input.error,
+      .form-textarea.error {
+        border-color: var(--red-500);
+      }
+      .form-error {
+        font-size: 0.75rem;
+        color: var(--red-500);
+        margin-top: 4px;
+        display: none;
+      }
+      .form-error.visible {
+        display: block;
+      }
+      .address-option:hover {
+        border-color: var(--green-300);
+      }
+      .address-option.selected {
+        border-color: var(--green-500);
+        background: var(--green-50);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        color: var(--gray-900);
+      }
+      .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
       .price-summary {
-        background: var(--color-paper-2);
-        border: 1px solid var(--color-rule);
+        background: var(--green-50);
+        border: 1px solid var(--green-100);
         border-radius: var(--radius-md);
-        padding: var(--space-md);
-        margin-top: var(--space-lg);
+        padding: 16px;
+        margin-top: 20px;
       }
       .price-row {
         display: flex;
         justify-content: space-between;
-        padding: var(--space-xs) 0;
-        font-size: var(--text-sm);
-        color: var(--color-muted);
+        padding: 6px 0;
+        font-size: 0.9rem;
       }
       .price-row:not(:last-child) {
-        border-bottom: 1px solid var(--color-rule);
-      }
-      .price-row span:last-child {
-        color: var(--color-ink);
-        font-weight: 600;
+        border-bottom: 1px solid var(--green-200);
       }
       .price-row.total {
         font-weight: 700;
-        font-size: var(--text-lg);
-        color: var(--color-brand-deep);
-        margin-top: var(--space-2xs);
-        padding-top: var(--space-sm);
-      }
-      .price-row.total span:last-child {
-        color: var(--color-brand-deep);
-      }
-
-      /* ── Final summary (step 3) ─────────────────────────────────── */
-      .plan-summary {
-        background: var(--color-paper-2);
-        border: 1px solid var(--color-rule);
-        border-radius: var(--radius-md);
-        padding: var(--space-md);
-        margin-bottom: var(--space-lg);
-      }
-      .plan-summary-row {
-        display: flex;
-        justify-content: space-between;
-        padding: var(--space-xs) 0;
-        font-size: var(--text-sm);
-        color: var(--color-muted);
-      }
-      .plan-summary-row span:last-child {
-        color: var(--color-ink);
-        font-weight: 600;
-      }
-      .plan-summary-row:not(:last-child) {
-        border-bottom: 1px solid var(--color-rule);
-      }
-      .plan-summary-row.total {
-        font-weight: 700;
-        font-size: var(--text-lg);
-        margin-top: var(--space-2xs);
-        padding-top: var(--space-sm);
-        color: var(--color-brand-deep);
-      }
-      .plan-summary-row.total span:last-child {
-        color: var(--color-brand-deep);
-      }
-
-      /* ── Auth + address inputs ──────────────────────────────────── */
-      .stack-row {
-        display: flex;
-        gap: var(--space-xs);
-      }
-      .stack-row .field-input {
-        flex: 1;
-      }
-      .stack-row .btn {
-        flex-shrink: 0;
-        min-height: 48px;
-        white-space: nowrap;
-      }
-      .check-row {
-        display: flex;
-        align-items: center;
-        gap: var(--space-sm);
-        font-size: var(--text-sm);
-        color: var(--color-ink);
-        cursor: pointer;
-      }
-      .check-row input {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--color-brand);
-        flex-shrink: 0;
-      }
-
-      /* ── Saved addresses (JS-rendered .address-option labels) ──── */
-      .address-option {
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-        padding: var(--space-sm) var(--space-md);
-        border: 1px solid var(--color-rule);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--space-xs);
-        cursor: pointer;
-        background: var(--color-card);
-        transition:
-          border-color var(--dur-short) var(--ease-base),
-          background-color var(--dur-short) var(--ease-base);
-      }
-      .address-option:hover {
-        border-color: var(--color-brand-tint-2);
-      }
-      .address-option.selected,
-      .address-option:has(input:checked) {
-        border-color: var(--color-brand);
-        background: var(--color-brand-tint);
-      }
-      .address-option input {
+        font-size: 1.05rem;
+        color: var(--green-800);
         margin-top: 4px;
-        accent-color: var(--color-brand);
-        flex-shrink: 0;
+        padding-top: 10px;
       }
-      .address-option-body {
-        font-size: var(--text-sm);
-        line-height: 1.5;
-        color: var(--color-ink);
-        flex: 1;
-        min-width: 0;
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        transition:
+          background-color 0.2s var(--ease-base),
+          border-color 0.2s var(--ease-base),
+          color 0.2s var(--ease-base),
+          transform 0.2s var(--ease-base);
+        font-family: inherit;
       }
-
-      /* ── Bottom actions ─────────────────────────────────────────── */
+      .btn-primary {
+        background: var(--green-500);
+        color: #fff;
+        width: 100%;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: var(--green-600);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+      }
+      .btn-primary:disabled {
+        background: var(--gray-300);
+        color: var(--gray-500);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .btn-secondary {
+        background: #fff;
+        color: var(--green-700);
+        border: 2px solid var(--green-200);
+        width: 100%;
+      }
+      .btn-secondary:hover:not(:disabled) {
+        border-color: var(--green-400);
+        background: var(--green-50);
+      }
+      .btn-secondary:disabled {
+        border-color: var(--gray-200);
+        color: var(--gray-400);
+        cursor: not-allowed;
+      }
       .btn-row {
         display: flex;
-        gap: var(--space-sm);
-        margin-top: var(--space-xl);
+        gap: 12px;
+        margin-top: 24px;
       }
       .btn-row .btn {
         flex: 1;
       }
-      #btn-back {
-        max-width: 140px;
+      .loading {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .loading.visible {
+        display: flex;
+      }
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .error-banner {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: var(--red-600);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 16px;
+        font-size: 0.85rem;
+        display: none;
+      }
+      .error-banner.visible {
+        display: block;
+      }
+      .success-banner {
+        background: var(--green-50);
+        border: 1px solid var(--green-100);
+        color: var(--green-700);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 16px;
+        font-size: 0.85rem;
+        display: none;
+      }
+      .success-banner.visible {
+        display: block;
+      }
+      .success-state {
+        text-align: center;
+        padding: 40px 20px;
+      }
+      .success-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--green-500), var(--green-600));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 8px 32px rgba(34, 197, 94, 0.35);
+      }
+      .success-icon svg {
+        width: 40px;
+        height: 40px;
+        color: #fff;
+      }
+      .success-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--green-800);
+        margin-bottom: 8px;
+      }
+      .success-text {
+        color: var(--gray-600);
+        margin-bottom: 24px;
+      }
+      .plan-summary {
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: 16px;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+      .plan-summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 0.9rem;
+      }
+      .plan-summary-row:not(:last-child) {
+        border-bottom: 1px solid var(--gray-200);
       }
       .footer-note {
         text-align: center;
-        font-size: var(--text-xs);
-        color: var(--color-muted);
-        margin-top: var(--space-2xl);
+        font-size: 0.75rem;
+        color: var(--gray-400);
+        margin-top: 32px;
       }
       .footer-note a {
-        color: var(--color-brand-deep);
-        font-weight: 600;
-      }
-      @media (max-width: 480px) {
-        .container {
-          padding: var(--space-lg) var(--page-gutter) var(--space-xl);
-        }
-        .form-card {
-          padding: var(--space-lg);
-        }
-        .stack-row {
-          flex-wrap: wrap;
-        }
-        .stack-row .btn {
-          width: 100%;
-        }
+        color: var(--green-600);
+        font-weight: 500;
       }
     </style>
     <!-- Start the auth check as early as possible. nav.js is deferred, so a
@@ -433,37 +578,37 @@
     <div id="nav-placeholder"></div>
 
     <div class="container">
-      <h1 class="wizard-title">Order your plan</h1>
-      <p class="wizard-lead">
-        Three steps from goal to checkout. Your number is only asked once —
-        we use it to verify you on WhatsApp and to reconnect your dashboard.
-      </p>
-
-      <div class="wizard-head">
-        <div
-          class="progress"
-          role="progressbar"
-          aria-valuenow="1"
-          aria-valuemin="1"
-          aria-valuemax="3"
-          aria-label="Order progress"
-        >
-          <div class="progress-step active" id="step1-prog"></div>
-          <div class="progress-step" id="step2-prog"></div>
-          <div class="progress-step" id="step3-prog"></div>
-        </div>
-        <div class="step-label">
-          <span class="active" id="step1-label" data-num="01">Plan</span>
-          <span id="step2-label" data-num="02">Customize</span>
-          <span id="step3-label" data-num="03">Checkout</span>
-        </div>
+      <div class="page-head">
+        <h1 class="page-title">Order your plan</h1>
+        <p class="page-lead">
+          Three steps from goal to checkout. Your number is only asked once —
+          we use it to verify you on WhatsApp and to reconnect your orders.
+        </p>
+      </div>
+      <div
+        class="progress"
+        role="progressbar"
+        aria-valuenow="1"
+        aria-valuemin="1"
+        aria-valuemax="3"
+        aria-label="Order progress"
+      >
+        <div class="progress-step active" id="step1-prog"></div>
+        <div class="progress-step" id="step2-prog"></div>
+        <div class="progress-step" id="step3-prog"></div>
+      </div>
+      <div class="step-label">
+        <span class="active" id="step1-label">Plan</span>
+        <span id="step2-label">Details</span>
+        <span id="step3-label">Checkout</span>
       </div>
 
-      <div class="banner-error" id="error-banner" role="alert"></div>
-      <div class="banner-success" id="success-banner" role="status"></div>
+      <div class="error-banner" id="error-banner" role="alert"></div>
+      <div class="success-banner" id="success-banner" role="status"></div>
+
       <form id="order-form" novalidate>
         <div class="form-step active" id="step1" data-step="1">
-          <div class="card form-card">
+          <div class="card">
             <div class="card-header">
               <h2 class="card-title">Choose Your Plan</h2>
               <p class="card-subtitle">
@@ -480,19 +625,18 @@
         </div>
 
         <div class="form-step" id="step2" data-step="2">
-          <div class="card form-card">
+          <div class="card">
             <div class="card-header">
               <h2 class="card-title">Customize Your Plan</h2>
               <p class="card-subtitle">Select duration and meals per day</p>
             </div>
 
-            <div class="field">
-              <span class="field-label" id="duration-label">Duration</span>
+            <div class="form-group">
+              <label class="form-label">Duration</label>
               <div
                 class="radio-group"
                 role="radiogroup"
                 aria-label="Plan duration"
-                aria-labelledby="duration-label"
               >
                 <div class="radio-btn">
                   <input
@@ -525,13 +669,12 @@
               </div>
             </div>
 
-            <div class="field">
-              <span class="field-label" id="meals-label">Meals Per Day</span>
+            <div class="form-group">
+              <label class="form-label">Meals Per Day</label>
               <div
                 class="radio-group"
                 role="radiogroup"
                 aria-label="Meals per day"
-                aria-labelledby="meals-label"
               >
                 <div class="radio-btn">
                   <input
@@ -541,7 +684,7 @@
                     id="meals-1"
                     required
                   />
-                  <label for="meals-1">Breakfast Only</label>
+                  <label for="meals-1">🌅 Breakfast Only</label>
                 </div>
                 <div class="radio-btn">
                   <input
@@ -551,7 +694,7 @@
                     id="meals-2"
                     checked
                   />
-                  <label for="meals-2">Lunch + Dinner</label>
+                  <label for="meals-2">🍽️ Lunch + Dinner</label>
                 </div>
                 <div class="radio-btn">
                   <input
@@ -560,10 +703,16 @@
                     value="3"
                     id="meals-3"
                   />
-                  <label for="meals-3">All 3 Meals</label>
+                  <label for="meals-3">🌟 All 3 Meals</label>
                 </div>
               </div>
-              <p class="field-note">
+              <p
+                style="
+                  font-size: 0.75rem;
+                  color: var(--gray-500);
+                  margin-top: 8px;
+                "
+              >
                 Note: Sundays are a kitchen holiday — no deliveries. Your plan
                 extends by a day for each Sunday.
               </p>
@@ -587,7 +736,7 @@
         </div>
 
         <div class="form-step" id="step3" data-step="3">
-          <div class="card form-card">
+          <div class="card">
             <div class="card-header">
               <h2 class="card-title">Delivery Details</h2>
               <p class="card-subtitle">
@@ -599,14 +748,14 @@
 
             <!-- OTP verification gate -->
             <div id="auth-section">
-              <div class="field">
-                <label class="field-label" for="auth-phone"
+              <div class="form-group">
+                <label class="form-label"
                   >Phone Number <span class="required">*</span></label
                 >
-                <div class="stack-row">
+                <div style="display: flex; gap: 8px">
                   <input
                     type="tel"
-                    class="field-input"
+                    class="form-input"
                     name="auth-phone"
                     id="auth-phone"
                     placeholder="9876543210"
@@ -614,39 +763,57 @@
                     autocomplete="tel"
                     pattern="[0-9]{10}"
                     maxlength="10"
+                    style="flex: 1"
                   />
-                  <button type="button" class="btn btn-secondary" id="btn-send-otp">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="btn-send-otp"
+                    style="width: auto; padding: 12px 16px; white-space: nowrap"
+                  >
                     Send OTP
                   </button>
                 </div>
-                <div class="field-error" id="auth-phone-error">
+                <div class="form-error" id="auth-phone-error">
                   Enter a valid 10-digit Indian mobile number
                 </div>
               </div>
 
-              <div class="field" id="otp-group" style="display: none">
-                <label class="field-label" for="otp-input"
+              <div class="form-group" id="otp-group" style="display: none">
+                <label class="form-label"
                   >Enter OTP <span class="required">*</span></label
                 >
-                <div class="stack-row">
+                <div style="display: flex; gap: 8px">
                   <input
                     type="tel"
-                    class="field-input"
+                    class="form-input"
                     name="otp"
                     id="otp-input"
                     placeholder="6-digit OTP"
                     pattern="[0-9]{6}"
                     maxlength="6"
                     inputmode="numeric"
+                    style="flex: 1"
                   />
-                  <button type="button" class="btn btn-primary" id="btn-verify-otp">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="btn-verify-otp"
+                    style="width: auto; padding: 12px 16px; white-space: nowrap"
+                  >
                     Verify
                   </button>
                 </div>
-                <div class="field-error" id="otp-error">
+                <div class="form-error" id="otp-error">
                   Enter the 6-digit OTP sent to your WhatsApp
                 </div>
-                <p class="field-note">
+                <p
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--gray-500);
+                    margin-top: 8px;
+                  "
+                >
                   The OTP is sent to your WhatsApp. One-time password expires in
                   5 minutes.
                 </p>
@@ -655,76 +822,104 @@
 
             <!-- Shown after OTP verification -->
             <div id="checkout-section" style="display: none">
-              <div class="banner-success" id="verified-banner">Phone verified!</div>
+              <div
+                class="success-banner"
+                id="verified-banner"
+                style="display: block"
+              >
+                ✅ Phone verified!
+              </div>
 
-              <div class="field">
-                <label class="field-label" for="name"
+              <div class="form-group">
+                <label class="form-label"
                   >Full Name <span class="required">*</span></label
                 >
                 <input
                   type="text"
-                  class="field-input"
+                  class="form-input"
                   name="name"
                   id="name"
                   placeholder="Your full name"
                   required
                   autocomplete="name"
                 />
-                <div class="field-error" id="name-error">
+                <div class="form-error" id="name-error">
                   Please enter your name
                 </div>
               </div>
 
-              <div class="field">
-                <label class="field-label" for="email">Email</label>
+              <div class="form-group">
+                <label class="form-label">Email</label>
                 <input
                   type="email"
-                  class="field-input"
+                  class="form-input"
                   name="email"
                   id="email"
                   placeholder="you@example.com"
                   autocomplete="email"
                 />
-                <div class="field-error" id="email-error">
+                <div class="form-error" id="email-error">
                   Enter a valid email address
                 </div>
               </div>
 
-              <div class="field">
-                <span class="field-label">Saved Addresses</span>
+              <div class="form-group">
+                <label class="form-label">Saved Addresses</label>
                 <div id="saved-addresses"></div>
-                <p class="field-note">
+                <p
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--gray-500);
+                    margin-top: 8px;
+                  "
+                >
                   Pick a saved address, or choose "Use a different address"
                   below to enter delivery details manually.
                 </p>
               </div>
 
-              <div class="field" id="manual-address-section">
-                <span class="field-label">Use a different address</span>
-                <label class="check-row" for="use-new-address">
-                  <input type="checkbox" id="use-new-address" />
-                  Enter a new delivery address
-                </label>
+              <div class="form-group" id="manual-address-section">
+                <label class="form-label">Use a different address</label>
+                <div>
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      font-size: 0.85rem;
+                      color: var(--gray-600);
+                    "
+                  >
+                    <input type="checkbox" id="use-new-address" />
+                    Enter a new delivery address
+                  </label>
+                </div>
               </div>
 
-              <div class="field" id="new-address-fields" style="display: none">
-                <label class="field-label" for="location"
+              <div
+                class="form-group"
+                id="new-address-fields"
+                style="display: none"
+              >
+                <label class="form-label"
                   >Delivery Area / Neighbourhood
                   <span class="required">*</span></label
                 >
-                <div class="stack-row">
+                <div style="display: flex; gap: 8px">
                   <input
                     type="text"
-                    class="field-input"
+                    class="form-input"
                     name="location"
                     id="location"
                     placeholder="e.g. Koramangala, Indiranagar"
                     autocomplete="address-level2"
+                    style="flex: 1"
                   />
                   <button
                     type="button"
                     class="btn btn-secondary"
                     id="btn-get-location"
+                    style="width: auto; padding: 12px 16px; white-space: nowrap"
                     title="Use current location"
                   >
                     <svg
@@ -742,23 +937,27 @@
                     </svg>
                   </button>
                 </div>
-                <div class="field-error" id="location-error">
+                <div class="form-error" id="location-error">
                   Please enter your area/neighbourhood
                 </div>
               </div>
 
-              <div class="field" id="new-address-fields-2" style="display: none">
-                <label class="field-label" for="address"
+              <div
+                class="form-group"
+                id="new-address-fields-2"
+                style="display: none"
+              >
+                <label class="form-label"
                   >Full Address <span class="required">*</span></label
                 >
                 <textarea
-                  class="field-textarea"
+                  class="form-textarea"
                   name="address"
                   id="address"
                   placeholder="Flat/House No., Street, Landmark, City, PIN"
                   autocomplete="street-address"
                 ></textarea>
-                <div class="field-error" id="address-error">
+                <div class="form-error" id="address-error">
                   Please enter your full delivery address
                 </div>
               </div>
@@ -775,7 +974,7 @@
           >
             Back
           </button>
-          <button type="button" class="btn btn-primary" id="btn-next" disabled>
+          <button type="button" class="btn btn-primary" id="btn-next">
             <span id="btn-next-label">Continue</span>
             <div class="loading" id="btn-loading">
               <div class="spinner"></div>
@@ -864,9 +1063,10 @@
           .map(
             (plan, idx) => `
         <div class="plan-option" data-plan-id="${esc(plan.id)}" role="radio" aria-checked="false" tabindex="0">
-          <input type="radio" name="plan" value="${esc(plan.id)}" id="plan-${esc(plan.id)}" ${idx === 0 ? "checked" : ""}>
-          <div class="plan-name">${esc(plan.title)}</div>
-          <span class="chip ${plan.tag === "Veg" ? "chip-veg" : "chip-nonveg"}">${esc(plan.tag)}</span>
+          <input type="radio" name="plan" value="${esc(plan.id)}" id="plan-${esc(plan.id)}" aria-label="${esc(plan.title)}" ${idx === 0 ? "checked" : ""}>
+          <div class="plan-emoji" aria-hidden="true">${esc(plan.title.split(" ")[0])}</div>
+          <div class="plan-name">${esc(plan.title.replace(/^[\s\S]*?\s/, ""))}</div>
+          <span class="plan-tag ${plan.tag === "Veg" ? "tag-veg" : "tag-nonveg"}">${esc(plan.tag)}</span>
           <div class="plan-desc">${esc(plan.description)}</div>
         </div>
       `,
@@ -964,7 +1164,7 @@
         <div class="plan-summary-row"><span>Plan</span><span>${esc(plan?.title) || "—"}</span></div>
         <div class="plan-summary-row"><span>Duration</span><span>${dayLabel}</span></div>
         <div class="plan-summary-row"><span>Meals/Day</span><span>${mealLabel}</span></div>
-        <div class="plan-summary-row total"><span>Total</span><span>₹${total.toLocaleString()}</span></div>
+        <div class="plan-summary-row" style="font-weight:700;color:var(--green-800);"><span>Total</span><span>₹${total.toLocaleString()}</span></div>
       `;
       }
 
@@ -1334,17 +1534,19 @@
         const container = document.getElementById("saved-addresses");
         if (!addresses.length) {
           container.innerHTML = `
-            <p class="field-note">No saved addresses yet — use "Use a different address" below.</p>`;
+            <p style="font-size:0.82rem;color:var(--gray-500);margin-top:4px">
+              No saved addresses yet — use "Use a different address" below.
+            </p>`;
           return;
         }
         container.innerHTML = addresses
           .map(
             (a) => `
-          <label class="address-option">
-            <input type="radio" name="saved-address" value="${esc(a.id)}" />
-            <span class="address-option-body">
+          <label class="address-option" style="display:flex;gap:10px;align-items:flex-start;padding:12px;border:2px solid var(--gray-200);border-radius:var(--radius-md);margin-bottom:8px;cursor:pointer;transition:border-color .15s">
+            <input type="radio" name="saved-address" value="${esc(a.id)}" style="margin-top:4px" />
+            <span style="font-size:0.85rem;line-height:1.5">
               <strong>${esc(a.label) || "Home"}</strong>
-              ${a.is_default ? ' <span class="chip chip-veg">Default</span>' : ""}
+              ${a.is_default ? ' <span style="background:var(--green-100);color:var(--green-800);font-size:0.7rem;padding:2px 6px;border-radius:999px">Default</span>' : ""}
               <br />${esc(a.address)}
             </span>
           </label>`,
@@ -1456,27 +1658,19 @@
         }, 100);
       }
     </script>
-
+    <script src="/js/nav.js" defer></script>
     <footer class="footer">
       <div class="footer-inner">
-        <div class="footer-letter">
+        <div>
           <div class="footer-brand">
             Fit<span class="wordmark-accent">Fuel</span> Nutrition
           </div>
-          <p class="footer-tagline">Fresh meals, every day</p>
-        </div>
-        <ul class="footer-links">
-          <li><a href="/login">Login</a></li>
-          <li><a href="/privacy-policy">Privacy Policy</a></li>
-          <li>
-            <a href="https://wa.me/916300159766" target="_blank" rel="noopener"
-              >WhatsApp Us</a
-            >
-          </li>
-        </ul>
-        <div class="footer-colophon">
-          <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
-          <p class="footer-trust">
+          <p class="footer-desc">
+            Chef-prepared meals, built to your macros and delivered to your
+            door, every single day.
+          </p>
+          <p class="footer-company">By Jadpod Fitness Private Limited</p>
+          <div class="footer-trust">
             <svg
               width="15"
               height="15"
@@ -1486,16 +1680,50 @@
               stroke-width="2.2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              aria-hidden="true"
             >
               <rect x="3" y="11" width="18" height="11" rx="2.5"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-            Payments by Razorpay
-          </p>
+            Secure payments by Razorpay
+          </div>
+        </div>
+        <div>
+          <h4>Your account</h4>
+          <ul>
+            <li><a href="/order">Start my plan</a></li>
+            <li><a href="/dashboard">My Orders</a></li>
+            <li><a href="/login">Login</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Get in touch</h4>
+          <ul>
+            <li>
+              <a
+                href="https://wa.me/916300159766"
+                target="_blank"
+                rel="noopener"
+                >WhatsApp: +91 63001 59766</a
+              >
+            </li>
+            <li>
+              <a href="mailto:hello@fitfuelnutrition.com"
+                >hello@fitfuelnutrition.com</a
+              >
+            </li>
+            <li><a href="/privacy-policy">Privacy Policy</a></li>
+          </ul>
         </div>
       </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Jadpod Fitness Private Limited. All rights reserved.</p>
+        <p class="footer-tagline">
+          <span class="wordmark"
+            >Fit<span class="wordmark-accent">Fuel</span></span
+          >
+          &mdash; Fresh meals, every day
+        </p>
+      </div>
     </footer>
-    <script src="/js/nav.js" defer></script>
   </body>
 </html>
