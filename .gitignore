@@ -3,3 +3,15 @@
 node_modules/
 .vercel/
 supabase/.temp/
+
+# Runtime logs
+logs/
+*.log
+
+# One-off database schema dump
+database_current.sql
+
+# Local AI/agent tooling (skills, configs)
+.agents/
+.claude/
+agent/
