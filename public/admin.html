@@ -130,7 +130,7 @@
           shown
             .map(
               (d) =>
-                `<option value="${esc(d.id)}" ${d.id === currentId ? "selected" : ""}>${esc(dishName(d))} (₹${esc(d.price)})</option>`,
+                `<option value="${esc(d.id)}" ${d.id === currentId ? "selected" : ""}>${esc(dishName(d))}</option>`,
             )
             .join("")
         );

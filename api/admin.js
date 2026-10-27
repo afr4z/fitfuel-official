@@ -733,7 +733,7 @@ async function handlePlanDefaults(req, res) {
         .order("name"),
       supabase
         .from("dishes")
-        .select("id, meal_plan_id, name, is_veg, price")
+        .select("id, meal_plan_id, name, is_veg")
         .eq("is_available", true)
         .order("name"),
       supabase
@@ -774,7 +774,6 @@ async function handlePlanDefaults(req, res) {
           id: d.id,
           name: d.name,
           is_veg: d.is_veg,
-          price: d.price,
         })),
       week: Object.fromEntries(
         DAYS.map((dow) => [
