@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { sendTemplate } from "../lib/whatsapp.js";
 import { safeEqualStrings } from "../lib/timingSafe.js";
 import { stripDishSlotSuffix } from "../lib/dishNames.js";
+import { calculateMealProgress, todayDateStrIST } from "../lib/mealProgress.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -260,19 +261,41 @@ async function getCustomerByPhone(phone) {
 }
 
 async function getActiveSubscriptions(phone) {
+  const today = todayDateStrIST();
   const { data } = await supabase
     .from("meal_plan_subscriptions")
     .select(
       `
       id, plan_type, status, start_date, end_date, meal_plan_id,
-      meal_plans (name, emoji, tag)
+      meal_plans (name, emoji, tag),
+      subscription_slots (slot, delivery_time)
     `,
     )
     .eq("phone", phone)
     .eq("status", "active")
-    .gte("end_date", new Date().toISOString().split("T")[0])
+    .gte("end_date", today)
     .order("end_date", { ascending: true });
-  return data || [];
+
+  const subs = data || [];
+  if (!subs.length) return [];
+
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select("subscription_id, delivery_date, slot, delivery_time, status")
+    .in(
+      "subscription_id",
+      subs.map((sub) => sub.id),
+    )
+    .lte("delivery_date", today);
+
+  if (error) {
+    console.error("[AUTH] Meal progress order lookup failed:", error.message);
+  }
+
+  return subs.map((sub) => ({
+    ...sub,
+    ...calculateMealProgress(sub, orders ?? []),
+  }));
 }
 
 async function getUpcomingMeals(phone) {
@@ -281,7 +304,7 @@ async function getUpcomingMeals(phone) {
     .select("id")
     .eq("phone", phone)
     .eq("status", "active")
-    .gte("end_date", new Date().toISOString().split("T")[0]);
+    .gte("end_date", todayDateStrIST());
 
   if (!subs?.length) return [];
 
@@ -295,7 +318,7 @@ async function getUpcomingMeals(phone) {
     `,
     )
     .in("subscription_slots.subscription_id", subIds)
-    .gte("delivery_date", new Date().toISOString().split("T")[0])
+    .gte("delivery_date", todayDateStrIST())
     .order("delivery_date", { ascending: true })
     .limit(10);
 

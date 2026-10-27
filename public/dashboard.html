@@ -456,18 +456,6 @@
         });
       }
 
-      function calcProgress(start, end) {
-        const today = new Date().toISOString().split("T")[0];
-        const s = new Date(start + "T00:00:00Z");
-        const e = new Date(end + "T00:00:00Z");
-        const t = new Date(today + "T00:00:00Z");
-        if (t < s) return 0;
-        if (t > e) return 100;
-        const total = (e - s) / (1000 * 60 * 60 * 24);
-        const elapsed = (t - s) / (1000 * 60 * 60 * 24);
-        return Math.round((elapsed / total) * 100);
-      }
-
       function renderSubscriptions(subs) {
         const el = document.getElementById("subscriptions-list");
         if (!subs?.length) {
@@ -483,7 +471,9 @@
         el.innerHTML = subs
           .map((sub) => {
             const plan = sub.meal_plans || {};
-            const progress = calcProgress(sub.start_date, sub.end_date);
+            const progress = sub.progress ?? 0;
+            const completedMeals = sub.completed_meals ?? 0;
+            const totalMeals = sub.total_meals ?? 0;
             return `
           <div class="plan-card">
             <div class="plan-header">
@@ -508,7 +498,7 @@
             </div>
             <div class="plan-progress">
               <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
-              <div class="progress-text"><span>${progress}% complete</span><span>${progress >= 100 ? "Ended" : "Active"}</span></div>
+              <div class="progress-text"><span>${progress}% complete</span><span>${completedMeals}/${totalMeals} meals</span></div>
             </div>
             <div class="plan-actions">
               <a href="/order" class="btn btn-secondary" style="flex:1;text-align:center;">Renew / New Plan</a>
