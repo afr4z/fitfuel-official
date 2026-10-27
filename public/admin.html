@@ -20,6 +20,8 @@
     <script>
       const API = "/api/admin/plan-defaults";
       const KC_API = "/api/admin/kitchen-closed";
+      const PRICING_API = "/api/admin/pricing";
+      const PRICING_DAYS = [3, 7, 14, 30];
       const SLOTS = ["breakfast", "lunch", "dinner"];
       const SLOT_LABELS = {
         breakfast: "Breakfast",
@@ -38,6 +40,8 @@
         subsTotal: 0,
         subsLimit: 20,
         detailReq: 0,
+        pricingPlans: [],
+        pricingLoaded: false,
         authFailed: false,
         dayInit: false,
       };
@@ -362,6 +366,116 @@
         p.set("limit", state.subsLimit);
         return p;
       }
+      function formatMoney(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return "—";
+        return `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+      }
+      function planTotalsHtml(rate, days) {
+        const n = Number(rate);
+        if (!Number.isFinite(n) || n <= 0) {
+          return '<span class="price-empty">Enter a price to see totals.</span>';
+        }
+        return [1, 2, 3]
+          .map(
+            (meals) =>
+              `<span><b>${formatMoney(n * days * meals)}</b> ${meals} meal${meals === 1 ? "" : "s"}/day</span>`,
+          )
+          .join("");
+      }
+      function updatePricePreview(input) {
+        const el = document.getElementById(
+          `price-totals-${input.dataset.plan}-${input.dataset.days}`,
+        );
+        if (el)
+          el.innerHTML = planTotalsHtml(
+            input.value,
+            Number(input.dataset.days),
+          );
+      }
+      async function savePrice(input) {
+        const planId = input.dataset.plan;
+        const days = Number(input.dataset.days);
+        const plan = state.pricingPlans.find((p) => p.id === planId);
+        const previous = plan?.pricing?.[days];
+        const price = Number(input.value);
+
+        if (!Number.isFinite(price) || price <= 0) {
+          toast("Enter a valid price", true);
+          input.value = previous ?? "";
+          updatePricePreview(input);
+          return;
+        }
+        if (Number(previous) === price) return;
+
+        input.disabled = true;
+        const data = await adminApi(PRICING_API, "POST", {
+          plan_id: planId,
+          days,
+          price_per_meal_per_day: price,
+        });
+        input.disabled = false;
+        if (!data) return;
+        if (data.error) {
+          toast(data.error, true);
+          input.value = previous ?? "";
+          updatePricePreview(input);
+          return;
+        }
+
+        const saved = Number(data.pricing.price_per_meal_per_day);
+        if (plan) plan.pricing[days] = saved;
+        input.value = saved;
+        updatePricePreview(input);
+        toast("Price updated");
+      }
+      function renderPricing() {
+        const el = document.getElementById("pricing-body");
+        if (!el) return;
+        if (!state.pricingPlans.length) {
+          el.innerHTML =
+            '<div class="empty-state">No active plans found.</div>';
+          return;
+        }
+        el.innerHTML = `<div class="pricing-grid">${state.pricingPlans
+          .map(
+            (plan) => `
+      <section class="card pricing-card">
+        <div class="pricing-head">
+          <div><h2>${esc(plan.name)}</h2><p class="pricing-sub">Per meal, per delivery day</p></div>
+          <span class="pricing-tag">${esc(plan.tag)}</span>
+        </div>
+        <div class="pricing-tiers">${PRICING_DAYS.map((days) => {
+          const rate = plan.pricing?.[days];
+          return `
+          <div class="price-tier">
+            <div class="price-tier-head"><strong>${days} days</strong><span>per meal</span></div>
+            <div class="price-input">
+              <span aria-hidden="true">₹</span>
+              <input type="number" min="1" max="100000" step="0.01" inputmode="decimal" value="${rate ?? ""}" data-plan="${esc(plan.id)}" data-days="${days}" aria-label="${esc(plan.name)} ${days}-day price per meal" oninput="updatePricePreview(this)" onchange="savePrice(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
+            </div>
+            <div class="price-totals" id="price-totals-${esc(plan.id)}-${days}">${planTotalsHtml(rate, days)}</div>
+          </div>`;
+        }).join("")}</div>
+      </section>`,
+          )
+          .join("")}</div>`;
+      }
+      async function loadPricing(force = false) {
+        const el = document.getElementById("pricing-body");
+        if (!el) return;
+        if (state.pricingLoaded && !force) return;
+        el.innerHTML = '<div class="empty-state">Loading pricing…</div>';
+        const data = await adminApi(PRICING_API, "GET");
+        if (!data) return;
+        if (data.error) {
+          el.innerHTML = `<div class="empty-state">${esc(data.error)}</div>`;
+          return;
+        }
+        state.pricingPlans = data.plans || [];
+        state.pricingLoaded = true;
+        renderPricing();
+      }
       function setupSubscriptionFilters(plans) {
         const s = document.getElementById("sub-plan");
         if (!s) return;
@@ -601,10 +715,13 @@
         document.getElementById("content-" + name).classList.add("active");
         window.scrollTo({ top: 0 });
         if (name === "kitchen") loadKitchenClosedDays();
+        if (name === "pricing") loadPricing();
         if (name === "subscriptions") loadSubscriptions(1, true);
       }
       function logout() {
         sessionStorage.removeItem("admin_token");
+        state.pricingPlans = [];
+        state.pricingLoaded = false;
         render();
       }
 
@@ -660,6 +777,7 @@
       <button class="tab" id="tab-weekly" onclick="switchTab('weekly')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Weekly</button>
       <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16a8 8 0 0 1-16 0zM9 8c0-1.5 1-1.5 1-3M14 8c0-1.5 1-1.5 1-3"/></svg>Tomorrow</button>
       <button class="tab" id="tab-kitchen" onclick="switchTab('kitchen')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Closures</button>
+      <button class="tab" id="tab-pricing" onclick="switchTab('pricing')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12M6 8h12M9 4c4 0 5.5 2 5.5 4S13 12 9 12H6l8 8"/></svg>Pricing</button>
       <button class="tab" id="tab-subscriptions" onclick="switchTab('subscriptions')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.5 3-5.5 6.5-5.5s6 2 6.5 5.5M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.2 2.3 3.5 5"/></svg>Plans</button>
     </nav>
     <main class="container">
@@ -688,6 +806,12 @@
           <div class="ok" id="kc-success" style="display:none"></div>
         </div>
         <div class="card"><h2>Upcoming closed days</h2><div id="kc-list"><div class="empty-state">Loading…</div></div></div>
+      </section>
+
+      <section class="tab-content" id="content-pricing">
+        <h2>Per-meal pricing</h2>
+        <p class="hint">Used for new subscriptions and future dispatches. Totals update for 1, 2, or 3 meals per day.</p>
+        <div id="pricing-body"><div class="empty-state">Loading pricing…</div></div>
       </section>
 
       <section class="tab-content" id="content-subscriptions">

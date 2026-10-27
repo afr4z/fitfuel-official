@@ -23,6 +23,7 @@ function unauthorized(res) {
 
 const SLOTS = ["breakfast", "lunch", "dinner"];
 const DAYS = [1, 2, 3, 4, 5, 6];
+const PLAN_DAYS = [3, 7, 14, 30];
 const DAY_LABELS = {
   1: "Mon",
   2: "Tue",
@@ -572,6 +573,11 @@ export default async function handler(req, res) {
   const path = url.searchParams.get("path") || url.pathname;
   const route = adminRoute(path);
 
+  // Plan pricing
+  if (route === "pricing") {
+    return handlePricing(req, res);
+  }
+
   // Subscriptions
   if (route === "subscriptions") {
     return handleSubscriptions(req, res, url);
@@ -717,6 +723,111 @@ async function handleKitchenClosed(req, res) {
     date,
     extended: subs.length,
     failed: failed.length,
+  });
+}
+
+async function handlePricing(req, res) {
+  if (req.method === "GET") {
+    const [plansRes, pricingRes] = await Promise.all([
+      supabase
+        .from("meal_plans")
+        .select("id, name, tag, emoji, base_price")
+        .eq("is_active", true)
+        .order("name"),
+      supabase
+        .from("plan_pricing")
+        .select("plan_id, days, price_per_meal_per_day"),
+    ]);
+
+    if (plansRes.error) {
+      console.error("[PRICING] Plans fetch failed:", plansRes.error.message);
+      return res.status(500).json({ error: "Failed to load plans" });
+    }
+    if (pricingRes.error) {
+      console.error("[PRICING] Fetch failed:", pricingRes.error.message);
+      return res.status(500).json({ error: "Failed to load pricing" });
+    }
+
+    const byPlan = {};
+    for (const row of pricingRes.data ?? []) {
+      (byPlan[row.plan_id] ??= {})[row.days] = Number(
+        row.price_per_meal_per_day,
+      );
+    }
+
+    return res.status(200).json({
+      days: PLAN_DAYS,
+      plans: (plansRes.data ?? []).map((plan) => ({
+        id: plan.id,
+        name: `${plan.emoji || "🥗"} ${plan.name}`,
+        tag: plan.tag,
+        base_price: Number(plan.base_price),
+        pricing: Object.fromEntries(
+          PLAN_DAYS.map((days) => [days, byPlan[plan.id]?.[days] ?? null]),
+        ),
+      })),
+    });
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { plan_id, days, price_per_meal_per_day } = req.body ?? {};
+  const planDays = Number(days);
+  const price = Number(price_per_meal_per_day);
+
+  if (!isUuid(plan_id)) {
+    return res.status(400).json({ error: "Invalid plan" });
+  }
+  if (!PLAN_DAYS.includes(planDays)) {
+    return res.status(400).json({ error: "Invalid duration" });
+  }
+  if (!Number.isFinite(price) || price <= 0 || price > 100000) {
+    return res.status(400).json({ error: "Enter a valid price" });
+  }
+
+  const { data: plan, error: planError } = await supabase
+    .from("meal_plans")
+    .select("id")
+    .eq("id", plan_id)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (planError) {
+    console.error("[PRICING] Plan lookup failed:", planError.message);
+    return res.status(500).json({ error: "Failed to save price" });
+  }
+  if (!plan) {
+    return res.status(404).json({ error: "Plan not found" });
+  }
+
+  const normalized = Math.round(price * 100) / 100;
+  const { data, error } = await supabase
+    .from("plan_pricing")
+    .upsert(
+      {
+        plan_id,
+        days: planDays,
+        price_per_meal_per_day: normalized,
+      },
+      { onConflict: "plan_id,days" },
+    )
+    .select("plan_id, days, price_per_meal_per_day")
+    .single();
+
+  if (error) {
+    console.error("[PRICING] Upsert failed:", error.message);
+    return res.status(500).json({ error: "Failed to save price" });
+  }
+
+  return res.status(200).json({
+    ok: true,
+    pricing: {
+      plan_id: data.plan_id,
+      days: data.days,
+      price_per_meal_per_day: Number(data.price_per_meal_per_day),
+    },
   });
 }
 

@@ -118,6 +118,7 @@ Admin operations:
 - Weekly default menu
 - Tomorrow-only overrides
 - Kitchen-closed days
+- Plan pricing per meal and duration
 - Subscription summary/list/detail/export
 - Subscription cancellation
 

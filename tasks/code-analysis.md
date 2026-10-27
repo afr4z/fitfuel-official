@@ -170,9 +170,9 @@ Between **00:00 and 05:29 IST**, UTC is still the previous date. This can show a
 
 ### 3.8 Plan cache never invalidates
 
-`lib/mealPlans.js:8-11` caches plans in a module-level variable. A warm serverless instance keeps the old plans/pricing until it is recycled. Admin plan/price changes can therefore be stale for minutes or hours.
-
-**Recommendation:** remove the cache, add a short TTL, or invalidate on admin writes.
+**Fixed.** `lib/mealPlans.js` no longer keeps a module-level plan cache, so admin
+price edits take effect on the next request. `/api/plans` is also served with
+`Cache-Control: no-store` while pricing remains editable.
 
 ### 3.9 `notified_at` is written before the WhatsApp send succeeds
 

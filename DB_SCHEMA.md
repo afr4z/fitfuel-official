@@ -99,7 +99,8 @@ CREATE TABLE plan_pricing (
 ```
 
 Tiered per-day pricing for 3, 7, 14, and 30-day plans. The server recomputes the
-amount from this table; the browser does not control price.
+amount from this table; the browser does not control price. Rates are managed
+from the admin **Pricing** tab.
 
 ## 5. `dishes`
 
