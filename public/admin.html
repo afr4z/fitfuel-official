@@ -610,22 +610,32 @@
 
       async function render() {
         const app = document.getElementById("app");
+        const signedIn = !!getToken();
+        document.body.classList.toggle("login-page", !signedIn);
         closeDetail();
-        if (!getToken()) {
+        if (!signedIn) {
           app.innerHTML = `
-      <div class="login"><div class="card">
-        <div class="brand">Fit<span class="wordmark-accent">Fuel</span><span class="brand-sub">Admin</span></div>
-        <input type="password" id="secret" placeholder="Admin secret" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')login()">
-        <button class="btn btn-primary" style="width:100%" onclick="login()">Log in</button>
-        <div class="error" id="loginErr">${state.authFailed ? "That secret didn't work. Try again." : ""}</div>
-      </div></div>`;
+      <div class="login">
+        <aside class="login-brand" aria-hidden="true">
+          <div class="brand login-wordmark">Fit<span class="wordmark-accent">Fuel</span><span class="brand-sub">Admin</span></div>
+        </aside>
+        <main class="login-main">
+          <form class="login-form" onsubmit="event.preventDefault(); login()">
+            <h2 class="login-title">Sign in</h2>
+            <label class="login-label" for="secret">Admin secret</label>
+            <input type="password" id="secret" name="secret" placeholder="Enter admin secret" autocomplete="current-password" autocapitalize="off" spellcheck="false" autofocus aria-describedby="loginErr">
+            <button class="btn btn-primary login-submit" type="submit">Log in</button>
+            <div class="error login-error" id="loginErr" role="alert" aria-live="polite">${state.authFailed ? "That secret didn't work. Try again." : ""}</div>
+          </form>
+        </main>
+      </div>`;
           state.authFailed = false;
           return;
         }
         const data = await api("GET");
         if (!data) return;
         if (data.error) {
-          app.innerHTML = `<div class="login"><div class="card"><div class="error" style="text-align:center;margin:0 0 16px"><strong>API error:</strong> ${esc(data.error)}</div>
+          app.innerHTML = `<div class="auth-error"><div class="card"><div class="error" style="text-align:center;margin:0 0 16px"><strong>API error:</strong> ${esc(data.error)}</div>
       <button class="btn btn-primary" style="width:100%" onclick="render()">Retry</button></div></div>`;
           return;
         }
