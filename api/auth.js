@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { sendTemplate } from "../lib/whatsapp.js";
 import { safeEqualStrings } from "../lib/timingSafe.js";
+import { stripDishSlotSuffix } from "../lib/dishNames.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -298,7 +299,10 @@ async function getUpcomingMeals(phone) {
     .order("delivery_date", { ascending: true })
     .limit(10);
 
-  return orders || [];
+  return (orders || []).map((order) => ({
+    ...order,
+    item_name: stripDishSlotSuffix(order.item_name),
+  }));
 }
 
 export default async function handler(req, res) {
