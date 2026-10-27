@@ -302,7 +302,9 @@ export async function handleIncoming(phone, message) {
 
         const rows = items.map((item) => ({
           id: `MEAL_${orderId}_${item.itemid}`,
-          title: item.itemname.substring(0, 24),
+          title: item.itemname
+            .replace(/\s*[(\[](breakfast|lunch|dinner)[)\]]\s*$/i, "")
+            .substring(0, 24),
           description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
         }));
         await sendList(phone, CHANGE_MEAL_LIST_ALT, "View Menu", [

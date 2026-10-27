@@ -2,388 +2,687 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#fffdf8" />
     <title>FitFuel Admin</title>
     <style>
+      :root {
+        --bg: #f6f2ea;
+        --surface: #fffdf8;
+        --ink: #1b2a21;
+        --muted: #7b8077;
+        --line: #e7e0d1;
+        --brand: #1f4a35;
+        --brand-l: #e8eee4;
+        --gold: #a67c2e;
+        --warn-bg: #f5ebd2;
+        --warn: #775718;
+        --danger: #9b2c2c;
+        --radius: 16px;
+        --nav-h: 64px;
+        --serif:
+          "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      }
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+        -webkit-tap-highlight-color: transparent;
       }
       body {
         font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background: #f5f5f5;
-        color: #333;
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        font-size: 14px;
+        line-height: 1.5;
+        padding-bottom: calc(
+          var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px
+        );
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      :focus-visible {
+        outline: 2px solid var(--brand);
+        outline-offset: 2px;
       }
       .container {
-        max-width: 1200px;
+        max-width: 1040px;
         margin: 0 auto;
-        padding: 24px;
+        padding: 0 20px;
       }
-      h1 {
-        font-size: 24px;
-        margin-bottom: 24px;
-      }
-      .card {
-        background: #fff;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-      h2 {
-        font-size: 18px;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-      }
-      th,
-      td {
-        border: 1px solid #e5e7eb;
-        padding: 8px;
-        text-align: center;
-        vertical-align: middle;
-      }
-      th {
-        background: #f9fafb;
-        font-weight: 600;
+      .topbar {
         position: sticky;
         top: 0;
+        z-index: 20;
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+        padding-top: env(safe-area-inset-top, 0px);
       }
-      .plan-name {
-        text-align: left;
+      .topbar .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+      }
+      .brand {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+        color: var(--brand);
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+      .brand span {
+        font-family: system-ui, sans-serif;
+        font-size: 12px;
         font-weight: 500;
-        white-space: nowrap;
-        min-width: 140px;
+        color: var(--muted);
+        letter-spacing: 0.02em;
       }
-      .slot-group {
+      .link-btn {
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 8px 0;
+      }
+      .link-btn:hover {
+        color: var(--brand);
+      }
+      .nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 30;
+        display: flex;
+        background: var(--surface);
+        border-top: 1px solid var(--line);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .tab {
+        flex: 1;
+        height: var(--nav-h);
         display: flex;
         flex-direction: column;
+        align-items: center;
+        justify-content: center;
         gap: 4px;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        position: relative;
       }
-      select {
+      .tab svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .tab.active {
+        color: var(--brand);
+      }
+      .tab.active::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 30%;
+        right: 30%;
+        height: 2px;
+        background: var(--brand);
+        border-radius: 0 0 2px 2px;
+      }
+      .tab-content {
+        display: none;
+        padding-top: 28px;
+      }
+      .tab-content.active {
+        display: block;
+      }
+      h2 {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 20px;
+        letter-spacing: -0.01em;
+        margin-bottom: 4px;
+      }
+      .card h2 {
+        font-family: inherit;
+        font-size: 16px;
+      }
+      .sheet h2 {
+        font-family: inherit;
+        font-size: 17px;
+      }
+      h3 {
+        font-weight: 600;
+      }
+      .hint {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 14px;
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1fr;
+      }
+      .grid .card {
+        margin: 0;
+      }
+      .plan-title {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .slot {
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .slot:last-child {
+        margin-bottom: 0;
+      }
+      .slot label {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      select,
+      input[type="text"],
+      input[type="password"],
+      input[type="date"] {
         width: 100%;
-        padding: 4px 6px;
-        font-size: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
-        background: #fff;
+        min-height: 44px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--bg);
+        font-size: 14px;
+      }
+      select:focus,
+      input:focus {
+        border-color: var(--brand);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--brand-l);
       }
       select:disabled {
-        background: #f3f4f6;
-        color: #9ca3af;
-        cursor: not-allowed;
+        opacity: 0.5;
       }
-      .slot-label {
-        font-size: 11px;
-        color: #6b7280;
-        text-align: left;
-        margin-bottom: 1px;
+      .pills {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 2px 0 18px;
+        scrollbar-width: none;
       }
-      .veg-badge {
-        display: inline-block;
-        font-size: 10px;
-        margin-left: 3px;
+      .pills::-webkit-scrollbar {
+        display: none;
       }
-      .saved {
-        color: #22c55e;
-        font-size: 11px;
-        opacity: 0;
-        transition: opacity 0.3s;
-        margin-left: 4px;
+      .pill {
+        flex: 0 0 auto;
+        min-width: 58px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        font-weight: 500;
+        font-size: 13px;
+        color: var(--muted);
       }
-      .saved.show {
-        opacity: 1;
+      .pill.active {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fffdf8;
+      }
+      .banner {
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 13px;
+        margin-bottom: 18px;
+        background: var(--brand-l);
+        color: var(--brand);
+      }
+      .banner.locked,
+      .sub-warning {
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+      .sub-warning {
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        margin: 14px 0;
+      }
+      .btn {
+        min-height: 44px;
+        padding: 10px 20px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 14px;
+        background: transparent;
+        border: 1px solid var(--line);
+      }
+      .btn:hover {
+        border-color: var(--brand);
+      }
+      .btn-primary {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fffdf8;
+      }
+      .btn-primary:hover {
+        background: #173a29;
+      }
+      .btn-primary:disabled {
+        opacity: 0.6;
+      }
+      .sub-danger {
+        background: transparent;
+        border: 1px solid var(--danger);
+        color: var(--danger);
+        min-height: 46px;
+        padding: 10px 20px;
+        border-radius: 999px;
+        font-weight: 600;
+        width: 100%;
+      }
+      .sub-danger:hover {
+        background: var(--danger);
+        color: #fff;
+      }
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .form-row label {
+        font-size: 13px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 6px;
+      }
+      .error {
+        color: var(--danger);
+        font-size: 14px;
+        margin-top: 8px;
+      }
+      .ok {
+        color: var(--brand);
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 12px;
+      }
+      .list-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .list-row:last-child {
+        border-bottom: none;
+      }
+      .muted,
+      .sub-muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .empty-state {
+        padding: 36px 12px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
       }
       .sub-summary {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
-        margin-bottom: 18px;
+        margin-bottom: 14px;
       }
       .sub-stat {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 14px 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 16px;
       }
       .sub-stat span {
         display: block;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: #6b7280;
+        font-size: 13px;
+        color: var(--muted);
         margin-bottom: 4px;
       }
       .sub-stat strong {
-        font-size: 22px;
-        line-height: 1.2;
-        color: #111827;
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 1.1;
       }
       .sub-stat small {
         display: block;
+        font-size: 12px;
+        color: var(--muted);
         margin-top: 4px;
-        font-size: 11px;
-        color: #6b7280;
       }
-      .sub-toolbar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: end;
-        margin-bottom: 16px;
+      .toolbar {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr 1fr;
       }
-      .sub-toolbar label {
-        font-size: 11px;
-        font-weight: 600;
-        color: #4b5563;
-        display: block;
-        margin-bottom: 4px;
+      .toolbar .full {
+        grid-column: 1/-1;
       }
-      .sub-toolbar input,
-      .sub-toolbar select {
-        padding: 9px 10px;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        font-size: 13px;
-        background: #fff;
-      }
-      .sub-toolbar input[type="text"] {
-        min-width: 190px;
-      }
-      .sub-toolbar .check {
+      .check {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 12px;
-        color: #374151;
-        padding-bottom: 10px;
+        gap: 10px;
+        font-size: 14px;
+        min-height: 44px;
       }
-      .sub-toolbar .check input {
-        width: auto;
+      .check input {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--brand);
       }
-      .badge {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 999px;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
+      .sub-item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 10px;
       }
-      .badge-active {
-        background: #dcfce7;
-        color: #166534;
+      .sub-item:hover {
+        border-color: var(--brand);
       }
-      .badge-expired {
-        background: #f3f4f6;
-        color: #4b5563;
-      }
-      .badge-cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-      .badge-paid {
-        background: #dbeafe;
-        color: #1e40af;
-      }
-      .badge-pending {
-        background: #fef3c7;
-        color: #92400e;
-      }
-      .sub-table td,
-      .sub-table th {
-        vertical-align: middle;
+      .sub-item .top {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: flex-start;
       }
       .sub-customer {
         font-weight: 600;
-        color: #111827;
+        font-size: 15px;
       }
-      .sub-muted {
-        color: #6b7280;
+      .sub-item .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+        font-size: 13px;
+      }
+      .badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 999px;
         font-size: 11px;
+        font-weight: 600;
+        margin-left: 4px;
       }
-      .sub-actions {
-        white-space: nowrap;
-        text-align: right;
+      .badge-active {
+        background: #e1ecdc;
+        color: #25502f;
+      }
+      .badge-expired {
+        background: #eeeae0;
+        color: #6b6a60;
+      }
+      .badge-cancelled {
+        background: #f4dcd8;
+        color: #8a2a22;
+      }
+      .badge-paid {
+        background: #e3e9ee;
+        color: #2f4a63;
+      }
+      .badge-pending {
+        background: #f5ebd2;
+        color: #775718;
       }
       .sub-pagination {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        padding-top: 12px;
-        font-size: 12px;
-        color: #6b7280;
+        font-size: 13px;
+        color: var(--muted);
+        padding: 8px 0;
       }
       .sub-pagination button {
-        padding: 6px 12px;
-        border: 1px solid #d1d5db;
-        background: #fff;
-        border-radius: 6px;
-        cursor: pointer;
+        min-height: 40px;
+        padding: 0 18px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        border-radius: 999px;
+        margin-left: 6px;
       }
       .sub-pagination button:disabled {
         opacity: 0.4;
-        cursor: not-allowed;
       }
-      .sub-detail-card {
-        border-left: 4px solid #22c55e;
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: rgba(27, 42, 33, 0.45);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
       }
-      .sub-detail-grid {
+      .sheet {
+        background: var(--surface);
+        width: 100%;
+        max-width: 640px;
+        max-height: 92vh;
+        overflow-y: auto;
+        border-radius: 24px 24px 0 0;
+        padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+      }
+      .sheet-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+      .close {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+        background: transparent;
+        font-size: 16px;
+        flex: 0 0 auto;
+      }
+      .detail-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px 24px;
-        margin: 14px 0 18px;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 20px 0;
       }
-      .sub-detail-grid div {
-        font-size: 13px;
-      }
-      .sub-detail-grid span {
+      .detail-grid span {
         display: block;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: #6b7280;
+        font-size: 12px;
+        color: var(--muted);
         margin-bottom: 2px;
       }
-      .sub-detail-grid strong {
+      .detail-grid strong {
+        font-size: 14px;
         font-weight: 600;
-        color: #111827;
+        word-break: break-word;
       }
-      .sub-warning {
-        background: #fffbeb;
-        border: 1px solid #fbbf24;
-        color: #92400e;
-        border-radius: 6px;
-        padding: 10px 12px;
-        font-size: 12px;
-        margin-bottom: 12px;
+      .detail-grid .wide {
+        grid-column: 1/-1;
       }
-      .sub-danger {
-        background: #dc2626;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 9px 16px;
+      .toast {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px);
+        background: var(--brand);
+        color: #fffdf8;
+        padding: 10px 20px;
+        border-radius: 999px;
         font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.25s;
+        z-index: 60;
+        max-width: 90vw;
+        text-align: center;
       }
-      .sub-danger:hover {
-        background: #b91c1c;
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%);
+      }
+      .toast.err {
+        background: var(--danger);
       }
       .login {
         max-width: 400px;
-        margin: 80px auto;
+        margin: 14vh auto 0;
+        padding: 0 20px;
+      }
+      .login .card {
+        padding: 32px 28px;
+      }
+      .login .brand {
+        font-size: 22px;
+        justify-content: center;
       }
       .login input {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        margin-bottom: 12px;
+        margin: 22px 0 14px;
       }
-      .btn {
-        padding: 8px 16px;
-        font-size: 14px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-      }
-      .btn-primary {
-        background: #22c55e;
-        color: #fff;
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-      }
-      .btn-primary:hover {
-        background: #16a34a;
-      }
-      .error {
-        color: #dc2626;
-        font-size: 14px;
-        margin-top: 8px;
-      }
-      .day-header {
-        font-size: 13px;
-      }
-      .empty-state {
-        padding: 40px;
-        text-align: center;
-        color: #9ca3af;
-      }
-      .scroll-wrap {
-        overflow-x: auto;
-      }
-      .tabs {
-        display: flex;
-        gap: 0;
-        margin-bottom: 0;
-        border-bottom: 2px solid #e5e7eb;
-      }
-      .tab {
-        padding: 12px 24px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        border: none;
-        background: none;
-        color: #6b7280;
-        border-bottom: 2px solid transparent;
-        margin-bottom: -2px;
-      }
-      .tab.active {
-        color: #22c55e;
-        border-bottom-color: #22c55e;
-      }
-      .tab:hover {
-        color: #333;
-      }
-      .tab-content {
-        display: none;
-      }
-      .tab-content.active {
-        display: block;
-      }
-      .lock-banner {
-        background: #fef3c7;
-        border: 1px solid #f59e0b;
-        border-radius: 6px;
-        padding: 12px 16px;
-        margin-bottom: 16px;
-        font-size: 13px;
-        color: #92400e;
-      }
-      .lock-banner strong {
-        font-weight: 600;
-      }
-      @media (max-width: 820px) {
-        .sub-summary {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+      @media (max-width: 719px) {
+        select,
+        input[type="text"],
+        input[type="password"],
+        input[type="date"] {
+          font-size: 16px;
         }
-        .sub-detail-grid {
-          grid-template-columns: 1fr;
+      }
+      @media (min-width: 720px) {
+        body {
+          padding-bottom: 40px;
+        }
+        .topbar .container {
+          height: 68px;
+        }
+        .nav {
+          position: static;
+          border: none;
+          background: none;
+          max-width: 1040px;
+          margin: 0 auto;
+          padding: 0 20px;
+          gap: 28px;
+          border-bottom: 1px solid var(--line);
+        }
+        .tab {
+          flex: 0 0 auto;
+          height: 52px;
+          flex-direction: row;
+          padding: 0;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        .tab svg {
+          display: none;
+        }
+        .tab.active::before {
+          top: auto;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          border-radius: 2px 2px 0 0;
+        }
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .sub-summary {
+          grid-template-columns: repeat(4, 1fr);
+        }
+        .toolbar {
+          grid-template-columns: 2fr 1fr 1fr auto auto auto;
+          align-items: center;
+        }
+        .toolbar .full {
+          grid-column: auto;
+        }
+        .form-row {
+          flex-direction: row;
+          align-items: flex-end;
+        }
+        .form-row .grow {
+          flex: 1;
+        }
+        .overlay {
+          align-items: center;
+        }
+        .sheet {
+          border-radius: 24px;
+          max-height: 86vh;
+        }
+        .toast {
+          bottom: 32px;
+        }
+      }
+      @media (min-width: 1000px) {
+        .grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
         }
       }
     </style>
   </head>
   <body>
     <div id="app"></div>
+    <div id="sub-detail"></div>
+    <div class="toast" id="toast" role="status"></div>
     <script src="/js/html-escape.js"></script>
     <script>
       const API = "/api/admin/plan-defaults";
+      const KC_API = "/api/admin/kitchen-closed";
       const SLOTS = ["breakfast", "lunch", "dinner"];
       const SLOT_LABELS = {
         breakfast: "Breakfast",
@@ -391,16 +690,51 @@
         dinner: "Dinner",
       };
 
+      const state = {
+        plans: [],
+        dayLabels: {},
+        tomorrow: "",
+        locked: false,
+        day: 1,
+        tab: "weekly",
+        subsPage: 1,
+        subsTotal: 0,
+        subsLimit: 20,
+        detailReq: 0,
+        authFailed: false,
+        dayInit: false,
+      };
+      const DAY_FALLBACK = {
+        1: "Mon",
+        2: "Tue",
+        3: "Wed",
+        4: "Thu",
+        5: "Fri",
+        6: "Sat",
+      };
+
+      function cleanName(n) {
+        return String(n || "").replace(/^[^\p{L}\p{N}]+/u, "");
+      }
+      function istToday() {
+        return new Date(Date.now() + 5.5 * 3600 * 1000)
+          .toISOString()
+          .slice(0, 10);
+      }
+
       function getToken() {
         return sessionStorage.getItem("admin_token") || "";
       }
 
-      const state = {
-        plans: [],
-        subsPage: 1,
-        subsTotal: 0,
-        subsLimit: 20,
-      };
+      let toastTimer;
+      function toast(msg, isErr) {
+        const el = document.getElementById("toast");
+        if (!el) return;
+        el.textContent = msg;
+        el.className = "toast show" + (isErr ? " err" : "");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove("show"), 2500);
+      }
 
       async function adminApi(path, method = "GET", body) {
         const headers = { "Content-Type": "application/json" };
@@ -408,8 +742,14 @@
         if (token) headers["Authorization"] = `Bearer ${token}`;
         const opts = { method, headers };
         if (body !== undefined) opts.body = JSON.stringify(body);
-        const res = await fetch(path, opts);
+        let res;
+        try {
+          res = await fetch(path, opts);
+        } catch {
+          return { error: "Network error. Check your connection." };
+        }
         if (res.status === 401) {
+          state.authFailed = true;
           sessionStorage.removeItem("admin_token");
           render();
           return null;
@@ -420,53 +760,171 @@
           return { error: "Invalid JSON response" };
         }
       }
-
       async function api(method, body) {
         return adminApi(API, method, body);
       }
 
-      function showSaved(el) {
-        el.classList.add("show");
-        setTimeout(() => el.classList.remove("show"), 2000);
+      // Dish names carry their slot, e.g. "Poha (Breakfast)". Filter by slot and hide the suffix.
+      const SLOT_TAG = /\s*[(\[]\s*(breakfast|lunch|dinner)\s*[)\]]\s*$/i;
+      function dishSlot(d) {
+        const m = String(d.name || "").match(SLOT_TAG);
+        return m ? m[1].toLowerCase() : null;
+      }
+      function dishName(d) {
+        return String(d.name || "").replace(SLOT_TAG, "");
+      }
+      function dishOptions(
+        plan,
+        currentId,
+        blank = "Select a dish",
+        blankDisabled = false,
+        slot = null,
+      ) {
+        const known = plan.dishes.some((d) => d.id === currentId);
+        const shown = plan.dishes.filter(
+          (d) =>
+            d.id === currentId || !slot || !dishSlot(d) || dishSlot(d) === slot,
+        );
+        return (
+          `<option value="" ${blankDisabled ? "disabled" : ""} ${currentId ? "" : "selected"}>${esc(blank)}</option>` +
+          (currentId && !known
+            ? `<option value="${esc(currentId)}" selected>Unavailable dish</option>`
+            : "") +
+          shown
+            .map(
+              (d) =>
+                `<option value="${esc(d.id)}" ${d.id === currentId ? "selected" : ""}>${esc(dishName(d))} (₹${esc(d.price)})</option>`,
+            )
+            .join("")
+        );
       }
 
-      async function saveWeekly(planId, day, slot, dishId, savedEl) {
+      /* ---------- Weekly ---------- */
+      async function saveWeekly(planId, day, slot, el) {
+        const dishId = el.value || null;
+        el.disabled = true;
         const data = await api("POST", {
           type: "weekly",
           plan_id: planId,
           day_of_week: day,
           slot,
-          dish_id: dishId || null,
+          dish_id: dishId,
         });
-        if (data && !data.error) showSaved(savedEl);
+        el.disabled = false;
+        if (data && !data.error) {
+          const plan = state.plans.find((p) => p.id === planId);
+          if (plan) {
+            plan.week = plan.week || {};
+            plan.week[day] = plan.week[day] || {};
+            plan.week[day][slot] = dishId;
+          }
+          el.dataset.prev = el.value;
+          renderTomorrow();
+          toast("Saved");
+        } else {
+          el.value = el.dataset.prev || "";
+          if (data) toast(data.error, true);
+        }
+      }
+      function setDay(d) {
+        state.day = d;
+        renderWeekly();
+      }
+      function renderWeekly() {
+        const el = document.getElementById("weekly-body");
+        if (!el) return;
+        const days = [1, 2, 3, 4, 5, 6];
+        const d = state.day;
+        el.innerHTML = `
+    <div class="pills" role="tablist">${days.map((n) => `<button class="pill ${n === d ? "active" : ""}" onclick="setDay(${n})">${esc(state.dayLabels[n] || DAY_FALLBACK[n])}</button>`).join("")}</div>
+    <div class="grid">${state.plans
+      .map((plan) => {
+        const dayData = (plan.week || {})[d] || {};
+        return `<div class="card"><div class="plan-title">${esc(cleanName(plan.name))}</div>${SLOTS.map(
+          (slot) => `
+        <div class="slot"><label>${SLOT_LABELS[slot]}</label>
+          <select aria-label="${esc(cleanName(plan.name))} ${SLOT_LABELS[slot]}" data-prev="${esc(dayData[slot] || "")}" onchange="saveWeekly('${plan.id}',${d},'${slot}',this)">${dishOptions(plan, dayData[slot] || "", "Select a dish", true, slot)}</select>
+        </div>`,
+        ).join("")}</div>`;
+      })
+      .join("")}</div>
+    ${!state.plans.length ? '<div class="empty-state">No plans found. Add them in Supabase first.</div>' : ""}
+    ${state.plans.length && state.plans.every((p) => !p.dishes.length) ? '<div class="empty-state">No dishes found. Add dishes in Supabase first.</div>' : ""}`;
       }
 
-      async function saveNextDay(planId, slot, dishId, savedEl, date) {
+      /* ---------- Tomorrow ---------- */
+      async function saveNextDay(planId, slot, el, date) {
+        const dishId = el.value || null;
+        el.disabled = true;
         const data = await api("POST", {
           type: "nextday",
           plan_id: planId,
           slot,
-          dish_id: dishId || null,
+          dish_id: dishId,
           date,
         });
+        el.disabled = false;
         if (data && !data.error) {
-          showSaved(savedEl);
-        } else if (data && data.error) {
-          alert(data.error);
+          const plan = state.plans.find((p) => p.id === planId);
+          if (plan) {
+            plan.nextDay = plan.nextDay || {};
+            plan.nextDay[slot] = dishId;
+          }
+          el.dataset.prev = el.value;
+          toast("Saved");
+        } else {
+          el.value = el.dataset.prev || "";
+          if (data) toast(data.error, true);
         }
       }
+      function tomorrowDow() {
+        const d = new Date(state.tomorrow + "T00:00:00");
+        return isNaN(d) ? null : d.getDay();
+      }
+      function defaultLabel(plan, slot) {
+        const dow = tomorrowDow();
+        const id = dow === null ? null : ((plan.week || {})[dow] || {})[slot];
+        const dish = id && plan.dishes.find((d) => d.id === id);
+        return dish
+          ? `Default · ${dishName(dish)}`
+          : id
+            ? "Default · unavailable dish"
+            : "No dish planned";
+      }
+      function renderTomorrow() {
+        const el = document.getElementById("tomorrow-body");
+        if (!el) return;
+        const { locked, tomorrow } = state;
+        el.innerHTML = `
+    <div class="banner ${locked ? "locked" : ""}">${
+      locked
+        ? "<strong>Locked.</strong> Tomorrow's menu locks at 7:45pm IST, so changes can't be saved now."
+        : "<strong>Open.</strong> You can edit tomorrow's menu until 7:45pm IST."
+    }</div>
+    <div class="grid">${state.plans
+      .map(
+        (plan) => `
+      <div class="card"><div class="plan-title">${esc(cleanName(plan.name))}</div>${SLOTS.map(
+        (slot) => `
+        <div class="slot"><label>${SLOT_LABELS[slot]}</label>
+          <select ${locked ? "disabled" : ""} aria-label="${esc(cleanName(plan.name))} ${SLOT_LABELS[slot]}" data-prev="${esc((plan.nextDay || {})[slot] || "")}" onchange="saveNextDay('${plan.id}','${slot}',this,'${esc(tomorrow)}')">${dishOptions(plan, (plan.nextDay || {})[slot] || "", defaultLabel(plan, slot), false, slot)}</select>
+        </div>`,
+      ).join("")}</div>`,
+      )
+      .join("")}</div>
+    ${!state.plans.length ? '<div class="empty-state">No plans found.</div>' : ""}
+    <p class="hint" style="margin-top:12px;text-align:center">Each meal follows the weekly schedule unless you pick a different dish here. Choose "Default" to remove an override.</p>`;
+      }
 
-      const KC_API = "/api/admin/kitchen-closed";
-
+      /* ---------- Kitchen closed ---------- */
       async function kcApi(method, body) {
         const data = await adminApi(KC_API, method, body);
         if (data === null) {
-          const errorEl = document.getElementById("kc-error");
-          if (errorEl) errorEl.textContent = "Unauthorized — please re-login.";
+          const e = document.getElementById("kc-error");
+          if (e) e.textContent = "Unauthorized. Please log in again.";
         }
         return data;
       }
-
       async function loadKitchenClosedDays() {
         const el = document.getElementById("kc-list");
         const data = await kcApi("GET");
@@ -481,11 +939,13 @@
             '<div class="empty-state">No upcoming closed days.</div>';
           return;
         }
-        el.innerHTML = `<table><thead><tr><th style="text-align:left">Date</th><th style="text-align:left">Reason</th></tr></thead><tbody>
-    ${days.map((d) => `<tr><td style="text-align:left">${esc(d.date)}</td><td style="text-align:left">${esc(d.reason) || "—"}</td></tr>`).join("")}
-  </tbody></table>`;
+        el.innerHTML = days
+          .map(
+            (d) =>
+              `<div class="list-row"><strong>${esc(d.date)}</strong><span class="muted" style="font-size:14px">${esc(d.reason) || "No reason given"}</span></div>`,
+          )
+          .join("");
       }
-
       async function markKitchenClosed() {
         const date = document.getElementById("kc-date").value;
         const reason = document.getElementById("kc-reason").value.trim();
@@ -494,336 +954,245 @@
         const btn = document.getElementById("kc-btn");
         errorEl.textContent = "";
         successEl.style.display = "none";
-
         if (!date) {
           errorEl.textContent = "Please select a date.";
           return;
         }
-
         btn.disabled = true;
-        btn.textContent = "Processing...";
-
+        btn.textContent = "Processing…";
         const data = await kcApi("POST", { date, reason: reason || undefined });
+        btn.disabled = false;
+        btn.textContent = "Mark closed";
         if (!data) {
-          btn.disabled = false;
-          btn.textContent = "Mark Closed";
           errorEl.textContent = "Request failed.";
           return;
         }
         if (data.error) {
-          btn.disabled = false;
-          btn.textContent = "Mark Closed";
           errorEl.textContent = data.error;
           return;
         }
-
-        successEl.textContent = `✅ Kitchen marked closed for ${date}. ${data.extended || 0} subscription(s) extended.`;
+        successEl.textContent = `Kitchen marked closed for ${date}. ${data.extended || 0} subscription(s) extended.${data.failed ? ` ${data.failed} WhatsApp notification(s) failed.` : ""}`;
         successEl.style.display = "block";
-        btn.disabled = false;
-        btn.textContent = "Mark Closed";
         document.getElementById("kc-date").value = "";
         document.getElementById("kc-reason").value = "";
         loadKitchenClosedDays();
       }
 
+      /* ---------- Subscriptions ---------- */
       function slotLabel(slot) {
         return SLOT_LABELS[slot] || slot;
       }
-
-      function statusBadge(status) {
-        const cls =
-          status === "active"
+      function statusBadge(s) {
+        const c =
+          s === "active"
             ? "badge-active"
-            : status === "cancelled"
+            : s === "cancelled"
               ? "badge-cancelled"
               : "badge-expired";
-        return `<span class="badge ${cls}">${esc(status)}</span>`;
+        return `<span class="badge ${c}">${esc(s)}</span>`;
       }
-
-      function paymentBadge(status) {
-        const cls =
-          status === "paid"
+      function paymentBadge(s) {
+        const c =
+          s === "paid"
             ? "badge-paid"
-            : status === "pending"
+            : s === "pending"
               ? "badge-pending"
               : "badge-expired";
-        return `<span class="badge ${cls}">${esc(status || "unknown")}</span>`;
+        return `<span class="badge ${c}">${esc(s || "unknown")}</span>`;
       }
-
-      function orderBadge(status) {
-        const cls =
-          status === "delivered" || status === "ready"
+      function orderBadge(s) {
+        const c =
+          s === "delivered" || s === "ready"
             ? "badge-active"
-            : status === "cancelled"
+            : s === "cancelled"
               ? "badge-cancelled"
-              : status === "accepted" || status === "sent_to_kitchen"
+              : s === "accepted" || s === "sent_to_kitchen"
                 ? "badge-paid"
                 : "badge-expired";
-        return `<span class="badge ${cls}">${esc(status)}</span>`;
+        return `<span class="badge ${c}" style="margin:0">${esc(s)}</span>`;
       }
-
       function subscriptionParams(page = state.subsPage) {
-        const params = new URLSearchParams();
+        const p = new URLSearchParams();
         const q = document.getElementById("sub-q")?.value.trim();
         const status = document.getElementById("sub-status")?.value;
         const plan = document.getElementById("sub-plan")?.value;
-        const expiring = document.getElementById("sub-expiring")?.checked;
-
-        if (q) params.set("q", q);
-        if (status) params.set("status", status);
-        if (plan) params.set("plan", plan);
-        if (expiring) params.set("expiring", "1");
-        params.set("page", page);
-        params.set("limit", state.subsLimit);
-        return params;
+        if (q) p.set("q", q);
+        if (status) p.set("status", status);
+        if (plan) p.set("plan", plan);
+        if (document.getElementById("sub-expiring")?.checked)
+          p.set("expiring", "1");
+        p.set("page", page);
+        p.set("limit", state.subsLimit);
+        return p;
       }
-
       function setupSubscriptionFilters(plans) {
-        const select = document.getElementById("sub-plan");
-        if (!select) return;
-        select.innerHTML =
+        const s = document.getElementById("sub-plan");
+        if (!s) return;
+        s.innerHTML =
           '<option value="">All plans</option>' +
           plans
             .map(
-              (plan) =>
-                `<option value="${esc(plan.id)}">${esc(plan.name)}</option>`,
+              (p) =>
+                `<option value="${esc(p.id)}">${esc(cleanName(p.name))}</option>`,
             )
             .join("");
       }
-
       function renderSubscriptionSummary(summary) {
         const el = document.getElementById("sub-summary");
         if (!el) return;
-
         if (!summary || summary.error) {
           el.innerHTML =
             '<div class="sub-stat"><span>Summary</span><strong>—</strong><small>Failed to load</small></div>';
           return;
         }
-
-        const meals = summary.today_meals || {};
-        const totalMeals =
-          (meals.breakfast || 0) + (meals.lunch || 0) + (meals.dinner || 0);
-        const planLines = (summary.active_by_plan || [])
+        const m = summary.today_meals || {};
+        const total = (m.breakfast || 0) + (m.lunch || 0) + (m.dinner || 0);
+        const lines = (summary.active_by_plan || [])
           .map(
-            (row) =>
-              `<div>${esc(row.plan)} <strong>${row.count}</strong></div>`,
+            (r) =>
+              `<div style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(cleanName(r.plan))}</span><strong style="font-size:13px">${r.count}</strong></div>`,
           )
           .join("");
-
         el.innerHTML = `
-          <div class="sub-stat">
-            <span>Active plans</span>
-            <strong>${summary.active_total ?? 0}</strong>
-            <small>${summary.expiring_soon ?? 0} expiring in 2 days</small>
-          </div>
-          <div class="sub-stat">
-            <span>Cancelled</span>
-            <strong>${summary.cancelled_total ?? 0}</strong>
-            <small>Total cancelled plans</small>
-          </div>
-          <div class="sub-stat">
-            <span>Today's meals</span>
-            <strong>${totalMeals}</strong>
-            <small>B ${meals.breakfast || 0} · L ${meals.lunch || 0} · D ${meals.dinner || 0}</small>
-          </div>
-          <div class="sub-stat">
-            <span>Active by plan</span>
-            <div style="font-size:12px;line-height:1.7;display:grid;gap:2px;">
-              ${planLines || '<span class="sub-muted">No active plans</span>'}
-            </div>
-          </div>`;
+    <div class="sub-stat"><span>Active plans</span><strong>${summary.active_total ?? 0}</strong><small>${summary.expiring_soon ?? 0} expiring in 2 days</small></div>
+    <div class="sub-stat"><span>Cancelled</span><strong>${summary.cancelled_total ?? 0}</strong><small>All time</small></div>
+    <div class="sub-stat"><span>Today's meals</span><strong>${total}</strong><small>B ${m.breakfast || 0} · L ${m.lunch || 0} · D ${m.dinner || 0}</small></div>
+    <div class="sub-stat"><span>Active by plan</span>${lines || "<small>No active plans</small>"}</div>`;
       }
-
       function renderSubscriptionList(data) {
         const el = document.getElementById("sub-list");
-        const pagination = document.getElementById("sub-pagination");
+        const pg = document.getElementById("sub-pagination");
         if (!el) return;
-
         if (!data || data.error) {
           el.innerHTML =
             '<div class="empty-state">Failed to load subscriptions.</div>';
-          if (pagination) pagination.innerHTML = "";
+          pg.innerHTML = "";
           return;
         }
-
         const rows = data.subscriptions || [];
         state.subsTotal = data.total || 0;
         state.subsPage = data.page || 1;
-
         if (!rows.length) {
           el.innerHTML =
             '<div class="empty-state">No subscriptions match these filters.</div>';
-          if (pagination) pagination.innerHTML = "";
+          pg.innerHTML = "";
           return;
         }
-
-        el.innerHTML = `
-          <div class="scroll-wrap">
-            <table class="sub-table">
-              <thead>
-                <tr>
-                  <th>Customer</th>
-                  <th>Plan</th>
-                  <th>Remaining</th>
-                  <th>Meals</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rows
-                  .map(
-                    (sub) => `
-                  <tr>
-                    <td>
-                      <div class="sub-customer">${esc(sub.customer_name || "Unnamed")}</div>
-                      <div class="sub-muted">${esc(sub.phone)}</div>
-                    </td>
-                    <td>
-                      <div>${esc(sub.plan_name)}</div>
-                      <div class="sub-muted">${esc(sub.plan_label)}</div>
-                    </td>
-                    <td>
-                      <strong>${sub.remaining_days}</strong> day(s)
-                      <div class="sub-muted">ends ${esc(sub.end_date)}</div>
-                    </td>
-                    <td>
-                      ${sub.slots.length ? sub.slots.map(slotLabel).map(esc).join(" / ") : "—"}
-                      <div class="sub-muted">${sub.meals_per_day} meal(s)/day</div>
-                    </td>
-                    <td>${statusBadge(sub.status)}</td>
-                    <td>${paymentBadge(sub.payment_status)}</td>
-                    <td class="sub-actions">
-                      <button class="btn" style="background:#f3f4f6;" onclick="openSubscription('${esc(sub.id)}')">View</button>
-                    </td>
-                  </tr>`,
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>`;
-
-        if (pagination) {
-          const totalPages = Math.max(
-            1,
-            Math.ceil(state.subsTotal / state.subsLimit),
-          );
-          const first = (state.subsPage - 1) * state.subsLimit + 1;
-          const last = Math.min(
-            state.subsTotal,
-            state.subsPage * state.subsLimit,
-          );
-          pagination.innerHTML = `
-            <span>Showing ${first}–${last} of ${state.subsTotal}</span>
-            <span>
-              <button ${state.subsPage <= 1 ? "disabled" : ""} onclick="loadSubscriptions(${state.subsPage - 1})">Previous</button>
-              <button ${state.subsPage >= totalPages ? "disabled" : ""} onclick="loadSubscriptions(${state.subsPage + 1})">Next</button>
-            </span>`;
-        }
-      }
-
-      async function loadSubscriptions(page = 1) {
-        const summary = await adminApi("/api/admin/subscriptions/summary");
-        renderSubscriptionSummary(summary);
-
-        const params = subscriptionParams(page);
-        const data = await adminApi(
-          `/api/admin/subscriptions?${params.toString()}`,
+        el.innerHTML = `<div class="grid">${rows
+          .map(
+            (sub) => `
+    <button class="sub-item" style="margin:0" onclick="openSubscription('${esc(sub.id)}')">
+      <div class="top">
+        <div><div class="sub-customer">${esc(sub.customer_name || "Unnamed")}</div><div class="sub-muted">${esc(sub.phone)}</div></div>
+        <div style="white-space:nowrap">${statusBadge(sub.status)}${paymentBadge(sub.payment_status)}</div>
+      </div>
+      <div class="meta">
+        <span><strong>${esc(cleanName(sub.plan_name))}</strong> <span class="muted">${esc(sub.plan_label)}</span></span>
+        <span>${sub.remaining_days} day(s) left <span class="muted">· ends ${esc(sub.end_date)}</span></span>
+        <span class="muted">${(sub.slots || []).length ? (sub.slots || []).map(slotLabel).map(esc).join(", ") : "No meals"}</span>
+      </div>
+    </button>`,
+          )
+          .join("")}</div>`;
+        const pages = Math.max(1, Math.ceil(state.subsTotal / state.subsLimit));
+        const first = (state.subsPage - 1) * state.subsLimit + 1;
+        const last = Math.min(
+          state.subsTotal,
+          state.subsPage * state.subsLimit,
         );
-        renderSubscriptionList(data);
+        pg.innerHTML = `<span>${first}–${last} of ${state.subsTotal}</span><span>
+    <button ${state.subsPage <= 1 ? "disabled" : ""} onclick="loadSubscriptions(${state.subsPage - 1})">Previous</button>
+    <button ${state.subsPage >= pages ? "disabled" : ""} onclick="loadSubscriptions(${state.subsPage + 1})">Next</button></span>`;
       }
-
+      let subsReq = 0;
+      async function loadSubscriptions(page = 1, withSummary = false) {
+        const req = ++subsReq;
+        const jobs = [
+          adminApi(
+            `/api/admin/subscriptions?${subscriptionParams(page).toString()}`,
+          ),
+        ];
+        if (withSummary)
+          jobs.push(adminApi("/api/admin/subscriptions/summary"));
+        const [list, summary] = await Promise.all(jobs);
+        if (withSummary) renderSubscriptionSummary(summary);
+        if (req !== subsReq) return; // a newer search superseded this one
+        renderSubscriptionList(list);
+      }
+      function closeDetail() {
+        state.detailReq++;
+        document.getElementById("sub-detail").innerHTML = "";
+        document.body.style.overflow = "";
+      }
+      function sheet(inner) {
+        document.getElementById("sub-detail").innerHTML =
+          `<div class="overlay" onclick="if(event.target===this)closeDetail()"><div class="sheet" role="dialog" aria-modal="true">${inner}</div></div>`;
+        document.body.style.overflow = "hidden";
+      }
       async function openSubscription(id) {
-        const el = document.getElementById("sub-detail");
-        if (!el) return;
-        el.innerHTML = '<div class="card">Loading subscription…</div>';
-
+        const req = ++state.detailReq;
+        sheet('<div class="empty-state">Loading…</div>');
         const data = await adminApi(
           `/api/admin/subscriptions/${encodeURIComponent(id)}`,
         );
-        if (!data) return;
+        if (req !== state.detailReq) return; // sheet was closed while loading
+        if (!data) return closeDetail();
         if (data.error) {
-          el.innerHTML = `<div class="card"><div class="error">${esc(data.error)}</div></div>`;
+          sheet(
+            `<div class="sheet-head"><div class="error">${esc(data.error)}</div><button class="close" onclick="closeDetail()" aria-label="Close">✕</button></div>`,
+          );
           return;
         }
-
         const sub = data.subscription;
         const orders = data.orders || [];
-        const dispatched = orders.filter((order) =>
-          ["sent_to_kitchen", "accepted", "ready"].includes(order.status),
+        const dispatched = orders.filter((o) =>
+          ["sent_to_kitchen", "accepted", "ready"].includes(o.status),
         );
-        const canCancel = sub.status === "active";
-        const cancelledLine = data.cancelled_from
-          ? `<div><span>Cancelled from</span><strong>${esc(data.cancelled_from)}</strong></div>`
-          : "";
-
-        el.innerHTML = `
-          <div class="card sub-detail-card">
-            <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
-              <div>
-                <h2 style="margin-bottom:2px;">${esc(sub.customer_name || "Unnamed customer")}</h2>
-                <div class="sub-muted">${esc(sub.phone)}</div>
-              </div>
-              <div>${statusBadge(sub.status)} ${paymentBadge(sub.payment_status)}</div>
-            </div>
-
-            <div class="sub-detail-grid">
-              <div><span>Plan</span><strong>${esc(sub.plan_name)}</strong></div>
-              <div><span>Duration</span><strong>${esc(sub.plan_label)}</strong></div>
-              <div><span>Start</span><strong>${esc(sub.start_date)}</strong></div>
-              <div><span>End</span><strong>${esc(sub.end_date)}</strong></div>
-              <div><span>Remaining</span><strong>${sub.remaining_days} delivery day(s)</strong></div>
-              <div><span>Meals</span><strong>${sub.meals_per_day} per day · ${sub.slots.map(slotLabel).map(esc).join(" / ") || "—"}</strong></div>
-              <div><span>Address</span><strong>${esc(sub.address || "Not set")}</strong></div>
-              <div><span>Razorpay payment</span><strong>${esc(sub.razorpay_payment_id || "—")}</strong></div>
-              ${cancelledLine}
-            </div>
-
-            ${
-              dispatched.length
-                ? `<div class="sub-warning">${dispatched.length} order(s) were already sent to Petpooja. If you cancel, cancel those orders in Petpooja too.</div>`
-                : ""
-            }
-
-            ${canCancel ? `<button class="sub-danger" onclick="cancelSubscription('${esc(sub.id)}')">Cancel plan</button>` : ""}
-
-            <h3 style="font-size:15px;margin:22px 0 10px;">Order history</h3>
-            ${
-              orders.length
-                ? `<div class="scroll-wrap">
-                    <table>
-                      <thead><tr><th>Date</th><th>Slot</th><th>Item</th><th>Status</th><th>Petpooja ID</th></tr></thead>
-                      <tbody>
-                        ${orders
-                          .map(
-                            (order) => `
-                          <tr>
-                            <td>${esc(order.delivery_date)}</td>
-                            <td>${esc(slotLabel(order.slot))}</td>
-                            <td>${esc(order.item_name || "—")}</td>
-                            <td>${orderBadge(order.status)}</td>
-                            <td>${esc(order.petpooja_client_id || "—")}</td>
-                          </tr>`,
-                          )
-                          .join("")}
-                      </tbody>
-                    </table>
-                  </div>`
-                : '<div class="empty-state">No orders yet.</div>'
-            }
-          </div>`;
-
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        sheet(`
+    <div class="sheet-head">
+      <div><h2>${esc(sub.customer_name || "Unnamed customer")}</h2><div class="sub-muted">${esc(sub.phone)}</div>
+        <div style="margin-top:8px">${statusBadge(sub.status)}${paymentBadge(sub.payment_status)}</div></div>
+      <button class="close" onclick="closeDetail()" aria-label="Close">✕</button>
+    </div>
+    <div class="detail-grid">
+      <div><span>Plan</span><strong>${esc(cleanName(sub.plan_name))}</strong></div>
+      <div><span>Duration</span><strong>${esc(sub.plan_label)}</strong></div>
+      <div><span>Start</span><strong>${esc(sub.start_date)}</strong></div>
+      <div><span>End</span><strong>${esc(sub.end_date)}</strong></div>
+      <div><span>Remaining</span><strong>${sub.remaining_days} delivery day(s)</strong></div>
+      <div><span>Meals</span><strong>${sub.meals_per_day}/day · ${(sub.slots || []).map(slotLabel).map(esc).join(", ") || "—"}</strong></div>
+      <div class="wide"><span>Address</span><strong>${esc(sub.address || "Not set")}</strong></div>
+      <div class="wide"><span>Razorpay payment</span><strong>${esc(sub.razorpay_payment_id || "—")}</strong></div>
+      ${data.cancelled_from ? `<div class="wide"><span>Cancelled from</span><strong>${esc(data.cancelled_from)}</strong></div>` : ""}
+    </div>
+    ${dispatched.length ? `<div class="sub-warning">${dispatched.length} order(s) were already sent to Petpooja. If you cancel, cancel those orders in Petpooja too.</div>` : ""}
+    ${sub.status === "active" ? `<button class="sub-danger" onclick="cancelSubscription('${esc(sub.id)}')">Cancel plan</button>` : ""}
+    <h3 style="font-size:15px;margin:22px 0 4px">Order history</h3>
+    ${
+      orders.length
+        ? orders
+            .map(
+              (o) => `
+      <div class="list-row"><div><strong>${esc(o.delivery_date)}</strong> <span class="muted">· ${esc(slotLabel(o.slot))}</span>
+        <div class="muted">${esc(o.item_name || "—")}${o.petpooja_client_id ? " · " + esc(o.petpooja_client_id) : ""}</div></div>
+        <div>${orderBadge(o.status)}</div></div>`,
+            )
+            .join("")
+        : '<div class="empty-state">No orders yet.</div>'
+    }`);
       }
-
       async function cancelSubscription(id) {
-        const confirmed = confirm(
-          "Cancel this plan from the next undelivered meal?\n\nRefunds are handled separately in Razorpay.",
-        );
-        if (!confirmed) return;
-
+        if (
+          !confirm(
+            "Cancel this plan from the next undelivered meal?\n\nRefunds are handled separately in Razorpay.",
+          )
+        )
+          return;
+        const btn = document.querySelector(".sub-danger");
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Cancelling…";
+        }
         const data = await adminApi(
           `/api/admin/subscriptions/${encodeURIComponent(id)}/cancel`,
           "POST",
@@ -831,272 +1200,182 @@
         );
         if (!data) return;
         if (data.error) {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Cancel plan";
+          }
           alert(data.error);
           return;
         }
-
-        let message = `Plan cancelled from ${data.cancelled_from}. ${data.cancelled_orders} future order(s) cancelled.`;
-        if (data.warning) message += `\n\n⚠️ ${data.warning}`;
-        if (!data.notification_sent) {
-          message +=
-            "\n\nWhatsApp notification failed — please inform the customer manually.";
-        }
-        alert(message);
-        await loadSubscriptions(state.subsPage);
+        let msg = `Plan cancelled from ${data.cancelled_from}. ${data.cancelled_orders} future order(s) cancelled.`;
+        if (data.warning) msg += `\n\n⚠️ ${data.warning}`;
+        if (!data.notification_sent)
+          msg +=
+            "\n\nWhatsApp notification failed. Please inform the customer manually.";
+        alert(msg);
+        await loadSubscriptions(state.subsPage, true);
         await openSubscription(id);
       }
-
       async function exportSubscriptions() {
         const params = subscriptionParams(1);
         params.delete("page");
         params.delete("limit");
         const token = getToken();
-        const res = await fetch(
-          `/api/admin/subscriptions/export?${params.toString()}`,
-          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-        );
-
+        let res;
+        try {
+          res = await fetch(
+            `/api/admin/subscriptions/export?${params.toString()}`,
+            { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+          );
+        } catch {
+          toast("Network error. Export failed.", true);
+          return;
+        }
         if (res.status === 401) {
+          state.authFailed = true;
           sessionStorage.removeItem("admin_token");
           render();
           return;
         }
         if (!res.ok) {
-          alert("Failed to export subscriptions.");
+          toast("Failed to export subscriptions.", true);
           return;
         }
-
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "fitfuel-subscriptions.csv";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        const url = URL.createObjectURL(await res.blob());
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "fitfuel-subscriptions.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
         URL.revokeObjectURL(url);
       }
 
-      function switchTab(tabName) {
+      /* ---------- Shell ---------- */
+      function switchTab(name) {
+        state.tab = name;
         document
           .querySelectorAll(".tab")
           .forEach((t) => t.classList.remove("active"));
         document
           .querySelectorAll(".tab-content")
           .forEach((t) => t.classList.remove("active"));
-        document.getElementById("tab-" + tabName).classList.add("active");
-        document.getElementById("content-" + tabName).classList.add("active");
-        if (tabName === "kitchen") loadKitchenClosedDays();
-        if (tabName === "subscriptions") loadSubscriptions();
+        document.getElementById("tab-" + name).classList.add("active");
+        document.getElementById("content-" + name).classList.add("active");
+        window.scrollTo({ top: 0 });
+        if (name === "kitchen") loadKitchenClosedDays();
+        if (name === "subscriptions") loadSubscriptions(1, true);
+      }
+      function logout() {
+        sessionStorage.removeItem("admin_token");
+        render();
       }
 
       async function render() {
-        const token = getToken();
-        if (!token) {
-          document.getElementById("app").innerHTML = `
-      <div class="login card">
-        <h2>FitFuel Admin</h2>
-        <input type="password" id="secret" placeholder="Admin Secret" autofocus>
-        <button class="btn btn-primary" onclick="login()">Login</button>
-        <div class="error" id="loginErr"></div>
-      </div>`;
+        const app = document.getElementById("app");
+        closeDetail();
+        if (!getToken()) {
+          app.innerHTML = `
+      <div class="login"><div class="card">
+        <div class="brand">FitFuel<span>Admin</span></div>
+        <input type="password" id="secret" placeholder="Admin secret" autocomplete="current-password" autofocus onkeydown="if(event.key==='Enter')login()">
+        <button class="btn btn-primary" style="width:100%" onclick="login()">Log in</button>
+        <div class="error" id="loginErr">${state.authFailed ? "That secret didn't work. Try again." : ""}</div>
+      </div></div>`;
+          state.authFailed = false;
           return;
         }
-
         const data = await api("GET");
         if (!data) return;
-
         if (data.error) {
-          document.getElementById("app").innerHTML = `
-      <div class="container">
-        <h1>FitFuel Admin</h1>
-        <div class="card">
-          <div class="error" style="padding:20px;text-align:center;">
-            <strong>API Error:</strong> ${esc(data.error)}<br><br>
-            <button class="btn btn-primary" style="width:auto;padding:8px 24px;" onclick="render()">Retry</button>
-          </div>
-        </div>
-      </div>`;
+          app.innerHTML = `<div class="login"><div class="card"><div class="error" style="text-align:center;margin:0 0 16px"><strong>API error:</strong> ${esc(data.error)}</div>
+      <button class="btn btn-primary" style="width:100%" onclick="render()">Retry</button></div></div>`;
           return;
         }
+        Object.assign(state, {
+          plans: data.plans || [],
+          dayLabels: data.dayLabels || {},
+          tomorrow: data.tomorrow,
+          locked: data.locked,
+        });
+        if (!state.dayInit) {
+          const dow = new Date().getDay();
+          state.day = dow === 0 ? 1 : dow;
+          state.dayInit = true;
+        }
 
-        const { plans, dayLabels, slots, tomorrow, locked } = data;
-        const days = [1, 2, 3, 4, 5, 6];
+        app.innerHTML = `
+    <header class="topbar"><div class="container">
+      <div class="brand">FitFuel<span>Admin</span></div>
+      <button class="link-btn" onclick="logout()">Log out</button>
+    </div></header>
+    <nav class="nav" aria-label="Sections">
+      <button class="tab" id="tab-weekly" onclick="switchTab('weekly')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Weekly</button>
+      <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16a8 8 0 0 1-16 0zM9 8c0-1.5 1-1.5 1-3M14 8c0-1.5 1-1.5 1-3"/></svg>Tomorrow</button>
+      <button class="tab" id="tab-kitchen" onclick="switchTab('kitchen')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Closures</button>
+      <button class="tab" id="tab-subscriptions" onclick="switchTab('subscriptions')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.5 3-5.5 6.5-5.5s6 2 6.5 5.5M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.2 2.3 3.5 5"/></svg>Plans</button>
+    </nav>
+    <main class="container">
+      <section class="tab-content" id="content-weekly">
+        <h2>Weekly schedule</h2>
+        <p class="hint">Applies to every week. Changes save as you pick.</p>
+        <div id="weekly-body"></div>
+      </section>
 
-        document.getElementById("app").innerHTML = `
-    <div class="container">
-      <h1>FitFuel Admin</h1>
-      <div class="tabs">
-        <button class="tab active" id="tab-weekly" onclick="switchTab('weekly')">Weekly Schedule</button>
-        <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow${tomorrow ? " (" + esc(tomorrow) + ")" : ""}</button>
-        <button class="tab" id="tab-kitchen" onclick="switchTab('kitchen')">🔒 Kitchen Closed</button>
-        <button class="tab" id="tab-subscriptions" onclick="switchTab('subscriptions')">Subscriptions</button>
-      </div>
+      <section class="tab-content" id="content-tomorrow">
+        <h2>Tomorrow${state.tomorrow ? " · " + esc(state.tomorrow) : ""}</h2>
+        <p class="hint">One-off menu for tomorrow only.</p>
+        <div id="tomorrow-body"></div>
+      </section>
 
-      <div class="tab-content active" id="content-weekly">
+      <section class="tab-content" id="content-kitchen">
         <div class="card">
-          <div class="scroll-wrap">
-            <table>
-              <thead><tr><th class="plan-name">Plan</th>
-                ${days.map((d) => `<th class="day-header">${esc(dayLabels[d])}<br><span style="font-weight:400;font-size:11px;color:#6b7280">${SLOTS.map((s) => SLOT_LABELS[s][0]).join(" / ")}</span></th>`).join("")}
-              </tr></thead>
-              <tbody>
-                ${plans
-                  .map(
-                    (plan) => `
-                  <tr><td class="plan-name">${esc(plan.name)}</td>
-                    ${days
-                      .map((d) => {
-                        const dayData = plan.week[d] || {};
-                        return `<td>${SLOTS.map((slot) => {
-                          const currentId = dayData[slot] || "";
-                          return `<div class="slot-group">
-                          <div class="slot-label">${SLOT_LABELS[slot][0]}</div>
-                          <div style="display:flex;align-items:center;gap:4px;">
-                            <select onchange="saveWeekly('${plan.id}',${d},'${slot}',this.value||null,document.getElementById('ws_${plan.id}_${d}_${slot}'))">
-                              <option value="">—</option>
-                              ${plan.dishes.map((dish) => `<option value="${esc(dish.id)}" ${dish.id === currentId ? "selected" : ""}>${esc(dish.name)} (₹${esc(dish.price)})</option>`).join("")}
-                            </select>
-                            <span class="saved" id="ws_${plan.id}_${d}_${slot}">✓</span>
-                          </div>
-                        </div>`;
-                        }).join("")}</td>`;
-                      })
-                      .join("")}
-                  </tr>`,
-                  )
-                  .join("")}
-              </tbody>
-            </table>
+          <h2>Mark kitchen closed</h2>
+          <p class="hint">All active subscriptions are extended by 1 delivery day and affected customers are notified on WhatsApp.</p>
+          <div class="form-row">
+            <div><label for="kc-date">Date</label><input type="date" id="kc-date" min="${istToday()}"></div>
+            <div class="grow"><label for="kc-reason">Reason (optional)</label><input type="text" id="kc-reason" placeholder="e.g. Public holiday"></div>
+            <button class="btn btn-primary" id="kc-btn" onclick="markKitchenClosed()">Mark closed</button>
           </div>
-          ${!plans.length ? '<div class="empty-state">No plans found. Add them in Supabase first.</div>' : ""}
-          ${plans.every((p) => !p.dishes.length) ? '<div class="empty-state" style="margin-top:16px;">No dishes found. Add dishes in Supabase first.</div>' : ""}
+          <div class="error" id="kc-error"></div>
+          <div class="ok" id="kc-success" style="display:none"></div>
         </div>
-        <div style="font-size:12px;color:#9ca3af;text-align:center;">Weekly schedule is always editable — it applies to every week.</div>
-      </div>
+        <div class="card"><h2>Upcoming closed days</h2><div id="kc-list"><div class="empty-state">Loading…</div></div></div>
+      </section>
 
-      <div class="tab-content" id="content-tomorrow">
-        ${locked ? '<div class="lock-banner"><strong>🔒 Locked</strong> — Tomorrow\'s menu is locked after 7:45pm IST. Changes cannot be saved.</div>' : '<div class="lock-banner" style="background:#f0fdf4;border-color:#22c55e;color:#166534;"><strong>✅ Open</strong> — You can edit tomorrow\'s menu until 7:45pm IST.</div>'}
+      <section class="tab-content" id="content-subscriptions">
+        <div class="sub-summary" id="sub-summary"><div class="sub-stat"><span>Summary</span><strong>—</strong><small>Loading…</small></div></div>
         <div class="card">
-          <div class="scroll-wrap">
-            <table>
-              <thead><tr><th class="plan-name">Plan</th>
-                ${SLOTS.map((s) => `<th class="day-header">${SLOT_LABELS[s]}</th>`).join("")}
-              </tr></thead>
-              <tbody>
-                ${plans
-                  .map(
-                    (plan) => `
-                  <tr><td class="plan-name">${esc(plan.name)}</td>
-                    ${SLOTS.map((slot) => {
-                      const currentId = plan.nextDay[slot] || "";
-                      return `<td>
-                        <div style="display:flex;align-items:center;gap:4px;justify-content:center;">
-                          <select ${locked ? "disabled" : ""} onchange="saveNextDay('${plan.id}','${slot}',this.value||null,document.getElementById('nd_${plan.id}_${slot}'),'${tomorrow}')">
-                            <option value="">—</option>
-                            ${plan.dishes.map((dish) => `<option value="${esc(dish.id)}" ${dish.id === currentId ? "selected" : ""}>${esc(dish.name)} (₹${esc(dish.price)})</option>`).join("")}
-                          </select>
-                          <span class="saved" id="nd_${plan.id}_${slot}">✓</span>
-                        </div>
-                      </td>`;
-                    }).join("")}
-                  </tr>`,
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-          ${!plans.length ? '<div class="empty-state">No plans found.</div>' : ""}
-        </div>
-        <div style="font-size:12px;color:#9ca3af;text-align:center;">Selecting "—" clears the override — the weekly schedule default will be used instead.</div>
-      </div>
-
-      <div class="tab-content" id="content-kitchen">
-        <div class="card">
-          <h2>🔒 Mark Kitchen Closed</h2>
-          <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">
-            When you mark a date as closed, all active subscriptions are extended by 1 delivery day
-            and affected customers are notified on WhatsApp.
-          </p>
-          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:end;">
-            <div>
-              <label style="font-size:12px;font-weight:500;display:block;margin-bottom:4px;">Date</label>
-              <input type="date" id="kc-date" style="padding:8px 12px;font-size:14px;border:1px solid #d1d5db;border-radius:6px;">
-            </div>
-            <div style="flex:1;min-width:200px;">
-              <label style="font-size:12px;font-weight:500;display:block;margin-bottom:4px;">Reason (optional)</label>
-              <input type="text" id="kc-reason" placeholder="e.g. Public holiday" style="width:100%;padding:8px 12px;font-size:14px;border:1px solid #d1d5db;border-radius:6px;">
-            </div>
-            <button class="btn btn-primary" id="kc-btn" onclick="markKitchenClosed()" style="width:auto;padding:8px 24px;">Mark Closed</button>
-          </div>
-          <div class="error" id="kc-error" style="margin-top:12px;"></div>
-          <div id="kc-success" style="margin-top:12px;color:#16a34a;font-size:14px;font-weight:500;display:none;"></div>
-        </div>
-
-        <div class="card">
-          <h2>📋 Upcoming Closed Days</h2>
-          <div id="kc-list">
-            <div class="empty-state">Loading...</div>
+          <div class="toolbar">
+            <input class="full" type="text" id="sub-q" placeholder="Search name or phone" enterkeyhint="search" onkeydown="if(event.key==='Enter')loadSubscriptions(1)">
+            <select id="sub-status" aria-label="Status" onchange="loadSubscriptions(1)">
+              <option value="">All statuses</option><option value="active">Active</option><option value="expired">Expired</option><option value="cancelled">Cancelled</option>
+            </select>
+            <select id="sub-plan" aria-label="Plan" onchange="loadSubscriptions(1)"><option value="">All plans</option></select>
+            <label class="check full"><input type="checkbox" id="sub-expiring" onchange="loadSubscriptions(1)">Expiring in 2 days</label>
+            <button class="btn" onclick="loadSubscriptions(1)">Search</button>
+            <button class="btn" onclick="exportSubscriptions()">Export CSV</button>
           </div>
         </div>
-      </div>
-
-      <div class="tab-content" id="content-subscriptions">
-        <div class="sub-summary" id="sub-summary">
-          <div class="sub-stat"><span>Summary</span><strong>—</strong><small>Loading…</small></div>
-        </div>
-
-        <div class="card">
-          <div class="sub-toolbar">
-            <div>
-              <label for="sub-q">Search</label>
-              <input type="text" id="sub-q" placeholder="Name or phone" onkeydown="if(event.key==='Enter') loadSubscriptions(1)">
-            </div>
-            <div>
-              <label for="sub-status">Status</label>
-              <select id="sub-status" onchange="loadSubscriptions(1)">
-                <option value="">All</option>
-                <option value="active">Active</option>
-                <option value="expired">Expired</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div>
-              <label for="sub-plan">Plan</label>
-              <select id="sub-plan" onchange="loadSubscriptions(1)">
-                <option value="">All plans</option>
-              </select>
-            </div>
-            <label class="check">
-              <input type="checkbox" id="sub-expiring" onchange="loadSubscriptions(1)">
-              Expiring in 2 days
-            </label>
-            <button class="btn" style="background:#f3f4f6;padding:9px 16px;" onclick="loadSubscriptions(1)">Apply</button>
-            <button class="btn" style="background:#ecfdf5;color:#166534;padding:9px 16px;" onclick="exportSubscriptions()">Export CSV</button>
-          </div>
-
-          <div id="sub-list">
-            <div class="empty-state">Loading subscriptions…</div>
-          </div>
-          <div class="sub-pagination" id="sub-pagination"></div>
-        </div>
-
-        <div id="sub-detail"></div>
-      </div>
-    </div>`;
-        state.plans = plans;
-        setupSubscriptionFilters(plans);
-        loadSubscriptions();
+        <div id="sub-list"><div class="empty-state">Loading subscriptions…</div></div>
+        <div class="sub-pagination" id="sub-pagination"></div>
+      </section>
+    </main>`;
+        setupSubscriptionFilters(state.plans);
+        renderWeekly();
+        renderTomorrow();
+        switchTab(state.tab);
       }
 
       function login() {
         const secret = document.getElementById("secret").value.trim();
         if (!secret) return;
         sessionStorage.setItem("admin_token", secret);
-        document.getElementById("loginErr").textContent = "";
         render();
       }
-
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeDetail();
+      });
       render();
     </script>
   </body>
