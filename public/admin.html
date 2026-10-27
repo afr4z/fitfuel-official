@@ -102,6 +102,185 @@
       .saved.show {
         opacity: 1;
       }
+      .sub-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .sub-stat {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 14px 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+      .sub-stat span {
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+      .sub-stat strong {
+        font-size: 22px;
+        line-height: 1.2;
+        color: #111827;
+      }
+      .sub-stat small {
+        display: block;
+        margin-top: 4px;
+        font-size: 11px;
+        color: #6b7280;
+      }
+      .sub-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: end;
+        margin-bottom: 16px;
+      }
+      .sub-toolbar label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #4b5563;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .sub-toolbar input,
+      .sub-toolbar select {
+        padding: 9px 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 13px;
+        background: #fff;
+      }
+      .sub-toolbar input[type="text"] {
+        min-width: 190px;
+      }
+      .sub-toolbar .check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #374151;
+        padding-bottom: 10px;
+      }
+      .sub-toolbar .check input {
+        width: auto;
+      }
+      .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .badge-active {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .badge-expired {
+        background: #f3f4f6;
+        color: #4b5563;
+      }
+      .badge-cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge-paid {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .badge-pending {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .sub-table td,
+      .sub-table th {
+        vertical-align: middle;
+      }
+      .sub-customer {
+        font-weight: 600;
+        color: #111827;
+      }
+      .sub-muted {
+        color: #6b7280;
+        font-size: 11px;
+      }
+      .sub-actions {
+        white-space: nowrap;
+        text-align: right;
+      }
+      .sub-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding-top: 12px;
+        font-size: 12px;
+        color: #6b7280;
+      }
+      .sub-pagination button {
+        padding: 6px 12px;
+        border: 1px solid #d1d5db;
+        background: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .sub-pagination button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .sub-detail-card {
+        border-left: 4px solid #22c55e;
+      }
+      .sub-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 24px;
+        margin: 14px 0 18px;
+      }
+      .sub-detail-grid div {
+        font-size: 13px;
+      }
+      .sub-detail-grid span {
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #6b7280;
+        margin-bottom: 2px;
+      }
+      .sub-detail-grid strong {
+        font-weight: 600;
+        color: #111827;
+      }
+      .sub-warning {
+        background: #fffbeb;
+        border: 1px solid #fbbf24;
+        color: #92400e;
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 12px;
+        margin-bottom: 12px;
+      }
+      .sub-danger {
+        background: #dc2626;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 9px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .sub-danger:hover {
+        background: #b91c1c;
+      }
       .login {
         max-width: 400px;
         margin: 80px auto;
@@ -190,6 +369,14 @@
       .lock-banner strong {
         font-weight: 600;
       }
+      @media (max-width: 820px) {
+        .sub-summary {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .sub-detail-grid {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
@@ -208,13 +395,20 @@
         return sessionStorage.getItem("admin_token") || "";
       }
 
-      async function api(method, body) {
+      const state = {
+        plans: [],
+        subsPage: 1,
+        subsTotal: 0,
+        subsLimit: 20,
+      };
+
+      async function adminApi(path, method = "GET", body) {
         const headers = { "Content-Type": "application/json" };
         const token = getToken();
         if (token) headers["Authorization"] = `Bearer ${token}`;
         const opts = { method, headers };
-        if (body) opts.body = JSON.stringify(body);
-        const res = await fetch(API, opts);
+        if (body !== undefined) opts.body = JSON.stringify(body);
+        const res = await fetch(path, opts);
         if (res.status === 401) {
           sessionStorage.removeItem("admin_token");
           render();
@@ -225,6 +419,10 @@
         } catch {
           return { error: "Invalid JSON response" };
         }
+      }
+
+      async function api(method, body) {
+        return adminApi(API, method, body);
       }
 
       function showSaved(el) {
@@ -261,22 +459,12 @@
       const KC_API = "/api/admin/kitchen-closed";
 
       async function kcApi(method, body) {
-        const headers = { "Content-Type": "application/json" };
-        const token = getToken();
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-        const opts = { method, headers };
-        if (body) opts.body = JSON.stringify(body);
-        const res = await fetch(KC_API, opts);
-        if (res.status === 401) {
-          document.getElementById("kc-error").textContent =
-            "Unauthorized — please re-login.";
-          return null;
+        const data = await adminApi(KC_API, method, body);
+        if (data === null) {
+          const errorEl = document.getElementById("kc-error");
+          if (errorEl) errorEl.textContent = "Unauthorized — please re-login.";
         }
-        try {
-          return await res.json();
-        } catch {
-          return { error: "Invalid JSON response" };
-        }
+        return data;
       }
 
       async function loadKitchenClosedDays() {
@@ -338,6 +526,357 @@
         loadKitchenClosedDays();
       }
 
+      function slotLabel(slot) {
+        return SLOT_LABELS[slot] || slot;
+      }
+
+      function statusBadge(status) {
+        const cls =
+          status === "active"
+            ? "badge-active"
+            : status === "cancelled"
+              ? "badge-cancelled"
+              : "badge-expired";
+        return `<span class="badge ${cls}">${esc(status)}</span>`;
+      }
+
+      function paymentBadge(status) {
+        const cls =
+          status === "paid"
+            ? "badge-paid"
+            : status === "pending"
+              ? "badge-pending"
+              : "badge-expired";
+        return `<span class="badge ${cls}">${esc(status || "unknown")}</span>`;
+      }
+
+      function orderBadge(status) {
+        const cls =
+          status === "delivered" || status === "ready"
+            ? "badge-active"
+            : status === "cancelled"
+              ? "badge-cancelled"
+              : status === "accepted" || status === "sent_to_kitchen"
+                ? "badge-paid"
+                : "badge-expired";
+        return `<span class="badge ${cls}">${esc(status)}</span>`;
+      }
+
+      function subscriptionParams(page = state.subsPage) {
+        const params = new URLSearchParams();
+        const q = document.getElementById("sub-q")?.value.trim();
+        const status = document.getElementById("sub-status")?.value;
+        const plan = document.getElementById("sub-plan")?.value;
+        const expiring = document.getElementById("sub-expiring")?.checked;
+
+        if (q) params.set("q", q);
+        if (status) params.set("status", status);
+        if (plan) params.set("plan", plan);
+        if (expiring) params.set("expiring", "1");
+        params.set("page", page);
+        params.set("limit", state.subsLimit);
+        return params;
+      }
+
+      function setupSubscriptionFilters(plans) {
+        const select = document.getElementById("sub-plan");
+        if (!select) return;
+        select.innerHTML =
+          '<option value="">All plans</option>' +
+          plans
+            .map(
+              (plan) =>
+                `<option value="${esc(plan.id)}">${esc(plan.name)}</option>`,
+            )
+            .join("");
+      }
+
+      function renderSubscriptionSummary(summary) {
+        const el = document.getElementById("sub-summary");
+        if (!el) return;
+
+        if (!summary || summary.error) {
+          el.innerHTML =
+            '<div class="sub-stat"><span>Summary</span><strong>—</strong><small>Failed to load</small></div>';
+          return;
+        }
+
+        const meals = summary.today_meals || {};
+        const totalMeals =
+          (meals.breakfast || 0) + (meals.lunch || 0) + (meals.dinner || 0);
+        const planLines = (summary.active_by_plan || [])
+          .map(
+            (row) =>
+              `<div>${esc(row.plan)} <strong>${row.count}</strong></div>`,
+          )
+          .join("");
+
+        el.innerHTML = `
+          <div class="sub-stat">
+            <span>Active plans</span>
+            <strong>${summary.active_total ?? 0}</strong>
+            <small>${summary.expiring_soon ?? 0} expiring in 2 days</small>
+          </div>
+          <div class="sub-stat">
+            <span>Cancelled</span>
+            <strong>${summary.cancelled_total ?? 0}</strong>
+            <small>Total cancelled plans</small>
+          </div>
+          <div class="sub-stat">
+            <span>Today's meals</span>
+            <strong>${totalMeals}</strong>
+            <small>B ${meals.breakfast || 0} · L ${meals.lunch || 0} · D ${meals.dinner || 0}</small>
+          </div>
+          <div class="sub-stat">
+            <span>Active by plan</span>
+            <div style="font-size:12px;line-height:1.7;display:grid;gap:2px;">
+              ${planLines || '<span class="sub-muted">No active plans</span>'}
+            </div>
+          </div>`;
+      }
+
+      function renderSubscriptionList(data) {
+        const el = document.getElementById("sub-list");
+        const pagination = document.getElementById("sub-pagination");
+        if (!el) return;
+
+        if (!data || data.error) {
+          el.innerHTML =
+            '<div class="empty-state">Failed to load subscriptions.</div>';
+          if (pagination) pagination.innerHTML = "";
+          return;
+        }
+
+        const rows = data.subscriptions || [];
+        state.subsTotal = data.total || 0;
+        state.subsPage = data.page || 1;
+
+        if (!rows.length) {
+          el.innerHTML =
+            '<div class="empty-state">No subscriptions match these filters.</div>';
+          if (pagination) pagination.innerHTML = "";
+          return;
+        }
+
+        el.innerHTML = `
+          <div class="scroll-wrap">
+            <table class="sub-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Plan</th>
+                  <th>Remaining</th>
+                  <th>Meals</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows
+                  .map(
+                    (sub) => `
+                  <tr>
+                    <td>
+                      <div class="sub-customer">${esc(sub.customer_name || "Unnamed")}</div>
+                      <div class="sub-muted">${esc(sub.phone)}</div>
+                    </td>
+                    <td>
+                      <div>${esc(sub.plan_name)}</div>
+                      <div class="sub-muted">${esc(sub.plan_label)}</div>
+                    </td>
+                    <td>
+                      <strong>${sub.remaining_days}</strong> day(s)
+                      <div class="sub-muted">ends ${esc(sub.end_date)}</div>
+                    </td>
+                    <td>
+                      ${sub.slots.length ? sub.slots.map(slotLabel).map(esc).join(" / ") : "—"}
+                      <div class="sub-muted">${sub.meals_per_day} meal(s)/day</div>
+                    </td>
+                    <td>${statusBadge(sub.status)}</td>
+                    <td>${paymentBadge(sub.payment_status)}</td>
+                    <td class="sub-actions">
+                      <button class="btn" style="background:#f3f4f6;" onclick="openSubscription('${esc(sub.id)}')">View</button>
+                    </td>
+                  </tr>`,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>`;
+
+        if (pagination) {
+          const totalPages = Math.max(
+            1,
+            Math.ceil(state.subsTotal / state.subsLimit),
+          );
+          const first = (state.subsPage - 1) * state.subsLimit + 1;
+          const last = Math.min(
+            state.subsTotal,
+            state.subsPage * state.subsLimit,
+          );
+          pagination.innerHTML = `
+            <span>Showing ${first}–${last} of ${state.subsTotal}</span>
+            <span>
+              <button ${state.subsPage <= 1 ? "disabled" : ""} onclick="loadSubscriptions(${state.subsPage - 1})">Previous</button>
+              <button ${state.subsPage >= totalPages ? "disabled" : ""} onclick="loadSubscriptions(${state.subsPage + 1})">Next</button>
+            </span>`;
+        }
+      }
+
+      async function loadSubscriptions(page = 1) {
+        const summary = await adminApi("/api/admin/subscriptions/summary");
+        renderSubscriptionSummary(summary);
+
+        const params = subscriptionParams(page);
+        const data = await adminApi(
+          `/api/admin/subscriptions?${params.toString()}`,
+        );
+        renderSubscriptionList(data);
+      }
+
+      async function openSubscription(id) {
+        const el = document.getElementById("sub-detail");
+        if (!el) return;
+        el.innerHTML = '<div class="card">Loading subscription…</div>';
+
+        const data = await adminApi(
+          `/api/admin/subscriptions/${encodeURIComponent(id)}`,
+        );
+        if (!data) return;
+        if (data.error) {
+          el.innerHTML = `<div class="card"><div class="error">${esc(data.error)}</div></div>`;
+          return;
+        }
+
+        const sub = data.subscription;
+        const orders = data.orders || [];
+        const dispatched = orders.filter((order) =>
+          ["sent_to_kitchen", "accepted", "ready"].includes(order.status),
+        );
+        const canCancel = sub.status === "active";
+        const cancelledLine = data.cancelled_from
+          ? `<div><span>Cancelled from</span><strong>${esc(data.cancelled_from)}</strong></div>`
+          : "";
+
+        el.innerHTML = `
+          <div class="card sub-detail-card">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+              <div>
+                <h2 style="margin-bottom:2px;">${esc(sub.customer_name || "Unnamed customer")}</h2>
+                <div class="sub-muted">${esc(sub.phone)}</div>
+              </div>
+              <div>${statusBadge(sub.status)} ${paymentBadge(sub.payment_status)}</div>
+            </div>
+
+            <div class="sub-detail-grid">
+              <div><span>Plan</span><strong>${esc(sub.plan_name)}</strong></div>
+              <div><span>Duration</span><strong>${esc(sub.plan_label)}</strong></div>
+              <div><span>Start</span><strong>${esc(sub.start_date)}</strong></div>
+              <div><span>End</span><strong>${esc(sub.end_date)}</strong></div>
+              <div><span>Remaining</span><strong>${sub.remaining_days} delivery day(s)</strong></div>
+              <div><span>Meals</span><strong>${sub.meals_per_day} per day · ${sub.slots.map(slotLabel).map(esc).join(" / ") || "—"}</strong></div>
+              <div><span>Address</span><strong>${esc(sub.address || "Not set")}</strong></div>
+              <div><span>Razorpay payment</span><strong>${esc(sub.razorpay_payment_id || "—")}</strong></div>
+              ${cancelledLine}
+            </div>
+
+            ${
+              dispatched.length
+                ? `<div class="sub-warning">${dispatched.length} order(s) were already sent to Petpooja. If you cancel, cancel those orders in Petpooja too.</div>`
+                : ""
+            }
+
+            ${canCancel ? `<button class="sub-danger" onclick="cancelSubscription('${esc(sub.id)}')">Cancel plan</button>` : ""}
+
+            <h3 style="font-size:15px;margin:22px 0 10px;">Order history</h3>
+            ${
+              orders.length
+                ? `<div class="scroll-wrap">
+                    <table>
+                      <thead><tr><th>Date</th><th>Slot</th><th>Item</th><th>Status</th><th>Petpooja ID</th></tr></thead>
+                      <tbody>
+                        ${orders
+                          .map(
+                            (order) => `
+                          <tr>
+                            <td>${esc(order.delivery_date)}</td>
+                            <td>${esc(slotLabel(order.slot))}</td>
+                            <td>${esc(order.item_name || "—")}</td>
+                            <td>${orderBadge(order.status)}</td>
+                            <td>${esc(order.petpooja_client_id || "—")}</td>
+                          </tr>`,
+                          )
+                          .join("")}
+                      </tbody>
+                    </table>
+                  </div>`
+                : '<div class="empty-state">No orders yet.</div>'
+            }
+          </div>`;
+
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      async function cancelSubscription(id) {
+        const confirmed = confirm(
+          "Cancel this plan from the next undelivered meal?\n\nRefunds are handled separately in Razorpay.",
+        );
+        if (!confirmed) return;
+
+        const data = await adminApi(
+          `/api/admin/subscriptions/${encodeURIComponent(id)}/cancel`,
+          "POST",
+          {},
+        );
+        if (!data) return;
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+
+        let message = `Plan cancelled from ${data.cancelled_from}. ${data.cancelled_orders} future order(s) cancelled.`;
+        if (data.warning) message += `\n\n⚠️ ${data.warning}`;
+        if (!data.notification_sent) {
+          message +=
+            "\n\nWhatsApp notification failed — please inform the customer manually.";
+        }
+        alert(message);
+        await loadSubscriptions(state.subsPage);
+        await openSubscription(id);
+      }
+
+      async function exportSubscriptions() {
+        const params = subscriptionParams(1);
+        params.delete("page");
+        params.delete("limit");
+        const token = getToken();
+        const res = await fetch(
+          `/api/admin/subscriptions/export?${params.toString()}`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+
+        if (res.status === 401) {
+          sessionStorage.removeItem("admin_token");
+          render();
+          return;
+        }
+        if (!res.ok) {
+          alert("Failed to export subscriptions.");
+          return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "fitfuel-subscriptions.csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
       function switchTab(tabName) {
         document
           .querySelectorAll(".tab")
@@ -348,6 +887,7 @@
         document.getElementById("tab-" + tabName).classList.add("active");
         document.getElementById("content-" + tabName).classList.add("active");
         if (tabName === "kitchen") loadKitchenClosedDays();
+        if (tabName === "subscriptions") loadSubscriptions();
       }
 
       async function render() {
@@ -390,6 +930,7 @@
         <button class="tab active" id="tab-weekly" onclick="switchTab('weekly')">Weekly Schedule</button>
         <button class="tab" id="tab-tomorrow" onclick="switchTab('tomorrow')">Tomorrow${tomorrow ? " (" + esc(tomorrow) + ")" : ""}</button>
         <button class="tab" id="tab-kitchen" onclick="switchTab('kitchen')">🔒 Kitchen Closed</button>
+        <button class="tab" id="tab-subscriptions" onclick="switchTab('subscriptions')">Subscriptions</button>
       </div>
 
       <div class="tab-content active" id="content-weekly">
@@ -499,7 +1040,53 @@
           </div>
         </div>
       </div>
+
+      <div class="tab-content" id="content-subscriptions">
+        <div class="sub-summary" id="sub-summary">
+          <div class="sub-stat"><span>Summary</span><strong>—</strong><small>Loading…</small></div>
+        </div>
+
+        <div class="card">
+          <div class="sub-toolbar">
+            <div>
+              <label for="sub-q">Search</label>
+              <input type="text" id="sub-q" placeholder="Name or phone" onkeydown="if(event.key==='Enter') loadSubscriptions(1)">
+            </div>
+            <div>
+              <label for="sub-status">Status</label>
+              <select id="sub-status" onchange="loadSubscriptions(1)">
+                <option value="">All</option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label for="sub-plan">Plan</label>
+              <select id="sub-plan" onchange="loadSubscriptions(1)">
+                <option value="">All plans</option>
+              </select>
+            </div>
+            <label class="check">
+              <input type="checkbox" id="sub-expiring" onchange="loadSubscriptions(1)">
+              Expiring in 2 days
+            </label>
+            <button class="btn" style="background:#f3f4f6;padding:9px 16px;" onclick="loadSubscriptions(1)">Apply</button>
+            <button class="btn" style="background:#ecfdf5;color:#166534;padding:9px 16px;" onclick="exportSubscriptions()">Export CSV</button>
+          </div>
+
+          <div id="sub-list">
+            <div class="empty-state">Loading subscriptions…</div>
+          </div>
+          <div class="sub-pagination" id="sub-pagination"></div>
+        </div>
+
+        <div id="sub-detail"></div>
+      </div>
     </div>`;
+        state.plans = plans;
+        setupSubscriptionFilters(plans);
+        loadSubscriptions();
       }
 
       function login() {

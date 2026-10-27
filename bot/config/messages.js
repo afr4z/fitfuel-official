@@ -338,6 +338,19 @@ export function kitchenClosed({ date, reasonLine, remaining }) {
   );
 }
 
+// ─── Subscription Cancelled ──────────────────────────────────────────────────
+
+export function subscriptionCancelled({ planLabel, effectiveDate }) {
+  return (
+    `❌ *Your FitFuel plan has been cancelled.*\n\n` +
+    `📦 Plan: *${planLabel}*\n` +
+    `📅 No meals will be delivered from *${effectiveDate}*.\n\n` +
+    `If this was a mistake, or you'd like to discuss a refund, please reply ` +
+    `to this chat and our team will help.\n\n` +
+    `Thank you for choosing FitFuel. 🙏`
+  );
+}
+
 // ─── Menu Unavailable ────────────────────────────────────────────────────────
 
 export const MENU_UNAVAILABLE = `Sorry, the menu is unavailable right now. Please try again later.`;
