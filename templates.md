@@ -1,341 +1,138 @@
 # WhatsApp Template Catalog
 
-All templates must be created in **Meta Business Manager → WhatsApp Manager → Message Templates**.
+Create every template in **Meta Business Manager → WhatsApp Manager → Message
+Templates**, then set the matching environment variable in Vercel.
 
-## Template Naming Convention
+The copy-paste body text lives in [`templates-body.md`](./templates-body.md).
+Keep the variable order in that file unchanged: the application sends positional
+parameters, not names.
 
-All template names are configurable via environment variables with sensible defaults.
+## Template overview
 
-| Purpose                | Env Var                               | Default Name             | Category       | Language |
-| ---------------------- | ------------------------------------- | ------------------------ | -------------- | -------- |
-| Breakfast notification | `WHATSAPP_BREAKFAST_TEMPLATE`         | `breakfast_notification` | UTILITY        | en       |
-| Lunch notification     | `WHATSAPP_LUNCH_TEMPLATE`             | `lunch_notification`     | UTILITY        | en       |
-| Dinner notification    | `WHATSAPP_DINNER_TEMPLATE`            | `dinner_notification`    | UTILITY        | en       |
-| Rescheduled meal       | `WHATSAPP_RESCHEDULED_TEMPLATE`       | `rescheduled_meal`       | UTILITY        | en       |
-| Expiry reminder        | `WHATSAPP_EXPIRY_TEMPLATE`            | `expiry_reminder`        | MARKETING      | en       |
-| Session expired        | `WHATSAPP_SESSION_EXPIRED_TEMPLATE`   | `session_expired`        | UTILITY        | en       |
-| OTP code               | `WHATSAPP_OTP_TEMPLATE`               | `otp_code`               | AUTHENTICATION | en       |
-| Payment failed         | `WHATSAPP_PAYMENT_FAILED_TEMPLATE`    | `payment_failed`         | UTILITY        | en       |
-| Payment confirmed      | `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE` | `payment_confirmed`      | UTILITY        | en       |
-| Kitchen closed         | `WHATSAPP_KITCHEN_CLOSED_TEMPLATE`    | `kitchen_closed`         | UTILITY        | en       |
+| Purpose                | Env var                               | Default name             | Category       | Params | Buttons       | Sent / trigger                           |
+| ---------------------- | ------------------------------------- | ------------------------ | -------------- | ------ | ------------- | ---------------------------------------- |
+| Breakfast notification | `WHATSAPP_BREAKFAST_TEMPLATE`         | `breakfast_notification` | UTILITY        | 5      | 3 quick reply | Daily ~8:00 PM IST, next day's breakfast |
+| Lunch notification     | `WHATSAPP_LUNCH_TEMPLATE`             | `lunch_notification`     | UTILITY        | 5      | 3 quick reply | Daily ~8:30 AM IST, same day's lunch     |
+| Dinner notification    | `WHATSAPP_DINNER_TEMPLATE`            | `dinner_notification`    | UTILITY        | 5      | 3 quick reply | Daily ~4:00 PM IST, same day's dinner    |
+| Rescheduled meal       | `WHATSAPP_RESCHEDULED_TEMPLATE`       | `rescheduled_meal`       | UTILITY        | 4      | 3 quick reply | When a skipped meal is pushed to the end |
+| Expiry reminder        | `WHATSAPP_EXPIRY_TEMPLATE`            | `expiry_reminder`        | MARKETING      | 2      | 2 quick reply | Daily ~1:30 PM IST                       |
+| Session expired        | `WHATSAPP_SESSION_EXPIRED_TEMPLATE`   | `session_expired`        | UTILITY        | 0      | none          | VPS cron, every minute                   |
+| OTP code               | `WHATSAPP_OTP_TEMPLATE`               | `otp_code`               | AUTHENTICATION | 2      | OTP button    | Website login request                    |
+| Payment failed         | `WHATSAPP_PAYMENT_FAILED_TEMPLATE`    | `payment_failed`         | UTILITY        | 1      | none          | Razorpay failure/cancel/expiry webhook   |
+| Payment confirmed      | `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE` | `payment_confirmed`      | UTILITY        | 5      | none          | Razorpay `payment_link.paid` webhook     |
+| Kitchen closed         | `WHATSAPP_KITCHEN_CLOSED_TEMPLATE`    | `kitchen_closed`         | UTILITY        | 3      | none          | Admin marks a kitchen-closed day         |
+| Subscription cancelled | `WHATSAPP_CANCELLED_TEMPLATE`         | `subscription_cancelled` | UTILITY        | 2      | none          | Admin cancels a subscription             |
 
----
-
-## 1. Breakfast Notification (`breakfast_notification`)
-
-**Category:** UTILITY  
-**Use:** Daily breakfast notification sent via cron at ~2:45 PM IST (for next day breakfast)
-
-### Variables (Body - 5 parameters)
-
-| Index | Name            | Type   | Example                                                  | Description                        |
-| ----- | --------------- | ------ | -------------------------------------------------------- | ---------------------------------- |
-| {{1}} | `delivery_date` | String | "15 Jan 2025"                                            | Delivery date for breakfast        |
-| {{2}} | `item_line`     | String | "🌅 _Breakfast_: Idli Sambar"                            | Meal emoji + label + item name     |
-| {{3}} | `time_str`      | String | "08:00"                                                  | Delivery time (HH:MM)              |
-| {{4}} | `deadline_msg`  | String | "You can confirm, skip, or change until _10pm tonight_." | Action deadline                    |
-| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in _2_ delivery day(s)!"           | Plan expiry warning (can be empty) |
-
-### Buttons (Quick Reply - 3 buttons)
-
-| Button Text | Payload (returned in webhook) |
-| ----------- | ----------------------------- |
-| ✅ Confirm  | `CONFIRM_<order_id>`          |
-| 🔄 Change   | `CHANGE_<order_id>`           |
-| ⏭️ Skip     | `SKIP_<order_id>`             |
-
-### Sample Body Text
-
-```
-🌅 *Tomorrow's Breakfast (15 Jan 2025)*
-
-🌅 *Breakfast*: Idli Sambar (08:00)
-
-You can confirm, skip, or change until *10pm tonight*.⚠️ Your plan expires in *2* delivery day(s)!
-```
+> `subscription_cancelled` may not exist in Meta yet. Create it, or point
+> `WHATSAPP_CANCELLED_TEMPLATE` at an approved equivalent template with the same
+> two body parameters.
 
 ---
 
-## 2. Lunch Notification (`lunch_notification`)
+## Variable order
 
-**Category:** UTILITY  
-**Use:** Daily lunch notification sent via cron at ~8:30 AM IST (for today's lunch)
+### Meal notifications
 
-### Variables (Body - 5 parameters)
+Breakfast, lunch, and dinner all use the same five positional parameters:
 
-| Index | Name            | Type   | Example                                              | Description                        |
-| ----- | --------------- | ------ | ---------------------------------------------------- | ---------------------------------- |
-| {{1}} | `delivery_date` | String | "15 Jan 2025"                                        | Delivery date for lunch            |
-| {{2}} | `item_line`     | String | "☀️ _Lunch_: Chicken Biryani"                        | Meal emoji + label + item name     |
-| {{3}} | `time_str`      | String | "12:30"                                              | Delivery time (HH:MM)              |
-| {{4}} | `deadline_msg`  | String | "⏰ Respond by _9:30am_ — changes close after that." | Action deadline                    |
-| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in _2_ delivery day(s)!"       | Plan expiry warning (can be empty) |
+| Index   | Name            | Example                                                 |
+| ------- | --------------- | ------------------------------------------------------- |
+| `{{1}}` | `delivery_date` | `15 Jan 2025`                                           |
+| `{{2}}` | `item_name`     | `Idli Sambar`                                           |
+| `{{3}}` | `time_str`      | `08:00`                                                 |
+| `{{4}}` | `deadline_msg`  | `You can confirm, skip, or change until 10pm tonight.`  |
+| `{{5}}` | `expiry_notice` | `⚠️ Your plan expires in 2 delivery day(s)!` (or empty) |
 
-### Buttons (Quick Reply - 3 buttons)
+Buttons:
 
-| Button Text | Payload (returned in webhook) |
-| ----------- | ----------------------------- |
-| ✅ Confirm  | `CONFIRM_<order_id>`          |
-| 🔄 Change   | `CHANGE_<order_id>`           |
-| ⏭️ Skip     | `SKIP_<order_id>`             |
+| Button     | Payload returned by WhatsApp |
+| ---------- | ---------------------------- |
+| ✅ Confirm | `CONFIRM_<order_id>`         |
+| 🔄 Change  | `CHANGE_<order_id>`          |
+| ⏭️ Skip    | `SKIP_<order_id>`            |
 
-### Sample Body Text
+### Rescheduled meal
 
-```
-🍽️ *Today's Lunch (15 Jan 2025)*
+| Index   | Name            | Example           |
+| ------- | --------------- | ----------------- |
+| `{{1}}` | `slot_label`    | `Lunch`           |
+| `{{2}}` | `slot_emoji`    | `☀️`              |
+| `{{3}}` | `item_name`     | `Chicken Biryani` |
+| `{{4}}` | `delivery_date` | `15 Jan 2025`     |
 
-☀️ *Lunch*: Chicken Biryani (12:30)
+Buttons: Confirm / Change / Skip, with the same payloads as the meal
+notifications.
 
-⏰ Respond by *9:30am* — changes close after that.⚠️ Your plan expires in *2* delivery day(s)!
-```
+### Expiry reminder
 
----
+| Index   | Name         | Example                   |
+| ------- | ------------ | ------------------------- |
+| `{{1}}` | `plan_label` | `🥗 Healthy Diet Non-Veg` |
+| `{{2}}` | `threshold`  | `2`                       |
 
-## 3. Dinner Notification (`dinner_notification`)
+Buttons:
 
-**Category:** UTILITY  
-**Use:** Daily dinner notification sent via cron at ~10:30 AM IST
-
-### Variables (Body - 5 parameters)
-
-| Index | Name            | Type   | Example                                           |
-| ----- | --------------- | ------ | ------------------------------------------------- |
-| {{1}} | `delivery_date` | String | "15 Jan 2025"                                     |
-| {{2}} | `item_line`     | String | "🌙 _Dinner_: Dal Makhani + Roti"                 |
-| {{3}} | `time_str`      | String | "19:30"                                           |
-| {{4}} | `deadline_msg`  | String | "⏰ Respond by _5pm_ — changes close after that." |
-| {{5}} | `expiry_notice` | String | "⚠️ Your plan expires in _2_ delivery day(s)!"    |
-
-### Buttons (Quick Reply - 3 buttons)
-
-| Button Text | Payload              |
-| ----------- | -------------------- |
-| ✅ Confirm  | `CONFIRM_<order_id>` |
-| 🔄 Change   | `CHANGE_<order_id>`  |
-| ⏭️ Skip     | `SKIP_<order_id>`    |
-
----
-
-## 4. Rescheduled Meal (`rescheduled_meal`)
-
-**Category:** UTILITY  
-**Use:** Sent when a skipped meal is pushed to end of plan and now being delivered
-
-### Variables (Body - 3 parameters)
-
-| Index | Name         | Type   | Example           |
-| ----- | ------------ | ------ | ----------------- |
-| {{1}} | `slot_label` | String | "Lunch"           |
-| {{2}} | `slot_emoji` | String | "☀️"              |
-| {{3}} | `item_name`  | String | "Chicken Biryani" |
-
-### Buttons (Quick Reply - 3 buttons)
-
-| Button Text | Payload              |
-| ----------- | -------------------- |
-| ✅ Confirm  | `CONFIRM_<order_id>` |
-| 🔄 Change   | `CHANGE_<order_id>`  |
-| ⏭️ Skip     | `SKIP_<order_id>`    |
-
-### Sample Body Text
-
-```
-⏭️ *Rescheduled Lunch*
-
-You skipped this meal earlier — it's being delivered today.
-
-☀️ *Lunch*: Chicken Biryani
-```
-
----
-
-## 5. Expiry Reminder (`expiry_reminder`)
-
-**Category:** MARKETING  
-**Use:** Daily cron at 8 AM IST for subscribers with exactly 2 delivery days remaining
-
-### Variables (Body - 2 parameters)
-
-| Index | Name         | Type   | Example                   |
-| ----- | ------------ | ------ | ------------------------- |
-| {{1}} | `plan_label` | String | "🥗 Healthy Diet Non-Veg" |
-| {{2}} | `threshold`  | String | "2"                       |
-
-### Buttons (Quick Reply - 2 buttons)
-
-| Button Text   | Payload      |
+| Button        | Payload      |
 | ------------- | ------------ |
 | 🔄 Renew Plan | `ORDER_NOW`  |
 | 📞 Contact Us | `CONTACT_US` |
 
-### Sample Body Text
+The reminder is sent when exactly `RENEWAL_THRESHOLD_DAYS` delivery days remain
+(default `2`).
 
-```
-⏳ *Your FitFuel plan is almost over!*
+### Session expired
 
-Your *🥗 Healthy Diet Non-Veg plan* has only *2 delivery day(s)* remaining.
+No body parameters. Sent when the bot session has been idle longer than
+`SESSION_TIMEOUT_MINUTES` (default `5`).
 
-Don't miss your healthy streak — renew now to keep your meals coming! 🥗
-```
+### OTP code
 
----
+| Index   | Name       | Example     |
+| ------- | ---------- | ----------- |
+| `{{1}}` | `otp_code` | `482917`    |
+| `{{2}}` | `validity` | `5 minutes` |
 
-## 6. Session Expired (`session_expired`)
+Use Meta's **Authentication** category and OTP button. Do not use quick-reply
+buttons for this template.
 
-**Category:** UTILITY  
-**Use:** Cron runs every 5 min, notifies users whose session expired (5 min idle)
+### Payment failed
 
-### Variables (Body - 0 parameters)
+| Index   | Name     | Example                               |
+| ------- | -------- | ------------------------------------- |
+| `{{1}}` | `reason` | `Cancelled`, `Link Expired`, `Failed` |
 
-No body parameters - static text.
+### Payment confirmed
 
-### Buttons (Quick Reply - 0 buttons)
+| Index   | Name          | Example                   |
+| ------- | ------------- | ------------------------- |
+| `{{1}}` | `plan_title`  | `🥗 Healthy Diet Non-Veg` |
+| `{{2}}` | `day_label`   | `7 Days`                  |
+| `{{3}}` | `meal_label`  | `Lunch + Dinner`          |
+| `{{4}}` | `amount`      | `₹1,540`                  |
+| `{{5}}` | `start_label` | `16 January 2025`         |
 
-None - this is a simple text notification.
+### Kitchen closed
 
-### Sample Body Text
+| Index   | Name             | Example                |
+| ------- | ---------------- | ---------------------- |
+| `{{1}}` | `date`           | `26 Jan 2025`          |
+| `{{2}}` | `reason_line`    | `Republic Day holiday` |
+| `{{3}}` | `remaining_days` | `5`                    |
 
-```
-⏰ *Your session expired due to inactivity.*
+### Subscription cancelled
 
-Type *hi* to start again!
-```
+| Index   | Name             | Example                            |
+| ------- | ---------------- | ---------------------------------- |
+| `{{1}}` | `plan_label`     | `🥗 Healthy Diet Non-Veg (7 Days)` |
+| `{{2}}` | `effective_date` | `28 Oct 2026`                      |
 
----
-
-## 7. OTP Code (`otp_code`)
-
-**Category:** AUTHENTICATION  
-**Use:** Web dashboard login via WhatsApp OTP
-
-### Variables (Body - 2 parameters)
-
-| Index | Name       | Type   | Example     |
-| ----- | ---------- | ------ | ----------- |
-| {{1}} | `otp_code` | String | "482917"    |
-| {{2}} | `validity` | String | "5 minutes" |
-
-### Buttons
-
-None - authentication template (OTP auto-fill on Android)
-
-### Sample Body Text
-
-```
-Your FitFuel login code is: 482917. Valid for 5 minutes.
-```
-
-**Note:** For Authentication category, Meta requires:
-
-- Add "OTP" button type (not quick reply)
-- Set "OTP length" to 6
-- Package name for Android auto-fill
+This template has no buttons. The message tells the customer that no meals will
+be delivered from the effective date and asks them to reply if they want to
+discuss a refund.
 
 ---
 
-## 8. Payment Failed (`payment_failed`)
-
-**Category:** UTILITY  
-**Use:** Razorpay webhook when payment link cancelled/expired/failed
-
-### Variables (Body - 1 parameter)
-
-| Index | Name     | Type   | Example                                 |
-| ----- | -------- | ------ | --------------------------------------- |
-| {{1}} | `reason` | String | "Cancelled" / "Link Expired" / "Failed" |
-
-### Buttons (Quick Reply - 0 buttons)
-
-None - informational only.
-
-### Sample Body Text
-
-```
-❌ *Payment Cancelled*
-
-Unfortunately your FitFuel order could not be completed.
-
-Please send us a message to start a new order whenever you're ready. We're here to help! 🙏
-```
-
----
-
-## 9. Payment Confirmed (`payment_confirmed`)
-
-**Category:** UTILITY  
-**Use:** Razorpay webhook when payment_link.paid event received
-
-### Variables (Body - 5 parameters)
-
-| Index | Name          | Type   | Example                      |
-| ----- | ------------- | ------ | ---------------------------- |
-| {{1}} | `plan_title`  | String | "🥗 Healthy Diet Non-Veg"    |
-| {{2}} | `day_label`   | String | "7 Days"                     |
-| {{3}} | `meal_label`  | String | "Lunch + Dinner"             |
-| {{4}} | `amount`      | String | "₹1,540"                     |
-| {{5}} | `start_label` | String | "from 16 Jan 2025" / "today" |
-
-### Buttons
-
-None - confirmation message.
-
-### Sample Body Text
-
-```
-🎉 *Payment Confirmed!*
-
-Your FitFuel *🥗 Healthy Diet Non-Veg* plan is now *active*!
-
-📅 Duration: 7 Days
-🍴 Meals: Lunch + Dinner
-💰 Amount paid: ₹1,540
-
-📦 Deliveries start from 16 Jan 2025.
-You'll get a daily notification before each meal to confirm, skip, or change it.
-
-Thank you for choosing FitFuel! 💪
-```
-
----
-
-## 10. Kitchen Closed (`kitchen_closed`)
-
-**Category:** UTILITY  
-**Use:** Admin marks kitchen closed (holiday) → extends all active subscriptions by 1 day
-
-### Variables (Body - 3 parameters)
-
-| Index | Name             | Type   | Example                |
-| ----- | ---------------- | ------ | ---------------------- |
-| {{1}} | `date`           | String | "26 Jan 2025"          |
-| {{2}} | `reason_line`    | String | "Republic Day holiday" |
-| {{3}} | `remaining_days` | String | "5"                    |
-
-### Buttons
-
-None - informational.
-
-### Sample Body Text
-
-```
-🔒 *Kitchen Closed — 26 Jan 2025*
-Republic Day holiday
-
-We're sorry, our kitchen won't be operating on 26 Jan 2025. No meals will be delivered that day.
-
-✅ Your plan has been extended by 1 day to make up for it.
-📅 You now have *5 delivery day(s)* remaining.
-
-We'll be back the next working day! 🙏
-```
-
----
-
-## Implementation Notes
-
-### Environment Variables (Vercel Project Settings)
-
-Add all these to Vercel → Settings → Environment Variables:
+## Environment variables
 
 ```bash
 WHATSAPP_BREAKFAST_TEMPLATE=breakfast_notification
@@ -348,30 +145,31 @@ WHATSAPP_OTP_TEMPLATE=otp_code
 WHATSAPP_PAYMENT_FAILED_TEMPLATE=payment_failed
 WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE=payment_confirmed
 WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
+WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
 ```
 
-### Meta Business Manager Checklist
+These are optional because the defaults above are already used in code. Set them
+only when the Meta template name differs.
+
+## Meta Business Manager checklist
 
 For each template:
 
-1. Go to WhatsApp Manager → Message Templates → Create Template
-2. Select Category (Utility / Marketing / Authentication)
-3. Name: Use exact name from table above
-4. Language: English (en)
-5. Add Body with `{{1}}`, `{{2}}`, etc. placeholders
-6. Add Buttons (Quick Reply) as specified
-7. Submit for review
-8. Once **APPROVED**, set env var in Vercel (optional - defaults match)
+1. Go to **WhatsApp Manager → Message Templates → Create Template**.
+2. Select the category shown in the overview.
+3. Use the exact template name shown in the overview (or update the env var).
+4. Select **English (en)**.
+5. Paste the body from `templates-body.md` without changing the `{{n}}` order.
+6. Add the quick-reply or OTP buttons listed above.
+7. Submit for review.
+8. Once **APPROVED**, confirm the env var in Vercel.
 
-### Testing
+## Fallback behavior
 
-Use Meta's test phone numbers in WhatsApp Manager to test each template before going live.
+`lib/sendNotification.js` first tries an interactive message with buttons or a
+list. If Meta rejects it with error `131047` (the customer is outside the
+24-hour window), it retries as the approved template. The interactive body is
+also available as a fallback if the template send fails.
 
-### Fallback Behavior
-
-Code automatically detects 24-hour WhatsApp session window:
-
-- **User messaged < 24h ago** → Uses interactive messages (buttons/lists) - no template needed
-- **User silent > 24h** → Uses approved template from above list
-
-This ensures delivery even when user hasn't messaged recently.
+Template names and parameter order therefore need to stay in sync with
+`lib/notifySlot.js`, `lib/sendNotification.js`, and the callers in `api/`.

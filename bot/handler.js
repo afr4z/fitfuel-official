@@ -1,10 +1,8 @@
-import { createClient } from "@supabase/supabase-js";
 import { getSession, setSession } from "./session.js";
 import { STATES } from "./states.js";
 import { handleGreeting } from "./handlers/greeting.js";
 import { handleMainMenu } from "./handlers/menu.js";
 import { handleOrderAction, handleMealChange } from "./handlers/orders.js";
-import { getMenuItems } from "../lib/petpooja.js";
 import {
   handlePlanCategory,
   handleDaySelection,
@@ -21,15 +19,8 @@ import {
   LOCATION_BACK,
   LOCATION_BACK_FALLBACK,
   BUTTON_EXPIRED,
-  MENU_UNAVAILABLE,
-  CHANGE_MEAL_LIST_ALT,
   PAYMENT_PENDING,
 } from "./config/messages.js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-);
 
 // Keywords that trigger "go back" navigation regardless of state
 const BACK_KEYWORDS = new Set(["back", "menu", "home", "0", "restart"]);
@@ -98,10 +89,6 @@ async function handleBack(phone, session, setSession) {
       // Abort pending payment and restart
       return resetToGreeting(phone, session, setSession);
     }
-
-    case STATES.SELECTING_MEAL_SLOT:
-      // Back to greeting from slot picker
-      return resetToGreeting(phone, session, setSession);
 
     default: {
       return resetToGreeting(phone, session, setSession);
@@ -255,65 +242,6 @@ export async function handleIncoming(phone, message) {
         `CHANGE_${session.data.orderId}`,
         setSession,
       );
-
-    case STATES.SELECTING_MEAL_SLOT: {
-      if (input.startsWith("PICK_SLOT_")) {
-        const orderId = input.replace("PICK_SLOT_", "");
-        if (!orderId) return resetToGreeting(phone, session, setSession);
-
-        await setSession(phone, {
-          ...session,
-          state: STATES.CHANGING_MEAL,
-          data: { orderId },
-        });
-
-        // Look up the subscription to filter menu items by meal plan
-        let mealPlanId;
-        let orderSlot;
-        try {
-          const { data: ord } = await supabase
-            .from("orders")
-            .select("subscription_id, slot")
-            .eq("id", orderId)
-            .single();
-          orderSlot = ord?.slot;
-          if (ord?.subscription_id) {
-            const { data: sub } = await supabase
-              .from("meal_plan_subscriptions")
-              .select("meal_plan_id")
-              .eq("id", ord.subscription_id)
-              .single();
-            mealPlanId = sub?.meal_plan_id;
-          }
-        } catch (_) {}
-
-        let items = [];
-        try {
-          const fetched = await getMenuItems({ mealPlanId, slot: orderSlot });
-          if (fetched.length) items = fetched;
-        } catch (e) {
-          console.error("[DB] Error fetching menu:", e.message);
-        }
-
-        if (items.length === 0) {
-          await sendText(phone, MENU_UNAVAILABLE);
-          return;
-        }
-
-        const rows = items.map((item) => ({
-          id: `MEAL_${orderId}_${item.itemid}`,
-          title: item.itemname
-            .replace(/\s*[(\[](breakfast|lunch|dinner)[)\]]\s*$/i, "")
-            .substring(0, 24),
-          description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
-        }));
-        await sendList(phone, CHANGE_MEAL_LIST_ALT, "View Menu", [
-          { title: "Menu", rows },
-        ]);
-        return;
-      }
-      return resetToGreeting(phone, session, setSession);
-    }
 
     case STATES.AWAITING_PAYMENT:
       await sendText(phone, PAYMENT_PENDING);

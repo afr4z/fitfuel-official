@@ -350,9 +350,3 @@ export function subscriptionCancelled({ planLabel, effectiveDate }) {
     `Thank you for choosing FitFuel. 🙏`
   );
 }
-
-// ─── Menu Unavailable ────────────────────────────────────────────────────────
-
-export const MENU_UNAVAILABLE = `Sorry, the menu is unavailable right now. Please try again later.`;
-
-export const CHANGE_MEAL_LIST_ALT = `🔄 *Change your meal*\n\nPick from today's options:`;

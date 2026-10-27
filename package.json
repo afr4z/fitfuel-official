@@ -1,10 +1,9 @@
 {
-  "name": "whatsapp-bot-vercel",
+  "name": "fitfuel-official",
   "version": "1.0.0",
-  "description": "WhatsApp Cloud API bot on Vercel serverless",
+  "description": "FitFuel website, WhatsApp bot, and admin on Vercel",
   "type": "module",
   "scripts": {
-    "dev": "vercel dev --local",
     "format": "prettier --write"
   },
   "dependencies": {
@@ -12,7 +11,6 @@
     "@upstash/redis": "^1.37.0"
   },
   "devDependencies": {
-    "dotenv": "^17.4.2",
     "prettier": "^3.5.3",
     "supabase": "^2.92.1",
     "vercel": "^51.7.0"

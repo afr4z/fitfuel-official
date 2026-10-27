@@ -21,16 +21,19 @@ Tap a button below to confirm, change, or skip this meal.
 ```
 
 ### Variables (in order):
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}         | {{2}}     | {{3}}    | {{4}}        | {{5}}         |
+| ------------- | --------- | -------- | ------------ | ------------- |
 | delivery_date | item_name | time_str | deadline_msg | expiry_notice |
 
 ### Sample Values:
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}           | {{2}}       | {{3}} | {{4}}                                                | {{5}}                                 |
+| --------------- | ----------- | ----- | ---------------------------------------------------- | ------------------------------------- |
 | 16 January 2025 | Idli Sambar | 08:00 | You can confirm, skip, or change until 10pm tonight. | Your plan expires in 2 delivery days. |
 
 ### Rendered Sample:
+
 ```
 🌅 Good evening! Your breakfast for tomorrow (16 January 2025) is scheduled.
 
@@ -42,6 +45,7 @@ Tap a button below to confirm, change, or skip this meal.
 ```
 
 ### Buttons (Quick Reply):
+
 1. ✅ Confirm
 2. 🔄 Change
 3. ⏭️ Skip
@@ -67,16 +71,19 @@ Please use the buttons below to manage your order.
 ```
 
 ### Variables:
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}         | {{2}}     | {{3}}    | {{4}}        | {{5}}         |
+| ------------- | --------- | -------- | ------------ | ------------- |
 | delivery_date | item_name | time_str | deadline_msg | expiry_notice |
 
 ### Sample Values:
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}           | {{2}}           | {{3}} | {{4}}                                                | {{5}}                                 |
+| --------------- | --------------- | ----- | ---------------------------------------------------- | ------------------------------------- |
 | 15 January 2025 | Chicken Biryani | 12:30 | Please respond by 9:30am — changes close after that. | Your plan expires in 2 delivery days. |
 
 ### Rendered Sample:
+
 ```
 ☀️ Good morning! Your lunch for today (15 January 2025) is scheduled.
 
@@ -88,6 +95,7 @@ Please use the buttons below to manage your order.
 ```
 
 ### Buttons (Quick Reply):
+
 1. ✅ Confirm
 2. 🔄 Change
 3. ⏭️ Skip
@@ -113,16 +121,19 @@ Use the buttons below to confirm, change, or skip.
 ```
 
 ### Variables:
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}         | {{2}}     | {{3}}    | {{4}}        | {{5}}         |
+| ------------- | --------- | -------- | ------------ | ------------- |
 | delivery_date | item_name | time_str | deadline_msg | expiry_notice |
 
 ### Sample Values:
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}           | {{2}}                 | {{3}} | {{4}}                                             | {{5}}                                 |
+| --------------- | --------------------- | ----- | ------------------------------------------------- | ------------------------------------- |
 | 15 January 2025 | Dal Makhani with Roti | 19:30 | Please respond by 5pm — changes close after that. | Your plan expires in 2 delivery days. |
 
 ### Rendered Sample:
+
 ```
 🌙 Good afternoon! Your dinner for today (15 January 2025) is scheduled.
 
@@ -134,6 +145,7 @@ Use the buttons below to confirm, change, or skip.
 ```
 
 ### Buttons (Quick Reply):
+
 1. ✅ Confirm
 2. 🔄 Change
 3. ⏭️ Skip
@@ -156,16 +168,19 @@ Please let us know if you'd like to confirm, change, or skip this meal.
 ```
 
 ### Variables:
-| {{1}} | {{2}} | {{3}} | {{4}} |
-|-------|-------|-------|-------|
+
+| {{1}}      | {{2}}      | {{3}}     | {{4}}         |
+| ---------- | ---------- | --------- | ------------- |
 | slot_label | slot_emoji | item_name | delivery_date |
 
 ### Sample Values:
-| {{1}} | {{2}} | {{3}} | {{4}} |
-|-------|-------|-------|-------|
-| Lunch | ☀️ | Chicken Biryani | 15 January 2025 |
+
+| {{1}} | {{2}} | {{3}}           | {{4}}           |
+| ----- | ----- | --------------- | --------------- |
+| Lunch | ☀️    | Chicken Biryani | 15 January 2025 |
 
 ### Rendered Sample:
+
 ```
 ⏭️ Hi there! The Lunch you skipped earlier is now being delivered today (15 January 2025).
 
@@ -175,6 +190,7 @@ Please let us know if you'd like to confirm, change, or skip this meal.
 ```
 
 ### Buttons (Quick Reply):
+
 1. ✅ Confirm
 2. 🔄 Change
 3. ⏭️ Skip
@@ -196,16 +212,19 @@ You have only {{2}} delivery day(s) remaining. Don't let your healthy streak end
 ```
 
 ### Variables:
-| {{1}} | {{2}} |
-|-------|-------|
+
+| {{1}}      | {{2}}     |
+| ---------- | --------- |
 | plan_label | threshold |
 
 ### Sample Values:
-| {{1}} | {{2}} |
-|-------|-------|
-| Healthy Diet Non-Veg | 2 |
+
+| {{1}}                | {{2}} |
+| -------------------- | ----- |
+| Healthy Diet Non-Veg | 2     |
 
 ### Rendered Sample:
+
 ```
 ⏳ Hi! Your FitFuel Healthy Diet Non-Veg plan is ending soon.
 
@@ -213,6 +232,7 @@ You have only 2 delivery day(s) remaining. Don't let your healthy streak end —
 ```
 
 ### Buttons (Quick Reply):
+
 1. 🔄 Renew Plan
 2. 📞 Contact Us
 
@@ -234,6 +254,7 @@ Please type "hi" to start a new conversation with FitFuel Nutrition.
 ### Variables: None
 
 ### Rendered Sample:
+
 ```
 ⏰ Your session has expired due to inactivity.
 
@@ -254,21 +275,25 @@ Your FitFuel verification code is {{1}}. This code is valid for {{2}}.
 ```
 
 ### Variables:
-| {{1}} | {{2}} |
-|-------|-------|
+
+| {{1}}    | {{2}}    |
+| -------- | -------- |
 | otp_code | validity |
 
 ### Sample Values:
-| {{1}} | {{2}} |
-|-------|-------|
+
+| {{1}}  | {{2}}     |
+| ------ | --------- |
 | 482917 | 5 minutes |
 
 ### Rendered Sample:
+
 ```
 Your FitFuel verification code is 482917. This code is valid for 5 minutes.
 ```
 
 ### Special Settings:
+
 - **Button Type:** OTP (not Quick Reply)
 - **OTP Length:** 6
 - **Package Name:** `com.fitfuel.nutrition` (for Android auto-fill)
@@ -289,16 +314,19 @@ Unfortunately your FitFuel order could not be completed. Please reply to this me
 ```
 
 ### Variables:
-| {{1}} |
-|-------|
+
+| {{1}}  |
+| ------ |
 | reason |
 
 ### Sample Values:
-| {{1}} |
-|-------|
+
+| {{1}}     |
+| --------- |
 | cancelled |
 
 ### Rendered Sample:
+
 ```
 ❌ We're sorry — your payment was cancelled.
 
@@ -328,16 +356,19 @@ Thank you for choosing FitFuel! 💪
 ```
 
 ### Variables:
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}      | {{2}}     | {{3}}      | {{4}}  | {{5}}       |
+| ---------- | --------- | ---------- | ------ | ----------- |
 | plan_title | day_label | meal_label | amount | start_label |
 
 ### Sample Values:
-| {{1}} | {{2}} | {{3}} | {{4}} | {{5}} |
-|-------|-------|-------|-------|-------|
+
+| {{1}}                | {{2}}  | {{3}}          | {{4}}  | {{5}}           |
+| -------------------- | ------ | -------------- | ------ | --------------- |
 | Healthy Diet Non-Veg | 7 Days | Lunch + Dinner | ₹1,540 | 16 January 2025 |
 
 ### Rendered Sample:
+
 ```
 🎉 Great news! Your payment is confirmed.
 
@@ -373,16 +404,19 @@ We'll be back the next working day! 🙏
 ```
 
 ### Variables:
-| {{1}} | {{2}} | {{3}} |
-|-------|-------|-------|
-| date | reason_line | remaining_days |
+
+| {{1}} | {{2}}       | {{3}}          |
+| ----- | ----------- | -------------- |
+| date  | reason_line | remaining_days |
 
 ### Sample Values:
-| {{1}} | {{2}} | {{3}} |
-|-------|-------|-------|
-| 26 January 2025 | Republic Day holiday | 5 |
+
+| {{1}}           | {{2}}                | {{3}} |
+| --------------- | -------------------- | ----- |
+| 26 January 2025 | Republic Day holiday | 5     |
 
 ### Rendered Sample:
+
 ```
 🔒 Kitchen Closed Notice — 26 January 2025
 
@@ -397,26 +431,73 @@ We'll be back the next working day! 🙏
 
 ---
 
+## 11. Subscription Cancelled (`subscription_cancelled`)
+
+**Category:** UTILITY | **Language:** en | **Buttons:** None
+**Sent:** When an admin cancels a subscription from the admin panel
+
+### Body Text:
+
+```
+❌ Your FitFuel plan has been cancelled.
+
+📦 Plan: {{1}}
+📅 No meals will be delivered from {{2}}.
+
+If this was a mistake, or you'd like to discuss a refund, please reply to this chat and our team will help.
+
+Thank you for choosing FitFuel. 🙏
+```
+
+### Variables:
+
+| {{1}}      | {{2}}          |
+| ---------- | -------------- |
+| plan_label | effective_date |
+
+### Sample Values:
+
+| {{1}}                            | {{2}}       |
+| -------------------------------- | ----------- |
+| 🥗 Healthy Diet Non-Veg (7 Days) | 28 Oct 2026 |
+
+### Rendered Sample:
+
+```
+❌ Your FitFuel plan has been cancelled.
+
+📦 Plan: 🥗 Healthy Diet Non-Veg (7 Days)
+📅 No meals will be delivered from 28 Oct 2026.
+
+If this was a mistake, or you'd like to discuss a refund, please reply to this chat and our team will help.
+
+Thank you for choosing FitFuel. 🙏
+```
+
+---
+
 ## Quick Reference Table
 
-| Template | Variables | Buttons | Category | Sent At |
-|----------|-----------|---------|----------|---------|
-| breakfast_notification | 5 | 3 Quick Reply | UTILITY | 8 PM (for tomorrow) |
-| lunch_notification | 5 | 3 Quick Reply | UTILITY | 8:30 AM (for today) |
-| dinner_notification | 5 | 3 Quick Reply | UTILITY | 4 PM (for today) |
-| rescheduled_meal | 4 | 3 Quick Reply | UTILITY | Same as meal slot |
-| expiry_reminder | 2 | 2 Quick Reply | MARKETING | 1:30 PM |
-| session_expired | 0 | None | UTILITY | Every 5 min |
-| otp_code | 2 | OTP (special) | AUTHENTICATION | On-demand |
-| payment_failed | 1 | None | UTILITY | Webhook |
-| payment_confirmed | 5 | None | UTILITY | Webhook |
-| kitchen_closed | 3 | None | UTILITY | Admin action |
+| Template               | Variables | Buttons       | Category       | Sent At                 |
+| ---------------------- | --------- | ------------- | -------------- | ----------------------- |
+| breakfast_notification | 5         | 3 Quick Reply | UTILITY        | 8 PM (for tomorrow)     |
+| lunch_notification     | 5         | 3 Quick Reply | UTILITY        | 8:30 AM (for today)     |
+| dinner_notification    | 5         | 3 Quick Reply | UTILITY        | 4 PM (for today)        |
+| rescheduled_meal       | 4         | 3 Quick Reply | UTILITY        | Same as meal slot       |
+| expiry_reminder        | 2         | 2 Quick Reply | MARKETING      | 1:30 PM                 |
+| session_expired        | 0         | None          | UTILITY        | Every minute (VPS cron) |
+| otp_code               | 2         | OTP (special) | AUTHENTICATION | On-demand               |
+| payment_failed         | 1         | None          | UTILITY        | Webhook                 |
+| payment_confirmed      | 5         | None          | UTILITY        | Webhook                 |
+| kitchen_closed         | 3         | None          | UTILITY        | Admin action            |
+| subscription_cancelled | 2         | None          | UTILITY        | Admin action            |
 
 ---
 
 ## Meta Business Manager - Setup Checklist
 
 For each template:
+
 1. **Name:** Use exact name (e.g., `breakfast_notification`)
 2. **Category:** As listed above
 3. **Language:** English (en)

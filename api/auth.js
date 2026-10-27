@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import { sendText, sendTemplate } from "../lib/whatsapp.js";
-import { sendNotification } from "../lib/sendNotification.js";
+import { sendTemplate } from "../lib/whatsapp.js";
 import { safeEqualStrings } from "../lib/timingSafe.js";
 
 const supabase = createClient(

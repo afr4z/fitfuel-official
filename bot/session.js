@@ -52,27 +52,11 @@ export async function clearSession(phone) {
   await redis.zrem(ACTIVITY_SET_KEY, phone);
 }
 
-export async function deleteSession(phone) {
-  await redis.del(`session:${phone}`);
-  await redis.zrem(ACTIVITY_SET_KEY, phone);
-}
-
-export async function markSessionExpired(phone) {
-  const session = await redis.get(`session:${phone}`);
-  if (!session) return;
-  const stamped = { ...session, state: "SESSION_EXPIRED", lastActivityAt: Date.now() };
-  await redis.set(`session:${phone}`, stamped, { ex: TTL });
-  await redis.zadd(ACTIVITY_SET_KEY, { score: Date.now(), member: phone });
-}
-
 export async function findExpiredSessions() {
   const cutoff = Date.now() - IDLE_TIMEOUT_MS;
-  const candidatePhones = await redis.zrange(
-    ACTIVITY_SET_KEY,
-    "-inf",
-    cutoff,
-    { byScore: true },
-  );
+  const candidatePhones = await redis.zrange(ACTIVITY_SET_KEY, "-inf", cutoff, {
+    byScore: true,
+  });
 
   if (!candidatePhones || candidatePhones.length === 0) return [];
 

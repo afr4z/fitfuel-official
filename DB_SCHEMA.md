@@ -1,21 +1,29 @@
 # FitFuel Database Schema
 
-Run `supabase/migration.sql` to apply (drops all data).
+The authoritative schema and seed data are in
+[`supabase/migration.sql`](./supabase/migration.sql). That file **drops every
+table** and must not be run against production.
 
-## Creation Order
+Additional one-off patches live in `supabase/*.sql`. Prefer a new, additive
+migration over editing a file that has already been applied.
 
-| Step | Table | Depends On |
-|------|-------|-----------|
-| 1 | `customers` | — |
-| 2 | `meal_plans` | — |
-| 2b | `plan_pricing` | meal_plans |
-| 3 | `dishes` | meal_plans |
-| 2c | `weekly_meal_schedule` | meal_plans, dishes |
-| 2d | `next_day_meals` | meal_plans, dishes |
-| 4 | `meal_plan_subscriptions` | customers |
-| 5 | `subscription_slots` | meal_plan_subscriptions |
-| 6 | `orders` | meal_plan_subscriptions, subscription_slots |
-| 7 | `kitchen_closed_days` | — |
+## Tables
+
+Creation order:
+
+| Step | Table                     | Depends on                                      |
+| ---- | ------------------------- | ----------------------------------------------- |
+| 1    | `customers`               | —                                               |
+| 2    | `customer_addresses`      | `customers`                                     |
+| 3    | `meal_plans`              | —                                               |
+| 4    | `plan_pricing`            | `meal_plans`                                    |
+| 5    | `dishes`                  | `meal_plans`                                    |
+| 6    | `weekly_meal_schedule`    | `meal_plans`, `dishes`                          |
+| 7    | `next_day_meals`          | `meal_plans`, `dishes`                          |
+| 8    | `meal_plan_subscriptions` | `customers`, `meal_plans`, `customer_addresses` |
+| 9    | `subscription_slots`      | `meal_plan_subscriptions`                       |
+| 10   | `orders`                  | `meal_plan_subscriptions`, `subscription_slots` |
+| 11   | `kitchen_closed_days`     | —                                               |
 
 ---
 
@@ -27,15 +35,34 @@ CREATE TABLE customers (
   phone TEXT NOT NULL UNIQUE,
   name TEXT,
   email TEXT,
-  address TEXT,
-  location JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
 
----
+## 2. `customer_addresses`
 
-## 2. `meal_plans`
+```sql
+CREATE TABLE customer_addresses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  label TEXT NOT NULL DEFAULT 'Home',
+  address TEXT NOT NULL,
+  location JSONB,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_customer_addresses_customer
+  ON customer_addresses(customer_id);
+CREATE UNIQUE INDEX idx_customer_addresses_unique
+  ON customer_addresses(customer_id, address);
+```
+
+The address book is the source of truth for website checkout. The bot session
+also stores a temporary address/location while onboarding.
+
+## 3. `meal_plans`
 
 ```sql
 CREATE TABLE meal_plans (
@@ -50,11 +77,16 @@ CREATE TABLE meal_plans (
 );
 ```
 
-Seed: 6 plans (healthy_nonveg, high_protein_nonveg, weight_loss_nonveg, healthy_veg, high_protein_veg, weight_loss_veg).
+Six seeded plans:
 
----
+- `healthy_nonveg`
+- `high_protein_nonveg`
+- `weight_loss_nonveg`
+- `healthy_veg`
+- `high_protein_veg`
+- `weight_loss_veg`
 
-## 2b. `plan_pricing`
+## 4. `plan_pricing`
 
 ```sql
 CREATE TABLE plan_pricing (
@@ -66,34 +98,36 @@ CREATE TABLE plan_pricing (
 );
 ```
 
-Tiered per-day pricing. `price_per_meal_per_day` varies by duration
-(e.g. 3-day @ ₹250/meal/day, 30-day @ ₹190/meal/day).
+Tiered per-day pricing for 3, 7, 14, and 30-day plans. The server recomputes the
+amount from this table; the browser does not control price.
 
----
-
-## 3. `dishes`
+## 5. `dishes`
 
 ```sql
 CREATE TABLE dishes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   meal_plan_id UUID NOT NULL REFERENCES meal_plans(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  description TEXT,
+  categoryname TEXT,
   is_veg BOOLEAN NOT NULL DEFAULT true,
   price DECIMAL(10,2) NOT NULL,
   is_available BOOLEAN NOT NULL DEFAULT true,
   petpooja_item_id TEXT,
+  slot TEXT NOT NULL CHECK (slot IN ('breakfast', 'lunch', 'dinner')),
+  nutrition JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX idx_dishes_meal_plan ON dishes(meal_plan_id);
+CREATE INDEX idx_dishes_available ON dishes(is_available);
+CREATE INDEX idx_dishes_slot ON dishes(slot);
 ```
 
-Seed: 5 placeholder dishes per plan (30 total). `petpooja_item_id` is populated by
-`sync-plans.js` from the Petpooja menu `itemid` field. Used by `dispatch-orders.js`
-when sending orders to Petpooja `save_order` API.
+Dishes are read-only in the admin UI. Petpooja remains the source of truth, and
+the external sync scripts update this table. `petpooja_item_id` is used when
+orders are dispatched to Petpooja.
 
----
-
-## 2c. `weekly_meal_schedule` (replaces `plan_weekly_meals`)
+## 6. `weekly_meal_schedule`
 
 ```sql
 CREATE TABLE weekly_meal_schedule (
@@ -107,12 +141,11 @@ CREATE TABLE weekly_meal_schedule (
 );
 ```
 
-Default dish per plan × day-of-week (Mon–Sat) × slot. Never null — 108 rows seeded.
-Managed via admin panel "Weekly Schedule" tab.
+Default dish for each plan × Monday–Saturday × slot. Managed from the admin
+**Weekly** tab. Rows are seeded by cyclically assigning available dishes, so the
+number of rows depends on the dish count.
 
----
-
-## 2d. `next_day_meals`
+## 7. `next_day_meals`
 
 ```sql
 CREATE TABLE next_day_meals (
@@ -128,13 +161,11 @@ CREATE TABLE next_day_meals (
 CREATE INDEX idx_next_day_meals_date ON next_day_meals(date);
 ```
 
-Tomorrow's override per plan × slot. Managed via admin panel "Tomorrow" tab.
-Locked after 7:45pm IST. Auto-filled by commit-meals cron at 7:45pm from
-`weekly_meal_schedule`.
+Tomorrow's override for a plan × slot. Managed from the admin **Tomorrow** tab.
+Locked after 7:45 PM IST. The `commit-meals` cron fills missing rows from
+`weekly_meal_schedule` at 7:45 PM IST.
 
----
-
-## 4. `meal_plan_subscriptions`
+## 8. `meal_plan_subscriptions`
 
 ```sql
 CREATE TABLE meal_plan_subscriptions (
@@ -142,6 +173,7 @@ CREATE TABLE meal_plan_subscriptions (
   customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
   meal_plan_id UUID REFERENCES meal_plans(id),
   phone TEXT NOT NULL,
+  address_id UUID REFERENCES customer_addresses(id) ON DELETE SET NULL,
   plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', 'monthly')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled')),
   start_date DATE NOT NULL,
@@ -154,13 +186,19 @@ CREATE TABLE meal_plan_subscriptions (
 
 CREATE INDEX idx_subscriptions_phone ON meal_plan_subscriptions(phone);
 CREATE INDEX idx_subscriptions_status ON meal_plan_subscriptions(status);
+
+CREATE UNIQUE INDEX idx_subscriptions_razorpay_payment
+  ON meal_plan_subscriptions(razorpay_payment_id);
 ```
 
-`meal_plan_id` links to the plan category.
+One Razorpay payment can provision at most one subscription. Multiple `NULL`
+payment IDs are allowed for WhatsApp-only subscriptions.
 
----
+Cancellation uses `status = 'cancelled'`; `start_date` and `end_date` are not
+rewritten. The effective cancellation date is derived from the earliest cancelled
+order.
 
-## 5. `subscription_slots`
+## 9. `subscription_slots`
 
 ```sql
 CREATE TABLE subscription_slots (
@@ -171,14 +209,12 @@ CREATE TABLE subscription_slots (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (subscription_id, slot)
 );
+
+CREATE INDEX idx_slots_subscription ON subscription_slots(subscription_id);
+CREATE INDEX idx_slots_slot ON subscription_slots(slot);
 ```
 
-Default dishes are looked up at order-creation time from `next_day_meals` →
-`weekly_meal_schedule` fallback.
-
----
-
-## 6. `orders`
+## 10. `orders`
 
 ```sql
 CREATE TABLE orders (
@@ -192,7 +228,19 @@ CREATE TABLE orders (
   item_id TEXT,
   item_name TEXT,
   is_default BOOLEAN NOT NULL DEFAULT true,
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'skipped', 'delivered')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (
+    status IN (
+      'pending',
+      'confirmed',
+      'skipped',
+      'sent_to_kitchen',
+      'accepted',
+      'ready',
+      'delivered',
+      'cancelled'
+    )
+  ),
+  petpooja_client_id TEXT,
   accept_until TIMESTAMPTZ,
   notified_at TIMESTAMPTZ,
   confirmed_at TIMESTAMPTZ,
@@ -205,11 +253,11 @@ CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_slot_id ON orders(slot_id);
 ```
 
-`accept_until` is set by the cron job. Users cannot confirm/change/skip after this deadline.
+`accept_until` is the customer-facing cutoff. A meal can be confirmed, changed,
+or skipped only before this timestamp. `sent_to_kitchen`, `accepted`, and `ready`
+orders are already with Petpooja and are skipped by admin cancellation.
 
----
-
-## 7. `kitchen_closed_days`
+## 11. `kitchen_closed_days`
 
 ```sql
 CREATE TABLE kitchen_closed_days (
@@ -220,42 +268,43 @@ CREATE TABLE kitchen_closed_days (
 );
 ```
 
----
-
-## Notification & Commit Schedule (IST)
-
-| Event              | Time (IST) | UTC Cron     | Description                                   |
-|--------------------|-----------|--------------|-----------------------------------------------|
-| commit-meals       | 7:45pm    | `15 14 * * *` | Auto-fill next_day_meals + create all orders  |
-| notify-breakfast   | 8:00pm    | `30 14 * * *` | Breakfast notification for tomorrow           |
-| notify-lunch       | 8:30am    | `0 3 * * *`  | Lunch notification for same day               |
-| notify-dinner      | 4:00pm    | `30 10 * * *` | Dinner notification for same day              |
-| expiry-reminder    | 1:30pm    | `0 8 * * *`  | Remind subscribers with 2 delivery days left  |
-
-Accept deadlines: Breakfast → 10pm IST, Lunch → 9:30am IST, Dinner → 5pm IST.
+When a day is marked closed, active subscriptions that would have received a
+meal that day are extended by one day, and the affected customers are notified.
 
 ---
 
-## Entity Relationships
+## Notification and commit schedule (IST)
 
-```
-customers 1──N meal_plan_subscriptions 1──N subscription_slots
-                                                │
-                                                N
-                                              orders
+| Job                | Time (IST) | UTC cron      | What it does                                    |
+| ------------------ | ---------- | ------------- | ----------------------------------------------- |
+| `commit-meals`     | 7:45 PM    | `15 14 * * *` | Fill `next_day_meals` and create pending orders |
+| `notify-breakfast` | 8:00 PM    | `30 14 * * *` | Breakfast notification for tomorrow             |
+| `notify-lunch`     | 8:30 AM    | `0 3 * * *`   | Lunch notification for today                    |
+| `notify-dinner`    | 4:00 PM    | `30 10 * * *` | Dinner notification for today                   |
+| `expiry-reminder`  | 1:30 PM    | `0 8 * * *`   | Remind subscribers with the threshold days left |
+| `session-expiry`   | Every min  | VPS cron      | Notify idle bot sessions (not a Vercel cron)    |
 
+Customer cutoffs: breakfast 10:00 PM IST (previous day), lunch 9:30 AM IST,
+dinner 5:00 PM IST.
+
+## Entity relationships
+
+```text
+customers 1──N customer_addresses
+customers 1──N meal_plan_subscriptions
 meal_plans 1──N plan_pricing
+meal_plans 1──N dishes
 meal_plans 1──N weekly_meal_schedule
 meal_plans 1──N next_day_meals
-meal_plans 1──N dishes
-meal_plan_subscriptions ──── meal_plans
 
-weekly_meal_schedule.dish_id ──── dishes.id
-next_day_meals.dish_id ────────── dishes.id
+meal_plan_subscriptions 1──N subscription_slots
+meal_plan_subscriptions 1──N orders
+subscription_slots      1──N orders
 ```
 
-## Meal Default Lookup Order
+## Meal default lookup
 
-1. Check `next_day_meals` for `(plan_id, date, slot)` — if exists, use it.
-2. Fall back to `weekly_meal_schedule` for `(plan_id, day_of_week, slot)`.
-3. `weekly_meal_schedule` is always fully seeded — no null fallback needed.
+1. Look for `next_day_meals` at `(plan_id, date, slot)`.
+2. Otherwise use `weekly_meal_schedule` at `(plan_id, day_of_week, slot)`.
+3. `weekly_meal_schedule` is seeded for every plan × slot, so there is no
+   dish-name fallback.

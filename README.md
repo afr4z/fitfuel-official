@@ -1,78 +1,143 @@
-# WhatsApp Bot — Vercel Serverless
+# FitFuel Nutrition
 
-A minimal WhatsApp Cloud API webhook backend deployable to Vercel in minutes.
+WhatsApp meal-plan bot, website checkout, Razorpay webhook, subscription
+operations, and the admin console. The app is deployed as Vercel serverless
+functions with static pages in `public/`.
 
-## File Structure
-
-```
-whatsapp-bot-vercel/
-├── api/
-│   └── webhook.js      ← The only file you need to edit for bot logic
-├── .env.local          ← Your secrets (never commit this)
-├── vercel.json
-└── package.json
-```
-
-## Setup
-
-### 1. Fill in .env.local
+## Structure
 
 ```
-WHATSAPP_PHONE_NUMBER_ID=   # From Meta App Dashboard → WhatsApp → API Setup
-WHATSAPP_ACCESS_TOKEN=      # Permanent system user token
-WHATSAPP_VERIFY_TOKEN=      # Any string you choose (e.g. "mysecret123")
+api/
+├── webhook.js              WhatsApp Cloud API webhook
+├── web-order.js            Website checkout → Razorpay payment link
+├── razorpay-webhook.js     Payment success/failure → subscription
+├── auth.js                 Website OTP, magic login, sessions, addresses
+├── admin.js                Admin menu + subscription APIs
+├── public.js               Public plan list
+└── cron/                   Daily meal, expiry, and session jobs
+
+bot/
+├── handler.js              WhatsApp state router
+├── session.js              Redis-backed bot sessions
+├── states.js               Bot states
+├── config/                 Messages and plan labels
+└── handlers/               Greeting, menu, orders, subscription, expiry
+
+lib/                        Supabase, WhatsApp, Razorpay, delivery, cron helpers
+public/                     Website, admin, dashboard, checkout, static assets
+supabase/                   SQL migrations / one-off schema patches
+scripts/                    VPS session-expiry trigger
 ```
 
-### 2. Deploy to Vercel
+## Environment variables
+
+Required:
+
+```
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+WHATSAPP_PHONE_NUMBER_ID
+WHATSAPP_ACCESS_TOKEN
+WHATSAPP_VERIFY_TOKEN
+RAZORPAY_KEY_ID
+RAZORPAY_KEY_SECRET
+RAZORPAY_WEBHOOK_SECRET
+ADMIN_SECRET
+CRON_SECRET
+APP_URL
+```
+
+Optional:
+
+```
+SESSION_TIMEOUT_MINUTES=5
+RENEWAL_THRESHOLD_DAYS=2
+BYPASS_DEADLINE_CHECK=false
+
+WHATSAPP_OTP_TEMPLATE=otp_code
+WHATSAPP_BREAKFAST_TEMPLATE=breakfast_notification
+WHATSAPP_LUNCH_TEMPLATE=lunch_notification
+WHATSAPP_DINNER_TEMPLATE=dinner_notification
+WHATSAPP_RESCHEDULED_TEMPLATE=rescheduled_meal
+WHATSAPP_EXPIRY_TEMPLATE=expiry_reminder
+WHATSAPP_SESSION_EXPIRED_TEMPLATE=session_expired
+WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE=payment_confirmed
+WHATSAPP_PAYMENT_FAILED_TEMPLATE=payment_failed
+WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
+WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
+```
+
+Template requirements are documented in `templates.md` and
+`templates-body.md`.
+
+## Deploy
+
+Push to `main` and let Vercel build the project:
 
 ```bash
-npm i -g vercel
-vercel deploy
+git push origin main
 ```
 
-Copy the deployment URL, e.g. `https://your-app.vercel.app`
-
-### 3. Add env vars in Vercel Dashboard
-
-Go to your project → Settings → Environment Variables  
-Add all three vars from `.env.local`
-
-### 4. Register Webhook in Meta Dashboard
-
-App Dashboard → WhatsApp → Configuration → Edit
-
-- **Callback URL**: `https://your-app.vercel.app/api/webhook`
-- **Verify Token**: same value as `WHATSAPP_VERIFY_TOKEN`
-
-Click **Verify and Save**.
-
-Then subscribe to the **messages** webhook field.
-
-### 5. Test it
-
-Send a WhatsApp message to your test number.  
-Check Vercel → Functions → Logs to see it arrive.
-
-## Bot Logic
-
-Edit the `handleIncomingMessage` function in `api/webhook.js`:
-
-```js
-async function handleIncomingMessage(from, messageText, messageId) {
-  await markAsRead(messageId);
-
-  // Your logic here — call Claude, query a DB, anything
-  const reply = await yourBotLogic(messageText);
-
-  await sendMessage(from, reply);
-}
-```
-
-## Local Development
+Or deploy from the CLI:
 
 ```bash
-npm install
-vercel dev
-# Use ngrok to expose localhost:3000 → register that URL as webhook
-ngrok http 3000
+npx vercel --prod
 ```
+
+## Local development
+
+The package intentionally has no `dev` script. `vercel dev` must not invoke
+itself through an npm script, so run Vercel directly:
+
+```bash
+npx vercel dev
+```
+
+To receive WhatsApp webhooks locally, expose the dev server with a tunnel and
+register the tunnel URL in Meta:
+
+```
+https://<tunnel-host>/api/webhook
+```
+
+For database changes, review `DB_SCHEMA.md` and `supabase/` first.
+`supabase/migration.sql` is a destructive development reset; do not run it
+against production.
+
+## Admin
+
+- UI: `/admin`
+- API: `/api/admin/*`
+- Auth: `Authorization: Bearer <ADMIN_SECRET>`
+- The secret is entered on the login screen and kept in `sessionStorage`.
+
+Admin operations:
+
+- Weekly default menu
+- Tomorrow-only overrides
+- Kitchen-closed days
+- Subscription summary/list/detail/export
+- Subscription cancellation
+
+## Important flows
+
+- **Meal confirmation:** `lib/notifySlot.js`, called by
+  `api/cron/notify-breakfast.js`, `notify-lunch.js`, and `notify-dinner.js`.
+- **Change meal menu:** `bot/handlers/orders.js`.
+- **Payment → subscription:** `api/razorpay-webhook.js`.
+- **Website checkout:** `public/order.html` → `api/web-order.js`.
+- **Admin subscription APIs:** `api/admin.js`.
+
+## Known follow-ups
+
+The full review is in `tasks/code-analysis.md`. Highest-priority follow-ups:
+
+- Fail closed when `ADMIN_SECRET`, `CRON_SECRET`, or
+  `RAZORPAY_WEBHOOK_SECRET` is missing.
+- Verify WhatsApp POST webhook signatures.
+- Decouple pending checkout state from the phone-keyed bot session.
+- Make subscription + slot creation transactional.
+- Normalize date handling on IST helpers.
+- Add tests, lint, and CI.

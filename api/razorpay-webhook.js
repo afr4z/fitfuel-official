@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import { sendText, sendButtons } from "../lib/whatsapp.js";
+import { sendButtons } from "../lib/whatsapp.js";
 import { sendNotification } from "../lib/sendNotification.js";
 import { formatTimeIST, formatDateIST } from "../lib/time.js";
 import { getSession, clearSession } from "../bot/session.js";
@@ -23,11 +23,6 @@ import {
   SLOT_LABELS,
 } from "../lib/cronUtils.js";
 import { resolveDeliveryAddress } from "../lib/addresses.js";
-
-const supabaseAuth = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-);
 
 async function createMagicToken(phone, referenceId) {
   const token = `magic_${crypto.randomBytes(16).toString("hex")}`;

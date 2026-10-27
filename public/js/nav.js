@@ -119,7 +119,6 @@
       </button>
       <div class="nav-account-menu" id="nav-account-menu" hidden>
         <a href="/dashboard" class="nav-account-item"${current(isDashboard)}>My Orders</a>
-        <a href="/single-meals" class="nav-account-item">Single Meals</a>
         <hr class="nav-account-sep" />
         <button type="button" class="nav-account-item nav-account-logout" id="btn-logout">Logout</button>
       </div>
