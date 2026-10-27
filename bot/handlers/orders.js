@@ -1,6 +1,7 @@
 import { sendText, sendList } from "../../lib/whatsapp.js";
 import { createClient } from "@supabase/supabase-js";
 import { getMenuItems } from "../../lib/petpooja.js";
+import { stripDishSlotSuffix } from "../../lib/dishNames.js";
 import { addDeliveryDays } from "../../lib/deliveryDays.js";
 import { formatDateIST } from "../../lib/time.js";
 import { STATES } from "../states.js";
@@ -45,7 +46,9 @@ function deadlineMessage(order) {
 
 export async function handleOrderAction(phone, session, buttonId, setSession) {
   const [action, orderId] = buttonId.split("_");
-  console.log(`[ORDERS] handleOrderAction called: phone=${phone} action=${action} orderId=${orderId}`);
+  console.log(
+    `[ORDERS] handleOrderAction called: phone=${phone} action=${action} orderId=${orderId}`,
+  );
 
   if (!orderId) {
     console.log(`[ORDERS] Missing orderId from buttonId=${buttonId}`);
@@ -55,25 +58,35 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
 
   const { data: order, error: fetchError } = await supabase
     .from("orders")
-    .select("phone, status, slot, accept_until, item_id, item_name, slot_id, subscription_id, delivery_time")
+    .select(
+      "phone, status, slot, accept_until, item_id, item_name, slot_id, subscription_id, delivery_time",
+    )
     .eq("id", orderId)
     .single();
 
   if (fetchError || !order) {
-    console.error(`[ORDERS] Order fetch failed: orderId=${orderId} error=${fetchError?.message}`);
+    console.error(
+      `[ORDERS] Order fetch failed: orderId=${orderId} error=${fetchError?.message}`,
+    );
     await sendText(phone, ERROR_ORDER_NOT_FOUND);
     return;
   }
-  console.log(`[ORDERS] Order found: id=${orderId} status=${order.status} slot=${order.slot} phoneMatch=${order.phone === phone}`);
+  console.log(
+    `[ORDERS] Order found: id=${orderId} status=${order.status} slot=${order.slot} phoneMatch=${order.phone === phone}`,
+  );
 
   if (order.phone !== phone) {
-    console.error(`[ORDERS] Ownership mismatch: orderPhone=${order.phone} requesterPhone=${phone}`);
+    console.error(
+      `[ORDERS] Ownership mismatch: orderPhone=${order.phone} requesterPhone=${phone}`,
+    );
     await sendText(phone, ERROR_GENERIC);
     return;
   }
 
   if (order.status !== "pending") {
-    console.log(`[ORDERS] Order not pending: orderId=${orderId} status=${order.status}`);
+    console.log(
+      `[ORDERS] Order not pending: orderId=${orderId} status=${order.status}`,
+    );
     const alreadyMsg =
       order.status === "confirmed"
         ? ALREADY_CONFIRMED
@@ -85,7 +98,9 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
   }
 
   if (isPastDeadline(order)) {
-    console.log(`[ORDERS] Deadline passed: orderId=${orderId} accept_until=${order.accept_until} bypass=${process.env.BYPASS_DEADLINE_CHECK}`);
+    console.log(
+      `[ORDERS] Deadline passed: orderId=${orderId} accept_until=${order.accept_until} bypass=${process.env.BYPASS_DEADLINE_CHECK}`,
+    );
     await sendText(phone, deadlineMessage(order));
     return;
   }
@@ -152,13 +167,14 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
               status: "pending",
             });
           }
-
         }
       }
 
       if (pushedDate) {
         const dateStr = formatDateIST(pushedDate, {
-          weekday: "long", day: "numeric", month: "long",
+          weekday: "long",
+          day: "numeric",
+          month: "long",
         });
         await sendText(phone, skipPushed({ dateStr }));
       } else {
@@ -168,7 +184,9 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
     }
 
     case "CHANGE": {
-      console.log(`[ORDERS] CHANGE case: setting session to CHANGING_MEAL for phone=${phone}`);
+      console.log(
+        `[ORDERS] CHANGE case: setting session to CHANGING_MEAL for phone=${phone}`,
+      );
       await setSession(phone, {
         ...session,
         state: STATES.CHANGING_MEAL,
@@ -190,7 +208,9 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
       let items;
       try {
         const fetched = await getMenuItems({ mealPlanId, slot: order.slot });
-        console.log(`[ORDERS] getMenuItems returned ${fetched?.length ?? 0} items`);
+        console.log(
+          `[ORDERS] getMenuItems returned ${fetched?.length ?? 0} items`,
+        );
         if (!fetched?.length) throw new Error("empty menu");
         items = fetched;
       } catch (e) {
@@ -199,19 +219,21 @@ export async function handleOrderAction(phone, session, buttonId, setSession) {
         return;
       }
 
-      const rows = items.map((item) => ({
-        id: `MEAL_${orderId}_${item.itemid}`,
-        title: item.itemname.substring(0, 24),
-        description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
-      }));
+      const rows = items.map((item) => {
+        const itemName = stripDishSlotSuffix(item.itemname) || "Meal";
+        return {
+          id: `MEAL_${orderId}_${item.itemid}`,
+          title: itemName.substring(0, 24),
+          description: `₹${item.price} · ${item.item_type === "1" ? "Veg" : "Non-Veg"}`,
+        };
+      });
 
-      console.log(`[ORDERS] Sending menu list with ${rows.length} items to ${phone}`);
-      await sendList(
-        phone,
-        CHANGE_MEAL_LIST,
-        "View Menu",
-        [{ title: "Today's Menu", rows }],
+      console.log(
+        `[ORDERS] Sending menu list with ${rows.length} items to ${phone}`,
       );
+      await sendList(phone, CHANGE_MEAL_LIST, "View Menu", [
+        { title: "Today's Menu", rows },
+      ]);
       console.log(`[ORDERS] Menu list sent successfully to ${phone}`);
       break;
     }
@@ -225,10 +247,14 @@ export async function handleMealChange(phone, session, listId, setSession) {
   const parts = listId.split("_");
   const orderId = parts[1];
   const itemId = parts[2];
-  console.log(`[ORDERS] handleMealChange: phone=${phone} orderId=${orderId} itemId=${itemId}`);
+  console.log(
+    `[ORDERS] handleMealChange: phone=${phone} orderId=${orderId} itemId=${itemId}`,
+  );
 
   if (!orderId || !itemId) {
-    console.log(`[ORDERS] handleMealChange: missing orderId/itemId from listId=${listId}`);
+    console.log(
+      `[ORDERS] handleMealChange: missing orderId/itemId from listId=${listId}`,
+    );
     await sendText(phone, ERROR_GENERIC);
     return;
   }
@@ -246,7 +272,10 @@ export async function handleMealChange(phone, session, listId, setSession) {
   }
 
   if (order.phone !== phone) {
-    console.error("[SECURITY] Order ownership mismatch on meal change:", { orderPhone: order.phone, requesterPhone: phone });
+    console.error("[SECURITY] Order ownership mismatch on meal change:", {
+      orderPhone: order.phone,
+      requesterPhone: phone,
+    });
     await sendText(phone, ERROR_GENERIC);
     return;
   }
@@ -281,7 +310,7 @@ export async function handleMealChange(phone, session, listId, setSession) {
 
     const items = await getMenuItems({ mealPlanId, slot: ord?.slot });
     const item = items.find((i) => i.itemid === itemId);
-    if (item) itemName = item.itemname;
+    if (item) itemName = stripDishSlotSuffix(item.itemname) || "Selected meal";
   } catch (e) {
     console.error("[PETPOOJA] Error resolving item name:", e.message);
   }

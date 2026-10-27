@@ -23,6 +23,7 @@ import {
   SLOT_LABELS,
 } from "../lib/cronUtils.js";
 import { resolveDeliveryAddress } from "../lib/addresses.js";
+import { stripDishSlotSuffix } from "../lib/dishNames.js";
 
 async function createMagicToken(phone, referenceId) {
   const token = `magic_${crypto.randomBytes(16).toString("hex")}`;
@@ -508,8 +509,9 @@ export default async function handler(req, res) {
               );
               const expiryNotice = buildExpiryNotice(daysLeft, true);
               const slotLabel = SLOT_LABELS.breakfast;
-              const itemLine = order.item_name
-                ? `🌅 *${slotLabel}*: ${order.item_name}`
+              const itemName = stripDishSlotSuffix(order.item_name);
+              const itemLine = itemName
+                ? `🌅 *${slotLabel}*: ${itemName}`
                 : `🌅 *${slotLabel}*`;
 
               await supabase
