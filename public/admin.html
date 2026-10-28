@@ -608,7 +608,7 @@
           return {
             label: "Needs details",
             cls: "badge-cancelled",
-            hint: "Invoices will stay off until the GSTIN, legal name, and address are valid.",
+            hint: "Invoices will stay off until the GSTIN, PAN, legal name, and address are valid and the GSTIN's PAN matches the PAN field.",
           };
         }
         return {
@@ -630,7 +630,7 @@
         }
         if (hint) {
           hint.textContent = checkbox.checked
-            ? "Invoices will go live after you save with a valid GSTIN, legal name, and address."
+            ? "Invoices will go live after you save with a valid GSTIN, matching PAN, legal name, and address."
             : "Automatic GST invoices are paused. Payments and subscriptions continue normally.";
         }
       }
@@ -661,6 +661,7 @@
         <div><label for="gst-gstin">GSTIN</label><input id="gst-gstin" type="text" maxlength="15" autocapitalize="characters" spellcheck="false" placeholder="36AAGCJ9203P1Z2" value="${esc(s.gstin)}"></div>
         <div><label for="gst-pan">PAN</label><input id="gst-pan" type="text" maxlength="10" autocapitalize="characters" spellcheck="false" placeholder="AAGCJ9203P" value="${esc(s.pan)}"></div>
       </div>
+      <p class="hint">The PAN must match the 10 characters embedded in the GSTIN. The state code is taken from the GSTIN's first two digits.</p>
     </div>
     <div class="card">
       <h2>Registered address</h2>
@@ -1299,7 +1300,7 @@
         <span></span>
       </div></header>
       <main class="container company-main">
-        <p class="hint">These details appear on GST invoices. Invoices stay off until they are enabled and the GSTIN, legal name, and address are valid. Keep invoicing paused until the WhatsApp invoice template is approved.</p>
+        <p class="hint">These details appear on GST invoices. Invoices stay off until they are enabled and the GSTIN, matching PAN, legal name, and address are valid. Keep invoicing paused until the WhatsApp invoice template is approved.</p>
         <form id="company-form" onsubmit="event.preventDefault(); saveCompanySettings()">
           <div id="company-body"><div class="empty-state">Loading company details…</div></div>
         </form>
