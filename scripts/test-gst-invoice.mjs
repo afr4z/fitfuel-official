@@ -96,7 +96,11 @@ async function main() {
 
   const gstRate = Number(process.env.GST_RATE || 5);
   const sac = process.env.GST_SAC || "996331";
-  const sample = !process.env.GST_SELLER_GSTIN;
+  // Always watermark test invoices unless GST_INVOICE_SAMPLE=false is set
+  // explicitly. A missing GSTIN also forces the sample watermark even if the
+  // flag is false, so placeholder sellers can never produce a live-looking PDF.
+  const sample =
+    process.env.GST_INVOICE_SAMPLE !== "false" || !process.env.GST_SELLER_GSTIN;
 
   const seller = {
     legalName: process.env.GST_SELLER_LEGAL_NAME || "FitFuel Nutrition",
