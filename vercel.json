@@ -51,6 +51,10 @@
       "destination": "/api/auth.js"
     },
     {
+      "source": "/api/delivery-quote",
+      "destination": "/api/public.js"
+    },
+    {
       "source": "/api/admin/:path*",
       "destination": "/api/admin.js"
     },
@@ -81,7 +85,7 @@
       "memory": 128
     },
     "api/public.js": {
-      "maxDuration": 10,
+      "maxDuration": 30,
       "memory": 128
     },
     "api/admin.js": {

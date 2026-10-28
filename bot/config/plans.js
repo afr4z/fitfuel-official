@@ -19,7 +19,7 @@ export const PLAN_TYPE_LABELS = {
   "3day": "3-Day",
   weekly: "7-Day",
   biweekly: "14-Day",
-  monthly: "30-Day",
+  monthly: "28-Day",
 };
 
 /** Returns a human-readable label for a plan_type, falling back to the raw value. */
@@ -35,7 +35,7 @@ export const DAY_OPTIONS = [
   { id: "DAYS_3", label: "3 Days", days: 3 },
   { id: "DAYS_7", label: "7 Days", days: 7 },
   { id: "DAYS_14", label: "14 Days", days: 14 },
-  { id: "DAYS_30", label: "30 Days", days: 30 },
+  { id: "DAYS_28", label: "28 Days", days: 28 },
 ];
 // ─── Meals-per-day options ───────────────────────────────────────────────────
 // mealsPerDay is used as the multiplier in the price formula.

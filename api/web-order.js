@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { createPaymentLink } from "../lib/razorpay.js";
-import { getPlanCategories } from "../lib/mealPlans.js";
+import { getPlanCategories, PLAN_DURATIONS } from "../lib/mealPlans.js";
+import { getDeliveryQuote } from "../lib/deliveryPricing.js";
 import { countRemainingDeliveryDays } from "../lib/deliveryDays.js";
 import { setSession } from "../bot/session.js";
 import { getCustomerByPhone } from "../lib/addresses.js";
@@ -67,7 +68,17 @@ export default async function handler(req, res) {
       location,
     } = req.body;
 
-    if (!planId || !days || !mealsPerDay) {
+    const planDays = Number(days);
+    const meals = Number(mealsPerDay);
+
+    if (
+      !planId ||
+      !Number.isInteger(planDays) ||
+      !PLAN_DURATIONS.includes(planDays) ||
+      !Number.isInteger(meals) ||
+      meals < 1 ||
+      meals > 3
+    ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -117,14 +128,14 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "Plan not found" });
     }
 
-    const pricePerMealPerDay = plan.pricing[days];
+    const pricePerMealPerDay =
+      plan.pricing[planDays] ?? plan.basePricePerMealPerDay;
     if (!pricePerMealPerDay) {
       return res.status(400).json({ error: "Invalid duration for this plan" });
     }
 
-    const totalAmount = Math.round(pricePerMealPerDay * mealsPerDay * days);
-
     // ─── Delivery address: saved addressId OR new address + location ────────
+    let deliveryAddress = null;
     if (addressId) {
       const customer = await getCustomerByPhone(normPhone);
       if (!customer) {
@@ -139,9 +150,21 @@ export default async function handler(req, res) {
       if (!saved) {
         return res.status(400).json({ error: "Invalid saved address" });
       }
+      deliveryAddress = saved;
     } else if (!address || !String(address).trim()) {
       return res.status(400).json({ error: "Please add a delivery address" });
     }
+
+    // Calculate delivery before creating the payment link. A typed area or a
+    // saved address with no coordinates is geocoded server-side.
+    const quote = await getDeliveryQuote({
+      ratePerMealPerDay,
+      days: planDays,
+      mealsPerDay: meals,
+      address: deliveryAddress?.address || address,
+      location: deliveryAddress?.location || location,
+    });
+    const totalAmount = quote.totalAmount;
 
     // No database writes before payment. The customer row, subscription,
     // slots, and orders are only created by the Razorpay webhook after the
@@ -151,12 +174,12 @@ export default async function handler(req, res) {
     const referenceId = `${normPhone}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
 
     const mealLabel =
-      mealsPerDay === 1
+      meals === 1
         ? "Breakfast"
-        : mealsPerDay === 2
+        : meals === 2
           ? "Lunch + Dinner"
           : "All 3 Meals";
-    const dayLabel = `${days} Days`;
+    const dayLabel = `${planDays} Days`;
 
     const paymentLink = await createPaymentLink({
       amount: totalAmount,
@@ -177,15 +200,23 @@ export default async function handler(req, res) {
       data: {
         planId,
         planTitle: plan.title,
-        days,
+        days: planDays,
         mealLabel,
         dayLabel,
         amount: totalAmount,
-        mealsPerDay,
+        planAmount: quote.planAmount,
+        deliveryTotal: quote.deliveryTotal,
+        deliveryPerMeal: quote.deliveryPerMeal,
+        distanceKm: quote.distanceKm,
+        locationKnown: quote.locationKnown,
+        mealsPerDay: meals,
         renewAfterEnd,
         name,
         email,
-        ...(addressId ? { addressId } : { address, location }),
+        ...(addressId ? { addressId } : { address }),
+        // Prefer the resolved coordinates so the webhook can save / refresh
+        // them on the address row.
+        location: quote.coordinates || deliveryAddress?.location || location,
       },
     });
 

@@ -69,6 +69,25 @@ WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
 WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
 ```
 
+Distance-based delivery (defaults are set for the Khammam kitchen):
+
+```
+KITCHEN_LAT=17.2478673
+KITCHEN_LNG=80.1496404
+DELIVERY_FREE_KM=3
+DELIVERY_STANDARD_PER_MEAL=20
+DELIVERY_LONG_PLAN_PER_MEAL=15
+DELIVERY_LONG_PLAN_MIN_DAYS=20
+DELIVERY_UNKNOWN_POLICY=charge
+DELIVERY_GEOCODE_SUFFIX=Khammam, Telangana, India
+DELIVERY_LAUNCH_AT=2026-10-28T00:00:00+05:30
+GOOGLE_MAPS_API_KEY=
+```
+
+`GOOGLE_MAPS_API_KEY` is optional. Without it, geocoding uses OpenStreetMap
+Nominatim and distance uses straight-line Haversine. With it, Google Geocoding
+and Distance Matrix are used for road distance.
+
 Template requirements are documented in `templates.md` and
 `templates-body.md`.
 
@@ -129,6 +148,8 @@ Admin operations:
 - **Change meal menu:** `bot/handlers/orders.js`.
 - **Payment → subscription:** `api/razorpay-webhook.js`.
 - **Website checkout:** `public/order.html` → `api/web-order.js`.
+- **Delivery quote:** `lib/deliveryPricing.js` → `api/delivery-quote.js`.
+  Payment-link totals and Petpooja dispatch use the same distance rules.
 - **Admin subscription APIs:** `api/admin.js`.
 
 ## Known follow-ups

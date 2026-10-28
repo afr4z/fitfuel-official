@@ -612,8 +612,8 @@
                   <label for="days-14">14 Days</label>
                 </div>
                 <div class="radio-btn">
-                  <input type="radio" name="days" value="30" id="days-30" />
-                  <label for="days-30">30 Days</label>
+                  <input type="radio" name="days" value="28" id="days-28" />
+                  <label for="days-28">28 Days</label>
                 </div>
               </div>
             </div>
@@ -677,6 +677,14 @@
               <div class="price-row">
                 <span>Meals/Day</span><span id="summary-meals">—</span>
               </div>
+              <div class="price-row">
+                <span>Plan amount</span
+                ><span id="summary-plan-amount">₹0</span>
+              </div>
+              <div class="price-row">
+                <span>Delivery</span
+                ><span id="summary-delivery">Calculated at checkout</span>
+              </div>
               <div class="price-row total">
                 <span>Total</span><span id="summary-total">₹0</span>
               </div>
@@ -690,6 +698,17 @@
               <h2 class="card-title">Delivery Details</h2>
               <p class="card-subtitle">
                 Verify your number, then pick a saved address or add a new one
+              </p>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  color: var(--gray-500);
+                  margin-top: 8px;
+                "
+              >
+                Free delivery within 3 km of our kitchen. Beyond that,
+                delivery is charged per meal (₹20/meal, or ₹15/meal on 20+
+                day plans).
               </p>
             </div>
 
@@ -945,12 +964,17 @@
       const API_PLANS = "/api/plans";
       const API_WEB_ORDER = "/api/web-order";
       const API_AUTH = "/api/auth";
+      const API_DELIVERY_QUOTE = "/api/delivery-quote";
 
       let plans = [];
       let selectedPlanId = null;
       let currentStep = 1;
       let authVerified = false;
       let selectedAddressId = null;
+      let savedAddresses = [];
+      let currentQuote = null;
+      let quoteRequestSeq = 0;
+      let geoCoords = null;
       const totalSteps = 3;
 
       const stepElements = {
@@ -1039,6 +1063,7 @@
 
       function selectPlan(planId) {
         selectedPlanId = planId;
+        currentQuote = null;
         planGrid.querySelectorAll(".plan-option").forEach((el) => {
           const isSel = el.dataset.planId === planId;
           el.classList.toggle("selected", isSel);
@@ -1066,6 +1091,12 @@
         );
       }
 
+      function formatRupees(value) {
+        return `₹${Number(value || 0).toLocaleString("en-IN")}`;
+      }
+
+      // Plan amount only. Delivery is quoted separately once we have an
+      // address, because it depends on distance from the kitchen.
       function calcTotal() {
         const plan = getSelectedPlan();
         const days = getSelectedDays();
@@ -1074,11 +1105,24 @@
         return Math.round(plan.pricing[days] * meals * days);
       }
 
+      function deliveryLabel(quote) {
+        if (!quote) return "Enter address to check";
+        if (quote.deliveryTotal === 0) return "Free (within 3 km)";
+
+        const distance =
+          quote.distanceKm != null
+            ? ` · ${Number(quote.distanceKm).toFixed(1)} km`
+            : "";
+        const unverified =
+          quote.locationKnown === false ? " (location unverified)" : "";
+        return `${formatRupees(quote.deliveryTotal)}${distance}${unverified}`;
+      }
+
       function updatePriceSummary() {
         const plan = getSelectedPlan();
         const days = getSelectedDays();
         const meals = getSelectedMeals();
-        const total = calcTotal();
+        const planAmount = calcTotal();
 
         const mealLabel =
           meals === 1
@@ -1092,15 +1136,20 @@
           plan?.title || "—";
         document.getElementById("summary-days").textContent = dayLabel;
         document.getElementById("summary-meals").textContent = mealLabel;
+        document.getElementById("summary-plan-amount").textContent =
+          formatRupees(planAmount);
+        document.getElementById("summary-delivery").textContent =
+          "Calculated at checkout";
         document.getElementById("summary-total").textContent =
-          `₹${total.toLocaleString()}`;
+          `${formatRupees(planAmount)} + delivery`;
       }
 
       function updateFinalSummary() {
         const plan = getSelectedPlan();
         const days = getSelectedDays();
         const meals = getSelectedMeals();
-        const total = calcTotal();
+        const planAmount = calcTotal();
+        const total = currentQuote?.totalAmount ?? planAmount;
         const mealLabel =
           meals === 1
             ? "Breakfast Only"
@@ -1113,8 +1162,68 @@
         <div class="plan-summary-row"><span>Plan</span><span>${esc(plan?.title) || "—"}</span></div>
         <div class="plan-summary-row"><span>Duration</span><span>${dayLabel}</span></div>
         <div class="plan-summary-row"><span>Meals/Day</span><span>${mealLabel}</span></div>
-        <div class="plan-summary-row" style="font-weight:700;color:var(--green-800);"><span>Total</span><span>₹${total.toLocaleString()}</span></div>
+        <div class="plan-summary-row"><span>Plan amount</span><span>${formatRupees(planAmount)}</span></div>
+        <div class="plan-summary-row"><span>Delivery</span><span>${deliveryLabel(currentQuote)}</span></div>
+        <div class="plan-summary-row" style="font-weight:700;color:var(--green-800);"><span>Total</span><span>${formatRupees(total)}</span></div>
       `;
+      }
+
+      function getDeliveryAddressPayload() {
+        const useNew = document.getElementById("use-new-address").checked;
+        if (useNew) {
+          const address = document.getElementById("address").value.trim();
+          const area = document.getElementById("location").value.trim();
+          if (!address) return null;
+          return {
+            address,
+            area,
+            location: geoCoords || area,
+          };
+        }
+
+        const saved = savedAddresses.find((a) => a.id === selectedAddressId);
+        if (!saved) return null;
+        return {
+          address: saved.address,
+          location: saved.location,
+        };
+      }
+
+      async function refreshDeliveryQuote() {
+        const requestId = ++quoteRequestSeq;
+        const plan = getSelectedPlan();
+        const addressPayload = getDeliveryAddressPayload();
+
+        if (!plan || !addressPayload) {
+          currentQuote = null;
+          updateFinalSummary();
+          return;
+        }
+
+        try {
+          const res = await fetch(API_DELIVERY_QUOTE, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              planId: plan.id,
+              days: getSelectedDays(),
+              mealsPerDay: getSelectedMeals(),
+              ...addressPayload,
+            }),
+          });
+          const data = await res.json();
+          if (requestId !== quoteRequestSeq) return;
+          if (!res.ok) {
+            throw new Error(data.error || "Could not calculate delivery");
+          }
+          currentQuote = data;
+        } catch (err) {
+          if (requestId !== quoteRequestSeq) return;
+          console.error("[ORDER] Delivery quote failed:", err);
+          currentQuote = null;
+        }
+
+        updateFinalSummary();
       }
 
       function validateStep1() {
@@ -1236,6 +1345,7 @@
         if (currentStep === 2) updatePriceSummary();
         if (currentStep === 3) {
           updateFinalSummary();
+          refreshDeliveryQuote();
           // Disable Pay Now until the phone is OTP-verified and an address is
           // chosen, then try to auto-authenticate returning users.
           validateStep3();
@@ -1269,7 +1379,9 @@
           ...(useNew
             ? {
                 address: document.getElementById("address").value.trim(),
-                location: document.getElementById("location").value.trim(),
+                location:
+                  geoCoords ||
+                  document.getElementById("location").value.trim(),
               }
             : { addressId: selectedAddressId }),
         };
@@ -1317,6 +1429,7 @@
         .querySelectorAll('input[name="days"], input[name="mealsPerDay"]')
         .forEach((input) => {
           input.addEventListener("change", () => {
+            currentQuote = null;
             updatePriceSummary();
           });
         });
@@ -1325,10 +1438,16 @@
         const el = document.getElementById(field);
         if (!el) return;
         el.addEventListener("input", () => {
+          if (field === "location") geoCoords = null;
           if (currentStep === 3) validateStep3();
         });
         el.addEventListener("blur", () => {
-          if (currentStep === 3) validateStep3();
+          if (currentStep === 3) {
+            validateStep3();
+            if (field === "location" || field === "address") {
+              refreshDeliveryQuote();
+            }
+          }
         });
       });
 
@@ -1351,7 +1470,11 @@
               el.classList.remove("selected");
               el.querySelector("input").checked = false;
             });
-          if (currentStep === 3) validateStep3();
+          currentQuote = null;
+          if (currentStep === 3) {
+            validateStep3();
+            refreshDeliveryQuote();
+          }
         });
 
       // ─── OTP authentication for the checkout ────────────────────────────────
@@ -1480,6 +1603,7 @@
       }
 
       function renderSavedAddresses(addresses) {
+        savedAddresses = addresses || [];
         const container = document.getElementById("saved-addresses");
         if (!addresses.length) {
           container.innerHTML = `
@@ -1519,7 +1643,11 @@
                   opt.querySelector("input").checked,
                 );
               });
-              if (currentStep === 3) validateStep3();
+              currentQuote = null;
+              if (currentStep === 3) {
+                validateStep3();
+                refreshDeliveryQuote();
+              }
             });
           });
       }
@@ -1556,12 +1684,16 @@
               });
             });
             const { latitude, longitude } = pos.coords;
-            // Reverse geocode using a simple approach - we'll use a free API or just store coords
-            // For now, store coords and let user edit the area name
-            locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-            locationInput.dispatchEvent(new Event("input"));
+            // Keep coordinates separate from the editable area label. The
+            // quote endpoint receives these exact coordinates.
+            geoCoords = { latitude, longitude };
+            locationInput.value = "Current location (GPS)";
+            if (currentStep === 3) {
+              validateStep3();
+              refreshDeliveryQuote();
+            }
             showSuccess(
-              "Location captured! You can edit the area name if needed.",
+              "Location captured! We can now check your delivery charge.",
             );
           } catch (err) {
             console.error("Geolocation error:", err);

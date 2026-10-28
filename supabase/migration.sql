@@ -72,37 +72,37 @@ CREATE TABLE plan_pricing (
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 250), (7, 220), (14, 207), (30, 190)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 250), (7, 220), (14, 207), (28, 190)) AS v(days, price)
   WHERE mp.tag = 'healthy_nonveg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 290), (7, 260), (14, 242), (30, 220)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 290), (7, 260), (14, 242), (28, 220)) AS v(days, price)
   WHERE mp.tag = 'high_protein_nonveg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 194), (30, 175)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 194), (28, 175)) AS v(days, price)
   WHERE mp.tag = 'weight_loss_nonveg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 193), (30, 175)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 193), (28, 175)) AS v(days, price)
   WHERE mp.tag = 'healthy_veg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 280), (7, 245), (14, 230), (30, 210)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 280), (7, 245), (14, 230), (28, 210)) AS v(days, price)
   WHERE mp.tag = 'high_protein_veg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 197), (30, 178)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 197), (28, 178)) AS v(days, price)
   WHERE mp.tag = 'weight_loss_veg';
 
 -- ─── 3. dishes (now includes slot and nutrition columns) ────────────────────────

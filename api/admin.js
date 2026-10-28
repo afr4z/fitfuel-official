@@ -23,7 +23,7 @@ function unauthorized(res) {
 
 const SLOTS = ["breakfast", "lunch", "dinner"];
 const DAYS = [1, 2, 3, 4, 5, 6];
-const PLAN_DAYS = [3, 7, 14, 30];
+const PLAN_DAYS = [3, 7, 14, 28];
 const DAY_LABELS = {
   1: "Mon",
   2: "Tue",

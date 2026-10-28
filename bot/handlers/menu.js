@@ -19,7 +19,7 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
       const plans = await getPlanCategories();
       const planLines = plans
         .map((p) => {
-          const prices = [3, 7, 14, 30]
+          const prices = [3, 7, 14, 28]
             .filter((d) => p.pricing[d])
             .map((d) => `₹${p.pricing[d]}/${d}d`)
             .join(" · ");
