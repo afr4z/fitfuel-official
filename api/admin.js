@@ -967,6 +967,11 @@ async function handleInvoiceResend(req, res, invoiceId) {
       paymentId: invoice.razorpay_payment_id,
       force: true,
     });
+    if (sent.status !== "sent") {
+      return res.status(409).json({
+        error: "Invoice is already being sent. Please wait a moment and retry.",
+      });
+    }
     return res.status(200).json({
       ok: true,
       invoice_number: sent.invoice_number,

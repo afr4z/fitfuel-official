@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   amount_paise INTEGER NOT NULL,
   plan_amount_paise INTEGER,
   delivery_amount_paise INTEGER,
+  delivery_description TEXT,
   gst_rate NUMERIC(5,2) NOT NULL DEFAULT 5,
   taxable_paise INTEGER NOT NULL,
   cgst_paise INTEGER NOT NULL DEFAULT 0,
@@ -69,13 +70,46 @@ CREATE TABLE IF NOT EXISTS invoices (
   line_items JSONB NOT NULL,
   pdf_path TEXT,
   status TEXT NOT NULL DEFAULT 'generated'
-    CHECK (status IN ('generated', 'sent', 'failed')),
+    CHECK (status IN ('generated', 'sending', 'sent', 'failed')),
   whatsapp_message_id TEXT,
   error TEXT,
   sent_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Existing installs need the delivery description and the "sending" claim
+-- state added without dropping the table.
+ALTER TABLE invoices
+  ADD COLUMN IF NOT EXISTS delivery_description TEXT;
+
+ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_status_check;
+ALTER TABLE invoices ADD CONSTRAINT invoices_status_check
+  CHECK (status IN ('generated', 'sending', 'sent', 'failed'));
+
+-- Atomically claims an invoice for one sender. A concurrent Razorpay retry or
+-- admin resend gets no row and therefore must not send a second WhatsApp
+-- message. Stale "sending" rows are reclaimable after 10 minutes.
+CREATE OR REPLACE FUNCTION claim_invoice_send(
+  p_invoice_id UUID,
+  p_force BOOLEAN DEFAULT FALSE
+)
+RETURNS SETOF invoices
+LANGUAGE sql
+AS $$
+  UPDATE invoices
+  SET status = 'sending', updated_at = now()
+  WHERE id = p_invoice_id
+    AND (
+      status IN ('generated', 'failed')
+      OR (p_force AND status = 'sent')
+      OR (status = 'sending' AND updated_at < now() - INTERVAL '10 minutes')
+    )
+  RETURNING *;
+$$;
+
+REVOKE ALL ON FUNCTION claim_invoice_send(UUID, BOOLEAN) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION claim_invoice_send(UUID, BOOLEAN) TO service_role;
 
 CREATE INDEX IF NOT EXISTS idx_invoices_subscription
   ON invoices(subscription_id);

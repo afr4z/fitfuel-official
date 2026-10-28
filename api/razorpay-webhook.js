@@ -588,7 +588,7 @@ export default async function handler(req, res) {
       // Clear session
       await clearSession(rawPhone);
 
-      // Notify customer on WhatsApp
+      // Notify customer on WhatsApp with payment confirmation + invoice
       const fmt = (s) => formatDateIST(s);
       const todayIST = new Date(new Date().getTime() + 5.5 * 60 * 60 * 1000)
         .toISOString()
@@ -602,23 +602,9 @@ export default async function handler(req, res) {
         amount,
         startLabel,
       });
-      const templateParams = [
-        { type: "text", text: planTitle },
-        { type: "text", text: dayLabel },
-        { type: "text", text: mealLabel },
-        { type: "text", text: `₹${amount}` },
-        { type: "text", text: startLabel },
-      ];
-      await sendNotification(
-        phone,
-        process.env.WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE || "payment_confirmed",
-        templateParams,
-        body,
-        null,
-      );
 
-      // Issue the GST invoice after the payment is confirmed. A failure here
-      // must not roll back or re-trigger the payment/subscription flow.
+      // Issue the GST invoice with payment confirmation as caption
+      // This sends a single WhatsApp message with the invoice PDF and the confirmation text.
       try {
         await issueInvoiceForPayment({
           supabase,
@@ -643,6 +629,7 @@ export default async function handler(req, res) {
             email: details.email,
             address: deliveryAddress?.address ?? details.address ?? null,
           },
+          caption: body,
         });
       } catch (invoiceErr) {
         console.error(
