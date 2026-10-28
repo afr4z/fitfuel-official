@@ -4,11 +4,15 @@
   "description": "FitFuel website, WhatsApp bot, and admin on Vercel",
   "type": "module",
   "scripts": {
-    "format": "prettier --write"
+    "format": "prettier --write",
+    "test:invoice": "node --env-file-if-exists=.env.local scripts/test-invoice.mjs",
+    "test:gst-invoice": "node --env-file-if-exists=.env.local scripts/test-gst-invoice.mjs",
+    "retry:invoice": "node --env-file-if-exists=.env.local scripts/retry-invoice.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
-    "@upstash/redis": "^1.37.0"
+    "@upstash/redis": "^1.37.0",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "prettier": "^3.5.3",

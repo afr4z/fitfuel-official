@@ -24,6 +24,7 @@ import {
 } from "../lib/cronUtils.js";
 import { resolveDeliveryAddress } from "../lib/addresses.js";
 import { stripDishSlotSuffix } from "../lib/dishNames.js";
+import { issueInvoiceForPayment } from "../lib/invoiceService.js";
 
 async function createMagicToken(phone, referenceId) {
   const token = `magic_${crypto.randomBytes(16).toString("hex")}`;
@@ -215,6 +216,23 @@ export default async function handler(req, res) {
             "already processed as subscription:",
             existing.id,
           );
+          // A previous delivery may have created the subscription but failed
+          // before the invoice was generated/sent. Retry it idempotently.
+          try {
+            await issueInvoiceForPayment({
+              supabase,
+              subscriptionId: existing.id,
+              paymentId: razorpayPaymentId,
+              paymentLinkId: razorpayPaymentLinkId,
+              paymentAmountPaise: payload?.payment?.entity?.amount ?? null,
+              paymentCreatedAt: payload?.payment?.entity?.created_at ?? null,
+            });
+          } catch (invoiceErr) {
+            console.error(
+              "[WEBHOOK] Invoice retry failed:",
+              invoiceErr.message,
+            );
+          }
           return res.status(200).json({
             status: "duplicate",
             subscription_id: existing.id,
@@ -336,6 +354,22 @@ export default async function handler(req, res) {
           payment_status: "paid",
           razorpay_order_id: razorpayPaymentLinkId ?? null,
           razorpay_payment_id: razorpayPaymentId ?? null,
+          payment_breakdown: {
+            planTitle: planTitle ?? null,
+            dayLabel: dayLabel ?? null,
+            mealLabel: mealLabel ?? null,
+            days: days ?? null,
+            mealsPerDay: mealsPerDay ?? null,
+            amount: amount ?? null,
+            planAmount: details.planAmount ?? null,
+            deliveryTotal: details.deliveryTotal ?? null,
+            deliveryPerMeal: details.deliveryPerMeal ?? null,
+            distanceKm: details.distanceKm ?? null,
+            locationKnown: details.locationKnown ?? null,
+            name: details.name ?? null,
+            email: details.email ?? null,
+            address: deliveryAddress?.address ?? details.address ?? null,
+          },
         })
         .select("id")
         .single();
@@ -582,6 +616,42 @@ export default async function handler(req, res) {
         body,
         null,
       );
+
+      // Issue the GST invoice after the payment is confirmed. A failure here
+      // must not roll back or re-trigger the payment/subscription flow.
+      try {
+        await issueInvoiceForPayment({
+          supabase,
+          subscriptionId: subscription.id,
+          paymentId: razorpayPaymentId,
+          paymentLinkId: razorpayPaymentLinkId,
+          paymentAmountPaise: paidPaise ?? null,
+          paymentCreatedAt: payload?.payment?.entity?.created_at ?? null,
+          breakdown: {
+            planTitle,
+            dayLabel,
+            mealLabel,
+            days,
+            mealsPerDay,
+            amount,
+            planAmount: details.planAmount,
+            deliveryTotal: details.deliveryTotal,
+            deliveryPerMeal: details.deliveryPerMeal,
+            distanceKm: details.distanceKm,
+            locationKnown: details.locationKnown,
+            name: details.name,
+            email: details.email,
+            address: deliveryAddress?.address ?? details.address ?? null,
+          },
+        });
+      } catch (invoiceErr) {
+        console.error(
+          "[WEBHOOK] Invoice generation failed for payment",
+          razorpayPaymentId,
+          ":",
+          invoiceErr.message,
+        );
+      }
 
       // Create magic login token for auto-login on payment-success page
       const referenceId = payload?.payment_link?.entity?.reference_id;

@@ -67,6 +67,7 @@ WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE=payment_confirmed
 WHATSAPP_PAYMENT_FAILED_TEMPLATE=payment_failed
 WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
 WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
+WHATSAPP_INVOICE_TEMPLATE=invoice_ready
 ```
 
 Distance-based delivery (defaults are set for the Khammam kitchen):
@@ -90,6 +91,39 @@ and Distance Matrix are used for road distance.
 
 Template requirements are documented in `templates.md` and
 `templates-body.md`.
+
+GST invoice settings are env-driven. Plan prices are treated as GST-inclusive;
+the invoice back-calculates the taxable value and the CGST/SGST or IGST
+component inside the amount paid. Set `GST_SELLER_GSTIN` to activate invoicing,
+or set `GST_INVOICE_ENABLED=false` to pause it explicitly:
+
+```
+GST_INVOICE_ENABLED=false
+GST_SELLER_LEGAL_NAME=Jadpod Fitness Private Limited
+GST_SELLER_TRADE_NAME=FitFuel Nutrition
+GST_SELLER_ADDRESS_LINES=3rd Floor, 402, YK Arcade|Wyra Road, Near Surabhi Hospital|Khammam, Telangana 507002
+GST_SELLER_GSTIN=
+GST_SELLER_PAN=
+GST_SELLER_EMAIL=hello@fitfuelnutrition.com
+GST_SELLER_PHONE=
+GST_SELLER_STATE_CODE=36
+GST_RATE=5
+GST_SAC=996331
+GST_DELIVERY_SAC=996331
+GST_INVOICE_PREFIX=FF
+INVOICE_STORAGE_BUCKET=invoices
+```
+
+Invoices are generated in `api/razorpay-webhook.js` after a successful
+payment, stored in the private `invoices` Supabase Storage bucket, and sent to
+the customer on WhatsApp. If the 24-hour customer-service window is closed,
+the send falls back to the approved `invoice_ready` document template.
+
+To retry an invoice that failed to send:
+
+```bash
+npm run retry:invoice -- --payment-id pay_xxxxxxxx
+```
 
 ## Deploy
 

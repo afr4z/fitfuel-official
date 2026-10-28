@@ -24,6 +24,8 @@ Creation order:
 | 9    | `subscription_slots`      | `meal_plan_subscriptions`                       |
 | 10   | `orders`                  | `meal_plan_subscriptions`, `subscription_slots` |
 | 11   | `kitchen_closed_days`     | —                                               |
+| 12   | `invoice_counters`        | —                                               |
+| 13   | `invoices`                | `meal_plan_subscriptions`, `customers`          |
 
 ---
 
@@ -275,6 +277,66 @@ CREATE TABLE kitchen_closed_days (
 When a day is marked closed, active subscriptions that would have received a
 meal that day are extended by one day, and the affected customers are notified.
 
+## 12. `invoice_counters`
+
+```sql
+CREATE TABLE invoice_counters (
+  financial_year TEXT PRIMARY KEY,
+  last_number INTEGER NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+`next_invoice_number(financial_year)` atomically increments the counter and
+returns the next sequence. Numbers are formatted as `FF/2026-27/0001`.
+
+## 13. `invoices`
+
+```sql
+CREATE TABLE invoices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  invoice_number TEXT NOT NULL UNIQUE,
+  financial_year TEXT NOT NULL,
+  invoice_date DATE NOT NULL,
+  subscription_id UUID REFERENCES meal_plan_subscriptions(id) ON DELETE SET NULL,
+  customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
+  phone TEXT NOT NULL,
+  razorpay_payment_id TEXT NOT NULL UNIQUE,
+  razorpay_payment_link_id TEXT,
+  amount_paise INTEGER NOT NULL,
+  plan_amount_paise INTEGER,
+  delivery_amount_paise INTEGER,
+  gst_rate NUMERIC(5,2) NOT NULL DEFAULT 5,
+  taxable_paise INTEGER NOT NULL,
+  cgst_paise INTEGER NOT NULL DEFAULT 0,
+  sgst_paise INTEGER NOT NULL DEFAULT 0,
+  igst_paise INTEGER NOT NULL DEFAULT 0,
+  place_of_supply TEXT,
+  inter_state BOOLEAN NOT NULL DEFAULT false,
+  buyer_name TEXT,
+  buyer_phone TEXT,
+  buyer_email TEXT,
+  buyer_address TEXT,
+  buyer_gstin TEXT,
+  seller_snapshot JSONB NOT NULL,
+  buyer_snapshot JSONB NOT NULL,
+  line_items JSONB NOT NULL,
+  pdf_path TEXT,
+  status TEXT NOT NULL DEFAULT 'generated'
+    CHECK (status IN ('generated', 'sent', 'failed')),
+  whatsapp_message_id TEXT,
+  error TEXT,
+  sent_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+One row per successful Razorpay payment. `seller_snapshot`, `buyer_snapshot`
+and `line_items` are immutable so the PDF can be regenerated after the original
+storage object is gone. The PDF is stored in the private `invoices` Storage
+bucket. See `supabase/invoices.sql`.
+
 ---
 
 ## Notification and commit schedule (IST)
@@ -303,6 +365,8 @@ meal_plans 1──N next_day_meals
 
 meal_plan_subscriptions 1──N subscription_slots
 meal_plan_subscriptions 1──N orders
+meal_plan_subscriptions 1──N invoices
+customers               1──N invoices
 subscription_slots      1──N orders
 ```
 
