@@ -527,11 +527,11 @@
           return;
         }
         el.innerHTML = `
-    <p class="hint">Within <strong>${esc(Number(s.freeKm))} km</strong> of the kitchen delivery is free. Beyond that it is charged per meal, per delivery day. Changes apply to new checkout quotes immediately.</p>
+    <p class="hint">Within <strong>${esc(Number(s.freeKm))} km</strong> of the kitchen delivery is free. Beyond that it is charged per meal, per delivery day. Rates are <strong>GST-inclusive</strong>; GST is back-calculated from the charged amount, not added on top. Changes apply to new checkout quotes immediately.</p>
     <div class="settings-grid">
       <div><label for="ds-free-km">Free delivery radius (km)</label><input id="ds-free-km" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="${esc(s.freeKm)}"></div>
-      <div><label for="ds-standard">Standard delivery (₹ / meal)</label><input id="ds-standard" type="number" min="0" max="10000" step="0.01" inputmode="decimal" value="${esc(s.standardPerMeal)}"></div>
-      <div><label for="ds-long">Long-plan delivery (₹ / meal)</label><input id="ds-long" type="number" min="0" max="10000" step="0.01" inputmode="decimal" value="${esc(s.longPlanPerMeal)}"></div>
+      <div><label for="ds-standard">Standard delivery (₹ / meal, GST-incl.)</label><input id="ds-standard" type="number" min="0" max="10000" step="0.01" inputmode="decimal" value="${esc(s.standardPerMeal)}"></div>
+      <div><label for="ds-long">Long-plan delivery (₹ / meal, GST-incl.)</label><input id="ds-long" type="number" min="0" max="10000" step="0.01" inputmode="decimal" value="${esc(s.longPlanPerMeal)}"></div>
       <div><label for="ds-min-days">Long-plan threshold (days)</label><input id="ds-min-days" type="number" min="1" max="365" step="1" inputmode="numeric" value="${esc(s.longPlanMinDays)}"></div>
       <div class="wide"><label for="ds-unknown">Address without a map location</label><select id="ds-unknown"><option value="charge" ${s.unknownPolicy === "charge" ? "selected" : ""}>Charge normal delivery rate</option><option value="free" ${s.unknownPolicy === "free" ? "selected" : ""}>Give free delivery</option></select></div>
     </div>

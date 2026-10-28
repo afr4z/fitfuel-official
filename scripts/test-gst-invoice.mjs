@@ -2,9 +2,10 @@
 /**
  * Generates a sample GST tax invoice PDF and sends it over WhatsApp.
  *
- * This is a layout/review harness, not the production flow. It uses
- * placeholder seller details unless GST_SELLER_* env vars are set, and the PDF
- * is watermarked "SAMPLE — NOT A VALID TAX INVOICE".
+ * This is a layout/review harness, not the production flow. Production seller
+ * details come from gst_settings; this harness only accepts optional
+ * GST_SELLER_* overrides for layout review. The PDF is watermarked
+ * "SAMPLE — NOT A VALID TAX INVOICE".
  *
  * Usage:
  *   npm run test:gst-invoice -- --phone 918606372462

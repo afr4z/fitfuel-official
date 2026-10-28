@@ -70,16 +70,11 @@ WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
 WHATSAPP_INVOICE_TEMPLATE=invoice_ready
 ```
 
-Distance-based delivery (defaults are set for the Khammam kitchen):
+Distance-based delivery (kitchen location and rollout):
 
 ```
 KITCHEN_LAT=17.2478673
 KITCHEN_LNG=80.1496404
-DELIVERY_FREE_KM=3
-DELIVERY_STANDARD_PER_MEAL=20
-DELIVERY_LONG_PLAN_PER_MEAL=15
-DELIVERY_LONG_PLAN_MIN_DAYS=20
-DELIVERY_UNKNOWN_POLICY=charge
 DELIVERY_GEOCODE_SUFFIX=Khammam, Telangana, India
 DELIVERY_LAUNCH_AT=2026-10-28T00:00:00+05:30
 GOOGLE_MAPS_API_KEY=
@@ -89,9 +84,11 @@ GOOGLE_MAPS_API_KEY=
 Nominatim and distance uses straight-line Haversine. With it, Google Geocoding
 and Distance Matrix are used for road distance.
 
-The `DELIVERY_*` values above are fallbacks. Delivery charges are stored in
-the `delivery_settings` table and can be edited from **Admin → Pricing →
-Delivery charges** without a redeploy.
+Delivery charges are stored only in the `delivery_settings` table and can be
+edited from **Admin → Pricing → Delivery charges** without a redeploy. The
+configured per-meal rates are GST-inclusive; checkout charges them as-is and
+the invoice back-calculates GST from the gross amount. Hardcoded defaults
+(3 km / ₹20 / ₹15 / 20 days) are used only if the settings row is unavailable.
 
 Template requirements are documented in `templates.md` and
 `templates-body.md`.
@@ -100,10 +97,14 @@ GST seller details are editable from **Admin → Company** and stored only in th
 `gst_settings` table. There is no seller/tax environment fallback; if the row is
 absent or invoicing is disabled, no GST invoice is generated.
 
-Plan prices are treated as GST-inclusive. The admin field is the **total** GST
-rate: at 5%, invoices split it into 2.5% CGST + 2.5% SGST for Telangana
-customers, or charge 5% IGST for customers in other states. The tax is
-back-calculated from the amount paid, not added on top.
+Plan prices and delivery charges are treated as GST-inclusive. The admin field
+is the **total** GST rate: at 5%, invoices split it into 2.5% CGST + 2.5% SGST
+for Telangana customers, or charge 5% IGST for customers in other states. The
+tax is back-calculated from the amount paid, not added on top.
+
+Delivery is a separate line item in the same invoice and uses the same
+invoice-level GST rate. The amount passed as `unitAmount` is the GST-inclusive
+delivery fee charged at checkout, not an ex-GST amount.
 
 Only these invoice operational settings remain environment-driven:
 

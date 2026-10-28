@@ -336,8 +336,10 @@ CREATE TABLE invoices (
 
 One row per successful Razorpay payment. `seller_snapshot`, `buyer_snapshot`
 and `line_items` are immutable so the PDF can be regenerated after the original
-storage object is gone. The PDF is stored in the private `invoices` Storage
-bucket. See `supabase/invoices.sql`.
+storage object is gone. `line_items` contains the plan and, when charged, a
+separate delivery line; both use the invoice-level `gst_rate` and GST-inclusive
+amounts. The PDF is stored in the private `invoices` Storage bucket. See
+`supabase/invoices.sql`.
 
 ## 14. `delivery_settings`
 
@@ -356,8 +358,9 @@ CREATE TABLE delivery_settings (
 
 Singleton row (`id = true`) edited from **Admin → Pricing → Delivery charges**.
 Delivery quotes read it on every request, so changes apply without a redeploy.
-If the row or table is unavailable, `lib/deliverySettings.js` falls back to the
-`DELIVERY_*` environment variables. See `supabase/delivery-settings.sql`.
+The per-meal rates are GST-inclusive. If the row or table is unavailable,
+`lib/deliverySettings.js` uses hardcoded defaults (3 km / ₹20 / ₹15 / 20 days).
+See `supabase/delivery-settings.sql`.
 
 ## 15. `gst_settings`
 

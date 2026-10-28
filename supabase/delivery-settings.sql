@@ -1,6 +1,6 @@
 -- Delivery charges editable from the admin panel.
--- One singleton row. The application falls back to env defaults if this row
--- or table is missing.
+-- One singleton row. Rates are GST-inclusive per meal. The application uses
+-- hardcoded defaults only if this row or table is missing.
 
 CREATE TABLE IF NOT EXISTS delivery_settings (
   id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
