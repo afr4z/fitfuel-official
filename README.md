@@ -94,8 +94,9 @@ Template requirements are documented in `templates.md` and
 
 GST invoice settings are env-driven. Plan prices are treated as GST-inclusive;
 the invoice back-calculates the taxable value and the CGST/SGST or IGST
-component inside the amount paid. Set `GST_SELLER_GSTIN` to activate invoicing,
-or set `GST_INVOICE_ENABLED=false` to pause it explicitly:
+component inside the amount paid. To activate invoicing, set a valid
+`GST_SELLER_GSTIN` and set `GST_INVOICE_ENABLED=true` (or remove the variable).
+Set `GST_INVOICE_ENABLED=false` to pause it explicitly:
 
 ```
 GST_INVOICE_ENABLED=false
