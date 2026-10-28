@@ -24,6 +24,10 @@ Creation order:
 | 9    | `subscription_slots`      | `meal_plan_subscriptions`                       |
 | 10   | `orders`                  | `meal_plan_subscriptions`, `subscription_slots` |
 | 11   | `kitchen_closed_days`     | —                                               |
+| 12   | `invoice_counters`        | —                                               |
+| 13   | `invoices`                | `meal_plan_subscriptions`, `customers`          |
+| 14   | `delivery_settings`       | —                                               |
+| 15   | `gst_settings`            | —                                               |
 
 ---
 
@@ -98,9 +102,12 @@ CREATE TABLE plan_pricing (
 );
 ```
 
-Tiered per-day pricing for 3, 7, 14, and 30-day plans. The server recomputes the
+Tiered per-day pricing for 3, 7, 14, and 28-day plans. The server recomputes the
 amount from this table; the browser does not control price. Rates are managed
 from the admin **Pricing** tab.
+
+Delivery is charged separately by distance and plan length. See
+`lib/deliveryPricing.js`; quotes are server-side only.
 
 ## 5. `dishes`
 
@@ -175,7 +182,7 @@ CREATE TABLE meal_plan_subscriptions (
   meal_plan_id UUID REFERENCES meal_plans(id),
   phone TEXT NOT NULL,
   address_id UUID REFERENCES customer_addresses(id) ON DELETE SET NULL,
-  plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', 'monthly')),
+  plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', '21day', 'monthly')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled')),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
@@ -272,6 +279,119 @@ CREATE TABLE kitchen_closed_days (
 When a day is marked closed, active subscriptions that would have received a
 meal that day are extended by one day, and the affected customers are notified.
 
+## 12. `invoice_counters`
+
+```sql
+CREATE TABLE invoice_counters (
+  financial_year TEXT PRIMARY KEY,
+  last_number INTEGER NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+`next_invoice_number(financial_year)` atomically increments the counter and
+returns the next sequence. Numbers are formatted as `FF/2026-27/0001`.
+
+## 13. `invoices`
+
+```sql
+CREATE TABLE invoices (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  invoice_number TEXT NOT NULL UNIQUE,
+  financial_year TEXT NOT NULL,
+  invoice_date DATE NOT NULL,
+  subscription_id UUID REFERENCES meal_plan_subscriptions(id) ON DELETE SET NULL,
+  customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
+  phone TEXT NOT NULL,
+  razorpay_payment_id TEXT NOT NULL UNIQUE,
+  razorpay_payment_link_id TEXT,
+  amount_paise INTEGER NOT NULL,
+  plan_amount_paise INTEGER,
+  delivery_amount_paise INTEGER,
+  gst_rate NUMERIC(5,2) NOT NULL DEFAULT 5,
+  taxable_paise INTEGER NOT NULL,
+  cgst_paise INTEGER NOT NULL DEFAULT 0,
+  sgst_paise INTEGER NOT NULL DEFAULT 0,
+  igst_paise INTEGER NOT NULL DEFAULT 0,
+  place_of_supply TEXT,
+  inter_state BOOLEAN NOT NULL DEFAULT false,
+  buyer_name TEXT,
+  buyer_phone TEXT,
+  buyer_email TEXT,
+  buyer_address TEXT,
+  buyer_gstin TEXT,
+  seller_snapshot JSONB NOT NULL,
+  buyer_snapshot JSONB NOT NULL,
+  line_items JSONB NOT NULL,
+  pdf_path TEXT,
+  status TEXT NOT NULL DEFAULT 'generated'
+    CHECK (status IN ('generated', 'sent', 'failed')),
+  whatsapp_message_id TEXT,
+  error TEXT,
+  sent_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+One row per successful Razorpay payment. `seller_snapshot`, `buyer_snapshot`
+and `line_items` are immutable so the PDF can be regenerated after the original
+storage object is gone. `line_items` contains the plan and, when charged, a
+separate delivery line; both use the invoice-level `gst_rate` and GST-inclusive
+amounts. The PDF is stored in the private `invoices` Storage bucket. See
+`supabase/invoices.sql`.
+
+## 14. `delivery_settings`
+
+```sql
+CREATE TABLE delivery_settings (
+  id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
+  free_km NUMERIC(6,2) NOT NULL DEFAULT 3 CHECK (free_km >= 0),
+  standard_per_meal NUMERIC(10,2) NOT NULL DEFAULT 20 CHECK (standard_per_meal >= 0),
+  long_plan_per_meal NUMERIC(10,2) NOT NULL DEFAULT 15 CHECK (long_plan_per_meal >= 0),
+  long_plan_min_days INTEGER NOT NULL DEFAULT 20 CHECK (long_plan_min_days >= 1),
+  unknown_policy TEXT NOT NULL DEFAULT 'charge'
+    CHECK (unknown_policy IN ('charge', 'free')),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+Singleton row (`id = true`) edited from **Admin → Pricing → Delivery charges**.
+Delivery quotes read it on every request, so changes apply without a redeploy.
+The per-meal rates are GST-inclusive. If the row or table is unavailable,
+`lib/deliverySettings.js` uses hardcoded defaults (3 km / ₹20 / ₹15 / 20 days).
+See `supabase/delivery-settings.sql`.
+
+## 15. `gst_settings`
+
+```sql
+CREATE TABLE gst_settings (
+  id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
+  enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  seller_gstin TEXT NOT NULL DEFAULT '',
+  seller_legal_name TEXT NOT NULL DEFAULT '',
+  seller_trade_name TEXT NOT NULL DEFAULT '',
+  seller_address_lines TEXT NOT NULL DEFAULT '',
+  seller_pan TEXT NOT NULL DEFAULT '',
+  seller_email TEXT NOT NULL DEFAULT '',
+  seller_phone TEXT NOT NULL DEFAULT '',
+  seller_state_code TEXT NOT NULL DEFAULT '36',
+  gst_rate NUMERIC(5,2) NOT NULL DEFAULT 5
+    CHECK (gst_rate > 0 AND gst_rate <= 50),
+  sac TEXT NOT NULL DEFAULT '996331',
+  delivery_sac TEXT NOT NULL DEFAULT '996331',
+  invoice_prefix TEXT NOT NULL DEFAULT 'FF',
+  terms TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+Singleton row (`id = true`) edited from **Admin → Company**. It holds the full
+seller identity and tax setup used on new GST invoices. Invoicing only becomes
+active when the row is enabled and the GSTIN, legal name, and address are valid.
+There is no seller/tax environment fallback: if the row is absent, invoicing is
+disabled and defaults are used. See `supabase/gst-settings.sql`.
+
 ---
 
 ## Notification and commit schedule (IST)
@@ -300,6 +420,8 @@ meal_plans 1──N next_day_meals
 
 meal_plan_subscriptions 1──N subscription_slots
 meal_plan_subscriptions 1──N orders
+meal_plan_subscriptions 1──N invoices
+customers               1──N invoices
 subscription_slots      1──N orders
 ```
 

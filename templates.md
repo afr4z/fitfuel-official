@@ -9,19 +9,20 @@ parameters, not names.
 
 ## Template overview
 
-| Purpose                | Env var                               | Default name             | Category       | Params | Buttons       | Sent / trigger                           |
-| ---------------------- | ------------------------------------- | ------------------------ | -------------- | ------ | ------------- | ---------------------------------------- |
-| Breakfast notification | `WHATSAPP_BREAKFAST_TEMPLATE`         | `breakfast_notification` | UTILITY        | 5      | 3 quick reply | Daily ~8:00 PM IST, next day's breakfast |
-| Lunch notification     | `WHATSAPP_LUNCH_TEMPLATE`             | `lunch_notification`     | UTILITY        | 5      | 3 quick reply | Daily ~8:30 AM IST, same day's lunch     |
-| Dinner notification    | `WHATSAPP_DINNER_TEMPLATE`            | `dinner_notification`    | UTILITY        | 5      | 3 quick reply | Daily ~4:00 PM IST, same day's dinner    |
-| Rescheduled meal       | `WHATSAPP_RESCHEDULED_TEMPLATE`       | `rescheduled_meal`       | UTILITY        | 4      | 3 quick reply | When a skipped meal is pushed to the end |
-| Expiry reminder        | `WHATSAPP_EXPIRY_TEMPLATE`            | `expiry_reminder`        | MARKETING      | 2      | 2 quick reply | Daily ~1:30 PM IST                       |
-| Session expired        | `WHATSAPP_SESSION_EXPIRED_TEMPLATE`   | `session_expired`        | UTILITY        | 0      | none          | VPS cron, every minute                   |
-| OTP code               | `WHATSAPP_OTP_TEMPLATE`               | `otp_code`               | AUTHENTICATION | 2      | OTP button    | Website login request                    |
-| Payment failed         | `WHATSAPP_PAYMENT_FAILED_TEMPLATE`    | `payment_failed`         | UTILITY        | 1      | none          | Razorpay failure/cancel/expiry webhook   |
-| Payment confirmed      | `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE` | `payment_confirmed`      | UTILITY        | 5      | none          | Razorpay `payment_link.paid` webhook     |
-| Kitchen closed         | `WHATSAPP_KITCHEN_CLOSED_TEMPLATE`    | `kitchen_closed`         | UTILITY        | 3      | none          | Admin marks a kitchen-closed day         |
-| Subscription cancelled | `WHATSAPP_CANCELLED_TEMPLATE`         | `subscription_cancelled` | UTILITY        | 2      | none          | Admin cancels a subscription             |
+| Purpose                | Env var                               | Default name             | Category       | Params | Buttons       | Sent / trigger                            |
+| ---------------------- | ------------------------------------- | ------------------------ | -------------- | ------ | ------------- | ----------------------------------------- |
+| Breakfast notification | `WHATSAPP_BREAKFAST_TEMPLATE`         | `breakfast_notification` | UTILITY        | 5      | 3 quick reply | Daily ~8:00 PM IST, next day's breakfast  |
+| Lunch notification     | `WHATSAPP_LUNCH_TEMPLATE`             | `lunch_notification`     | UTILITY        | 5      | 3 quick reply | Daily ~8:30 AM IST, same day's lunch      |
+| Dinner notification    | `WHATSAPP_DINNER_TEMPLATE`            | `dinner_notification`    | UTILITY        | 5      | 3 quick reply | Daily ~4:00 PM IST, same day's dinner     |
+| Rescheduled meal       | `WHATSAPP_RESCHEDULED_TEMPLATE`       | `rescheduled_meal`       | UTILITY        | 4      | 3 quick reply | When a skipped meal is pushed to the end  |
+| Expiry reminder        | `WHATSAPP_EXPIRY_TEMPLATE`            | `expiry_reminder`        | MARKETING      | 2      | 2 quick reply | Daily ~1:30 PM IST                        |
+| Session expired        | `WHATSAPP_SESSION_EXPIRED_TEMPLATE`   | `session_expired`        | UTILITY        | 0      | none          | VPS cron, every minute                    |
+| OTP code               | `WHATSAPP_OTP_TEMPLATE`               | `otp_code`               | AUTHENTICATION | 2      | OTP button    | Website login request                     |
+| Payment failed         | `WHATSAPP_PAYMENT_FAILED_TEMPLATE`    | `payment_failed`         | UTILITY        | 1      | none          | Razorpay failure/cancel/expiry webhook    |
+| Payment confirmed      | `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE` | `payment_confirmed`      | UTILITY        | 5      | none          | Razorpay `payment_link.paid` webhook      |
+| GST invoice            | `WHATSAPP_INVOICE_TEMPLATE`           | `invoice_ready`          | UTILITY        | 1      | none          | Payment webhook, document-header fallback |
+| Kitchen closed         | `WHATSAPP_KITCHEN_CLOSED_TEMPLATE`    | `kitchen_closed`         | UTILITY        | 3      | none          | Admin marks a kitchen-closed day          |
+| Subscription cancelled | `WHATSAPP_CANCELLED_TEMPLATE`         | `subscription_cancelled` | UTILITY        | 2      | none          | Admin cancels a subscription              |
 
 > `subscription_cancelled` may not exist in Meta yet. Create it, or point
 > `WHATSAPP_CANCELLED_TEMPLATE` at an approved equivalent template with the same
@@ -111,6 +112,15 @@ buttons for this template.
 | `{{4}}` | `amount`      | `₹1,540`                  |
 | `{{5}}` | `start_label` | `16 January 2025`         |
 
+### GST invoice
+
+This template has a **document header** and one body parameter. The PDF media
+id is supplied in the header; the body receives the caption text.
+
+| Index   | Name      | Example                                                  |
+| ------- | --------- | -------------------------------------------------------- |
+| `{{1}}` | `caption` | `FitFuel tax invoice FF/2026-27/0001 — ₹17,220.00 paid.` |
+
 ### Kitchen closed
 
 | Index   | Name             | Example                |
@@ -144,6 +154,7 @@ WHATSAPP_SESSION_EXPIRED_TEMPLATE=session_expired
 WHATSAPP_OTP_TEMPLATE=otp_code
 WHATSAPP_PAYMENT_FAILED_TEMPLATE=payment_failed
 WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE=payment_confirmed
+WHATSAPP_INVOICE_TEMPLATE=invoice_ready
 WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
 WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
 ```

@@ -476,6 +476,45 @@ Thank you for choosing FitFuel. 🙏
 
 ---
 
+## 12. GST Invoice (`invoice_ready`)
+
+**Category:** UTILITY | **Language:** en | **Buttons:** None | **Header:** Document
+**Sent:** Payment webhook when the customer's 24-hour service window is closed
+
+### Body Text:
+
+```
+Your FitFuel GST invoice is attached.
+
+{{1}}
+
+Thank you for choosing FitFuel.
+```
+
+### Variables:
+
+| {{1}}   | Example                                                       |
+| ------- | ------------------------------------------------------------- |
+| caption | FitFuel tax invoice FF/2026-27/0001 — Amount paid: ₹17,220.00 |
+
+### Sample Values:
+
+| {{1}}                                                         |
+| ------------------------------------------------------------- |
+| FitFuel tax invoice FF/2026-27/0001 — Amount paid: ₹17,220.00 |
+
+### Rendered Sample:
+
+```
+Your FitFuel GST invoice is attached.
+
+FitFuel tax invoice FF/2026-27/0001 — Amount paid: ₹17,220.00
+
+Thank you for choosing FitFuel.
+```
+
+---
+
 ## Quick Reference Table
 
 | Template               | Variables | Buttons       | Category       | Sent At                 |
@@ -489,6 +528,7 @@ Thank you for choosing FitFuel. 🙏
 | otp_code               | 2         | OTP (special) | AUTHENTICATION | On-demand               |
 | payment_failed         | 1         | None          | UTILITY        | Webhook                 |
 | payment_confirmed      | 5         | None          | UTILITY        | Webhook                 |
+| invoice_ready          | 1         | None          | UTILITY        | Webhook fallback        |
 | kitchen_closed         | 3         | None          | UTILITY        | Admin action            |
 | subscription_cancelled | 2         | None          | UTILITY        | Admin action            |
 

@@ -26,7 +26,7 @@ export const GREETING_NEW = `👋 Welcome to FitFuel Nutrition!\n\nHow can we he
 export function viewPlans({ planLines }) {
   return (
     `🥗 *Our Nutrition Plans*\n\n${planLines}\n\n` +
-    `📅 *Durations:* 3, 7, 14, or 30 days\n` +
+    `📅 *Durations:* 3, 7, 14, 21, or 28 days\n` +
     `🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3\n\n` +
     `Tap below to customise your plan!`
   );
@@ -95,7 +95,8 @@ export function locationPrompt({ mealLabel }) {
   return (
     `🍴 *${mealLabel}* selected!\n\n` +
     `📍 *Where should we deliver?*\n\n` +
-    `Tap the button below to share your location, or just type your area / neighbourhood name.`
+    `Tap the button below to share your location, or just type your area / neighbourhood name.\n\n` +
+    `_Delivery is free within 3 km of our kitchen; beyond that a per-meal charge applies._`
   );
 }
 
@@ -104,7 +105,8 @@ export function locationPromptFallback({ mealLabel }) {
     `🍴 *${mealLabel}* selected!\n\n` +
     `📍 *Where should we deliver?*\n\n` +
     `Tap the 📎 icon → *Location* → *Send Your Current Location*,\n` +
-    `or type your area / neighbourhood name.`
+    `or type your area / neighbourhood name.\n\n` +
+    `_Delivery is free within 3 km of our kitchen; beyond that a per-meal charge applies._`
   );
 }
 
@@ -121,23 +123,38 @@ export const ADDRESS_SAVED_SELECTED = `✅ *Got it!* Using your saved address fo
 
 export const PAYMENT_LINK_ERROR = `Sorry, we couldn't generate your payment link right now. Please contact support.`;
 
+export const PAYMENT_LINK_LIMIT_ERROR = `This plan total is above our current online payment limit. Please choose a shorter plan (for example 14 or 21 days) or contact support so we can collect the payment another way.`;
+
 export function orderSummary({
   planTitle,
   dayLabel,
   mealLabel,
   addressText,
+  planAmount,
+  deliveryTotal,
+  distanceKm,
+  locationKnown,
   totalPrice,
   paymentUrl,
 }) {
+  const distanceNote =
+    distanceKm != null ? ` · ${distanceKm.toFixed(1)} km` : "";
+  const deliveryText =
+    deliveryTotal === 0
+      ? "Free (within 3 km)"
+      : `₹${deliveryTotal}${distanceNote}${locationKnown === false ? " (location unverified)" : ""}`;
+
   return (
-    `✅ *Order Summary*\n\n` +
-    `📦 Plan: ${planTitle}\n` +
-    `📅 Duration: ${dayLabel}\n` +
-    `🍴 Meals: ${mealLabel}\n` +
-    `🏠 Address: ${addressText}\n` +
-    `💰 Total: ₹${totalPrice}\n\n` +
+    `*Order Summary*\n\n` +
+    `Plan: ${planTitle}\n` +
+    `Duration: ${dayLabel}\n` +
+    `Meals: ${mealLabel}\n` +
+    `Address: ${addressText}\n` +
+    `Plan amount: ₹${planAmount}\n` +
+    `Delivery: ${deliveryText}\n` +
+    `*Total: ₹${totalPrice}*\n\n` +
     `💳 *Complete your payment here:*\n${paymentUrl}\n\n` +
-    `_Your subscription activates once payment is confirmed!_`
+    `_Your subscription activates once payment is confirmed._`
   );
 }
 
@@ -261,12 +278,12 @@ export function paymentConfirmed({
   startLabel,
 }) {
   return (
-    `🎉 *Payment Confirmed!*\n\n` +
-    `Your FitFuel *${planTitle}* plan is now *active*!\n\n` +
-    `📅 Duration: ${dayLabel}\n` +
-    `🍴 Meals: ${mealLabel}\n` +
-    `💰 Amount paid: ₹${amount}\n\n` +
-    `📦 Deliveries start ${startLabel}.\n` +
+    `🎉 *Payment Confirmed*\n\n` +
+    `Your FitFuel *${planTitle}* plan is now *active*.\n\n` +
+    `Duration: ${dayLabel}\n` +
+    `Meals: ${mealLabel}\n` +
+    `Amount paid: ₹${amount}\n\n` +
+    `Deliveries start ${startLabel}.\n` +
     `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
     `Thank you for choosing FitFuel! 💪`
   );

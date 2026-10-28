@@ -8,6 +8,9 @@ supabase/.temp/
 logs/
 *.log
 
+# Generated invoice samples
+scripts/out/
+
 # One-off database schema dump
 database_current.sql
 

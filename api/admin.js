@@ -11,6 +11,16 @@ import {
 import { getPlanLabel } from "../bot/config/plans.js";
 import { isPastIST, tomorrowDateStrIST } from "../lib/cronUtils.js";
 import { safeEqualStrings } from "../lib/timingSafe.js";
+import {
+  DEFAULT_DELIVERY_SETTINGS,
+  getDeliverySettings,
+  saveDeliverySettings,
+} from "../lib/deliverySettings.js";
+import {
+  getInvoiceConfig,
+  resendInvoiceByPaymentId,
+} from "../lib/invoiceService.js";
+import { saveGstSettings } from "../lib/gstSettings.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -23,7 +33,7 @@ function unauthorized(res) {
 
 const SLOTS = ["breakfast", "lunch", "dinner"];
 const DAYS = [1, 2, 3, 4, 5, 6];
-const PLAN_DAYS = [3, 7, 14, 30];
+const PLAN_DAYS = [3, 7, 14, 21, 28];
 const DAY_LABELS = {
   1: "Mon",
   2: "Tue",
@@ -578,6 +588,31 @@ export default async function handler(req, res) {
     return handlePricing(req, res);
   }
 
+  // Company / GST settings
+  if (route === "gst-settings") {
+    return handleGstSettings(req, res);
+  }
+
+  // Delivery charges
+  if (route === "delivery-settings") {
+    return handleDeliverySettings(req, res);
+  }
+
+  // GST invoices
+  if (route === "invoices") {
+    return handleInvoices(req, res, url);
+  }
+
+  const invoiceDownloadMatch = route.match(/^invoices\/([^/]+)\/download$/);
+  if (invoiceDownloadMatch) {
+    return handleInvoiceDownload(req, res, invoiceDownloadMatch[1]);
+  }
+
+  const invoiceResendMatch = route.match(/^invoices\/([^/]+)\/resend$/);
+  if (invoiceResendMatch) {
+    return handleInvoiceResend(req, res, invoiceResendMatch[1]);
+  }
+
   // Subscriptions
   if (route === "subscriptions") {
     return handleSubscriptions(req, res, url);
@@ -724,6 +759,230 @@ async function handleKitchenClosed(req, res) {
     extended: subs.length,
     failed: failed.length,
   });
+}
+
+function gstSettingsResponse(config) {
+  return {
+    enabled: config.requestedEnabled,
+    active: config.enabled,
+    configured: config.configured,
+    gstin: config.seller.gstin,
+    legalName: config.seller.legalName,
+    tradeName: config.seller.tradeName,
+    addressLines: config.seller.addressLines,
+    pan: config.seller.pan,
+    email: config.seller.email,
+    phone: config.seller.phone,
+    stateCode: config.sellerStateCode,
+    gstRate: config.gstRate,
+    sac: config.sac,
+    deliverySac: config.deliverySac,
+    prefix: config.prefix,
+    terms: config.seller.terms,
+    whatsappTemplate: config.whatsappTemplate,
+    sample: config.sample,
+  };
+}
+
+async function handleGstSettings(req, res) {
+  if (req.method === "GET") {
+    const config = await getInvoiceConfig();
+    return res.status(200).json({ settings: gstSettingsResponse(config) });
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  try {
+    await saveGstSettings(req.body ?? {});
+    const config = await getInvoiceConfig();
+    return res.status(200).json({
+      ok: true,
+      settings: gstSettingsResponse(config),
+    });
+  } catch (err) {
+    console.error("[GST-SETTINGS] Save failed:", err.message);
+    return res.status(400).json({ error: err.message });
+  }
+}
+
+async function handleDeliverySettings(req, res) {
+  if (req.method === "GET") {
+    const settings = await getDeliverySettings();
+    return res.status(200).json({
+      settings,
+      defaults: DEFAULT_DELIVERY_SETTINGS,
+    });
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  try {
+    const settings = await saveDeliverySettings(req.body ?? {});
+    return res.status(200).json({ ok: true, settings });
+  } catch (err) {
+    console.error("[DELIVERY-SETTINGS] Save failed:", err.message);
+    return res.status(400).json({ error: err.message });
+  }
+}
+
+const INVOICE_STATUSES = ["generated", "sent", "failed"];
+
+async function handleInvoices(req, res, url) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+  const limit = Math.min(
+    100,
+    Math.max(1, Number(url.searchParams.get("limit")) || 20),
+  );
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+  const status = url.searchParams.get("status") || "";
+  const q = (url.searchParams.get("q") || "").trim();
+
+  if (status && !INVOICE_STATUSES.includes(status)) {
+    return res.status(400).json({ error: "Invalid invoice status" });
+  }
+
+  let query = supabase
+    .from("invoices")
+    .select(
+      "id, invoice_number, invoice_date, phone, buyer_name, buyer_email, amount_paise, status, pdf_path, razorpay_payment_id, created_at, sent_at, error",
+      { count: "exact" },
+    );
+
+  if (status) query = query.eq("status", status);
+
+  if (q) {
+    const term = q.replace(/[(),%]/g, " ").trim();
+    if (term) {
+      query = query.or(
+        `invoice_number.ilike.%${term}%,phone.ilike.%${term}%,buyer_name.ilike.%${term}%`,
+      );
+    }
+  }
+
+  const { data, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (error) {
+    console.error("[INVOICES] List failed:", error.message);
+    return res.status(500).json({ error: "Failed to load invoices" });
+  }
+
+  return res.status(200).json({
+    invoices: (data ?? []).map((invoice) => {
+      const { pdf_path: pdfPath, ...row } = invoice;
+      return {
+        ...row,
+        amount: invoice.amount_paise / 100,
+        pdf_available: Boolean(pdfPath),
+      };
+    }),
+    total: count ?? 0,
+    page,
+    limit,
+  });
+}
+
+async function handleInvoiceDownload(req, res, invoiceId) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+  if (!isUuid(invoiceId)) {
+    return res.status(400).json({ error: "Invalid invoice id" });
+  }
+
+  const { data: invoice, error } = await supabase
+    .from("invoices")
+    .select("invoice_number, pdf_path")
+    .eq("id", invoiceId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[INVOICES] Download lookup failed:", error.message);
+    return res.status(500).json({ error: "Failed to load invoice" });
+  }
+  if (!invoice?.pdf_path) {
+    return res.status(404).json({ error: "Invoice PDF not found" });
+  }
+
+  const bucket = process.env.INVOICE_STORAGE_BUCKET || "invoices";
+  const { data, error: storageError } = await supabase.storage
+    .from(bucket)
+    .download(invoice.pdf_path);
+
+  if (storageError) {
+    console.error("[INVOICES] Download failed:", storageError.message);
+    return res.status(404).json({ error: "Invoice PDF not found" });
+  }
+
+  const pdf = Buffer.from(await data.arrayBuffer());
+  const safeNumber = String(invoice.invoice_number).replace(
+    /[^A-Za-z0-9._-]+/g,
+    "-",
+  );
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="FitFuel-GST-Invoice-${safeNumber}.pdf"`,
+  );
+  res.setHeader("Content-Length", pdf.length);
+  res.setHeader("Cache-Control", "private, no-store");
+  return res.status(200).send(pdf);
+}
+
+async function handleInvoiceResend(req, res, invoiceId) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+  if (!isUuid(invoiceId)) {
+    return res.status(400).json({ error: "Invalid invoice id" });
+  }
+
+  const { data: invoice, error } = await supabase
+    .from("invoices")
+    .select("id, razorpay_payment_id")
+    .eq("id", invoiceId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[INVOICES] Resend lookup failed:", error.message);
+    return res.status(500).json({ error: "Failed to load invoice" });
+  }
+  if (!invoice) {
+    return res.status(404).json({ error: "Invoice not found" });
+  }
+
+  try {
+    const sent = await resendInvoiceByPaymentId({
+      supabase,
+      paymentId: invoice.razorpay_payment_id,
+      force: true,
+    });
+    if (sent.status !== "sent") {
+      return res.status(409).json({
+        error: "Invoice is already being sent. Please wait a moment and retry.",
+      });
+    }
+    return res.status(200).json({
+      ok: true,
+      invoice_number: sent.invoice_number,
+      status: sent.status,
+      whatsapp_message_id: sent.whatsapp_message_id || null,
+    });
+  } catch (err) {
+    console.error("[INVOICES] Resend failed:", err.message);
+    const status = err.message.includes("not configured") ? 400 : 502;
+    return res.status(status).json({ error: err.message });
+  }
 }
 
 async function handlePricing(req, res) {

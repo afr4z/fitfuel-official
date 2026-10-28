@@ -9,6 +9,7 @@ import { createPaymentLink } from "../../lib/razorpay.js";
 import { STATES } from "../states.js";
 import { getPlanCategories, getPlanById } from "../../lib/mealPlans.js";
 import { DAY_OPTIONS, MEAL_OPTIONS } from "../config/plans.js";
+import { calcPlanAmount, getDeliveryQuote } from "../../lib/deliveryPricing.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import {
   alreadyActivePlan,
@@ -24,6 +25,7 @@ import {
   ADDRESS_BOOK_PROMPT,
   ADDRESS_SAVED_SELECTED,
   PAYMENT_LINK_ERROR,
+  PAYMENT_LINK_LIMIT_ERROR,
   orderSummary,
 } from "../config/messages.js";
 import {
@@ -41,7 +43,11 @@ const supabase = createClient(
 
 function calcPrice(plan, dayOption, mealOption) {
   const rate = plan.pricing?.[dayOption.days] ?? plan.basePricePerMealPerDay;
-  return rate * dayOption.days * mealOption.mealsPerDay;
+  return calcPlanAmount({
+    ratePerMealPerDay: rate,
+    days: dayOption.days,
+    mealsPerDay: mealOption.mealsPerDay,
+  });
 }
 
 /**
@@ -186,13 +192,13 @@ export async function handleDaySelection(phone, session, input, setSession) {
     return {
       ...m,
       label: m.label,
-      description: price !== "—" ? `₹${price} total` : "",
+      description: price !== "—" ? `₹${price} plan + delivery` : "",
     };
   });
 
   const priceLines = plan
     ? MEAL_OPTIONS.map(
-        (m) => `${m.label} — ₹${calcPrice(plan, dayOption, m)}`,
+        (m) => `${m.label} — ₹${calcPrice(plan, dayOption, m)} plan + delivery`,
       ).join("\n")
     : "";
 
@@ -417,16 +423,34 @@ export async function handleAddress(phone, session, addressText, setSession) {
   const plan = plans.find((p) => p.id === planId);
   const dayOption = DAY_OPTIONS.find((d) => d.days === days);
   const mealOption = MEAL_OPTIONS.find((m) => m.mealsPerDay === mealsPerDay);
-  const totalPrice =
+  const quote =
     plan && dayOption && mealOption
-      ? calcPrice(plan, dayOption, mealOption)
-      : 0;
+      ? await getDeliveryQuote({
+          ratePerMealPerDay:
+            plan.pricing?.[days] ?? plan.basePricePerMealPerDay,
+          days,
+          mealsPerDay,
+          address: addressText,
+          location,
+        })
+      : null;
+  const totalPrice = quote?.totalAmount || 0;
 
   // Store address in session — NOT in Supabase yet
   await setSession(phone, {
     ...session,
     state: STATES.AWAITING_PAYMENT,
-    data: { ...session.data, address: addressText, amount: totalPrice },
+    data: {
+      ...session.data,
+      address: addressText,
+      amount: totalPrice,
+      planAmount: quote?.planAmount ?? 0,
+      deliveryTotal: quote?.deliveryTotal ?? 0,
+      deliveryPerMeal: quote?.deliveryPerMeal ?? 0,
+      distanceKm: quote?.distanceKm ?? null,
+      locationKnown: quote?.locationKnown ?? false,
+      location: quote?.coordinates ?? location,
+    },
   });
 
   // Create Razorpay link with enough metadata to reconstruct the order on webhook
@@ -441,7 +465,13 @@ export async function handleAddress(phone, session, addressText, setSession) {
     paymentUrl = link.short_url;
   } catch (e) {
     console.error("[RAZORPAY] Error:", e.message);
-    await sendText(phone, PAYMENT_LINK_ERROR);
+    const limitReached = /amount exceeds maximum amount allowed/i.test(
+      e.message,
+    );
+    await sendText(
+      phone,
+      limitReached ? PAYMENT_LINK_LIMIT_ERROR : PAYMENT_LINK_ERROR,
+    );
     await setSession(phone, {
       ...session,
       state: STATES.GREETING,
@@ -457,6 +487,10 @@ export async function handleAddress(phone, session, addressText, setSession) {
       dayLabel,
       mealLabel,
       addressText,
+      planAmount: quote?.planAmount ?? 0,
+      deliveryTotal: quote?.deliveryTotal ?? 0,
+      distanceKm: quote?.distanceKm ?? null,
+      locationKnown: quote?.locationKnown ?? false,
       totalPrice,
       paymentUrl,
     }),

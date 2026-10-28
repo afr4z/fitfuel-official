@@ -50,7 +50,7 @@ login.
 
 - Customer and phone
 - Plan
-- Duration: `3day`, `weekly`, `biweekly`, `monthly`
+- Duration: `3day`, `weekly`, `biweekly`, `21day`, `monthly`
 - Status: `active`, `expired`, `cancelled`
 - Start/end dates
 - Payment status and Razorpay references

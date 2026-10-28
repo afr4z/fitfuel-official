@@ -72,38 +72,45 @@ CREATE TABLE plan_pricing (
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 250), (7, 220), (14, 207), (30, 190)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 250), (7, 220), (14, 207), (28, 190)) AS v(days, price)
   WHERE mp.tag = 'healthy_nonveg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 290), (7, 260), (14, 242), (30, 220)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 290), (7, 260), (14, 242), (28, 220)) AS v(days, price)
   WHERE mp.tag = 'high_protein_nonveg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 194), (30, 175)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 194), (28, 175)) AS v(days, price)
   WHERE mp.tag = 'weight_loss_nonveg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 193), (30, 175)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 193), (28, 175)) AS v(days, price)
   WHERE mp.tag = 'healthy_veg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 280), (7, 245), (14, 230), (30, 210)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 280), (7, 245), (14, 230), (28, 210)) AS v(days, price)
   WHERE mp.tag = 'high_protein_veg';
 
 INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
   SELECT mp.id, v.days, v.price
   FROM meal_plans mp
-  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 197), (30, 178)) AS v(days, price)
+  CROSS JOIN (VALUES (3, 240), (7, 210), (14, 197), (28, 178)) AS v(days, price)
   WHERE mp.tag = 'weight_loss_veg';
+
+-- 21-day plans use the same per-meal rate as the 28-day tier.
+INSERT INTO plan_pricing (plan_id, days, price_per_meal_per_day)
+  SELECT plan_id, 21, price_per_meal_per_day
+  FROM plan_pricing
+  WHERE days = 28
+  ON CONFLICT (plan_id, days) DO NOTHING;
 
 -- ─── 3. dishes (now includes slot and nutrition columns) ────────────────────────
 
@@ -212,7 +219,7 @@ CREATE TABLE meal_plan_subscriptions (
   meal_plan_id UUID REFERENCES meal_plans(id),
   phone TEXT NOT NULL,
   address_id UUID REFERENCES customer_addresses(id) ON DELETE SET NULL,
-  plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', 'monthly')),
+  plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', '21day', 'monthly')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled')),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,

@@ -67,10 +67,63 @@ WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE=payment_confirmed
 WHATSAPP_PAYMENT_FAILED_TEMPLATE=payment_failed
 WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
 WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
+WHATSAPP_INVOICE_TEMPLATE=invoice_ready
 ```
+
+Distance-based delivery (kitchen location and rollout):
+
+```
+KITCHEN_LAT=17.2478673
+KITCHEN_LNG=80.1496404
+DELIVERY_GEOCODE_SUFFIX=Khammam, Telangana, India
+DELIVERY_LAUNCH_AT=2026-10-28T00:00:00+05:30
+GOOGLE_MAPS_API_KEY=
+```
+
+`GOOGLE_MAPS_API_KEY` is optional. Without it, geocoding uses OpenStreetMap
+Nominatim and distance uses straight-line Haversine. With it, Google Geocoding
+and Distance Matrix are used for road distance.
+
+Delivery charges are stored only in the `delivery_settings` table and can be
+edited from **Admin → Pricing → Delivery charges** without a redeploy. The
+configured per-meal rates are GST-inclusive; checkout charges them as-is and
+the invoice back-calculates GST from the gross amount. Hardcoded defaults
+(3 km / ₹20 / ₹15 / 20 days) are used only if the settings row is unavailable.
 
 Template requirements are documented in `templates.md` and
 `templates-body.md`.
+
+GST seller details are editable from **Admin → Company** and stored only in the
+`gst_settings` table. There is no seller/tax environment fallback; if the row is
+absent or invoicing is disabled, no GST invoice is generated.
+
+Plan prices and delivery charges are treated as GST-inclusive. The admin field
+is the **total** GST rate: at 5%, invoices split it into 2.5% CGST + 2.5% SGST
+for Telangana customers, or charge 5% IGST for customers in other states. The
+tax is back-calculated from the amount paid, not added on top.
+
+Delivery is a separate line item in the same invoice and uses the same
+invoice-level GST rate. The amount passed as `unitAmount` is the GST-inclusive
+delivery fee charged at checkout, not an ex-GST amount.
+
+Only these invoice operational settings remain environment-driven:
+
+```
+GST_INVOICE_SAMPLE=false
+INVOICE_STORAGE_BUCKET=invoices
+WHATSAPP_INVOICE_TEMPLATE=invoice_ready
+```
+
+Invoices are generated in `api/razorpay-webhook.js` after a successful
+payment, stored in the private `invoices` Supabase Storage bucket, and sent to
+the customer on WhatsApp. If the 24-hour customer-service window is closed,
+the send falls back to the approved `invoice_ready` document template.
+
+To retry an invoice that failed to send:
+
+```bash
+npm run retry:invoice -- --payment-id pay_xxxxxxxx
+```
 
 ## Deploy
 
@@ -119,6 +172,9 @@ Admin operations:
 - Tomorrow-only overrides
 - Kitchen-closed days
 - Plan pricing per meal and duration
+- Delivery charges (free radius, per-meal rates, long-plan threshold)
+- Company/GST details (legal name, address, GSTIN, PAN, tax settings, enable/disable)
+- GST invoice list, PDF download, and WhatsApp resend
 - Subscription summary/list/detail/export
 - Subscription cancellation
 
@@ -129,6 +185,8 @@ Admin operations:
 - **Change meal menu:** `bot/handlers/orders.js`.
 - **Payment → subscription:** `api/razorpay-webhook.js`.
 - **Website checkout:** `public/order.html` → `api/web-order.js`.
+- **Delivery quote:** `lib/deliveryPricing.js` → `api/delivery-quote.js`.
+  Payment-link totals and Petpooja dispatch use the same distance rules.
 - **Admin subscription APIs:** `api/admin.js`.
 
 ## Known follow-ups

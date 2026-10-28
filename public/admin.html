@@ -21,7 +21,10 @@
       const API = "/api/admin/plan-defaults";
       const KC_API = "/api/admin/kitchen-closed";
       const PRICING_API = "/api/admin/pricing";
-      const PRICING_DAYS = [3, 7, 14, 30];
+      const DELIVERY_SETTINGS_API = "/api/admin/delivery-settings";
+      const GST_SETTINGS_API = "/api/admin/gst-settings";
+      const INVOICES_API = "/api/admin/invoices";
+      const PRICING_DAYS = [3, 7, 14, 21, 28];
       const SLOTS = ["breakfast", "lunch", "dinner"];
       const SLOT_LABELS = {
         breakfast: "Breakfast",
@@ -42,6 +45,15 @@
         detailReq: 0,
         pricingPlans: [],
         pricingLoaded: false,
+        deliverySettings: null,
+        deliverySettingsLoaded: false,
+        gstSettings: null,
+        gstSettingsLoaded: false,
+        companyOpen: false,
+        invoices: [],
+        invoicesPage: 1,
+        invoicesTotal: 0,
+        invoicesLimit: 20,
         authFailed: false,
         dayInit: false,
       };
@@ -103,6 +115,34 @@
       }
       async function api(method, body) {
         return adminApi(API, method, body);
+      }
+
+      async function adminBlob(path) {
+        const token = getToken();
+        let res;
+        try {
+          res = await fetch(
+            path,
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+        } catch {
+          return { error: "Network error. Check your connection." };
+        }
+        if (res.status === 401) {
+          state.authFailed = true;
+          sessionStorage.removeItem("admin_token");
+          render();
+          return null;
+        }
+        if (!res.ok) {
+          let message = "Request failed.";
+          try {
+            const data = await res.json();
+            if (data?.error) message = data.error;
+          } catch {}
+          return { error: message };
+        }
+        return { blob: await res.blob(), response: res };
       }
 
       // Dish names carry their slot, e.g. "Poha (Breakfast)". Filter by slot and hide the suffix.
@@ -476,6 +516,258 @@
         state.pricingLoaded = true;
         renderPricing();
       }
+      /* ---------- Delivery charges ---------- */
+      function renderDeliverySettings() {
+        const el = document.getElementById("delivery-settings-body");
+        if (!el) return;
+        const s = state.deliverySettings;
+        if (!s) {
+          el.innerHTML =
+            '<div class="empty-state">Failed to load delivery charges.</div>';
+          return;
+        }
+        el.innerHTML = `
+    <p class="hint">Within <strong>${esc(Number(s.freeKm))} km</strong> of the kitchen delivery is free. Beyond that it is charged per meal, per delivery day. Rates are <strong>GST-inclusive</strong>; GST is back-calculated from the charged amount, not added on top. Changes apply to new checkout quotes immediately.</p>
+    <div class="settings-grid">
+      <div><label for="ds-free-km">Free delivery radius (km)</label><input id="ds-free-km" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="${esc(s.freeKm)}"></div>
+      <div><label for="ds-standard">Standard delivery (₹ / meal, GST-incl.)</label><input id="ds-standard" type="number" min="0" max="10000" step="0.01" inputmode="decimal" value="${esc(s.standardPerMeal)}"></div>
+      <div><label for="ds-long">Long-plan delivery (₹ / meal, GST-incl.)</label><input id="ds-long" type="number" min="0" max="10000" step="0.01" inputmode="decimal" value="${esc(s.longPlanPerMeal)}"></div>
+      <div><label for="ds-min-days">Long-plan threshold (days)</label><input id="ds-min-days" type="number" min="1" max="365" step="1" inputmode="numeric" value="${esc(s.longPlanMinDays)}"></div>
+      <div class="wide"><label for="ds-unknown">Address without a map location</label><select id="ds-unknown"><option value="charge" ${s.unknownPolicy === "charge" ? "selected" : ""}>Charge normal delivery rate</option><option value="free" ${s.unknownPolicy === "free" ? "selected" : ""}>Give free delivery</option></select></div>
+    </div>
+    <div class="settings-actions"><button class="btn btn-primary" id="ds-save" onclick="saveDeliverySettings()">Save delivery charges</button></div>
+    <div class="error" id="ds-error"></div><div class="ok" id="ds-success" style="display:none"></div>`;
+      }
+      async function loadDeliverySettings(force = false) {
+        if (state.deliverySettingsLoaded && !force) return;
+        const data = await adminApi(DELIVERY_SETTINGS_API, "GET");
+        if (!data) return;
+        if (data.error) {
+          state.deliverySettings = null;
+          renderDeliverySettings();
+          return;
+        }
+        state.deliverySettings = data.settings;
+        state.deliverySettingsLoaded = true;
+        renderDeliverySettings();
+      }
+      async function saveDeliverySettings() {
+        const btn = document.getElementById("ds-save");
+        const errorEl = document.getElementById("ds-error");
+        const okEl = document.getElementById("ds-success");
+        if (!btn) return;
+        errorEl.textContent = "";
+        okEl.style.display = "none";
+        const body = {
+          freeKm: Number(document.getElementById("ds-free-km").value),
+          standardPerMeal: Number(document.getElementById("ds-standard").value),
+          longPlanPerMeal: Number(document.getElementById("ds-long").value),
+          longPlanMinDays: Number(document.getElementById("ds-min-days").value),
+          unknownPolicy: document.getElementById("ds-unknown").value,
+        };
+        if (
+          !Number.isFinite(body.freeKm) ||
+          body.freeKm < 0 ||
+          body.freeKm > 100 ||
+          !Number.isFinite(body.standardPerMeal) ||
+          body.standardPerMeal < 0 ||
+          !Number.isFinite(body.longPlanPerMeal) ||
+          body.longPlanPerMeal < 0 ||
+          !Number.isInteger(body.longPlanMinDays) ||
+          body.longPlanMinDays < 1
+        ) {
+          errorEl.textContent = "Enter valid delivery charges.";
+          return;
+        }
+        btn.disabled = true;
+        btn.textContent = "Saving…";
+        const data = await adminApi(DELIVERY_SETTINGS_API, "POST", body);
+        btn.disabled = false;
+        btn.textContent = "Save delivery charges";
+        if (!data) return;
+        if (data.error) {
+          errorEl.textContent = data.error;
+          return;
+        }
+        state.deliverySettings = data.settings;
+        state.deliverySettingsLoaded = true;
+        renderDeliverySettings();
+        toast("Delivery charges updated");
+      }
+
+      /* ---------- Company / GST details ---------- */
+      function companyStatus(settings) {
+        if (settings.active) {
+          return {
+            label: "Active",
+            cls: "badge-active",
+            hint: "Automatic GST invoices are enabled and the seller details are valid.",
+          };
+        }
+        if (settings.enabled) {
+          return {
+            label: "Needs details",
+            cls: "badge-cancelled",
+            hint: "Invoices will stay off until the GSTIN, PAN, legal name, and address are valid and the GSTIN's PAN matches the PAN field.",
+          };
+        }
+        return {
+          label: "Paused",
+          cls: "badge-pending",
+          hint: "Automatic GST invoices are paused. Payments and subscriptions continue normally.",
+        };
+      }
+      function updateCompanyStatusPreview() {
+        const checkbox = document.getElementById("gst-enabled");
+        const badge = document.getElementById("company-status-badge");
+        const hint = document.getElementById("gst-status-hint");
+        if (!checkbox) return;
+        if (badge) {
+          badge.textContent = checkbox.checked ? "Needs details" : "Paused";
+          badge.className = checkbox.checked
+            ? "badge badge-cancelled"
+            : "badge badge-pending";
+        }
+        if (hint) {
+          hint.textContent = checkbox.checked
+            ? "Invoices will go live after you save with a valid GSTIN, matching PAN, legal name, and address."
+            : "Automatic GST invoices are paused. Payments and subscriptions continue normally.";
+        }
+      }
+      function renderCompanySettings() {
+        const el = document.getElementById("company-body");
+        if (!el) return;
+        const s = state.gstSettings;
+        if (!s) {
+          el.innerHTML =
+            '<div class="empty-state">Failed to load company details.</div>';
+          return;
+        }
+        const status = companyStatus(s);
+        el.innerHTML = `
+    <div class="card company-status-card">
+      <div class="company-status-head">
+        <div><h2>GST invoices</h2><p class="hint">Used for invoices generated after successful payments. GST is already included in the plan price.</p></div>
+        <span class="badge ${status.cls}" id="company-status-badge">${status.label}</span>
+      </div>
+      <label class="check"><input type="checkbox" id="gst-enabled" ${s.enabled ? "checked" : ""} onchange="updateCompanyStatusPreview()">Enable automatic GST invoices</label>
+      <div class="hint" id="gst-status-hint">${esc(status.hint)}</div>
+    </div>
+    <div class="card">
+      <h2>Legal identity</h2>
+      <div class="settings-grid">
+        <div><label for="gst-legal-name">Legal name</label><input id="gst-legal-name" type="text" autocomplete="organization" value="${esc(s.legalName)}"></div>
+        <div><label for="gst-trade-name">Trade name</label><input id="gst-trade-name" type="text" value="${esc(s.tradeName)}"></div>
+        <div><label for="gst-gstin">GSTIN</label><input id="gst-gstin" type="text" maxlength="15" autocapitalize="characters" spellcheck="false" placeholder="36AAGCJ9203P1Z2" value="${esc(s.gstin)}"></div>
+        <div><label for="gst-pan">PAN</label><input id="gst-pan" type="text" maxlength="10" autocapitalize="characters" spellcheck="false" placeholder="AAGCJ9203P" value="${esc(s.pan)}"></div>
+      </div>
+      <p class="hint">The PAN must match the 10 characters embedded in the GSTIN. The state code is taken from the GSTIN's first two digits.</p>
+    </div>
+    <div class="card">
+      <h2>Registered address</h2>
+      <div class="settings-grid">
+        <div class="wide"><label for="gst-address">Address lines (one per row)</label><textarea id="gst-address" rows="4" autocomplete="street-address">${esc((s.addressLines || []).join("\n"))}</textarea></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Contact</h2>
+      <div class="settings-grid">
+        <div><label for="gst-email">Email</label><input id="gst-email" type="email" autocomplete="email" value="${esc(s.email)}"></div>
+        <div><label for="gst-phone">Phone</label><input id="gst-phone" type="tel" autocomplete="tel" value="${esc(s.phone)}"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Invoice setup</h2>
+      <div class="settings-grid">
+        <div><label for="gst-rate">GST rate (total %)</label><input id="gst-rate" type="number" min="0.01" max="50" step="0.01" inputmode="decimal" value="${esc(s.gstRate)}"></div>
+        <div><label for="gst-state">State code</label><input id="gst-state" type="text" value="${esc(s.stateCode)}" readonly></div>
+        <div><label for="gst-sac">SAC</label><input id="gst-sac" type="text" inputmode="numeric" value="${esc(s.sac)}"></div>
+        <div><label for="gst-delivery-sac">Delivery SAC</label><input id="gst-delivery-sac" type="text" inputmode="numeric" value="${esc(s.deliverySac)}"></div>
+        <div><label for="gst-prefix">Invoice prefix</label><input id="gst-prefix" type="text" maxlength="12" value="${esc(s.prefix)}"></div>
+        <div><label for="gst-template">WhatsApp template</label><input id="gst-template" type="text" value="${esc(s.whatsappTemplate)}" readonly></div>
+        <div class="wide"><label for="gst-terms">Invoice terms</label><textarea id="gst-terms" rows="3">${esc(s.terms)}</textarea></div>
+      </div>
+      <p class="hint">Enter the total GST rate. For 5%, invoices split it into 2.5% CGST + 2.5% SGST for Telangana customers, or charge 5% IGST for other states.</p>
+    </div>
+    <div class="company-savebar">
+      <div class="error" id="company-error"></div>
+      <button class="btn btn-primary" id="company-save" type="submit">Save company details</button>
+    </div>`;
+      }
+      async function loadCompanySettings(force = false) {
+        if (state.gstSettingsLoaded && !force) return;
+        const el = document.getElementById("company-body");
+        if (el) {
+          el.innerHTML =
+            '<div class="empty-state">Loading company details…</div>';
+        }
+        const data = await adminApi(GST_SETTINGS_API, "GET");
+        if (!data) return;
+        if (data.error) {
+          state.gstSettings = null;
+          if (el) {
+            el.innerHTML = `<div class="empty-state">${esc(data.error)}</div>`;
+          }
+          return;
+        }
+        state.gstSettings = data.settings;
+        state.gstSettingsLoaded = true;
+        renderCompanySettings();
+      }
+      function openCompanySettings() {
+        const el = document.getElementById("company-settings");
+        if (!el) return;
+        state.companyOpen = true;
+        el.hidden = false;
+        document.body.classList.add("company-open");
+        loadCompanySettings(true);
+      }
+      function closeCompanySettings() {
+        const el = document.getElementById("company-settings");
+        state.companyOpen = false;
+        if (el) el.hidden = true;
+        document.body.classList.remove("company-open");
+      }
+      async function saveCompanySettings() {
+        const btn = document.getElementById("company-save");
+        const errorEl = document.getElementById("company-error");
+        if (!btn) return;
+        if (errorEl) errorEl.textContent = "";
+        const body = {
+          enabled: document.getElementById("gst-enabled").checked,
+          legalName: document.getElementById("gst-legal-name").value.trim(),
+          tradeName: document.getElementById("gst-trade-name").value.trim(),
+          gstin: document.getElementById("gst-gstin").value.trim(),
+          pan: document.getElementById("gst-pan").value.trim(),
+          addressLines: document.getElementById("gst-address").value,
+          email: document.getElementById("gst-email").value.trim(),
+          phone: document.getElementById("gst-phone").value.trim(),
+          gstRate: Number(document.getElementById("gst-rate").value),
+          sac: document.getElementById("gst-sac").value.trim(),
+          deliverySac: document.getElementById("gst-delivery-sac").value.trim(),
+          prefix: document.getElementById("gst-prefix").value.trim(),
+          terms: document.getElementById("gst-terms").value.trim(),
+        };
+        btn.disabled = true;
+        btn.textContent = "Saving…";
+        const data = await adminApi(GST_SETTINGS_API, "POST", body);
+        btn.disabled = false;
+        btn.textContent = "Save company details";
+        if (!data) return;
+        if (data.error) {
+          if (errorEl) errorEl.textContent = data.error;
+          return;
+        }
+        state.gstSettings = data.settings;
+        state.gstSettingsLoaded = true;
+        renderCompanySettings();
+        toast(
+          data.settings.active
+            ? "Company details saved — GST invoices are active"
+            : "Company details saved",
+        );
+      }
+
       function setupSubscriptionFilters(plans) {
         const s = document.getElementById("sub-plan");
         if (!s) return;
@@ -702,6 +994,135 @@
         URL.revokeObjectURL(url);
       }
 
+      /* ---------- Invoices ---------- */
+      function invoiceStatusBadge(status) {
+        const cls =
+          status === "sent"
+            ? "badge-active"
+            : status === "failed"
+              ? "badge-cancelled"
+              : "badge-pending";
+        return `<span class="badge ${cls}">${esc(status)}</span>`;
+      }
+      function invoiceParams(page = state.invoicesPage) {
+        const p = new URLSearchParams();
+        const q = document.getElementById("inv-q")?.value.trim();
+        const status = document.getElementById("inv-status")?.value;
+        if (q) p.set("q", q);
+        if (status) p.set("status", status);
+        p.set("page", page);
+        p.set("limit", state.invoicesLimit);
+        return p;
+      }
+      function renderInvoiceList(data) {
+        const el = document.getElementById("invoice-list");
+        const pg = document.getElementById("invoice-pagination");
+        if (!el) return;
+        if (!data || data.error) {
+          el.innerHTML =
+            '<div class="empty-state">Failed to load invoices.</div>';
+          if (pg) pg.innerHTML = "";
+          return;
+        }
+        const rows = data.invoices || [];
+        state.invoices = rows;
+        state.invoicesTotal = data.total || 0;
+        state.invoicesPage = data.page || 1;
+        if (!rows.length) {
+          el.innerHTML =
+            '<div class="empty-state">No invoices match these filters.</div>';
+          if (pg) pg.innerHTML = "";
+          return;
+        }
+        el.innerHTML = `<div class="grid">${rows
+          .map((inv) => {
+            const filename = `FitFuel-GST-Invoice-${String(inv.invoice_number).replace(/[^A-Za-z0-9._-]+/g, "-")}.pdf`;
+            return `
+    <div class="sub-item invoice-item" data-filename="${esc(filename)}">
+      <div class="top">
+        <div><div class="sub-customer">${esc(inv.invoice_number)}</div><div class="sub-muted">${esc(inv.buyer_name || "Unnamed customer")} · ${esc(inv.phone)}</div></div>
+        <div style="white-space:nowrap">${invoiceStatusBadge(inv.status)}</div>
+      </div>
+      <div class="meta">
+        <span>${esc(inv.invoice_date)}</span>
+        <span>${formatMoney(inv.amount)}</span>
+        <span class="muted">${esc(inv.razorpay_payment_id || "")}</span>
+      </div>
+      ${inv.error ? `<div class="invoice-error">${esc(inv.error)}</div>` : ""}
+      <div class="invoice-actions">
+        <button class="btn" ${inv.pdf_available ? "" : "disabled"} onclick="downloadInvoice('${esc(inv.id)}', this)">Download PDF</button>
+        <button class="btn" onclick="resendInvoice('${esc(inv.id)}', this)">Resend on WhatsApp</button>
+      </div>
+    </div>`;
+          })
+          .join("")}</div>`;
+        const pages = Math.max(
+          1,
+          Math.ceil(state.invoicesTotal / state.invoicesLimit),
+        );
+        const first = (state.invoicesPage - 1) * state.invoicesLimit + 1;
+        const last = Math.min(
+          state.invoicesTotal,
+          state.invoicesPage * state.invoicesLimit,
+        );
+        if (pg) {
+          pg.innerHTML = `<span>${first}–${last} of ${state.invoicesTotal}</span><span>
+    <button ${state.invoicesPage <= 1 ? "disabled" : ""} onclick="loadInvoices(${state.invoicesPage - 1})">Previous</button>
+    <button ${state.invoicesPage >= pages ? "disabled" : ""} onclick="loadInvoices(${state.invoicesPage + 1})">Next</button></span>`;
+        }
+      }
+      let invoicesReq = 0;
+      async function loadInvoices(page = 1, force = false) {
+        const el = document.getElementById("invoice-list");
+        if (!el) return;
+        const req = ++invoicesReq;
+        el.innerHTML = '<div class="empty-state">Loading invoices…</div>';
+        const data = await adminApi(
+          `${INVOICES_API}?${invoiceParams(page).toString()}`,
+        );
+        if (req !== invoicesReq) return;
+        if (!data) return;
+        renderInvoiceList(data);
+      }
+      async function downloadInvoice(id, btn) {
+        if (btn) btn.disabled = true;
+        const data = await adminBlob(
+          `${INVOICES_API}/${encodeURIComponent(id)}/download`,
+        );
+        if (btn) btn.disabled = false;
+        if (!data) return;
+        if (data.error) return toast(data.error, true);
+        const url = URL.createObjectURL(data.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download =
+          btn?.closest(".invoice-item")?.dataset.filename || "invoice.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+      async function resendInvoice(id, btn) {
+        if (!confirm("Resend this invoice on WhatsApp?")) return;
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Sending…";
+        }
+        const data = await adminApi(
+          `${INVOICES_API}/${encodeURIComponent(id)}/resend`,
+          "POST",
+          {},
+        );
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Resend on WhatsApp";
+        }
+        if (!data) return;
+        if (data.error) return toast(data.error, true);
+        toast("Invoice resent");
+        loadInvoices(state.invoicesPage, true);
+      }
+
       /* ---------- Shell ---------- */
       function switchTab(name) {
         state.tab = name;
@@ -715,13 +1136,26 @@
         document.getElementById("content-" + name).classList.add("active");
         window.scrollTo({ top: 0 });
         if (name === "kitchen") loadKitchenClosedDays();
-        if (name === "pricing") loadPricing();
+        if (name === "pricing") {
+          loadPricing();
+          loadDeliverySettings();
+        }
+        if (name === "invoices") loadInvoices(1);
         if (name === "subscriptions") loadSubscriptions(1, true);
       }
       function logout() {
         sessionStorage.removeItem("admin_token");
         state.pricingPlans = [];
         state.pricingLoaded = false;
+        state.deliverySettings = null;
+        state.deliverySettingsLoaded = false;
+        state.gstSettings = null;
+        state.gstSettingsLoaded = false;
+        state.companyOpen = false;
+        document.body.classList.remove("company-open");
+        state.invoices = [];
+        state.invoicesPage = 1;
+        state.invoicesTotal = 0;
         render();
       }
 
@@ -729,6 +1163,8 @@
         const app = document.getElementById("app");
         const signedIn = !!getToken();
         document.body.classList.toggle("login-page", !signedIn);
+        document.body.classList.remove("company-open");
+        state.companyOpen = false;
         closeDetail();
         if (!signedIn) {
           app.innerHTML = `
@@ -771,7 +1207,10 @@
         app.innerHTML = `
     <header class="topbar"><div class="container">
       <div class="brand">Fit<span class="wordmark-accent">Fuel</span><span class="brand-sub">Admin</span></div>
-      <button class="link-btn" onclick="logout()">Log out</button>
+      <div class="topbar-actions">
+        <button class="link-btn" onclick="openCompanySettings()">Company</button>
+        <button class="link-btn" onclick="logout()">Log out</button>
+      </div>
     </div></header>
     <nav class="nav" aria-label="Sections">
       <button class="tab" id="tab-weekly" onclick="switchTab('weekly')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Weekly</button>
@@ -779,6 +1218,7 @@
       <button class="tab" id="tab-kitchen" onclick="switchTab('kitchen')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Closures</button>
       <button class="tab" id="tab-pricing" onclick="switchTab('pricing')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12M6 8h12M9 4c4 0 5.5 2 5.5 4S13 12 9 12H6l8 8"/></svg>Pricing</button>
       <button class="tab" id="tab-subscriptions" onclick="switchTab('subscriptions')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.5 3-5.5 6.5-5.5s6 2 6.5 5.5M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.2 2.3 3.5 5"/></svg>Plans</button>
+      <button class="tab" id="tab-invoices" onclick="switchTab('invoices')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h9l3 3V20.5H6z"/><path d="M9 9h6M9 12.5h6M9 16h4"/></svg>Invoices</button>
     </nav>
     <main class="container">
       <section class="tab-content" id="content-weekly">
@@ -809,8 +1249,12 @@
       </section>
 
       <section class="tab-content" id="content-pricing">
+        <div class="card" style="margin-bottom:14px">
+          <h2>Delivery charges</h2>
+          <div id="delivery-settings-body"><div class="empty-state">Loading delivery charges…</div></div>
+        </div>
         <h2>Per-meal pricing</h2>
-        <p class="hint">Used for new subscriptions and future dispatches. Totals update for 1, 2, or 3 meals per day.</p>
+        <p class="hint">Used for new subscriptions and future dispatches. Totals update for 1, 2, or 3 meals per day. Delivery is added separately from the settings above.</p>
         <div id="pricing-body"><div class="empty-state">Loading pricing…</div></div>
       </section>
 
@@ -831,7 +1275,37 @@
         <div id="sub-list"><div class="empty-state">Loading subscriptions…</div></div>
         <div class="sub-pagination" id="sub-pagination"></div>
       </section>
-    </main>`;
+
+      <section class="tab-content" id="content-invoices">
+        <h2>GST invoices</h2>
+        <p class="hint">Invoices generated after successful payments. Download the stored PDF or resend it on WhatsApp.</p>
+        <div class="card">
+          <div class="toolbar">
+            <input class="full" type="text" id="inv-q" placeholder="Search invoice number, name or phone" enterkeyhint="search" onkeydown="if(event.key==='Enter')loadInvoices(1)">
+            <select id="inv-status" aria-label="Invoice status" onchange="loadInvoices(1)">
+              <option value="">All statuses</option><option value="sent">Sent</option><option value="generated">Generated</option><option value="failed">Failed</option>
+            </select>
+            <button class="btn" onclick="loadInvoices(1)">Search</button>
+            <button class="btn" onclick="loadInvoices(1, true)">Refresh</button>
+          </div>
+        </div>
+        <div id="invoice-list"><div class="empty-state">Loading invoices…</div></div>
+        <div class="sub-pagination" id="invoice-pagination"></div>
+      </section>
+    </main>
+    <div class="company-settings" id="company-settings" hidden role="dialog" aria-modal="true" aria-labelledby="company-title">
+      <header class="company-topbar"><div class="container">
+        <button class="link-btn company-back" onclick="closeCompanySettings()">← Back</button>
+        <strong id="company-title">Company details</strong>
+        <span></span>
+      </div></header>
+      <main class="container company-main">
+        <p class="hint">These details appear on GST invoices. Invoices stay off until they are enabled and the GSTIN, matching PAN, legal name, and address are valid. Keep invoicing paused until the WhatsApp invoice template is approved.</p>
+        <form id="company-form" onsubmit="event.preventDefault(); saveCompanySettings()">
+          <div id="company-body"><div class="empty-state">Loading company details…</div></div>
+        </form>
+      </main>
+    </div>`;
         setupSubscriptionFilters(state.plans);
         renderWeekly();
         renderTomorrow();
@@ -845,7 +1319,10 @@
         render();
       }
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeDetail();
+        if (e.key === "Escape") {
+          closeDetail();
+          if (state.companyOpen) closeCompanySettings();
+        }
       });
       render();
     </script>
