@@ -98,6 +98,7 @@ function toPlanType(days) {
   if (days === 3) return "3day";
   if (days === 7) return "weekly";
   if (days === 14) return "biweekly";
+  if (days === 21) return "21day";
   return "monthly";
 }
 
@@ -267,7 +268,9 @@ export default async function handler(req, res) {
 
       // Validate plan_type
       const planType = toPlanType(days);
-      if (!["3day", "weekly", "biweekly", "monthly"].includes(planType)) {
+      if (
+        !["3day", "weekly", "biweekly", "21day", "monthly"].includes(planType)
+      ) {
         console.error("[WEBHOOK] Invalid plan_type:", days, "->", planType);
         return res.status(500).json({ error: "Invalid plan type" });
       }

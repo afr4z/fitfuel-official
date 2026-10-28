@@ -19,6 +19,7 @@ export const PLAN_TYPE_LABELS = {
   "3day": "3-Day",
   weekly: "7-Day",
   biweekly: "14-Day",
+  "21day": "21-Day",
   monthly: "28-Day",
 };
 
@@ -35,6 +36,7 @@ export const DAY_OPTIONS = [
   { id: "DAYS_3", label: "3 Days", days: 3 },
   { id: "DAYS_7", label: "7 Days", days: 7 },
   { id: "DAYS_14", label: "14 Days", days: 14 },
+  { id: "DAYS_21", label: "21 Days", days: 21 },
   { id: "DAYS_28", label: "28 Days", days: 28 },
 ];
 // ─── Meals-per-day options ───────────────────────────────────────────────────

@@ -51,7 +51,7 @@ How can we help you today?
 
 [plan list with prices]
 
-📅 *Durations:* 3, 7, 14, or 28 days
+📅 *Durations:* 3, 7, 14, 21, or 28 days
 🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3
 
 Tap below to customise your plan!

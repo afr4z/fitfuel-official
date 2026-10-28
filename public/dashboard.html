@@ -428,6 +428,13 @@
     <script src="/js/html-escape.js"></script>
     <script>
       const API_BASE = "/api/auth";
+      const PLAN_TYPE_LABELS = {
+        "3day": "3-Day",
+        weekly: "7-Day",
+        biweekly: "14-Day",
+        "21day": "21-Day",
+        monthly: "28-Day",
+      };
 
       async function fetchMe() {
         const res = await fetch(`${API_BASE}/me`, { credentials: "include" });
@@ -484,7 +491,7 @@
                   <span class="plan-tag ${plan.tag?.toLowerCase() === "veg" ? "tag-veg" : "tag-nonveg"}">${esc(plan.tag) || ""}</span>
                 </div>
               </div>
-              <span class="plan-type">${esc(sub.plan_type?.replace("3day", "3-Day") || sub.plan_type)}</span>
+              <span class="plan-type">${esc(PLAN_TYPE_LABELS[sub.plan_type] || sub.plan_type || "")}</span>
             </div>
             <div class="plan-dates">
               <div class="plan-date">

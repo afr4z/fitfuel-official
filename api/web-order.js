@@ -227,6 +227,12 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error("[WEB-ORDER] Error:", err.message, err.stack);
+    if (/amount exceeds maximum amount allowed/i.test(err.message)) {
+      return res.status(400).json({
+        error:
+          "This plan total is above our current online payment limit. Please choose a shorter plan or contact support.",
+      });
+    }
     return res.status(500).json({ error: "Internal server error" });
   }
 }

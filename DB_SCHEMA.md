@@ -178,7 +178,7 @@ CREATE TABLE meal_plan_subscriptions (
   meal_plan_id UUID REFERENCES meal_plans(id),
   phone TEXT NOT NULL,
   address_id UUID REFERENCES customer_addresses(id) ON DELETE SET NULL,
-  plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', 'monthly')),
+  plan_type TEXT NOT NULL CHECK (plan_type IN ('3day', 'weekly', 'biweekly', '21day', 'monthly')),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'cancelled')),
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,

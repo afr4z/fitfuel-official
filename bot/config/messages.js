@@ -26,7 +26,7 @@ export const GREETING_NEW = `👋 Welcome to FitFuel Nutrition!\n\nHow can we he
 export function viewPlans({ planLines }) {
   return (
     `🥗 *Our Nutrition Plans*\n\n${planLines}\n\n` +
-    `📅 *Durations:* 3, 7, 14, or 28 days\n` +
+    `📅 *Durations:* 3, 7, 14, 21, or 28 days\n` +
     `🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3\n\n` +
     `Tap below to customise your plan!`
   );
@@ -122,6 +122,8 @@ export const ADDRESS_BOOK_PROMPT =
 export const ADDRESS_SAVED_SELECTED = `✅ *Got it!* Using your saved address for this order.`;
 
 export const PAYMENT_LINK_ERROR = `Sorry, we couldn't generate your payment link right now. Please contact support.`;
+
+export const PAYMENT_LINK_LIMIT_ERROR = `This plan total is above our current online payment limit. Please choose a shorter plan (for example 14 or 21 days) or contact support so we can collect the payment another way.`;
 
 export function orderSummary({
   planTitle,

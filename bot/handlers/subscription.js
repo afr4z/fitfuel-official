@@ -25,6 +25,7 @@ import {
   ADDRESS_BOOK_PROMPT,
   ADDRESS_SAVED_SELECTED,
   PAYMENT_LINK_ERROR,
+  PAYMENT_LINK_LIMIT_ERROR,
   orderSummary,
 } from "../config/messages.js";
 import {
@@ -464,7 +465,13 @@ export async function handleAddress(phone, session, addressText, setSession) {
     paymentUrl = link.short_url;
   } catch (e) {
     console.error("[RAZORPAY] Error:", e.message);
-    await sendText(phone, PAYMENT_LINK_ERROR);
+    const limitReached = /amount exceeds maximum amount allowed/i.test(
+      e.message,
+    );
+    await sendText(
+      phone,
+      limitReached ? PAYMENT_LINK_LIMIT_ERROR : PAYMENT_LINK_ERROR,
+    );
     await setSession(phone, {
       ...session,
       state: STATES.GREETING,
