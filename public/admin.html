@@ -678,7 +678,7 @@
     <div class="card">
       <h2>Invoice setup</h2>
       <div class="settings-grid">
-        <div><label for="gst-rate">GST rate (%)</label><input id="gst-rate" type="number" min="0.01" max="50" step="0.01" inputmode="decimal" value="${esc(s.gstRate)}"></div>
+        <div><label for="gst-rate">GST rate (total %)</label><input id="gst-rate" type="number" min="0.01" max="50" step="0.01" inputmode="decimal" value="${esc(s.gstRate)}"></div>
         <div><label for="gst-state">State code</label><input id="gst-state" type="text" value="${esc(s.stateCode)}" readonly></div>
         <div><label for="gst-sac">SAC</label><input id="gst-sac" type="text" inputmode="numeric" value="${esc(s.sac)}"></div>
         <div><label for="gst-delivery-sac">Delivery SAC</label><input id="gst-delivery-sac" type="text" inputmode="numeric" value="${esc(s.deliverySac)}"></div>
@@ -686,6 +686,7 @@
         <div><label for="gst-template">WhatsApp template</label><input id="gst-template" type="text" value="${esc(s.whatsappTemplate)}" readonly></div>
         <div class="wide"><label for="gst-terms">Invoice terms</label><textarea id="gst-terms" rows="3">${esc(s.terms)}</textarea></div>
       </div>
+      <p class="hint">Enter the total GST rate. For 5%, invoices split it into 2.5% CGST + 2.5% SGST for Telangana customers, or charge 5% IGST for other states.</p>
     </div>
     <div class="company-savebar">
       <div class="error" id="company-error"></div>

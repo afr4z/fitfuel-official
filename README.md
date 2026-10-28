@@ -96,28 +96,21 @@ Delivery charges** without a redeploy.
 Template requirements are documented in `templates.md` and
 `templates-body.md`.
 
-GST seller details are editable from **Admin → Company** and stored in the
-`gst_settings` table. The `GST_*` environment variables below are fallbacks used
-until that settings row is saved. Plan prices are treated as GST-inclusive; the
-invoice back-calculates the taxable value and the CGST/SGST or IGST component
-inside the amount paid. Invoicing stays off until it is enabled and the GSTIN,
-legal name, and address are valid.
+GST seller details are editable from **Admin → Company** and stored only in the
+`gst_settings` table. There is no seller/tax environment fallback; if the row is
+absent or invoicing is disabled, no GST invoice is generated.
+
+Plan prices are treated as GST-inclusive. The admin field is the **total** GST
+rate: at 5%, invoices split it into 2.5% CGST + 2.5% SGST for Telangana
+customers, or charge 5% IGST for customers in other states. The tax is
+back-calculated from the amount paid, not added on top.
+
+Only these invoice operational settings remain environment-driven:
 
 ```
-GST_INVOICE_ENABLED=false
-GST_SELLER_LEGAL_NAME=Jadpod Fitness Private Limited
-GST_SELLER_TRADE_NAME=FitFuel Nutrition
-GST_SELLER_ADDRESS_LINES=3rd Floor, 402, YK Arcade|Wyra Road, Near Surabhi Hospital|Khammam, Telangana 507002
-GST_SELLER_GSTIN=
-GST_SELLER_PAN=
-GST_SELLER_EMAIL=hello@fitfuelnutrition.com
-GST_SELLER_PHONE=
-GST_SELLER_STATE_CODE=36
-GST_RATE=5
-GST_SAC=996331
-GST_DELIVERY_SAC=996331
-GST_INVOICE_PREFIX=FF
+GST_INVOICE_SAMPLE=false
 INVOICE_STORAGE_BUCKET=invoices
+WHATSAPP_INVOICE_TEMPLATE=invoice_ready
 ```
 
 Invoices are generated in `api/razorpay-webhook.js` after a successful

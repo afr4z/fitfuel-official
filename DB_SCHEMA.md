@@ -386,8 +386,8 @@ CREATE TABLE gst_settings (
 Singleton row (`id = true`) edited from **Admin → Company**. It holds the full
 seller identity and tax setup used on new GST invoices. Invoicing only becomes
 active when the row is enabled and the GSTIN, legal name, and address are valid.
-Before the first save, `lib/invoiceService.js` falls back to the `GST_*`
-environment variables. See `supabase/gst-settings.sql`.
+There is no seller/tax environment fallback: if the row is absent, invoicing is
+disabled and defaults are used. See `supabase/gst-settings.sql`.
 
 ---
 
