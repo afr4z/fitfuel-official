@@ -145,16 +145,16 @@ export function orderSummary({
       : `₹${deliveryTotal}${distanceNote}${locationKnown === false ? " (location unverified)" : ""}`;
 
   return (
-    `✅ *Order Summary*\n\n` +
-    `📦 Plan: ${planTitle}\n` +
-    `📅 Duration: ${dayLabel}\n` +
-    `🍴 Meals: ${mealLabel}\n` +
-    `🏠 Address: ${addressText}\n` +
-    `🍱 Plan amount: ₹${planAmount}\n` +
-    `🛵 Delivery: ${deliveryText}\n` +
-    `💰 *Total: ₹${totalPrice}*\n\n` +
-    `💳 *Complete your payment here:*\n${paymentUrl}\n\n` +
-    `_Your subscription activates once payment is confirmed!_`
+    `*Order Summary*\n\n` +
+    `Plan: ${planTitle}\n` +
+    `Duration: ${dayLabel}\n` +
+    `Meals: ${mealLabel}\n` +
+    `Address: ${addressText}\n` +
+    `Plan amount: ₹${planAmount}\n` +
+    `Delivery: ${deliveryText}\n` +
+    `*Total: ₹${totalPrice}*\n\n` +
+    `*Complete your payment here:*\n${paymentUrl}\n\n` +
+    `_Your subscription activates once payment is confirmed._`
   );
 }
 
@@ -278,14 +278,14 @@ export function paymentConfirmed({
   startLabel,
 }) {
   return (
-    `🎉 *Payment Confirmed!*\n\n` +
-    `Your FitFuel *${planTitle}* plan is now *active*!\n\n` +
-    `📅 Duration: ${dayLabel}\n` +
-    `🍴 Meals: ${mealLabel}\n` +
-    `💰 Amount paid: ₹${amount}\n\n` +
-    `📦 Deliveries start ${startLabel}.\n` +
+    `*Payment Confirmed*\n\n` +
+    `Your FitFuel *${planTitle}* plan is now *active*.\n\n` +
+    `Duration: ${dayLabel}\n` +
+    `Meals: ${mealLabel}\n` +
+    `Amount paid: ₹${amount}\n\n` +
+    `Deliveries start ${startLabel}.\n` +
     `You'll get a daily notification before each meal to confirm, skip, or change it.\n\n` +
-    `Thank you for choosing FitFuel! 💪`
+    `Thank you for choosing FitFuel.`
   );
 }
 
