@@ -26,6 +26,8 @@ Creation order:
 | 11   | `kitchen_closed_days`     | —                                               |
 | 12   | `invoice_counters`        | —                                               |
 | 13   | `invoices`                | `meal_plan_subscriptions`, `customers`          |
+| 14   | `delivery_settings`       | —                                               |
+| 15   | `gst_settings`            | —                                               |
 
 ---
 
@@ -336,6 +338,56 @@ One row per successful Razorpay payment. `seller_snapshot`, `buyer_snapshot`
 and `line_items` are immutable so the PDF can be regenerated after the original
 storage object is gone. The PDF is stored in the private `invoices` Storage
 bucket. See `supabase/invoices.sql`.
+
+## 14. `delivery_settings`
+
+```sql
+CREATE TABLE delivery_settings (
+  id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
+  free_km NUMERIC(6,2) NOT NULL DEFAULT 3 CHECK (free_km >= 0),
+  standard_per_meal NUMERIC(10,2) NOT NULL DEFAULT 20 CHECK (standard_per_meal >= 0),
+  long_plan_per_meal NUMERIC(10,2) NOT NULL DEFAULT 15 CHECK (long_plan_per_meal >= 0),
+  long_plan_min_days INTEGER NOT NULL DEFAULT 20 CHECK (long_plan_min_days >= 1),
+  unknown_policy TEXT NOT NULL DEFAULT 'charge'
+    CHECK (unknown_policy IN ('charge', 'free')),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+Singleton row (`id = true`) edited from **Admin → Pricing → Delivery charges**.
+Delivery quotes read it on every request, so changes apply without a redeploy.
+If the row or table is unavailable, `lib/deliverySettings.js` falls back to the
+`DELIVERY_*` environment variables. See `supabase/delivery-settings.sql`.
+
+## 15. `gst_settings`
+
+```sql
+CREATE TABLE gst_settings (
+  id BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (id),
+  enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  seller_gstin TEXT NOT NULL DEFAULT '',
+  seller_legal_name TEXT NOT NULL DEFAULT '',
+  seller_trade_name TEXT NOT NULL DEFAULT '',
+  seller_address_lines TEXT NOT NULL DEFAULT '',
+  seller_pan TEXT NOT NULL DEFAULT '',
+  seller_email TEXT NOT NULL DEFAULT '',
+  seller_phone TEXT NOT NULL DEFAULT '',
+  seller_state_code TEXT NOT NULL DEFAULT '36',
+  gst_rate NUMERIC(5,2) NOT NULL DEFAULT 5
+    CHECK (gst_rate > 0 AND gst_rate <= 50),
+  sac TEXT NOT NULL DEFAULT '996331',
+  delivery_sac TEXT NOT NULL DEFAULT '996331',
+  invoice_prefix TEXT NOT NULL DEFAULT 'FF',
+  terms TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+Singleton row (`id = true`) edited from **Admin → Company**. It holds the full
+seller identity and tax setup used on new GST invoices. Invoicing only becomes
+active when the row is enabled and the GSTIN, legal name, and address are valid.
+Before the first save, `lib/invoiceService.js` falls back to the `GST_*`
+environment variables. See `supabase/gst-settings.sql`.
 
 ---
 

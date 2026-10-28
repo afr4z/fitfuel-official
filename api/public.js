@@ -69,10 +69,7 @@ async function handleDeliveryQuote(req, res) {
     });
 
     res.setHeader("Cache-Control", "no-store");
-    return res.status(200).json({
-      ...quote,
-      deliveryConfig: getPublicDeliveryConfig(),
-    });
+    return res.status(200).json(quote);
   } catch (err) {
     console.error("[DELIVERY-QUOTE] Error:", err.message, err.stack);
     return res.status(500).json({ error: "Could not calculate delivery" });
@@ -114,7 +111,7 @@ async function handleGetPlans(req, res) {
     res.setHeader("Cache-Control", "no-store");
     return res.status(200).json({
       plans,
-      delivery: getPublicDeliveryConfig(),
+      delivery: await getPublicDeliveryConfig(),
     });
   } catch (err) {
     console.error("[PLANS] Error:", err.message, err.stack);

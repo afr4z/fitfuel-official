@@ -89,14 +89,19 @@ GOOGLE_MAPS_API_KEY=
 Nominatim and distance uses straight-line Haversine. With it, Google Geocoding
 and Distance Matrix are used for road distance.
 
+The `DELIVERY_*` values above are fallbacks. Delivery charges are stored in
+the `delivery_settings` table and can be edited from **Admin → Pricing →
+Delivery charges** without a redeploy.
+
 Template requirements are documented in `templates.md` and
 `templates-body.md`.
 
-GST invoice settings are env-driven. Plan prices are treated as GST-inclusive;
-the invoice back-calculates the taxable value and the CGST/SGST or IGST
-component inside the amount paid. To activate invoicing, set a valid
-`GST_SELLER_GSTIN` and set `GST_INVOICE_ENABLED=true` (or remove the variable).
-Set `GST_INVOICE_ENABLED=false` to pause it explicitly:
+GST seller details are editable from **Admin → Company** and stored in the
+`gst_settings` table. The `GST_*` environment variables below are fallbacks used
+until that settings row is saved. Plan prices are treated as GST-inclusive; the
+invoice back-calculates the taxable value and the CGST/SGST or IGST component
+inside the amount paid. Invoicing stays off until it is enabled and the GSTIN,
+legal name, and address are valid.
 
 ```
 GST_INVOICE_ENABLED=false
@@ -173,6 +178,9 @@ Admin operations:
 - Tomorrow-only overrides
 - Kitchen-closed days
 - Plan pricing per meal and duration
+- Delivery charges (free radius, per-meal rates, long-plan threshold)
+- Company/GST details (legal name, address, GSTIN, PAN, tax settings, enable/disable)
+- GST invoice list, PDF download, and WhatsApp resend
 - Subscription summary/list/detail/export
 - Subscription cancellation
 
