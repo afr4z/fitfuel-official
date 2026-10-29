@@ -56,7 +56,7 @@ export const CONTACT_US =
   `📞 *Get in Touch*\n\n` +
   `📧 Email: support@fitfuelnutrition.in\n` +
   `📱 WhatsApp: This chat!\n` +
-  `🌐 Website: fitfuelnutrition.in\n` +
+  `🌐 Website: www.fitfuelnutrition.in\n` +
   `🕐 Support hours: Mon–Sat, 9am–7pm`;
 
 // ─── Subscription Onboarding ─────────────────────────────────────────────────

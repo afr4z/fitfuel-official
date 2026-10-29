@@ -98,7 +98,7 @@ Type anything to go back to the menu.
 
 📧 Email: support@fitfuelnutrition.in
 📱 WhatsApp: This chat!
-🌐 Website: fitfuelnutrition.in
+🌐 Website: www.fitfuelnutrition.in
 🕐 Support hours: Mon–Sat, 9am–7pm
 ```
 
