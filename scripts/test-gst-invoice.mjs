@@ -111,7 +111,7 @@ async function main() {
       "Pune, Maharashtra 411001",
     ]),
     gstin: process.env.GST_SELLER_GSTIN || "27AAAAA0000A1Z5",
-    email: process.env.GST_SELLER_EMAIL || "hello@fitfuelnutrition.com",
+    email: process.env.GST_SELLER_EMAIL || "support@fitfuelnutrition.in",
     phone: process.env.GST_SELLER_PHONE || "",
     terms: process.env.GST_INVOICE_TERMS || "",
   };

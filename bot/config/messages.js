@@ -54,9 +54,9 @@ export const MY_PLAN_RENEW_PROMPT = `🔄 Ready to renew your plan?`;
 
 export const CONTACT_US =
   `📞 *Get in Touch*\n\n` +
-  `📧 Email: hello@fitfuelnutrition.com\n` +
+  `📧 Email: support@fitfuelnutrition.in\n` +
   `📱 WhatsApp: This chat!\n` +
-  `🌐 Website: www.fitfuelnutrition.com\n` +
+  `🌐 Website: fitfuelnutrition.in\n` +
   `🕐 Support hours: Mon–Sat, 9am–7pm`;
 
 // ─── Subscription Onboarding ─────────────────────────────────────────────────
