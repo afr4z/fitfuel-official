@@ -137,7 +137,7 @@ id is supplied in the header; the body receives the caption text.
 | `{{2}}` | `effective_date` | `28 Oct 2026`                      |
 
 This template has no buttons. The message tells the customer that no meals will
-be delivered from the effective date and asks them to reply if they want to
+be delivered from the effective date and asks them to email if they want to
 discuss a refund.
 
 ---

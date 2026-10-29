@@ -310,7 +310,7 @@ Your FitFuel verification code is 482917. This code is valid for 5 minutes.
 ```
 ❌ We're sorry — your payment was {{1}}.
 
-Unfortunately your FitFuel order could not be completed. Please reply to this message or contact us to start a new order whenever you're ready. We're here to help! 🙏
+Unfortunately your FitFuel order could not be completed. Type "hi" to start a new order. If money left your account, email support@fitfuelnutrition.in with the payment reference and we'll sort it out. 🙏
 ```
 
 ### Variables:
@@ -330,7 +330,7 @@ Unfortunately your FitFuel order could not be completed. Please reply to this me
 ```
 ❌ We're sorry — your payment was cancelled.
 
-Unfortunately your FitFuel order could not be completed. Please reply to this message or contact us to start a new order whenever you're ready. We're here to help! 🙏
+Unfortunately your FitFuel order could not be completed. Type "hi" to start a new order. If money left your account, email support@fitfuelnutrition.in with the payment reference and we'll sort it out. 🙏
 ```
 
 ---
@@ -444,7 +444,7 @@ We'll be back the next working day! 🙏
 📦 Plan: {{1}}
 📅 No meals will be delivered from {{2}}.
 
-If this was a mistake, or you'd like to discuss a refund, please reply to this chat and our team will help.
+If this was a mistake, or you'd like to discuss a refund, email support@fitfuelnutrition.in and our team will help.
 
 Thank you for choosing FitFuel. 🙏
 ```
@@ -469,7 +469,7 @@ Thank you for choosing FitFuel. 🙏
 📦 Plan: 🥗 Healthy Diet Non-Veg (7 Days)
 📅 No meals will be delivered from 28 Oct 2026.
 
-If this was a mistake, or you'd like to discuss a refund, please reply to this chat and our team will help.
+If this was a mistake, or you'd like to discuss a refund, email support@fitfuelnutrition.in and our team will help.
 
 Thank you for choosing FitFuel. 🙏
 ```

@@ -230,7 +230,7 @@ export default async function handler(req, res) {
     if (/amount exceeds maximum amount allowed/i.test(err.message)) {
       return res.status(400).json({
         error:
-          "This plan total is above our current online payment limit. Please choose a shorter plan or contact support.",
+          "This plan total is above our current online payment limit. Please choose a shorter plan, or email support@fitfuelnutrition.in to arrange payment another way.",
       });
     }
     return res.status(500).json({ error: "Internal server error" });
