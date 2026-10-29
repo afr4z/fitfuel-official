@@ -55,6 +55,10 @@
       "destination": "/api/public.js"
     },
     {
+      "source": "/api/notify",
+      "destination": "/api/webhook?route=notify"
+    },
+    {
       "source": "/api/admin/:path*",
       "destination": "/api/admin.js"
     },
