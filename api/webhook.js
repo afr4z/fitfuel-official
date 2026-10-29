@@ -1,6 +1,7 @@
 console.log("[BOOT] webhook function starting");
 import { handleIncoming } from "../bot/handler.js";
 import { updateUserActivity } from "../bot/session.js";
+import { handleNotify } from "../lib/notifyHandler.js";
 
 function extractMessage(body) {
   try {
@@ -15,6 +16,12 @@ function extractMessage(body) {
 }
 
 export default async function handler(req, res) {
+  // Internal sender used by the VPS dispatch service. Routed here via the
+  // `/api/notify` rewrite to stay within the 12-function Hobby limit.
+  if (req.query?.route === "notify") {
+    return handleNotify(req, res);
+  }
+
   if (req.method === "GET") {
     const {
       "hub.mode": mode,
