@@ -180,8 +180,9 @@ Admin operations:
 
 ## Important flows
 
-- **Meal confirmation:** `lib/notifySlot.js`, called by
-  `api/cron/notify-breakfast.js`, `notify-lunch.js`, and `notify-dinner.js`.
+- **Meal confirmation:** `lib/notifySlot.js`, called by `api/cron/notify.js`
+  once per slot (the three legacy paths
+  `/api/cron/notify-{breakfast,lunch,dinner}` rewrite to it).
 - **Change meal menu:** `bot/handlers/orders.js`.
 - **Payment → subscription:** `api/razorpay-webhook.js`.
 - **Website checkout:** `public/order.html` → `api/web-order.js`.

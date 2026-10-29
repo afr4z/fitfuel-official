@@ -399,9 +399,9 @@ disabled and defaults are used. See `supabase/gst-settings.sql`.
 | Job                | Time (IST) | UTC cron      | What it does                                    |
 | ------------------ | ---------- | ------------- | ----------------------------------------------- |
 | `commit-meals`     | 7:45 PM    | `15 14 * * *` | Fill `next_day_meals` and create pending orders |
-| `notify-breakfast` | 8:00 PM    | `30 14 * * *` | Breakfast notification for tomorrow             |
-| `notify-lunch`     | 8:30 AM    | `0 3 * * *`   | Lunch notification for today                    |
-| `notify-dinner`    | 4:00 PM    | `30 10 * * *` | Dinner notification for today                   |
+| `notify` (breakfast) | 8:00 PM  | `30 14 * * *` | Breakfast notification for tomorrow             |
+| `notify` (lunch)     | 8:30 AM  | `0 3 * * *`   | Lunch notification for today                    |
+| `notify` (dinner)    | 4:00 PM  | `30 10 * * *` | Dinner notification for today                   |
 | `expiry-reminder`  | 1:30 PM    | `0 8 * * *`   | Remind subscribers with the threshold days left |
 | `session-expiry`   | Every min  | VPS cron      | Notify idle bot sessions (not a Vercel cron)    |
 

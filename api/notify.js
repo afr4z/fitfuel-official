@@ -1,20 +1,21 @@
-import { sendText, sendButtons } from "./whatsapp.js";
-import { safeEqualStrings } from "./timingSafe.js";
+import { sendText, sendButtons } from "../lib/whatsapp.js";
+import { safeEqualStrings } from "../lib/timingSafe.js";
 
 /**
- * Internal WhatsApp sender used by the VPS dispatch service.
+ * POST /api/notify
  *
- * Reached via the `/api/notify` rewrite, which points at `api/webhook.js` with
- * `?route=notify`. It lives here rather than in its own `api/` file because the
- * Hobby plan caps a deployment at 12 serverless functions and the project is
- * already at the limit.
+ * Sends a WhatsApp message on behalf of a trusted internal caller — the VPS
+ * dispatch service, which posts here when Petpooja marks an order `ready`.
  *
- * Body (JSON): { to: string, body: string, buttons?: { id, title }[] }
+ * Body (JSON):
+ *   { to: string, body: string, buttons?: { id: string, title: string }[] }
  *
- * Fail-closed: without a configured CRON_SECRET this refuses to send rather
- * than becoming an open WhatsApp relay.
+ * This endpoint was deleted in c90116c (2026-09-19), which silently broke the
+ * "Meal Dispatched" notification: the VPS kept posting here and every call
+ * returned 404 until it was restored. Fail-closed: without a configured
+ * CRON_SECRET it refuses to send rather than acting as an open WhatsApp relay.
  */
-export async function handleNotify(req, res) {
+export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }

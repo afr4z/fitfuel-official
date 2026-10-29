@@ -55,8 +55,16 @@
       "destination": "/api/public.js"
     },
     {
-      "source": "/api/notify",
-      "destination": "/api/webhook?route=notify"
+      "source": "/api/cron/notify-breakfast",
+      "destination": "/api/cron/notify?slot=breakfast"
+    },
+    {
+      "source": "/api/cron/notify-lunch",
+      "destination": "/api/cron/notify?slot=lunch"
+    },
+    {
+      "source": "/api/cron/notify-dinner",
+      "destination": "/api/cron/notify?slot=dinner"
     },
     {
       "source": "/api/admin/:path*",
@@ -104,17 +112,13 @@
       "maxDuration": 120,
       "memory": 256
     },
-    "api/cron/notify-breakfast.js": {
+    "api/cron/notify.js": {
       "maxDuration": 60,
       "memory": 256
     },
-    "api/cron/notify-lunch.js": {
-      "maxDuration": 60,
-      "memory": 256
-    },
-    "api/cron/notify-dinner.js": {
-      "maxDuration": 60,
-      "memory": 256
+    "api/notify.js": {
+      "maxDuration": 30,
+      "memory": 128
     },
     "api/cron/expiry-reminder.js": {
       "maxDuration": 60,
@@ -131,15 +135,15 @@
       "schedule": "15 14 * * *"
     },
     {
-      "path": "/api/cron/notify-breakfast",
+      "path": "/api/cron/notify?slot=breakfast",
       "schedule": "30 14 * * *"
     },
     {
-      "path": "/api/cron/notify-lunch",
+      "path": "/api/cron/notify?slot=lunch",
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/notify-dinner",
+      "path": "/api/cron/notify?slot=dinner",
       "schedule": "30 10 * * *"
     },
     {
