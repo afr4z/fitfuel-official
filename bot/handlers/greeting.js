@@ -26,7 +26,10 @@ export async function handleGreeting(phone, session, setSession) {
     .maybeSingle();
 
   if (activeSub) {
-    const remaining = await countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
+    const remaining = await countRemainingDeliveryDays(
+      activeSub.start_date,
+      activeSub.end_date,
+    );
     const planLabel = getPlanLabel(activeSub.plan_type);
     const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
 
@@ -41,18 +44,18 @@ export async function handleGreeting(phone, session, setSession) {
 
     await sendButtons(
       phone,
-      greetingReturning({ planLabel, remaining, nearExpiry: remaining <= threshold }),
+      greetingReturning({
+        planLabel,
+        remaining,
+        nearExpiry: remaining <= threshold,
+      }),
       buttons,
     );
   } else {
-    await sendButtons(
-      phone,
-      GREETING_NEW,
-      [
-        { id: "VIEW_PLANS", title: "🥗 View Plans" },
-        { id: "ORDER_NOW", title: "🛒 Order Now" },
-        { id: "CONTACT_US", title: "📞 Contact Us" },
-      ],
-    );
+    await sendButtons(phone, GREETING_NEW, [
+      { id: "VIEW_PLANS", title: "🥗 View Plans" },
+      { id: "ORDER_ONLINE", title: "🛒 Order Now" },
+      { id: "CONTACT_US", title: "📞 Contact Us" },
+    ]);
   }
 }

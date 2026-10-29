@@ -4,8 +4,13 @@ import { handleGreeting } from "./greeting.js";
 import { startSubscription } from "./subscription.js";
 import { countRemainingDeliveryDays } from "../../lib/deliveryDays.js";
 import { getPlanLabel } from "../config/plans.js";
-import { buildExpiryNotice, viewPlans, MY_PLAN_NO_ACTIVE, myPlanActive, MY_PLAN_RENEW_PROMPT, CONTACT_US } from "../config/messages.js";
-import { getPlanCategories } from "../../lib/mealPlans.js";
+import {
+  buildExpiryNotice,
+  MY_PLAN_NO_ACTIVE,
+  myPlanActive,
+  MY_PLAN_RENEW_PROMPT,
+  CONTACT_US,
+} from "../config/messages.js";
 import { formatDateIST } from "../../lib/time.js";
 
 const supabase = createClient(
@@ -15,25 +20,10 @@ const supabase = createClient(
 
 export async function handleMainMenu(phone, session, buttonId, setSession) {
   switch (buttonId) {
-    case "VIEW_PLANS": {
-      const plans = await getPlanCategories();
-      const planLines = plans
-        .map((p) => {
-          const prices = [3, 7, 14, 21, 28]
-            .filter((d) => p.pricing[d])
-            .map((d) => `₹${p.pricing[d]}/${d}d`)
-            .join(" · ");
-          return `${p.title}\n   ${p.description}\n   Starts at ${prices}`;
-        })
-        .join("\n\n");
-
-      await sendButtons(
-        phone,
-        viewPlans({ planLines }),
-        [{ id: "ORDER_NOW", title: "🛒 Build My Plan" }],
-      );
-      break;
-    }
+    // "View Plans" now opens the in-chat plan builder directly. The old
+    // plan-list message is gone; the flow starts at plan-category selection.
+    case "VIEW_PLANS":
+      return startSubscription(phone, session, setSession);
 
     case "ORDER_NOW":
       return startSubscription(phone, session, setSession);
@@ -55,9 +45,13 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
         break;
       }
 
-      const remaining = await countRemainingDeliveryDays(activeSub.start_date,activeSub.end_date);
+      const remaining = await countRemainingDeliveryDays(
+        activeSub.start_date,
+        activeSub.end_date,
+      );
       const planLabel = getPlanLabel(activeSub.plan_type);
-      const expiryLine = buildExpiryNotice(remaining) ||
+      const expiryLine =
+        buildExpiryNotice(remaining) ||
         `⏳ *${remaining}* delivery day(s) remaining.`;
 
       let pushedLines = "";
@@ -71,9 +65,12 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
 
       if (pushedOrders?.length) {
         const lines = pushedOrders.map((o) => {
-          const emoji = o.slot === "breakfast" ? "🌅" : o.slot === "lunch" ? "☀️" : "🌙";
+          const emoji =
+            o.slot === "breakfast" ? "🌅" : o.slot === "lunch" ? "☀️" : "🌙";
           const date = formatDateIST(o.delivery_date, {
-            weekday: "short", day: "numeric", month: "short",
+            weekday: "short",
+            day: "numeric",
+            month: "short",
           });
           return `  ${emoji} ${o.slot} → ${date}`;
         });
@@ -82,19 +79,20 @@ export async function handleMainMenu(phone, session, buttonId, setSession) {
 
       await sendText(
         phone,
-        myPlanActive({ planLabel, startDate: activeSub.start_date, expiryLine, pushedLines }),
+        myPlanActive({
+          planLabel,
+          startDate: activeSub.start_date,
+          expiryLine,
+          pushedLines,
+        }),
       );
 
       const threshold = parseInt(process.env.RENEWAL_THRESHOLD_DAYS, 10) || 2;
       if (remaining <= threshold) {
-        await sendButtons(
-          phone,
-          MY_PLAN_RENEW_PROMPT,
-          [
-            { id: "ORDER_NOW", title: "🔄 Renew Plan" },
-            { id: "CONTACT_US", title: "📞 Contact Us" },
-          ],
-        );
+        await sendButtons(phone, MY_PLAN_RENEW_PROMPT, [
+          { id: "ORDER_NOW", title: "🔄 Renew Plan" },
+          { id: "CONTACT_US", title: "📞 Contact Us" },
+        ]);
       }
       break;
     }

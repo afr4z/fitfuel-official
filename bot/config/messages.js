@@ -23,14 +23,13 @@ export const GREETING_NEW = `👋 Welcome to FitFuel Nutrition!\n\nHow can we he
 
 // ─── Main Menu ───────────────────────────────────────────────────────────────
 
-export function viewPlans({ planLines }) {
-  return (
-    `🥗 *Our Nutrition Plans*\n\n${planLines}\n\n` +
-    `📅 *Durations:* 3, 7, 14, 21, or 28 days\n` +
-    `🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3\n\n` +
-    `Tap below to customise your plan!`
-  );
-}
+/**
+ * Body for the "Order Now" call-to-action message. The link itself lives in
+ * the CTA button (see `sendCtaUrl`), not in this text.
+ */
+export const ORDER_ONLINE_BODY =
+  `🛒 *Order Now*\n\n` +
+  `Browse the menu and place your order on our storefront.`;
 
 export const MY_PLAN_NO_ACTIVE = `ℹ️ You don't have an active plan right now.\n\nType anything to go back to the menu.`;
 

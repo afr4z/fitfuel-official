@@ -13,13 +13,14 @@ import {
   startSubscription,
 } from "./handlers/subscription.js";
 import { handleSessionExpired } from "./handlers/sessionExpired.js";
-import { sendText, sendLocationRequest } from "../lib/whatsapp.js";
+import { sendText, sendLocationRequest, sendCtaUrl } from "../lib/whatsapp.js";
 import {
   GOING_BACK,
   LOCATION_BACK,
   LOCATION_BACK_FALLBACK,
   BUTTON_EXPIRED,
   PAYMENT_PENDING,
+  ORDER_ONLINE_BODY,
 } from "./config/messages.js";
 
 // Keywords that trigger "go back" navigation regardless of state
@@ -197,6 +198,17 @@ export async function handleIncoming(phone, message) {
     return;
   }
   // -------------------------------------------------------------------------
+
+  // Order on the external storefront — handled from any state
+  if (input === "ORDER_ONLINE") {
+    await sendCtaUrl(
+      phone,
+      ORDER_ONLINE_BODY,
+      "Order Now",
+      "https://order.fitfuelnutrition.in",
+    );
+    return;
+  }
 
   // Renew / new subscription — handle from any state (expiry reminder, greeting, MY_PLAN)
   if (input === "ORDER_NOW") {

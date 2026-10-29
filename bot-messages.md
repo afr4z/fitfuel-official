@@ -38,7 +38,7 @@ How can we help you?
 How can we help you today?
 ```
 
-**Buttons shown:** 📋 My Plan · 📞 Contact Us · 🥗 View Plans · 🛒 Order Now
+**Buttons shown:** 🥗 View Plans · 🛒 Order Now · 📞 Contact Us
 
 ---
 
@@ -46,18 +46,18 @@ How can we help you today?
 
 ### View Plans
 
+Opens the in-chat plan builder directly — plan → duration → meals → address
+→ payment. The old plan-list message has been removed.
+
+### Order Now
+
 ```
-🥗 *Our Nutrition Plans*
+🛒 *Order Now*
 
-[plan list with prices]
-
-📅 *Durations:* 3, 7, 14, 21, or 28 days
-🍴 *Meals:* Breakfast only, Lunch + Dinner, or All 3
-
-Tap below to customise your plan!
+Browse the menu and place your order on our storefront.
 ```
 
-**Button:** 🛒 Build My Plan
+**CTA button:** Order Now → `https://order.fitfuelnutrition.in`
 
 ### My Plan — no active subscription
 
