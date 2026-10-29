@@ -97,9 +97,10 @@ Type anything to go back to the menu.
 📞 *Get in Touch*
 
 📧 Email: support@fitfuelnutrition.in
-📱 WhatsApp: This chat!
 🌐 Website: www.fitfuelnutrition.in
 🕐 Support hours: Mon–Sat, 9am–7pm
+
+This assistant can't answer questions — please email us and we'll reply within one working day.
 ```
 
 ---
@@ -197,7 +198,7 @@ or type your area / neighbourhood name.
 ### Step 6 — Payment link error
 
 ```
-Sorry, we couldn't generate your payment link right now. Please contact support.
+Sorry, we couldn't generate your payment link right now. Please email support@fitfuelnutrition.in and we'll sort it out.
 ```
 
 ### Step 6 — Order summary with payment link
@@ -296,7 +297,7 @@ Sorry, something went wrong skipping your order. Please try again.
 ### Change — menu unavailable
 
 ```
-😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.
+😔 Sorry, we're having trouble loading today's menu. Please try again later or email support@fitfuelnutrition.in.
 ```
 
 ### Change — pick new meal
@@ -394,7 +395,8 @@ You skipped this meal earlier — it's being delivered today.
 
 Unfortunately your FitFuel order could not be completed.
 
-Please send us a message to start a new order whenever you're ready. We're here to help! 🙏
+Type *hi* whenever you're ready to start a new order.
+If money left your account, email support@fitfuelnutrition.in with the payment reference and we'll sort it out. 🙏
 ```
 
 ### Payment confirmed

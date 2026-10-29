@@ -6,6 +6,15 @@
  * that accept a single object of template variables.
  */
 
+/**
+ * The only support channel customers are pointed at.
+ *
+ * This WhatsApp number is an automated assistant: it cannot read or answer
+ * free-form questions, so no message may tell the customer to "reply" or
+ * "message us here" for help. Route every support request to email.
+ */
+export const SUPPORT_EMAIL = "support@fitfuelnutrition.in";
+
 // ─── Greeting ────────────────────────────────────────────────────────────────
 
 export function greetingReturning({ planLabel, remaining, nearExpiry }) {
@@ -53,10 +62,10 @@ export const MY_PLAN_RENEW_PROMPT = `🔄 Ready to renew your plan?`;
 
 export const CONTACT_US =
   `📞 *Get in Touch*\n\n` +
-  `📧 Email: support@fitfuelnutrition.in\n` +
-  `📱 WhatsApp: This chat!\n` +
+  `📧 Email: ${SUPPORT_EMAIL}\n` +
   `🌐 Website: www.fitfuelnutrition.in\n` +
-  `🕐 Support hours: Mon–Sat, 9am–7pm`;
+  `🕐 Support hours: Mon–Sat, 9am–7pm\n\n` +
+  `This assistant can't answer questions — please email us and we'll reply within one working day.`;
 
 // ─── Subscription Onboarding ─────────────────────────────────────────────────
 
@@ -120,9 +129,9 @@ export const ADDRESS_BOOK_PROMPT =
 
 export const ADDRESS_SAVED_SELECTED = `✅ *Got it!* Using your saved address for this order.`;
 
-export const PAYMENT_LINK_ERROR = `Sorry, we couldn't generate your payment link right now. Please contact support.`;
+export const PAYMENT_LINK_ERROR = `Sorry, we couldn't generate your payment link right now. Please email ${SUPPORT_EMAIL} and we'll sort it out.`;
 
-export const PAYMENT_LINK_LIMIT_ERROR = `This plan total is above our current online payment limit. Please choose a shorter plan (for example 14 or 21 days) or contact support so we can collect the payment another way.`;
+export const PAYMENT_LINK_LIMIT_ERROR = `This plan total is above our current online payment limit. Please choose a shorter plan (for example 14 or 21 days), or email ${SUPPORT_EMAIL} to arrange payment another way.`;
 
 export function orderSummary({
   planTitle,
@@ -187,7 +196,7 @@ export function skipPushed({ dateStr }) {
 
 export const SKIP_NO_PUSH = `⏭️ *Skipped!* No delivery for this slot today.\n\nSee you next time 👋`;
 
-export const MENU_LOAD_ERROR = `😔 Sorry, we're having trouble loading today's menu. Please try again later or contact support.`;
+export const MENU_LOAD_ERROR = `😔 Sorry, we're having trouble loading today's menu. Please try again later or email ${SUPPORT_EMAIL}.`;
 
 export const CHANGE_MEAL_LIST = `🔄 *Change your meal*\n\nPick from today's available options:`;
 
@@ -237,7 +246,8 @@ export function paymentFailed({ reason }) {
   return (
     `❌ *Payment ${reason}*\n\n` +
     `Unfortunately your FitFuel order could not be completed.\n\n` +
-    `Please send us a message to start a new order whenever you're ready. We're here to help! 🙏`
+    `Type *hi* whenever you're ready to start a new order.\n` +
+    `If money left your account, email ${SUPPORT_EMAIL} with the payment reference and we'll sort it out. 🙏`
   );
 }
 
@@ -361,8 +371,8 @@ export function subscriptionCancelled({ planLabel, effectiveDate }) {
     `❌ *Your FitFuel plan has been cancelled.*\n\n` +
     `📦 Plan: *${planLabel}*\n` +
     `📅 No meals will be delivered from *${effectiveDate}*.\n\n` +
-    `If this was a mistake, or you'd like to discuss a refund, please reply ` +
-    `to this chat and our team will help.\n\n` +
+    `If this was a mistake, or you'd like to discuss a refund, email ` +
+    `${SUPPORT_EMAIL} and our team will help.\n\n` +
     `Thank you for choosing FitFuel. 🙏`
   );
 }
