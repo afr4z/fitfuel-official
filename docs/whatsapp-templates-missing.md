@@ -49,12 +49,12 @@ WhatsApp Manager → **Message templates** → **Create template**, then:
 | --- | --- |
 | Category | UTILITY |
 | Language | en |
-| Header | Text, 1 variable |
+| Header | Text, 1 variable (`Today's Lunch ({{1}})`) |
 | Buttons | Quick Reply ×3 |
 | Sent by | `lib/notifySlot.js` |
 | Schedule | 08:30 IST daily (`0 3 * * *`) |
 
-**Header:** `Your lunch for today, {{1}}`
+**Header:** `Today's Lunch ({{1}})`
 
 **Body:**
 
@@ -81,12 +81,12 @@ Please use the buttons below to manage your order.
 | --- | --- |
 | Category | UTILITY |
 | Language | en |
-| Header | Text, 1 variable |
+| Header | Text, 1 variable (`Today's Dinner ({{1}})`) |
 | Buttons | Quick Reply ×3 |
 | Sent by | `lib/notifySlot.js` |
 | Schedule | 16:00 IST daily (`30 10 * * *`) |
 
-**Header:** `Your dinner for today, {{1}}`
+**Header:** `Today's Dinner ({{1}})`
 
 **Body:**
 
