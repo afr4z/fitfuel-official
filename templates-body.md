@@ -515,6 +515,55 @@ Thank you for choosing FitFuel.
 
 ---
 
+## 13. Meal Dispatched (`meal_dispatched`)
+
+**Category:** UTILITY | **Language:** en | **Parameter format:** named | **Buttons:** None  
+**Sent:** When Petpooja marks an order `ready` (VPS `webhook.js` → `POST /api/notify`)  
+**Fallback for:** error `131047` (re-engagement required) on the free-form dispatch text
+
+### Body Text (copy exactly):
+
+```
+🚚 Your meal is on its way!
+
+{{meal_slot}}: {{dish_name}}
+
+It should reach you shortly. Enjoy your meal! 🍽️
+
+— FitFuel Nutrition
+```
+
+### Variables (in order):
+
+| Name          | Meaning                     |
+| ------------- | --------------------------- |
+| `meal_slot`   | Breakfast / Lunch / Dinner  |
+| `dish_name`   | Dish name, slot suffix removed |
+
+### Sample Values:
+
+| `meal_slot` | `dish_name`                            |
+| ----------- | -------------------------------------- |
+| Dinner      | Paneer Butter Masala with 4 Rotis      |
+
+### Rendered Sample:
+
+```
+🚚 Your meal is on its way!
+
+Dinner: Paneer Butter Masala with 4 Rotis
+
+It should reach you shortly. Enjoy your meal! 🍽️
+
+— FitFuel Nutrition
+```
+
+> Named parameters must be lowercase letters and underscores only. If the
+> template was created as **positional** instead, the body uses `{{1}}` and
+> `{{2}}`, and `api/notify.js` must drop `parameter_name` from each parameter.
+
+---
+
 ## Quick Reference Table
 
 | Template               | Variables | Buttons       | Category       | Sent At                 |
@@ -531,6 +580,7 @@ Thank you for choosing FitFuel.
 | invoice_ready          | 1         | None          | UTILITY        | Webhook fallback        |
 | kitchen_closed         | 3         | None          | UTILITY        | Admin action            |
 | subscription_cancelled | 2         | None          | UTILITY        | Admin action            |
+| meal_dispatched        | 2 (named) | None          | UTILITY        | Order marked ready      |
 
 ---
 
