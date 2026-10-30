@@ -28,6 +28,10 @@ import { safeEqualStrings } from "../lib/timingSafe.js";
 const DISPATCH_TEMPLATE =
   process.env.WHATSAPP_DISPATCH_TEMPLATE || "meal_dispatched";
 
+// The template was approved as en_US; sending it as "en" returns 132001.
+const DISPATCH_TEMPLATE_LANG =
+  process.env.WHATSAPP_DISPATCH_TEMPLATE_LANG || "en_US";
+
 const SLOT_LABEL = {
   breakfast: "Breakfast",
   lunch: "Lunch",
@@ -78,6 +82,8 @@ export default async function handler(req, res) {
         DISPATCH_TEMPLATE,
         dispatchParams(slot, item),
         body,
+        undefined,
+        DISPATCH_TEMPLATE_LANG,
       );
     } else if (Array.isArray(buttons) && buttons.length > 0) {
       await sendButtons(to, body, buttons);

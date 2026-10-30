@@ -517,7 +517,7 @@ Thank you for choosing FitFuel.
 
 ## 13. Meal Dispatched (`meal_dispatched`)
 
-**Category:** UTILITY | **Language:** en | **Parameter format:** named | **Buttons:** None  
+**Category:** UTILITY | **Language:** en_US | **Parameter format:** named | **Buttons:** None  
 **Sent:** When Petpooja marks an order `ready` (VPS `webhook.js` → `POST /api/notify`)  
 **Fallback for:** error `131047` (re-engagement required) on the free-form dispatch text
 
