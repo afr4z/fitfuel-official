@@ -3,23 +3,28 @@
 Audited against the live WhatsApp Business Account on **30 Oct 2026** by sending
 each template from `+91 63001 59766` and reading Meta's error codes.
 
-**Result:** only 3 of the 12 templates the code sends actually exist.
+## Status
 
-| Template                 | Live status                |
-| ------------------------ | -------------------------- |
-| `breakfast_notification` | ✅ exists (`en`)            |
-| `otp_code_en`            | ✅ exists (`en`)            |
-| `meal_dispatched`        | ✅ exists (`en_US`)         |
-| `lunch_notification`     | ❌ missing                  |
-| `dinner_notification`    | ❌ missing                  |
-| `rescheduled_meal`       | ❌ missing                  |
-| `expiry_reminder`        | ❌ missing                  |
-| `session_expired`        | ❌ missing                  |
-| `payment_failed`         | ❌ missing                  |
-| `payment_confirmed`      | ❌ missing (and unused)     |
-| `kitchen_closed`         | ❌ missing                  |
-| `subscription_cancelled` | ❌ missing                  |
-| `invoice_ready`          | ❌ unverified (document header) |
+| Template                 | Live status                          |
+| ------------------------ | ------------------------------------ |
+| `breakfast_notification` | ✅ exists (`en`) — verified end to end |
+| `otp_code_en`            | ✅ exists (`en`)                      |
+| `meal_dispatched`        | ✅ exists (`en_US`)                   |
+| `lunch_notification`     | ✅ exists (`en`) — verified 30 Oct     |
+| `dinner_notification`    | ❌ missing                            |
+| `rescheduled_meal`       | ❌ missing                            |
+| `expiry_reminder`        | ❌ missing                            |
+| `session_expired`        | ❌ missing                            |
+| `payment_failed`         | ❌ missing                            |
+| `payment_confirmed`      | ❌ missing (and unused in code)       |
+| `kitchen_closed`         | ❌ missing                            |
+| `subscription_cancelled` | ❌ missing                            |
+| `invoice_ready`          | ❌ unverified (needs a document header) |
+
+`lunch_notification` returned `132001` while it was in review, then sent
+successfully in `en` once approved — a pending template is indistinguishable
+from a missing one by error code. Anything created as `en` needs no code change;
+`lib/whatsapp.js` retries `en_US` automatically on `132001`.
 
 **Why this matters:** the bot sends free-form text first and only falls back to a
 template when Meta returns `131047` (customer outside the 24-hour service
@@ -30,58 +35,46 @@ customer simply gets nothing.
 
 WhatsApp Manager → **Message templates** → **Create template**, then:
 
-1. **Name** — exact string from the table below.
+1. **Name** — exact string from the spec below.
 2. **Category** — as listed.
-3. **Language** — **English** (`en`) for all of these. The existing
-   `breakfast_notification` is `en`; `meal_dispatched` is `en_US`. `lib/whatsapp.js`
-   now retries the other English variant on `132001`, so either works, but `en`
-   matches the code default.
-4. **Header** — Text, 1 variable where listed.
-5. **Body** — paste the block exactly.
-6. **Buttons** — Quick Reply, in the order given.
+3. **Language** — **English** (`en`) for all of these. `breakfast_notification`
+   is `en`, `meal_dispatched` is `en_US`. `lib/whatsapp.js` retries the other
+   English variant on `132001`, so either works, but `en` matches the code
+   default.
+4. **Header** — Text with 1 variable where listed; otherwise none.
+5. **Body** — paste the block exactly. Variables are positional (`{{1}}`,
+   `{{2}}`, …).
+6. **Buttons** — Quick Reply, **in the order given**. Order is positional.
 7. **Samples** — Meta refuses to review without a sample for every variable.
 
+## Button payloads are sent at send time
+
+Quick-reply buttons are declared statically in the template, but the payload is
+supplied when the template is sent:
+
+```json
+{ "type": "button", "sub_type": "quick_reply", "index": "0",
+  "parameters": [{ "type": "payload", "payload": "CONFIRM_<order-uuid>" }] }
+```
+
+`lib/sendNotification.js` now does this automatically for every template that
+has reply buttons, so a tap arrives as `CONFIRM_<uuid>` and routes straight to
+`handleOrderAction`. Verified on 30 Oct: with no button component the payload
+comes back as the button title (`Confirm`); with one it comes back as the
+supplied value.
+
+`index` is the button's position, **0-based**. If the template's button order
+does not match the code's array order, the wrong action fires.
+
 ---
 
-## 1. `lunch_notification`
+## 1. `dinner_notification`
 
 | Field | Value |
 | --- | --- |
 | Category | UTILITY |
-| Language | en |
-| Header | Text, 1 variable (`Today's Lunch ({{1}})`) |
-| Buttons | Quick Reply ×3 |
-| Sent by | `lib/notifySlot.js` |
-| Schedule | 08:30 IST daily (`0 3 * * *`) |
-
-**Header:** `Today's Lunch ({{1}})`
-
-**Body:**
-
-```
-☀️ Good morning! Your lunch for today ({{1}}) is scheduled.
-
-🍽️ Meal: {{2}} at 12:30
-
-⏰ Respond by {{3}} — changes close after that.
-Please use the buttons below to manage your order.
-```
-
-**Variables:** `{{1}}` delivery_date · `{{2}}` item_name · `{{3}}` cutoff
-
-**Samples:** `15 January 2025` · `Chicken Biryani` · `9:30am`
-
-**Buttons:** ✅ Confirm · 🔄 Change · ⏭️ Skip
-
----
-
-## 2. `dinner_notification`
-
-| Field | Value |
-| --- | --- |
-| Category | UTILITY |
-| Language | en |
-| Header | Text, 1 variable (`Today's Dinner ({{1}})`) |
+| Language | `en` |
+| Header | Text, 1 variable |
 | Buttons | Quick Reply ×3 |
 | Sent by | `lib/notifySlot.js` |
 | Schedule | 16:00 IST daily (`30 10 * * *`) |
@@ -95,8 +88,8 @@ Please use the buttons below to manage your order.
 
 🍽️ Meal: {{2}} at 19:30
 
-⏰ Respond by {{3}} — changes close after that.
-Use the buttons below to confirm, change, or skip.
+You can confirm, skip, or change until {{3}}.
+Tap a button below to confirm, change, or skip this meal.
 ```
 
 **Variables:** `{{1}}` delivery_date · `{{2}}` item_name · `{{3}}` cutoff
@@ -107,15 +100,16 @@ Use the buttons below to confirm, change, or skip.
 
 ---
 
-## 3. `rescheduled_meal`
+## 2. `rescheduled_meal`
 
 | Field | Value |
 | --- | --- |
 | Category | UTILITY |
-| Language | en |
+| Language | `en` |
 | Header | none |
 | Buttons | Quick Reply ×3 |
 | Sent by | `lib/notifySlot.js` (`getRescheduledParams`) |
+| Schedule | with the slot cron, when a skipped meal is pushed into the plan |
 
 **Body:**
 
@@ -133,17 +127,19 @@ Please let us know if you'd like to confirm, change, or skip this meal.
 
 **Buttons:** ✅ Confirm · 🔄 Change · ⏭️ Skip
 
+Payloads: `CONFIRM_<uuid>` · `CHANGE_<uuid>` · `SKIP_<uuid>`
+
 ---
 
-## 4. `expiry_reminder`
+## 3. `expiry_reminder`
 
 | Field | Value |
 | --- | --- |
 | Category | MARKETING |
-| Language | en |
+| Language | `en` |
 | Header | none |
 | Buttons | Quick Reply ×2 |
-| Sent by | `api/cron/expiry-reminder.js:94` |
+| Sent by | `api/cron/expiry-reminder.js` |
 | Schedule | 13:30 IST daily (`0 8 * * *`) |
 
 **Body:**
@@ -160,21 +156,23 @@ You have only {{2}} delivery day(s) remaining. Don't let your healthy streak end
 
 **Buttons:** 🔄 Renew Plan · 📞 Contact Us
 
+Payloads: `ORDER_NOW` · `CONTACT_US`
+
 > Marketing category = per-message pricing and opt-out rules. If renewal nudges
 > should stay free, this must be UTILITY — but Meta may reject renewal copy as
 > utility, so keep MARKETING.
 
 ---
 
-## 5. `session_expired`
+## 4. `session_expired`
 
 | Field | Value |
 | --- | --- |
 | Category | UTILITY |
-| Language | en |
+| Language | `en` |
 | Header | none |
 | Buttons | none |
-| Sent by | `api/cron/session-expiry.js:24` |
+| Sent by | `api/cron/session-expiry.js` |
 | Trigger | VPS crontab, every minute |
 
 **Body:**
@@ -187,20 +185,22 @@ Please type "hi" to start a new conversation with FitFuel Nutrition.
 
 **Variables:** none
 
+**Samples:** none
+
 > Note: "type hi" is allowed — it is a bot keyword, not a human support request.
 > Do **not** add "reply to this chat".
 
 ---
 
-## 6. `payment_failed`
+## 5. `payment_failed`
 
 | Field | Value |
 | --- | --- |
 | Category | UTILITY |
-| Language | en |
+| Language | `en` |
 | Header | none |
 | Buttons | none |
-| Sent by | `api/razorpay-webhook.js:185` |
+| Sent by | `api/razorpay-webhook.js` |
 
 **Body:**
 
@@ -216,15 +216,15 @@ Unfortunately your FitFuel order could not be completed. Type "hi" to start a ne
 
 ---
 
-## 7. `kitchen_closed`
+## 6. `kitchen_closed`
 
 | Field | Value |
 | --- | --- |
 | Category | UTILITY |
-| Language | en |
+| Language | `en` |
 | Header | none |
 | Buttons | none |
-| Sent by | `api/admin.js:744`, `api/razorpay-webhook.js:454` |
+| Sent by | `api/admin.js`, `api/razorpay-webhook.js` |
 
 **Body:**
 
@@ -246,15 +246,15 @@ We'll be back the next working day! 🙏
 
 ---
 
-## 8. `subscription_cancelled`
+## 7. `subscription_cancelled`
 
 | Field | Value |
 | --- | --- |
 | Category | UTILITY |
-| Language | en |
+| Language | `en` |
 | Header | none |
 | Buttons | none |
-| Sent by | `api/admin.js:477` |
+| Sent by | `api/admin.js` |
 
 **Body:**
 
@@ -275,15 +275,15 @@ Thank you for choosing FitFuel. 🙏
 
 ---
 
-## 9. `invoice_ready`
+## 8. `invoice_ready`
 
 | Field | Value |
 | --- | --- |
 | Category | UTILITY |
-| Language | en |
+| Language | `en` |
 | Header | **Document** (PDF) |
 | Buttons | none |
-| Sent by | `lib/invoiceService.js:109` |
+| Sent by | `lib/invoiceService.js` |
 
 **Body:**
 
@@ -305,32 +305,7 @@ Thank you for choosing FitFuel.
 
 ---
 
-## 10. `otp_code_en` — exists, already correct
-
-| Field | Value |
-| --- | --- |
-| Category | AUTHENTICATION |
-| Language | en |
-| Body | `Your FitFuel verification code is {{1}}.` |
-| Button | OTP / copy-code, 6 digits |
-| Sent by | `api/auth.js:485` |
-
-Sending needs **two** components — body *and* button:
-
-```json
-[
-  { "type": "body", "parameters": [{ "type": "text", "text": "482913" }] },
-  { "type": "button", "sub_type": "url", "index": 0,
-    "parameters": [{ "type": "text", "text": "482913" }] }
-]
-```
-
-`api/auth.js` already does this. Sending only the body returns
-`131008 Required parameter is missing`.
-
----
-
-## 11. `payment_confirmed` — exists in config, unused in code
+## 9. `payment_confirmed` — exists in config, unused in code
 
 No file references `WHATSAPP_PAYMENT_CONFIRMED_TEMPLATE`. Either delete the env
 var or wire it into `api/razorpay-webhook.js` after a successful payment. Spec
@@ -340,19 +315,19 @@ lives in `templates-body.md` §9 if you want it.
 
 ## Code ↔ template contract
 
-| Template | Header | Body params |
-| --- | --- | --- |
-| `breakfast_notification` | 1 (date) | 3 (date, dish, cutoff) |
-| `lunch_notification` | 1 (date) | 3 (date, dish, cutoff) |
-| `dinner_notification` | 1 (date) | 3 (date, dish, cutoff) |
-| `rescheduled_meal` | none | 4 |
-| `expiry_reminder` | none | 2 |
-| `session_expired` | none | 0 |
-| `payment_failed` | none | 1 |
-| `kitchen_closed` | none | 3 |
-| `subscription_cancelled` | none | 2 |
-| `invoice_ready` | document | 1 |
-| `meal_dispatched` | none | 2 (named: `meal_slot`, `dish_name`) |
+| Template | Header | Body params | Buttons |
+| --- | --- | --- | --- |
+| `breakfast_notification` | 1 (date) | 3 (date, dish, cutoff) | 3 QR |
+| `lunch_notification` | 1 (date) | 3 (date, dish, cutoff) | 3 QR |
+| `dinner_notification` | 1 (date) | 3 (date, dish, cutoff) | 3 QR |
+| `rescheduled_meal` | none | 4 | 3 QR |
+| `expiry_reminder` | none | 2 | 2 QR |
+| `session_expired` | none | 0 | none |
+| `payment_failed` | none | 1 | none |
+| `kitchen_closed` | none | 3 | none |
+| `subscription_cancelled` | none | 2 | none |
+| `invoice_ready` | document | 1 | none |
+| `meal_dispatched` | none | 2 (named: `meal_slot`, `dish_name`) | none |
 
 Meal times are **hardcoded in the templates** (breakfast 8:00, lunch 12:30,
 dinner 19:30), matching `lib/cronUtils.js`. If a slot's delivery time is changed
