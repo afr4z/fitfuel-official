@@ -9,6 +9,12 @@
 **Cron:** `30 14 * * *` (14:30 UTC = 20:00 IST)  
 **Status:** live and approved — this section reflects the real template.
 
+### Header Text (copy exactly):
+
+```
+Tomorrows Breakfast ({{1}})
+```
+
 ### Body Text (copy exactly):
 
 ```
