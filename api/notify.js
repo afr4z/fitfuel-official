@@ -1,4 +1,5 @@
 import { sendText, sendButtons } from "../lib/whatsapp.js";
+import { sendNotification } from "../lib/sendNotification.js";
 import { safeEqualStrings } from "../lib/timingSafe.js";
 
 /**
@@ -8,13 +9,46 @@ import { safeEqualStrings } from "../lib/timingSafe.js";
  * dispatch service, which posts here when Petpooja marks an order `ready`.
  *
  * Body (JSON):
- *   { to: string, body: string, buttons?: { id: string, title: string }[] }
+ *   { to: string, body: string, buttons?: { id, title }[],
+ *     slot?: "breakfast"|"lunch"|"dinner", item?: string }
+ *
+ * When `slot` and `item` are present the message is sent through
+ * `sendNotification`, which tries the free-form text first and falls back to
+ * the `meal_dispatched` template on error 131047 (re-engagement required).
+ * Free-form text is only delivered inside the 24-hour customer service window,
+ * so without that fallback a dispatch notice silently disappears for anyone
+ * who has not messaged recently.
  *
  * This endpoint was deleted in c90116c (2026-09-19), which silently broke the
  * "Meal Dispatched" notification: the VPS kept posting here and every call
  * returned 404 until it was restored. Fail-closed: without a configured
  * CRON_SECRET it refuses to send rather than acting as an open WhatsApp relay.
  */
+
+const DISPATCH_TEMPLATE =
+  process.env.WHATSAPP_DISPATCH_TEMPLATE || "meal_dispatched";
+
+const SLOT_LABEL = {
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+};
+
+function dispatchParams(slot, item) {
+  return [
+    {
+      type: "text",
+      parameter_name: "meal_slot",
+      text: SLOT_LABEL[slot] || "Meal",
+    },
+    {
+      type: "text",
+      parameter_name: "dish_name",
+      text: item,
+    },
+  ];
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -31,14 +65,21 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const { to, body, buttons } = req.body ?? {};
+  const { to, body, buttons, slot, item } = req.body ?? {};
 
   if (!to || !body) {
     return res.status(400).json({ error: "Missing required fields: to, body" });
   }
 
   try {
-    if (Array.isArray(buttons) && buttons.length > 0) {
+    if (slot && item) {
+      await sendNotification(
+        to,
+        DISPATCH_TEMPLATE,
+        dispatchParams(slot, item),
+        body,
+      );
+    } else if (Array.isArray(buttons) && buttons.length > 0) {
       await sendButtons(to, body, buttons);
     } else {
       await sendText(to, body);
