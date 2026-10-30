@@ -4,43 +4,44 @@
 
 ## 1. Breakfast Notification (`breakfast_notification`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)  
+**Category:** UTILITY | **Language:** en | **Header:** Text (1 variable) | **Buttons:** Quick Reply (3)  
 **Sent:** 8:00 PM IST (for **tomorrow's** breakfast)  
-**Cron:** `30 14 * * *` (14:30 UTC = 20:00 IST)
+**Cron:** `30 14 * * *` (14:30 UTC = 20:00 IST)  
+**Status:** live and approved — this section reflects the real template.
 
 ### Body Text (copy exactly):
 
 ```
 🌅 Good evening! Your breakfast for tomorrow ({{1}}) is scheduled.
 
-🍽️ Meal: {{2}} at {{3}}
+🍽️ Meal: {{2}} at 8:00
 
-{{4}} {{5}}
-
+You can confirm, skip, or change until {{3}} tonight.
 Tap a button below to confirm, change, or skip this meal.
 ```
 
+The delivery time (`8:00`) is **fixed in the template**, not a variable.
+
 ### Variables (in order):
 
-| {{1}}         | {{2}}     | {{3}}    | {{4}}        | {{5}}         |
-| ------------- | --------- | -------- | ------------ | ------------- |
-| delivery_date | item_name | time_str | deadline_msg | expiry_notice |
+| Header {{1}}  | Body {{1}}    | Body {{2}} | Body {{3}} |
+| ------------- | ------------- | ---------- | ---------- |
+| delivery_date | delivery_date | item_name  | cutoff     |
 
 ### Sample Values:
 
-| {{1}}           | {{2}}       | {{3}} | {{4}}                                                | {{5}}                                 |
-| --------------- | ----------- | ----- | ---------------------------------------------------- | ------------------------------------- |
-| 16 January 2025 | Idli Sambar | 08:00 | You can confirm, skip, or change until 10pm tonight. | Your plan expires in 2 delivery days. |
+| Header {{1}}    | Body {{1}}      | Body {{2}}  | Body {{3}} |
+| --------------- | --------------- | ----------- | ---------- |
+| 16 January 2025 | 16 January 2025 | Idli Sambar | 10pm       |
 
 ### Rendered Sample:
 
 ```
 🌅 Good evening! Your breakfast for tomorrow (16 January 2025) is scheduled.
 
-🍽️ Meal: Idli Sambar at 08:00
+🍽️ Meal: Idli Sambar at 8:00
 
-You can confirm, skip, or change until 10pm tonight. Your plan expires in 2 delivery days.
-
+You can confirm, skip, or change until 10pm tonight.
 Tap a button below to confirm, change, or skip this meal.
 ```
 
@@ -54,33 +55,33 @@ Tap a button below to confirm, change, or skip this meal.
 
 ## 2. Lunch Notification (`lunch_notification`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)  
+**Category:** UTILITY | **Language:** en | **Header:** Text (1 variable) | **Buttons:** Quick Reply (3)  
 **Sent:** 8:30 AM IST (for **today's** lunch)  
-**Cron:** `0 3 * * *` (03:00 UTC = 08:30 IST)
+**Cron:** `0 3 * * *` (03:00 UTC = 08:30 IST)  
+**Status:** ⚠️ **does not exist in the WABA yet** — create it exactly as below.
 
-### Body Text:
+### Body Text (copy exactly):
 
 ```
 ☀️ Good morning! Your lunch for today ({{1}}) is scheduled.
 
-🍽️ Meal: {{2}} at {{3}}
+🍽️ Meal: {{2}} at 12:30
 
-{{4}} {{5}}
-
+⏰ Respond by {{3}} — changes close after that.
 Please use the buttons below to manage your order.
 ```
 
-### Variables:
+### Variables (in order):
 
-| {{1}}         | {{2}}     | {{3}}    | {{4}}        | {{5}}         |
-| ------------- | --------- | -------- | ------------ | ------------- |
-| delivery_date | item_name | time_str | deadline_msg | expiry_notice |
+| Header {{1}}  | Body {{1}}    | Body {{2}} | Body {{3}} |
+| ------------- | ------------- | ---------- | ---------- |
+| delivery_date | delivery_date | item_name  | cutoff     |
 
 ### Sample Values:
 
-| {{1}}           | {{2}}           | {{3}} | {{4}}                                                | {{5}}                                 |
-| --------------- | --------------- | ----- | ---------------------------------------------------- | ------------------------------------- |
-| 15 January 2025 | Chicken Biryani | 12:30 | Please respond by 9:30am — changes close after that. | Your plan expires in 2 delivery days. |
+| Header {{1}}    | Body {{1}}      | Body {{2}}       | Body {{3}} |
+| --------------- | --------------- | ---------------- | ---------- |
+| 15 January 2025 | 15 January 2025 | Chicken Biryani  | 9:30am     |
 
 ### Rendered Sample:
 
@@ -89,8 +90,7 @@ Please use the buttons below to manage your order.
 
 🍽️ Meal: Chicken Biryani at 12:30
 
-Please respond by 9:30am — changes close after that. Your plan expires in 2 delivery days.
-
+⏰ Respond by 9:30am — changes close after that.
 Please use the buttons below to manage your order.
 ```
 
@@ -104,33 +104,33 @@ Please use the buttons below to manage your order.
 
 ## 3. Dinner Notification (`dinner_notification`)
 
-**Category:** UTILITY | **Language:** en | **Buttons:** Quick Reply (3)  
+**Category:** UTILITY | **Language:** en | **Header:** Text (1 variable) | **Buttons:** Quick Reply (3)  
 **Sent:** 4:00 PM IST (for **today's** dinner)  
-**Cron:** `30 10 * * *` (10:30 UTC = 16:00 IST)
+**Cron:** `30 10 * * *` (10:30 UTC = 16:00 IST)  
+**Status:** ⚠️ **does not exist in the WABA yet** — create it exactly as below.
 
-### Body Text:
+### Body Text (copy exactly):
 
 ```
 🌙 Good afternoon! Your dinner for today ({{1}}) is scheduled.
 
-🍽️ Meal: {{2}} at {{3}}
+🍽️ Meal: {{2}} at 19:30
 
-{{4}} {{5}}
-
+⏰ Respond by {{3}} — changes close after that.
 Use the buttons below to confirm, change, or skip.
 ```
 
-### Variables:
+### Variables (in order):
 
-| {{1}}         | {{2}}     | {{3}}    | {{4}}        | {{5}}         |
-| ------------- | --------- | -------- | ------------ | ------------- |
-| delivery_date | item_name | time_str | deadline_msg | expiry_notice |
+| Header {{1}}  | Body {{1}}    | Body {{2}}            | Body {{3}} |
+| ------------- | ------------- | --------------------- | ---------- |
+| delivery_date | delivery_date | item_name             | cutoff     |
 
 ### Sample Values:
 
-| {{1}}           | {{2}}                 | {{3}} | {{4}}                                             | {{5}}                                 |
-| --------------- | --------------------- | ----- | ------------------------------------------------- | ------------------------------------- |
-| 15 January 2025 | Dal Makhani with Roti | 19:30 | Please respond by 5pm — changes close after that. | Your plan expires in 2 delivery days. |
+| Header {{1}}    | Body {{1}}      | Body {{2}}            | Body {{3}} |
+| --------------- | --------------- | --------------------- | ---------- |
+| 15 January 2025 | 15 January 2025 | Dal Makhani with Roti | 5pm        |
 
 ### Rendered Sample:
 
@@ -139,8 +139,7 @@ Use the buttons below to confirm, change, or skip.
 
 🍽️ Meal: Dal Makhani with Roti at 19:30
 
-Please respond by 5pm — changes close after that. Your plan expires in 2 delivery days.
-
+⏰ Respond by 5pm — changes close after that.
 Use the buttons below to confirm, change, or skip.
 ```
 
@@ -568,9 +567,9 @@ It should reach you shortly. Enjoy your meal! 🍽️
 
 | Template               | Variables | Buttons       | Category       | Sent At                 |
 | ---------------------- | --------- | ------------- | -------------- | ----------------------- |
-| breakfast_notification | 5         | 3 Quick Reply | UTILITY        | 8 PM (for tomorrow)     |
-| lunch_notification     | 5         | 3 Quick Reply | UTILITY        | 8:30 AM (for today)     |
-| dinner_notification    | 5         | 3 Quick Reply | UTILITY        | 4 PM (for today)        |
+| breakfast_notification | 3 + hdr   | 3 Quick Reply | UTILITY        | 8 PM (for tomorrow)     |
+| lunch_notification     | 3 + hdr   | 3 Quick Reply | UTILITY        | 8:30 AM (for today)     |
+| dinner_notification    | 3 + hdr   | 3 Quick Reply | UTILITY        | 4 PM (for today)        |
 | rescheduled_meal       | 4         | 3 Quick Reply | UTILITY        | Same as meal slot       |
 | expiry_reminder        | 2         | 2 Quick Reply | MARKETING      | 1:30 PM                 |
 | session_expired        | 0         | None          | UTILITY        | Every minute (VPS cron) |
