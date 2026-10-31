@@ -38,6 +38,7 @@
           <a href="/#how-it-works" class="nav-link">How It Works</a>
           <a href="/#plans" class="nav-link">Plans</a>
           <a href="/#why" class="nav-link">Why FitFuel</a>
+          <a href="https://order.fitfuelnutrition.in" class="nav-link" target="_blank" rel="noopener">Single Meals</a>
           <div class="nav-actions">
             <div id="nav-auth" class="nav-auth"></div>
             ${cta}
