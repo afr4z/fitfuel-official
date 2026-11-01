@@ -9,6 +9,7 @@ import {
   requireInstagramConfig,
   sendPrivateReply,
   sendText,
+  sendMessageWithButtons,
   replyToComment,
 } from "../lib/instagram.js";
 import {
@@ -94,8 +95,12 @@ async function handleMessage(value) {
     const context = await loadReplyContext();
     const body = renderReply(intent, context);
 
-    await sendText(senderId, body);
-    return { replied: "dm", intent };
+    if (rule?.buttons?.length) {
+      await sendMessageWithButtons(senderId, body, rule.buttons);
+    } else {
+      await sendText(senderId, body);
+    }
+    return { replied: "dm", intent, buttons: rule?.buttons?.length ?? 0 };
   } catch (e) {
     console.error(`[IG] DM reply failed for ${senderId}:`, e.message);
     throw e;
