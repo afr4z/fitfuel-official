@@ -394,6 +394,88 @@ disabled and defaults are used. See `supabase/gst-settings.sql`.
 
 ---
 
+## Instagram automation tables
+
+Added by `supabase/instagram.sql`. Server-only: accessed with the service-role
+key, RLS enabled with no public policies.
+
+### `instagram_tokens`
+
+```sql
+CREATE TABLE instagram_tokens (
+  id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  access_token TEXT NOT NULL,
+  expires_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+Single row. Holds the rotated long-lived token so the weekly refresh does not
+require a redeploy. `INSTAGRAM_ACCESS_TOKEN` is the bootstrap value.
+
+### `instagram_events`
+
+```sql
+CREATE TABLE instagram_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  kind TEXT NOT NULL CHECK (kind IN ('comment', 'message')),
+  external_id TEXT NOT NULL,
+  sender_id TEXT,
+  username TEXT,
+  text TEXT,
+  action TEXT,
+  detail JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  processed_at TIMESTAMPTZ,
+  UNIQUE (kind, external_id)
+);
+```
+
+Webhook idempotency log. `(kind, external_id)` is the claim key, so a Meta retry
+cannot produce a second reply. `action` is `processing`, `replied`,
+`rate_limited` or `ignored`.
+
+### `instagram_posts`
+
+```sql
+CREATE TABLE instagram_posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  date DATE NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'menu' CHECK (kind IN ('menu', 'promo')),
+  media_id TEXT,
+  caption TEXT,
+  image_url TEXT,
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'published', 'failed', 'skipped')),
+  error TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  published_at TIMESTAMPTZ,
+  UNIQUE (date, kind)
+);
+```
+
+One row per menu post per date; the unique pair makes the cron publish
+idempotent. `image_url` overrides the default image for that date.
+
+### `instagram_insights`
+
+```sql
+CREATE TABLE instagram_insights (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  date DATE NOT NULL UNIQUE,
+  followers INTEGER,
+  media_count INTEGER,
+  reach INTEGER,
+  profile_views INTEGER,
+  website_clicks INTEGER,
+  accounts_engaged INTEGER,
+  raw JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+One row per day, upserted by the `insights` cron.
+
 ## Notification and commit schedule (IST)
 
 | Job                | Time (IST) | UTC cron      | What it does                                    |
@@ -404,6 +486,9 @@ disabled and defaults are used. See `supabase/gst-settings.sql`.
 | `notify` (dinner)    | 4:00 PM  | `30 10 * * *` | Dinner notification for today                   |
 | `expiry-reminder`  | 1:30 PM    | `0 8 * * *`   | Remind subscribers with the threshold days left |
 | `session-expiry`   | Every min  | VPS cron      | Notify idle bot sessions (not a Vercel cron)    |
+| `instagram` (publish) | 8:30 PM | `0 15 * * *` | Post tomorrow's menu to Instagram               |
+| `instagram` (insights) | 5:30 AM | `0 0 * * *` | Snapshot Instagram followers/reach              |
+| `instagram` (refresh-token) | Mon 7:30 AM | `0 2 * * 1` | Extend the 60-day Instagram token          |
 
 Customer cutoffs: breakfast 10:00 PM IST (previous day), lunch 9:30 AM IST,
 dinner 5:00 PM IST.

@@ -9,6 +9,7 @@ functions with static pages in `public/`.
 ```
 api/
 ├── webhook.js              WhatsApp Cloud API webhook
+├── instagram.js            Instagram webhook, menu posts, insights (cron)
 ├── web-order.js            Website checkout → Razorpay payment link
 ├── razorpay-webhook.js     Payment success/failure → subscription
 ├── auth.js                 Website OTP, magic login, sessions, addresses
@@ -69,6 +70,26 @@ WHATSAPP_KITCHEN_CLOSED_TEMPLATE=kitchen_closed
 WHATSAPP_CANCELLED_TEMPLATE=subscription_cancelled
 WHATSAPP_INVOICE_TEMPLATE=invoice_ready
 ```
+
+Instagram (optional — see `docs/instagram.md`):
+
+```
+INSTAGRAM_APP_ID=
+INSTAGRAM_APP_SECRET=
+INSTAGRAM_ACCESS_TOKEN=
+INSTAGRAM_USER_ID=
+INSTAGRAM_VERIFY_TOKEN=
+
+INSTAGRAM_ENABLED=true
+INSTAGRAM_MENU_IMAGE_URL=
+INSTAGRAM_PUBLIC_COMMENT_REPLIES=false
+INSTAGRAM_REQUIRE_SIGNATURE=false
+INSTAGRAM_MAX_REPLIES_PER_HOUR=5
+```
+
+Instagram and WhatsApp are separate Meta products: different credentials,
+different token, different API host (`graph.instagram.com`). They can share one
+Meta app without sharing anything else.
 
 Distance-based delivery (kitchen location and rollout):
 
@@ -177,6 +198,20 @@ Admin operations:
 - GST invoice list, PDF download, and WhatsApp resend
 - Subscription summary/list/detail/export
 - Subscription cancellation
+
+## Instagram
+
+Official Meta Graph API (Instagram Login). Comment keyword → DM funnel, DM
+auto-replies, the daily menu post, and a daily insights snapshot.
+
+- Setup, permissions and troubleshooting: `docs/instagram.md`
+- Webhook + cron entry point: `api/instagram.js`
+- Admin UI: **Admin → Instagram**
+- Schema: `supabase/instagram.sql`
+- Tests: `npm run test:instagram`
+
+Set `INSTAGRAM_ENABLED=false` to stop all posting and replying without a
+redeploy.
 
 ## Important flows
 

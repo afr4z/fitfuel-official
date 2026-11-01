@@ -21,6 +21,25 @@ import {
   resendInvoiceByPaymentId,
 } from "../lib/invoiceService.js";
 import { saveGstSettings } from "../lib/gstSettings.js";
+import {
+  getProfile,
+  getPublishingLimit,
+  instagramEnabled,
+} from "../lib/instagram.js";
+import { listRecentEvents } from "../lib/instagramEvents.js";
+import { loadToken } from "../lib/instagramToken.js";
+import {
+  hasMenuContent,
+  loadMenuSnapshot,
+  siteUrl,
+} from "../lib/instagramMenu.js";
+import {
+  getRecentInsights,
+  getRecentPosts,
+  publishMenuPost,
+  resolveMenuDate,
+  resolveMenuImageUrl,
+} from "../lib/instagramPublish.js";
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -646,6 +665,17 @@ export default async function handler(req, res) {
     return handlePlanDefaults(req, res);
   }
 
+  // Instagram automation
+  if (route === "instagram") {
+    return handleInstagramStatus(req, res);
+  }
+  if (route === "instagram/publish" || path === "instagram/publish") {
+    return handleInstagramPublish(req, res);
+  }
+  if (route === "instagram/preview" || path === "instagram/preview") {
+    return handleInstagramPreview(req, res, url);
+  }
+
   return res.status(404).json({ error: "Not found" });
 }
 
@@ -1255,4 +1285,136 @@ async function handlePlanDefaults(req, res) {
   }
 
   return res.status(405).json({ error: "Method not allowed" });
+}
+
+// ─── Instagram automation ─────────────────────────────────────────────────────
+
+function instagramConfigured() {
+  return Boolean(
+    process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_USER_ID,
+  );
+}
+
+/** Prefer the rotated database token, falling back to the env bootstrap value. */
+async function useInstagramToken() {
+  try {
+    const { token } = await loadToken();
+    if (token) process.env.INSTAGRAM_ACCESS_TOKEN = token;
+  } catch (err) {
+    console.error("[ADMIN/instagram] token lookup failed:", err.message);
+  }
+}
+
+async function handleInstagramStatus(req, res) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const configured = instagramConfigured();
+
+  let profile = null;
+  let quota = null;
+
+  if (configured) {
+    await useInstagramToken();
+    try {
+      const fullProfile = await getProfile();
+      // Unified Login: profile.business_instagram_accounts.data[0] has the IG account fields
+      const igAccount = fullProfile?.business_instagram_accounts?.data?.[0] ?? {};
+      profile = {
+        id: igAccount.id,
+        username: igAccount.username,
+        account_type: igAccount.account_type,
+        followers_count: igAccount.followers_count,
+        media_count: igAccount.media_count,
+      };
+      quota = await getPublishingLimit().catch((err) => ({ error: err.message }));
+    } catch (err) {
+      // A dead token should not break the whole admin screen.
+      console.error("[ADMIN/instagram] profile fetch failed:", err.message);
+    }
+  }
+
+  const [posts, insights, events] = await Promise.all([
+    getRecentPosts(20).catch(() => []),
+    getRecentInsights(30).catch(() => []),
+    listRecentEvents(30).catch(() => []),
+  ]);
+
+  return res.status(200).json({
+    enabled: instagramEnabled(),
+    configured,
+    profile,
+    quota,
+    posts,
+    insights,
+    events,
+    public_comment_replies:
+      String(process.env.INSTAGRAM_PUBLIC_COMMENT_REPLIES ?? "false").toLowerCase() ===
+      "true",
+    menu_image_configured: Boolean(process.env.INSTAGRAM_MENU_IMAGE_URL),
+  });
+}
+
+/** Render the caption that would be posted, without publishing anything. */
+async function handleInstagramPreview(req, res, url) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const when = url.searchParams.get("when") === "today" ? "today" : "tomorrow";
+  const date = resolveMenuDate({
+    date: url.searchParams.get("date") ?? undefined,
+    when,
+  });
+
+  try {
+    const { buildMenuCaption } = await import("../lib/instagramMenu.js");
+    const snapshot = await loadMenuSnapshot(date);
+    const caption = buildMenuCaption(snapshot, { when, url: siteUrl() });
+    const imageUrl = await resolveMenuImageUrl(date).catch((err) => ({
+      error: err.message,
+    }));
+
+    return res.status(200).json({
+      date,
+      when,
+      closed: snapshot.closed,
+      reason: snapshot.reason,
+      will_publish: hasMenuContent(snapshot),
+      caption,
+      image_url: imageUrl,
+    });
+  } catch (err) {
+    console.error("[ADMIN/instagram] preview failed:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+async function handleInstagramPublish(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+  if (!instagramConfigured()) {
+    return res.status(400).json({ error: "Instagram is not configured" });
+  }
+  if (!instagramEnabled()) {
+    return res.status(409).json({ error: "Instagram is disabled (INSTAGRAM_ENABLED=false)" });
+  }
+
+  const { date, when, force } = req.body ?? {};
+
+  await useInstagramToken();
+
+  try {
+    const result = await publishMenuPost({
+      date: typeof date === "string" ? date : undefined,
+      when: when === "today" ? "today" : "tomorrow",
+      force: force === true,
+    });
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error("[ADMIN/instagram] publish failed:", err.message);
+    return res.status(500).json({ error: err.message, code: err.code ?? null });
+  }
 }

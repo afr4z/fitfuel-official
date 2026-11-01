@@ -1124,6 +1124,164 @@
       }
 
       /* ---------- Shell ---------- */
+      // ── Instagram ──────────────────────────────────────────────────────────
+      const IG_API = "/api/admin/instagram";
+      const IG_PUBLISH_API = "/api/admin/instagram/publish";
+
+      function igNum(value) {
+        if (value === null || value === undefined || Number.isNaN(Number(value)))
+          return "—";
+        return Number(value).toLocaleString("en-IN");
+      }
+
+      function igBadge(label, kind) {
+        return `<span class="badge badge-${kind}">${esc(label)}</span>`;
+      }
+
+      async function loadInstagram() {
+        const statusEl = document.getElementById("ig-status");
+        if (!statusEl) return;
+
+        const data = await adminApi(IG_API, "GET");
+        if (!data) return;
+
+        if (data.error) {
+          statusEl.innerHTML = `<div class="error">${esc(data.error)}</div>`;
+          return;
+        }
+
+        const profile = data.profile;
+        const quota = data.quota?.data?.[0] ?? null;
+        const state = !data.configured
+          ? igBadge("Not configured", "pending")
+          : data.enabled
+            ? igBadge("Active", "active")
+            : igBadge("Disabled", "cancelled");
+
+        statusEl.innerHTML = `
+          <div class="list-row">
+            <div><strong>${esc(profile?.username ? "@" + profile.username : "Instagram")}</strong>
+              <div class="muted">${esc(profile?.account_type || "not connected")} · ${igNum(profile?.followers_count)} followers · ${igNum(profile?.media_count)} posts</div></div>
+            <div>${state}</div>
+          </div>
+          <div class="list-row">
+            <div><strong>Publishing quota</strong>
+              <div class="muted">${quota ? igNum(quota.quota_usage) + " of " + igNum(quota.config?.quota_total) + " used in the last 24h" : "Unavailable"}</div></div>
+          </div>
+          <div class="list-row">
+            <div><strong>Automation</strong>
+              <div class="muted">Public comment replies: ${data.public_comment_replies ? "on" : "off"} · Menu image: ${data.menu_image_configured ? "configured" : "fallback"}</div></div>
+          </div>`;
+
+        const posts = data.posts || [];
+        document.getElementById("ig-posts").innerHTML = posts.length
+          ? posts
+              .map(
+                (post) => `
+            <div class="list-row">
+              <div><strong>${esc(post.date)}</strong>
+                <div class="muted">${esc(post.status)}${post.media_id ? " · " + esc(post.media_id) : ""}${post.error ? " · " + esc(post.error) : ""}</div></div>
+              <div>${post.status === "published" ? igBadge("published", "active") : igBadge(post.status, "pending")}</div>
+            </div>`,
+              )
+              .join("")
+          : '<div class="empty-state">No posts yet.</div>';
+
+        const insights = data.insights || [];
+        document.getElementById("ig-insights").innerHTML = insights.length
+          ? insights
+              .map(
+                (row) => `
+            <div class="list-row">
+              <div><strong>${esc(row.date)}</strong>
+                <div class="muted">${igNum(row.followers)} followers · reach ${igNum(row.reach)} · profile views ${igNum(row.profile_views)} · site clicks ${igNum(row.website_clicks)}</div></div>
+            </div>`,
+              )
+              .join("")
+          : '<div class="empty-state">No snapshots yet.</div>';
+
+        const events = data.events || [];
+        document.getElementById("ig-events").innerHTML = events.length
+          ? events
+              .map(
+                (event) => `
+            <div class="list-row">
+              <div><strong>${esc(event.kind)}</strong>
+                <div class="muted">${esc(event.username || event.sender_id || "")}${event.text ? " · " + esc(String(event.text).slice(0, 80)) : ""}</div></div>
+              <div>${igBadge(event.action || "—", event.action === "replied" ? "active" : "expired")}</div>
+            </div>`,
+              )
+              .join("")
+          : '<div class="empty-state">No activity yet.</div>';
+
+        loadInstagramPreview();
+      }
+
+      async function loadInstagramPreview() {
+        const el = document.getElementById("ig-preview");
+        if (!el) return;
+
+        const when = document.getElementById("ig-when")?.value || "tomorrow";
+        const date = document.getElementById("ig-date")?.value || "";
+        const params = new URLSearchParams({ when });
+        if (date) params.set("date", date);
+
+        el.textContent = "Building preview…";
+        const data = await adminApi(`${IG_API}/preview?${params}`, "GET");
+        if (!data) return;
+
+        if (data.error) {
+          el.textContent = data.error;
+          return;
+        }
+
+        const imageUrl =
+          typeof data.image_url === "string" ? data.image_url : "(no image configured)";
+        el.textContent = [
+          `${data.will_publish ? "Will publish" : "Will NOT publish"} for ${data.date}${data.reason ? " (" + data.reason + ")" : ""}`,
+          `Image: ${imageUrl}`,
+          "",
+          data.caption,
+        ].join("\n");
+      }
+
+      async function publishInstagram() {
+        const btn = document.getElementById("ig-publish-btn");
+        const errEl = document.getElementById("ig-error");
+        const okEl = document.getElementById("ig-success");
+        if (!btn) return;
+
+        const when = document.getElementById("ig-when")?.value || "tomorrow";
+        const date = document.getElementById("ig-date")?.value || undefined;
+
+        errEl.textContent = "";
+        okEl.style.display = "none";
+
+        if (!confirm(`Publish the ${when}'s menu to Instagram now?`)) return;
+
+        btn.disabled = true;
+        btn.textContent = "Publishing…";
+
+        try {
+          const data = await adminApi(IG_PUBLISH_API, "POST", { date, when });
+          if (!data) return;
+
+          if (data.error) {
+            errEl.textContent = data.error;
+            return;
+          }
+
+          okEl.textContent = data.published
+            ? `Published to Instagram (media ${data.media_id}).`
+            : `Skipped: ${data.skipped || "nothing to publish"}.`;
+          okEl.style.display = "block";
+          loadInstagram();
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Publish now";
+        }
+      }
+
       function switchTab(name) {
         state.tab = name;
         document
@@ -1142,6 +1300,7 @@
         }
         if (name === "invoices") loadInvoices(1);
         if (name === "subscriptions") loadSubscriptions(1, true);
+        if (name === "instagram") loadInstagram();
       }
       function logout() {
         sessionStorage.removeItem("admin_token");
@@ -1219,6 +1378,7 @@
       <button class="tab" id="tab-pricing" onclick="switchTab('pricing')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12M6 8h12M9 4c4 0 5.5 2 5.5 4S13 12 9 12H6l8 8"/></svg>Pricing</button>
       <button class="tab" id="tab-subscriptions" onclick="switchTab('subscriptions')"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.5 3-5.5 6.5-5.5s6 2 6.5 5.5M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c2 .6 3.2 2.3 3.5 5"/></svg>Plans</button>
       <button class="tab" id="tab-invoices" onclick="switchTab('invoices')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h9l3 3V20.5H6z"/><path d="M9 9h6M9 12.5h6M9 16h4"/></svg>Invoices</button>
+      <button class="tab" id="tab-instagram" onclick="switchTab('instagram')"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7.5" r="1"/></svg>Instagram</button>
     </nav>
     <main class="container">
       <section class="tab-content" id="content-weekly">
@@ -1291,6 +1451,39 @@
         </div>
         <div id="invoice-list"><div class="empty-state">Loading invoices…</div></div>
         <div class="sub-pagination" id="invoice-pagination"></div>
+      </section>
+
+      <section class="tab-content" id="content-instagram">
+        <h2>Instagram</h2>
+        <p class="hint">Comment and DM auto-replies, plus the daily menu post. Runs on the official Meta Graph API — no browser automation.</p>
+        <div class="card" id="ig-status"><div class="empty-state">Loading…</div></div>
+
+        <div class="card">
+          <h2>Menu post</h2>
+          <p class="hint">The caption is built from the scheduled dishes. A date that is already published is skipped unless you force it.</p>
+          <div class="form-row">
+            <div>
+              <label for="ig-when">Menu for</label>
+              <select id="ig-when" onchange="loadInstagramPreview()">
+                <option value="tomorrow">Tomorrow</option>
+                <option value="today">Today</option>
+              </select>
+            </div>
+            <div>
+              <label for="ig-date">Date (optional)</label>
+              <input type="date" id="ig-date" onchange="loadInstagramPreview()">
+            </div>
+            <button class="btn" onclick="loadInstagramPreview()">Preview</button>
+            <button class="btn btn-primary" id="ig-publish-btn" onclick="publishInstagram()">Publish now</button>
+          </div>
+          <div class="error" id="ig-error"></div>
+          <div class="ok" id="ig-success" style="display:none"></div>
+          <pre id="ig-preview" class="hint" style="white-space:pre-wrap;margin-top:12px"></pre>
+        </div>
+
+        <div class="card"><h2>Recent posts</h2><div id="ig-posts"><div class="empty-state">Loading…</div></div></div>
+        <div class="card"><h2>Insights</h2><p class="hint">One snapshot per day, written by the nightly job.</p><div id="ig-insights"><div class="empty-state">Loading…</div></div></div>
+        <div class="card"><h2>Recent activity</h2><p class="hint">Webhook deliveries. Only matched keywords get a reply.</p><div id="ig-events"><div class="empty-state">Loading…</div></div></div>
       </section>
     </main>
     <div class="company-settings" id="company-settings" hidden role="dialog" aria-modal="true" aria-labelledby="company-title">

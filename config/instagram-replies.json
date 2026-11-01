@@ -1,0 +1,58 @@
+{
+  "rules": [
+    {
+      "intent": "price",
+      "displayName": "Pricing Inquiry",
+      "keywords": ["price", "cost", "rate", "how much", "kitna", "entha", "pricing"],
+      "reply": "💪 FitFuel meal plans start from ₹176/meal (veg) and ₹190/meal (non-veg).\n\nDurations: 3, 7, 14, 21, 28 days.\nMeals: Breakfast only / Lunch+Dinner / All 3 meals.\n\nAll prices GST-inclusive. Delivery across Khammam.\n\nSee all plans: {{url}}"
+    },
+    {
+      "intent": "order",
+      "displayName": "Order / Subscribe",
+      "keywords": ["order", "buy", "subscribe", "start", "join", "signup", "book"],
+      "reply": "Let's get you started 🍱\n\n1. Pick your plan and duration\n2. Choose veg or non-veg\n3. Pay online — meals start next day\n\nOrder here: {{url}}\nDelivery across Khammam."
+    },
+    {
+      "intent": "plan",
+      "displayName": "Plan Details",
+      "keywords": ["plan", "plans", "package", "interested", "details", "info", "options"],
+      "reply": "🍱 Our plans:\n\nCategories: Healthy Diet, High Protein, Weight Loss — veg and non-veg.\nDurations: 3, 7, 14, 21, 28 days.\nMeals: Breakfast only / Lunch+Dinner / All three.\n\nCompare all plans: {{url}}"
+    },
+    {
+      "intent": "weightloss",
+      "displayName": "Weight Loss",
+      "keywords": ["weight loss", "weightloss", "fat loss", "lose weight", "slim", "calorie", "diet"],
+      "reply": "🔥 Weight Loss plan — calorie-controlled meals with high protein to keep you full.\nVeg and non-veg, 3–28 days.\n\nDetails: {{url}}"
+    },
+    {
+      "intent": "protein",
+      "displayName": "High Protein",
+      "keywords": ["protein", "muscle", "gym", "bulk", "bulking", "gain"],
+      "reply": "💪 High Protein plan — protein-forward meals for recovery and gym days.\nVeg and non-veg, 3–28 days.\n\nDetails: {{url}}"
+    },
+    {
+      "intent": "veg",
+      "displayName": "Veg / Non-Veg",
+      "keywords": ["veg", "vegan", "vegetarian", "non veg", "nonveg", "egg", "chicken", "mutton", "fish"],
+      "reply": "🥗 Yes — every plan comes in veg and non-veg.\nNon-veg rotates chicken, egg, fish; never mixed into veg meals.\n\nPick a plan: {{url}}"
+    },
+    {
+      "intent": "delivery",
+      "displayName": "Delivery Info",
+      "keywords": ["delivery", "deliver", "area", "khammam", "timing", "timings", "address", "pincode"],
+      "reply": "🛵 We cook in Khammam and deliver across the city.\nBreakfast ~8:00 AM, Lunch ~12:30 PM, Dinner ~7:30 PM.\n\nSend us your area to confirm delivery charge.\nOr check at checkout: {{url}}"
+    },
+    {
+      "intent": "human",
+      "displayName": "Talk to Human",
+      "keywords": ["human", "agent", "person", "call", "talk", "help", "support", "complaint", "issue", "refund", "cancel"],
+      "reply": "Connecting you to the team 🙋\nSomeone will reply here shortly. For urgent queries, WhatsApp us via the number on our site.\n\n{{url}}"
+    },
+    {
+      "intent": "default",
+      "displayName": "Default / Help",
+      "keywords": [],
+      "reply": "Hi! 👋 This is FitFuel's automated assistant.\n\nReply with:\n• PRICE — plan costs\n• ORDER — start a subscription\n• PLANS — see all options\n• DELIVERY — area & timings\n• HUMAN — talk to the team\n\nOr browse: {{url}}"
+    }
+  ]
+}
