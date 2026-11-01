@@ -4,7 +4,7 @@
       "intent": "price",
       "displayName": "Pricing Inquiry",
       "keywords": ["price", "cost", "rate", "how much", "kitna", "entha", "pricing"],
-      "reply": "💪 FitFuel meal plans start from ₹176/meal (veg) and ₹190/meal (non-veg).\n\nDurations: 3, 7, 14, 21, 28 days.\nMeals: Breakfast only / Lunch+Dinner / All 3 meals.\n\nAll prices GST-inclusive. Delivery across Khammam.\n\nSee all plans: {{url}}",
+      "reply": "🍱 *FitFuel Nutrition*\n\nOur meal plans start at just **₹176/meal (veg)** and **₹190/meal (non-veg)** — GST inclusive.\n\n**Flexible durations:** 3 · 7 · 14 · 21 · 28 days\n**Choose meals:** Breakfast only | Lunch + Dinner | All 3 meals\n\nFresh, home-style cooking delivered across Khammam.\n\n👉 View all plans: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "View Plans", "payload": "VIEW_PLANS" },
         { "type": "quick_reply", "title": "Order Now", "payload": "ORDER_NOW" }
@@ -14,7 +14,7 @@
       "intent": "order",
       "displayName": "Order / Subscribe",
       "keywords": ["order", "buy", "subscribe", "start", "join", "signup", "book"],
-      "reply": "Let's get you started 🍱\n\n1. Pick your plan and duration\n2. Choose veg or non-veg\n3. Pay online — meals start next day\n\nOrder here: {{url}}\nDelivery across Khammam.",
+      "reply": "🚀 *Ready to start?*\n\nIt takes 2 minutes:\n1️⃣ Pick your plan (Healthy Diet / High Protein / Weight Loss)\n2️⃣ Choose veg or non-veg\n3️⃣ Select duration (3–28 days) & meals per day\n4️⃣ Pay securely online — meals begin tomorrow\n\n📦 Free delivery across Khammam\n🍽️ Fresh from our kitchen to your door\n\n👉 Start your order: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "Start Order", "payload": "START_ORDER" },
         { "type": "quick_reply", "title": "See Plans First", "payload": "VIEW_PLANS" }
@@ -24,7 +24,7 @@
       "intent": "plan",
       "displayName": "Plan Details",
       "keywords": ["plan", "plans", "package", "interested", "details", "info", "options"],
-      "reply": "🍱 Our plans:\n\nCategories: Healthy Diet, High Protein, Weight Loss — veg and non-veg.\nDurations: 3, 7, 14, 21, 28 days.\nMeals: Breakfast only / Lunch+Dinner / All three.\n\nCompare all plans: {{url}}",
+      "reply": "🥗 *Our Meal Plans*\n\n**Healthy Diet** — Balanced everyday nutrition\n**High Protein** — For muscle recovery & gym days\n**Weight Loss** — Calorie-controlled, high satiety\n\n✅ Veg & Non-veg versions\n✅ 3, 7, 14, 21, 28-day durations\n✅ 1, 2, or 3 meals/day\n✅ Fresh daily, no preservatives\n\n👉 Compare all: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "Healthy Diet", "payload": "PLAN_HEALTHY" },
         { "type": "quick_reply", "title": "High Protein", "payload": "PLAN_PROTEIN" },
@@ -35,7 +35,7 @@
       "intent": "weightloss",
       "displayName": "Weight Loss",
       "keywords": ["weight loss", "weightloss", "fat loss", "lose weight", "slim", "calorie", "diet"],
-      "reply": "🔥 Weight Loss plan — calorie-controlled meals with high protein to keep you full.\nVeg and non-veg, 3–28 days.\n\nDetails: {{url}}",
+      "reply": "🔥 *Weight Loss Plan*\n\nDesigned for sustainable fat loss:\n• Calorie-controlled portions\n• High protein → keeps you full longer\n• Complex carbs + fibre for steady energy\n• Veg & Non-veg options\n• 3–28 day durations\n\nNo crash diets — just real food, smart portions.\n\n👉 Details: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "Veg Weight Loss", "payload": "PLAN_WEIGHTLOSS_VEG" },
         { "type": "quick_reply", "title": "Non-Veg Weight Loss", "payload": "PLAN_WEIGHTLOSS_NONVEG" }
@@ -45,7 +45,7 @@
       "intent": "protein",
       "displayName": "High Protein",
       "keywords": ["protein", "muscle", "gym", "bulk", "bulking", "gain"],
-      "reply": "💪 High Protein plan — protein-forward meals for recovery and gym days.\nVeg and non-veg, 3–28 days.\n\nDetails: {{url}}",
+      "reply": "💪 *High Protein Plan*\n\nBuilt for active lifestyles:\n• 25–35g protein per meal\n• Lean meats, eggs, paneer, legumes\n• Balanced macros for recovery\n• Veg & Non-veg versions\n• 3–28 day durations\n\nFuel your gains with real food.\n\n👉 Details: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "Veg High Protein", "payload": "PLAN_PROTEIN_VEG" },
         { "type": "quick_reply", "title": "Non-Veg High Protein", "payload": "PLAN_PROTEIN_NONVEG" }
@@ -55,7 +55,7 @@
       "intent": "veg",
       "displayName": "Veg / Non-Veg",
       "keywords": ["veg", "vegan", "vegetarian", "non veg", "nonveg", "egg", "chicken", "mutton", "fish"],
-      "reply": "🥗 Yes — every plan comes in veg and non-veg.\nNon-veg rotates chicken, egg, fish; never mixed into veg meals.\n\nPick a plan: {{url}}",
+      "reply": "🥗 *Yes — we do both!*\n\nEvery plan comes in **Veg** and **Non-Veg**:\n\n**Veg:** Paneer, soya, dal, seasonal veg, dairy\n**Non-Veg:** Rotating chicken, egg, fish — never mixed into veg meals\n\nYou choose per plan. No cross-contamination.\n\n👉 Pick yours: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "Veg Plans", "payload": "VIEW_VEG" },
         { "type": "quick_reply", "title": "Non-Veg Plans", "payload": "VIEW_NONVEG" }
@@ -65,7 +65,7 @@
       "intent": "delivery",
       "displayName": "Delivery Info",
       "keywords": ["delivery", "deliver", "area", "khammam", "timing", "timings", "address", "pincode"],
-      "reply": "🛵 We cook in Khammam and deliver across the city.\nBreakfast ~8:00 AM, Lunch ~12:30 PM, Dinner ~7:30 PM.\n\nSend us your area to confirm delivery charge.\nOr check at checkout: {{url}}",
+      "reply": "🚚 *Delivery across Khammam*\n\n🕐 **Timings:**\n• Breakfast — 7:30–8:30 AM\n• Lunch — 12:00–1:00 PM\n• Dinner — 7:00–8:00 PM\n\n📍 **Coverage:** All major Khammam areas\n💰 **Charges:** Based on distance (free within 3 km)\n\nSend us your area/pincode for exact charge, or check at checkout.\n\n👉 Check delivery: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "Check My Area", "payload": "CHECK_DELIVERY" }
       ]
@@ -74,7 +74,7 @@
       "intent": "human",
       "displayName": "Talk to Human",
       "keywords": ["human", "agent", "person", "call", "talk", "help", "support", "complaint", "issue", "refund", "cancel"],
-      "reply": "Connecting you to the team 🙋\nSomeone will reply here shortly. For urgent queries, WhatsApp us via the number on our site.\n\n{{url}}",
+      "reply": "🙋 *Connecting you to our team…*\n\nSomeone will reply here within a few minutes.\n\nFor urgent queries, WhatsApp us directly:\n📞 **+91 98765 43210** (on our website)\n\nWe're here to help! 💛\n\n👉 Website: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "WhatsApp Us", "payload": "WHATSAPP_CONTACT" }
       ]
@@ -83,7 +83,7 @@
       "intent": "default",
       "displayName": "Default / Help",
       "keywords": [],
-      "reply": "Hi! 👋 This is FitFuel's automated assistant.\n\nReply with:\n• PRICE — plan costs\n• ORDER — start a subscription\n• PLANS — see all options\n• DELIVERY — area & timings\n• HUMAN — talk to the team\n\nOr browse: {{url}}",
+      "reply": "👋 *Welcome to FitFuel Nutrition!*\n\nWe deliver fresh, home-style meals across Khammam — healthy, high-protein, or weight-loss plans tailored to you.\n\n**How can I help?**\n\n• **PRICE** — See plan costs\n• **ORDER** — Start a subscription\n• **PLANS** — Browse all options\n• **DELIVERY** — Check your area\n• **HUMAN** — Talk to our team\n\n👉 Explore: {{url}}",
       "buttons": [
         { "type": "quick_reply", "title": "View Plans", "payload": "VIEW_PLANS" },
         { "type": "quick_reply", "title": "Pricing", "payload": "SHOW_PRICE" },
