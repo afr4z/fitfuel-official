@@ -8,6 +8,12 @@
       name="description"
       content="FitFuel Nutrition delivers fresh, customized meal plans to your doorstep. Choose from High Protein, Healthy Diet and Weight Loss meal plans. Order via WhatsApp."
     />
+    <meta name="theme-color" content="#1a7d36" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FitFuel Nutrition" />
+    <meta property="og:title" content="FitFuel Nutrition – Chef-prepared meals, built around your goals" />
+    <meta property="og:description" content="Macro-balanced meal plans cooked fresh every day and delivered to your door. Plans from ₹175 per meal per day." />
+    <meta name="twitter:card" content="summary" />
     <link
       rel="preload"
       href="/fonts/archivo-latin-var.woff2"
@@ -829,6 +835,94 @@
           grid-template-columns: 1fr;
         }
       }
+
+      /* ── Landing refresh ─────────────────────────────────────── */
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: none; }
+      }
+      .hero-copy > *, .hero-menu {
+        animation: rise 0.7s var(--ease-out) both;
+      }
+      .hero-copy > :nth-child(2) { animation-delay: 0.06s; }
+      .hero-copy > :nth-child(3) { animation-delay: 0.12s; }
+      .hero-copy > :nth-child(4) { animation-delay: 0.18s; }
+      .hero-copy > :nth-child(5) { animation-delay: 0.24s; }
+      .hero-menu { animation-delay: 0.3s; }
+      .hero-badge .pulse { animation: pulse 2.2s ease-in-out infinite; }
+      .hero h1 { text-wrap: balance; }
+      .hero-menu-list li { padding: 0; }
+      .hero-menu-list li:first-child { padding-top: 0; }
+      .hero-menu-row {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        padding: 14px 8px;
+        margin: 0 -8px;
+        border-radius: var(--radius-sm);
+        transition: background 0.2s var(--ease-base);
+      }
+      .hero-menu-row { flex: 1; }
+      .hero-menu-name { flex: 1; }
+      .hero-menu-arrow {
+        align-self: center;
+        color: var(--orange-600);
+        opacity: 0;
+        transform: translateX(-6px);
+        transition: opacity 0.2s var(--ease-base), transform 0.2s var(--ease-base);
+      }
+      .hero-menu-row:hover, .hero-menu-row:focus-visible { background: var(--orange-50); }
+      .hero-menu-row:hover .hero-menu-arrow,
+      .hero-menu-row:focus-visible .hero-menu-arrow { opacity: 1; transform: none; }
+      .hero-menu-row:focus-visible, .btn-primary:focus-visible, .hero-textlink:focus-visible {
+        outline: 3px solid var(--orange-500);
+        outline-offset: 2px;
+      }
+      .hero-trust {
+        grid-column: 1 / -1;
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 28px;
+        padding-top: 28px;
+        border-top: 1px solid var(--green-100);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--green-800);
+      }
+      .hero-trust li { display: inline-flex; align-items: center; gap: 8px; }
+      .hero-trust li::before {
+        content: "";
+        width: 14px; height: 14px;
+        background: var(--leaf);
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/contain no-repeat;
+      }
+      .step { transition: border-color 0.25s var(--ease-base), transform 0.25s var(--ease-base); }
+      .step:hover { border-color: var(--orange-500); transform: translateY(-3px); }
+      .sticky-cta { display: none; }
+      @media (max-width: 768px) {
+        .hero-menu-arrow { opacity: 1; transform: none; }
+        .sticky-cta {
+          display: block;
+          position: fixed;
+          left: 0; right: 0; bottom: 0;
+          z-index: 50;
+          padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+          background: rgba(255,255,255,0.94);
+          backdrop-filter: blur(10px);
+          border-top: 1px solid var(--green-100);
+          transform: translateY(110%);
+          transition: transform 0.3s var(--ease-out);
+        }
+        .sticky-cta.show { transform: none; }
+        .sticky-cta .btn-primary { width: 100%; justify-content: center; }
+        body { padding-bottom: 72px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hero-copy > *, .hero-menu { animation: none; }
+        .step:hover { transform: none; }
+      }
     </style>
     <!-- Start the auth check as early as possible. nav.js is deferred, so a
          fetch inside it cannot start until the script has downloaded and
@@ -889,24 +983,44 @@
           <p class="hero-menu-title">On the menu</p>
           <ul class="hero-menu-list">
             <li>
-              <span class="hero-menu-name">High Protein Meal Plan</span>
-              <span class="hero-menu-price">₹290<small>/day</small></span>
+              <a class="hero-menu-row" href="/order?plan=high-protein-nonveg">
+                <span class="hero-menu-name">High Protein Meal Plan</span>
+                <span class="hero-menu-price">₹290<small>/day</small></span>
+                <svg class="hero-menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </a>
             </li>
             <li>
-              <span class="hero-menu-name">Healthy Diet Meal Plan</span>
-              <span class="hero-menu-price">₹250<small>/day</small></span>
+              <a class="hero-menu-row" href="/order?plan=healthy-nonveg">
+                <span class="hero-menu-name">Healthy Diet Meal Plan</span>
+                <span class="hero-menu-price">₹250<small>/day</small></span>
+                <svg class="hero-menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </a>
             </li>
             <li>
-              <span class="hero-menu-name">Weight Loss Meal Plan</span>
-              <span class="hero-menu-price">₹240<small>/day</small></span>
+              <a class="hero-menu-row" href="/order?plan=weight-loss-nonveg">
+                <span class="hero-menu-name">Weight Loss Meal Plan</span>
+                <span class="hero-menu-price">₹240<small>/day</small></span>
+                <svg class="hero-menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+              </a>
             </li>
           </ul>
           <p class="hero-menu-note">
-            Per meal, per day. Cooked fresh daily, delivered to your door.
+            Per meal, per day, non-veg, 3-day plan. Longer plans cost less per
+            meal.
           </p>
         </aside>
+        <ul class="hero-trust" aria-label="Why people choose FitFuel">
+          <li>Cooked fresh daily</li>
+          <li>Order on WhatsApp</li>
+          <li>Skip or swap any meal</li>
+          <li>Secure Razorpay checkout</li>
+        </ul>
       </div>
     </section>
+
+    <div class="sticky-cta" id="sticky-cta" aria-hidden="true">
+      <a href="/order" class="btn-primary" tabindex="-1">Start my plan</a>
+    </div>
 
     <section class="section section-alt" id="how-it-works">
       <h2 class="section-title reveal">How FitFuel Works</h2>
@@ -1301,6 +1415,26 @@
           el.textContent = el.dataset.target + (el.dataset.suffix || "");
         });
       }
+
+      // ── Sticky mobile CTA: show once the hero CTA has scrolled away ──
+      (function () {
+        const bar = document.getElementById("sticky-cta");
+        const heroBtn = document.querySelector(".hero .btn-primary");
+        const cta = document.querySelector(".cta-banner");
+        if (!bar || !heroBtn || !("IntersectionObserver" in window)) return;
+        let heroGone = false, ctaVisible = false;
+        const update = () => {
+          const on = heroGone && !ctaVisible;
+          bar.classList.toggle("show", on);
+          bar.setAttribute("aria-hidden", on ? "false" : "true");
+          bar.querySelector("a").tabIndex = on ? 0 : -1;
+        };
+        new IntersectionObserver(([e]) => {
+          heroGone = !e.isIntersecting && e.boundingClientRect.top < 0;
+          update();
+        }).observe(heroBtn);
+        if (cta) new IntersectionObserver(([e]) => { ctaVisible = e.isIntersecting; update(); }).observe(cta);
+      })();
     </script>
     <script src="/js/nav.js" defer></script>
   </body>
