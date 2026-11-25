@@ -8,652 +8,195 @@
       name="description"
       content="FitFuel Nutrition delivers fresh, customized meal plans to your doorstep. Choose from High Protein, Healthy Diet and Weight Loss meal plans. Order via WhatsApp."
     />
-    <meta name="theme-color" content="#1a7d36" />
+    <meta name="theme-color" content="#0d2f1a" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="FitFuel Nutrition" />
     <meta property="og:title" content="FitFuel Nutrition – Chef-prepared meals, built around your goals" />
     <meta property="og:description" content="Macro-balanced meal plans cooked fresh every day and delivered to your door. Plans from ₹175 per meal per day." />
-    <meta name="twitter:card" content="summary" />
-    <link
-      rel="preload"
-      href="/fonts/archivo-latin-var.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <meta property="og:image" content="/img/hero.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/img/hero.webp" as="image" type="image/webp" />
     <link rel="stylesheet" href="/css/nav.css" />
     <link rel="stylesheet" href="/css/main.css" />
     <style>
-      /* brand palette lives in /css/main.css (single source of truth) */
+      /* FitFuel landing, full refresh. Brand tokens (greens, ember orange,
+         Archivo + Inter) come from /css/main.css. */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+      body { font-family: var(--font); color: var(--gray-800); background: var(--cream); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+      :root { --cream: #fbf8f1; --cream-2: #f3eee1; }
+      a { color: inherit; text-decoration: none; }
+      img { max-width: 100%; display: block; }
+      .wrap { max-width: 1120px; margin: 0 auto; }
+      :focus-visible { outline: 3px solid var(--orange-500); outline-offset: 3px; }
+
+      .reveal { opacity: 0; transform: translateY(34px); transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out); }
+      .reveal.visible { opacity: 1; transform: none; }
+      .reveal-delay-1 { transition-delay: 0.08s; } .reveal-delay-2 { transition-delay: 0.16s; } .reveal-delay-3 { transition-delay: 0.24s; } .reveal-delay-4 { transition-delay: 0.32s; }
+
+      .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none; }
+      .dot--veg { background: var(--leaf); } .dot--nonveg { background: var(--orange-500); }
+
+      /* Buttons */
+      .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--green-500); color: #fff; padding: 15px 28px; border-radius: var(--radius-full); font-size: 1rem; font-weight: 700; border: 0; cursor: pointer; box-shadow: 0 10px 24px -8px rgba(26,125,54,0.55); transition: background 0.2s, transform 0.25s var(--ease-out), box-shadow 0.25s; }
+      .btn-primary svg { transition: transform 0.25s var(--ease-out); }
+      .btn-primary:hover { background: var(--green-600); transform: translateY(-2px); box-shadow: 0 14px 28px -8px rgba(26,125,54,0.6); }
+      .btn-primary:hover svg { transform: translateX(4px); }
+      .btn-lg { padding: 17px 34px; font-size: 1.05rem; }
+      .btn-light { background: #fff; color: var(--green-800); box-shadow: 0 12px 28px -10px rgba(0,0,0,0.45); }
+      .btn-light:hover { background: var(--cream); }
+      .hero-textlink { font-weight: 600; color: var(--green-800); border-bottom: 2px solid var(--green-200); padding-bottom: 3px; transition: border-color 0.2s; }
+      .hero-textlink:hover { border-color: var(--orange-500); }
+
+      /* Hero */
+      .hero { position: relative; overflow: hidden; padding: 72px 24px 88px; background: var(--cream); }
+      .hero-bg { position: absolute; inset: 0; pointer-events: none; }
+      .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.55; animation: drift 16s ease-in-out infinite alternate; }
+      .b1 { width: 460px; height: 460px; background: #cdeacc; top: -140px; right: 8%; }
+      .b2 { width: 380px; height: 380px; background: #fddcc0; bottom: -120px; left: -80px; animation-delay: -6s; }
+      @keyframes drift { to { transform: translate(40px, 30px) scale(1.12); } }
+      .hero-inner { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 56px; align-items: center; }
+      .hero-badge { display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px 7px 12px; background: #fff; border: 1px solid var(--green-100); border-radius: var(--radius-full); color: var(--green-700); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+      .pulse { width: 8px; height: 8px; background: var(--leaf); border-radius: 50%; animation: pulse 2.2s ease-in-out infinite; }
+      @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(47,158,68,0.5); } 50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(47,158,68,0); } }
+      .hero h1 { font-family: var(--font-display); font-size: clamp(2.5rem, 5.4vw, 4.2rem); font-weight: 800; font-stretch: 104%; color: var(--green-900); line-height: 1.02; letter-spacing: -0.035em; margin-bottom: 22px; text-wrap: balance; }
+      .hl { position: relative; display: inline-block; color: var(--orange-600); white-space: nowrap; }
+      .hl-line { position: absolute; left: 0; bottom: -10px; width: 100%; height: 14px; overflow: visible; }
+      .hl-line path { fill: none; stroke: var(--orange-500); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 340; stroke-dashoffset: 340; animation: draw 1.1s 0.9s var(--ease-out) forwards; }
+      @keyframes draw { to { stroke-dashoffset: 0; } }
+      .hero-subtitle { font-size: clamp(1.02rem, 1.4vw, 1.15rem); color: var(--gray-600); max-width: 31em; margin-bottom: 32px; }
+      .hero-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-bottom: 40px; }
+      .hero-proof { list-style: none; display: flex; gap: 36px; flex-wrap: wrap; padding-top: 26px; border-top: 1px solid rgba(13,47,26,0.12); }
+      .hero-proof li { display: flex; flex-direction: column; }
+      .hero-proof b { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; color: var(--green-900); letter-spacing: -0.03em; line-height: 1.1; }
+      .hero-proof li > span { font-size: 0.78rem; color: var(--gray-500); }
+      .hero-copy > * { animation: rise 0.8s var(--ease-out) both; }
+      .hero-copy > :nth-child(2) { animation-delay: 0.08s; } .hero-copy > :nth-child(3) { animation-delay: 0.16s; } .hero-copy > :nth-child(4) { animation-delay: 0.24s; } .hero-copy > :nth-child(5) { animation-delay: 0.32s; }
+      @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+      .hero-visual { --px: 0; --py: 0; position: relative; max-width: 460px; margin-left: auto; width: 100%; animation: rise 1s 0.15s var(--ease-out) both; }
+      .arch { border-radius: 999px 999px 28px 28px; overflow: hidden; aspect-ratio: 4 / 5; box-shadow: 0 40px 70px -30px rgba(13,47,26,0.55); background: var(--green-100); transform: translate3d(calc(var(--px) * -8px), calc(var(--py) * -8px), 0); transition: transform 0.4s var(--ease-out); }
+      .arch img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); animation: kenburns 18s ease-in-out infinite alternate; }
+      @keyframes kenburns { to { transform: scale(1.02) translateY(-1.5%); } }
+      .seal { position: absolute; width: 112px; height: 112px; left: -44px; bottom: 56px; animation: spin 22s linear infinite; filter: drop-shadow(0 12px 18px rgba(13,47,26,0.35)); }
+      .seal text { font: 700 9.4px var(--font); letter-spacing: 0.16em; fill: #fff; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .chip { position: absolute; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 11px 16px; border-radius: 16px; box-shadow: 0 18px 36px -14px rgba(13,47,26,0.4); font-size: 0.85rem; line-height: 1.25; color: var(--green-900); transform: translate3d(calc(var(--px) * 14px), calc(var(--py) * 14px), 0); transition: transform 0.4s var(--ease-out); }
+      .chip span { display: flex; flex-direction: column; }
+      .chip small { color: var(--gray-500); font-size: 0.72rem; }
+      .chip-a { top: 14%; right: -26px; animation: bob 5s ease-in-out infinite; }
+      .chip-b { bottom: 8%; right: 18px; animation: bob 6s -2s ease-in-out infinite; }
+      @keyframes bob { 50% { margin-top: -10px; } }
+
+      /* Marquee */
+      .marquee { background: var(--green-900); color: #eaf6ec; overflow: hidden; padding: 16px 0; border-block: 1px solid rgba(255,255,255,0.08); }
+      .marquee-track { display: flex; width: max-content; align-items: center; gap: 30px; animation: marquee 38s linear infinite; font-family: var(--font-display); font-stretch: 104%; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; white-space: nowrap; padding-right: 30px; }
+      .marquee-track i { width: 8px; height: 8px; background: var(--orange-500); border-radius: 50%; display: block; }
+      @keyframes marquee { to { transform: translateX(-25%); } }
+
+      /* Section scaffolding */
+      .section { padding: 104px 24px; position: relative; }
+      .eyebrow { text-align: center; font-size: 0.74rem; font-weight: 700; letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--orange-700); margin-bottom: 14px; }
+      .eyebrow--light { color: var(--orange-400); }
+      .section-title { text-align: center; font-family: var(--font-display); font-size: clamp(1.9rem, 3.9vw, 2.9rem); font-weight: 800; font-stretch: 103%; color: var(--green-900); letter-spacing: -0.03em; line-height: 1.08; max-width: 18em; margin: 0 auto 16px; text-wrap: balance; }
+      .section-title--light { color: #fff; }
+      .section-sub { text-align: center; color: var(--gray-600); max-width: 40em; margin: 0 auto 56px; }
+      .section-sub--light { color: #cfe5d3; }
+
+      /* Steps */
+      .steps-sec { background: #fff; }
+      .steps { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 56px; position: relative; counter-reset: s; }
+      .steps::before { content: ""; position: absolute; top: 27px; left: 8%; right: 8%; height: 2px; background: repeating-linear-gradient(90deg, var(--green-300) 0 8px, transparent 8px 16px); }
+      .st { position: relative; }
+      .st-num { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--green-900); color: #fff; font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; margin-bottom: 20px; position: relative; box-shadow: 0 0 0 8px #fff; transition: background 0.3s, transform 0.4s var(--ease-out); }
+      .st:hover .st-num { background: var(--orange-600); transform: scale(1.08) rotate(-6deg); }
+      .st h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; font-stretch: 102%; color: var(--green-900); letter-spacing: -0.02em; margin-bottom: 8px; }
+      .st p { font-size: 0.92rem; color: var(--gray-600); line-height: 1.6; }
+
+      /* Plans */
+      .plans-sec { background: var(--cream); }
+      .pc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; align-items: stretch; }
+      .pc { background: #fff; border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(13,47,26,0.06), 0 22px 44px -26px rgba(13,47,26,0.35); transition: transform 0.45s var(--ease-out), box-shadow 0.45s var(--ease-out); }
+      .pc:hover { transform: translateY(-8px); box-shadow: 0 1px 2px rgba(13,47,26,0.06), 0 34px 60px -26px rgba(13,47,26,0.45); }
+      .pc-photo { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--green-100); }
+      .pc-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.9s var(--ease-out); }
+      .pc:hover .pc-photo img { transform: scale(1.07); }
+      .pc-tag { position: absolute; top: 14px; left: 14px; background: rgba(255,255,255,0.95); color: var(--green-800); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; padding: 6px 12px; border-radius: var(--radius-full); }
+      .pc-from { position: absolute; bottom: 14px; right: 14px; background: var(--green-900); color: #cfe5d3; font-size: 0.78rem; padding: 7px 14px; border-radius: var(--radius-full); }
+      .pc-from b { color: #fff; font-family: var(--font-display); font-size: 1.05rem; }
+      .pc-body { padding: 26px 26px 28px; display: flex; flex-direction: column; flex: 1; }
+      .pc-body h3 { font-family: var(--font-display); font-size: 1.45rem; font-weight: 800; font-stretch: 103%; color: var(--green-900); letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 8px; }
+      .pc-body > p { font-size: 0.9rem; color: var(--gray-600); margin-bottom: 20px; }
+      .pc-variant { padding: 12px 0; border-top: 1px solid var(--green-100); }
+      .pc-label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-600); margin-bottom: 8px; }
+      .pc-variant ul { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+      .pc-variant li { background: var(--cream); border-radius: 10px; padding: 7px 4px; text-align: center; display: flex; flex-direction: column; line-height: 1.25; }
+      .pc-variant li span { font-size: 0.68rem; color: var(--gray-500); font-weight: 600; }
+      .pc-variant li b { font-family: var(--font-display); font-size: 0.95rem; color: var(--green-900); }
+      .pc-cta { margin-top: auto; padding-top: 18px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--green-600); }
+      .pc-cta svg { transition: transform 0.25s var(--ease-out); }
+      .pc-cta:hover { color: var(--orange-600); } .pc-cta:hover svg { transform: translateX(5px); }
+      .plans-single { text-align: center; margin-top: 40px; color: var(--gray-600); }
+      .plans-single a { color: var(--green-600); font-weight: 700; border-bottom: 2px solid var(--green-200); }
+      .plans-single a:hover { border-color: var(--orange-500); }
+
+      /* Why */
+      .why-sec { background: var(--green-900); overflow: hidden; }
+      .why-bg { position: absolute; inset: 0; background: url("/img/spread.webp") center/cover; opacity: 0.16; mix-blend-mode: luminosity; }
+      .why-sec::before { content: ""; position: absolute; inset: 0; background: radial-gradient(900px 400px at 85% -10%, rgba(238,112,28,0.22), transparent 60%), linear-gradient(180deg, rgba(13,47,26,0.75), var(--green-900) 95%); }
+      .why-sec .wrap { position: relative; z-index: 1; }
+      .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+      .feat { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(10px); border-radius: 20px; padding: 28px; transition: transform 0.4s var(--ease-out), background 0.3s, border-color 0.3s; }
+      .feat:hover { transform: translateY(-6px); background: rgba(255,255,255,0.1); border-color: rgba(238,112,28,0.6); }
+      .feat-ic { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: rgba(238,112,28,0.15); color: var(--orange-400); margin-bottom: 18px; transition: transform 0.4s var(--ease-out); }
+      .feat:hover .feat-ic { transform: rotate(-8deg) scale(1.08); }
+      .feat h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.015em; margin-bottom: 8px; }
+      .feat p { font-size: 0.92rem; color: #cfe5d3; line-height: 1.6; }
+
+      /* CTA */
+      .cta-banner { padding: 96px 24px; background: var(--cream); }
+      .cta-inner { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 1.2fr 0.8fr; align-items: center; gap: 24px; background: linear-gradient(120deg, var(--green-600), var(--green-900)); border-radius: 36px; padding: 56px 56px 56px 64px; position: relative; overflow: hidden; color: #fff; }
+      .cta-inner::before { content: ""; position: absolute; width: 420px; height: 420px; border-radius: 50%; right: -90px; top: -120px; background: radial-gradient(circle, rgba(238,112,28,0.55), transparent 65%); }
+      .cta-copy { position: relative; z-index: 1; }
+      .cta-banner h2 { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; font-stretch: 103%; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 14px; color: #fff; }
+      .cta-sub { color: #d6ecd9; max-width: 28em; margin-bottom: 30px; }
+      .cta-img { position: relative; z-index: 1; width: 320px; height: 320px; max-width: 100%; object-fit: cover; border-radius: 50%; margin-left: auto; border: 8px solid rgba(255,255,255,0.16); box-shadow: 0 30px 50px -20px rgba(0,0,0,0.5); animation: float 7s ease-in-out infinite; }
+      @keyframes float { 50% { transform: translateY(-12px) rotate(3deg); } }
+
+      /* Sticky mobile CTA */
+      .sticky-cta { display: none; }
+
+      @media (max-width: 960px) {
+        .hero-inner { grid-template-columns: 1fr; gap: 56px; }
+        .hero-visual { margin: 0 auto; max-width: 400px; }
+        .chip-a { right: -8px; } .seal { left: -14px; }
+        .steps { grid-template-columns: repeat(2, 1fr); row-gap: 40px; } .steps::before { display: none; }
+        .pc-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; }
+        .feat-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 768px) {
+        .hero { padding: 48px 20px 64px; }
+        .section { padding: 72px 20px; }
+        .cta-banner { padding: 56px 20px; }
+        .cta-inner { grid-template-columns: 1fr; padding: 40px 28px; text-align: center; border-radius: 28px; }
+        .cta-sub { margin-inline: auto; } .cta-img { margin: 0 auto; width: 220px; height: 220px; order: -1; }
+        .sticky-cta { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(251,248,241,0.94); backdrop-filter: blur(10px); border-top: 1px solid var(--green-100); transform: translateY(110%); transition: transform 0.3s var(--ease-out); }
+        .sticky-cta.show { transform: none; }
+        .sticky-cta .btn-primary { width: 100%; justify-content: center; }
+        body { padding-bottom: 72px; }
+      }
+      @media (max-width: 560px) {
+        .steps, .feat-grid { grid-template-columns: 1fr; }
+        .hero-proof { gap: 24px; }
+        .chip-a { top: 8%; right: -4px; } .chip-b { right: 8px; }
+        .seal { width: 92px; height: 92px; bottom: 70px; }
+      }
       @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.01ms !important;
-          transition-duration: 0.01ms !important;
-        }
-        .reveal {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      html {
-        scroll-behavior: smooth;
-        scroll-padding-top: 72px;
-      }
-      body {
-        font-family: var(--font);
-        color: var(--gray-800);
-        background: #fff;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-      }
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-      img {
-        max-width: 100%;
-        display: block;
-      }
-
-      .reveal {
-        opacity: 0;
-        transform: translateY(32px);
-        transition:
-          opacity 0.8s var(--ease-out),
-          transform 0.8s var(--ease-out);
-      }
-      .reveal.visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      .reveal-delay-1 {
-        transition-delay: 0.08s;
-      }
-      .reveal-delay-2 {
-        transition-delay: 0.16s;
-      }
-      .reveal-delay-3 {
-        transition-delay: 0.24s;
-      }
-      .reveal-delay-4 {
-        transition-delay: 0.32s;
-      }
-      .reveal-delay-5 {
-        transition-delay: 0.4s;
-      }
-      .reveal-delay-6 {
-        transition-delay: 0.48s;
-      }
-
-      /* Hero — the poster, rebuilt for a screen. The brand board is a
-         flat white sheet with a huge two-tone mark and a letterspaced
-         tagline, so: paper ground, no gradient, no floating orbs, and
-         the menu itself (the thing a food brand actually sells) set as
-         real type instead of a stat row. */
-      .hero {
-        position: relative;
-        padding: 84px 24px 64px;
-        overflow: hidden;
-        background: #fff;
-        /* The board's own watermark motif — the same leaf, barely
-           there. At full strength it read as wallpaper and fought the
-           headline, so the stroke carries its own low opacity. */
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M60 18c0 0-26 22-26 44a26 26 0 0 0 52 0c0-22-26-44-26-44Z' fill='none' stroke='%232f9e44' stroke-opacity='0.09' stroke-width='2'/%3E%3C/svg%3E");
-        background-repeat: repeat;
-        background-size: 96px 96px;
-        background-position: center top;
-      }
-      .hero::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.55) 0%,
-          rgba(255, 255, 255, 0.88) 38%,
-          #fff 66%
-        );
-        pointer-events: none;
-      }
-      .hero-inner {
-        position: relative;
-        z-index: 1;
-        max-width: 1120px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-        gap: 72px;
-        align-items: center;
-      }
-      .hero-copy {
-        max-width: 620px;
-      }
-      .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--green-700);
-        font-size: 0.78rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        margin-bottom: 22px;
-      }
-      .hero-badge .pulse {
-        width: 7px;
-        height: 7px;
-        background: var(--leaf);
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-          transform: scale(1);
-        }
-        50% {
-          opacity: 0.45;
-          transform: scale(1.35);
-        }
-      }
-      /* The poster's tagline, used as the kicker. */
-      .hero-kicker {
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
-        /* orange-700, not orange-500: at 0.78rem this needs 4.5:1 and
-           orange-500 only manages 3.0:1 on white. */
-        color: var(--orange-700, #b84e0f);
-        margin-bottom: 18px;
-      }
-      .hero h1 {
-        font-family: var(--font-display);
-        font-size: clamp(2.4rem, 4.6vw, 3.5rem);
-        font-weight: 800;
-        font-stretch: 104%;
-        color: var(--green-900);
-        line-height: 1.06;
-        letter-spacing: -0.03em;
-        margin-bottom: 20px;
-        max-width: 15em;
-      }
-      .hero-subtitle {
-        font-size: clamp(1rem, 1.4vw, 1.1rem);
-        color: var(--gray-600);
-        margin-bottom: 30px;
-        max-width: 34em;
-      }
-      .hero-buttons {
-        display: flex;
-        gap: 22px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      /* One primary colour across the site: green carries the action,
-         orange stays the accent (wordmark, prices, the auth control). */
-      .btn-primary {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--green-500);
-        color: #fff;
-        padding: 15px 30px;
-        border-radius: var(--radius-full);
-        font-size: 1.05rem;
-        font-weight: 700;
-        transition:
-          background 0.2s var(--ease-base),
-          transform 0.2s var(--ease-base);
-        cursor: pointer;
-        border: none;
-      }
-      .btn-primary:hover {
-        background: var(--green-600);
-        transform: translateY(-2px);
-      }
-      .btn-primary:active {
-        transform: translateY(0);
-      }
-      /* The secondary action is a quiet text link, not a second pill —
-         one filled control per screen. */
-      .hero-textlink {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--green-800);
-        border-bottom: 2px solid var(--green-200);
-        padding-bottom: 3px;
-        transition: border-color 0.2s var(--ease-base);
-      }
-      .hero-textlink:hover {
-        border-color: var(--green-600);
-      }
-      .btn-secondary {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: #fff;
-        backdrop-filter: blur(8px);
-        color: var(--green-700);
-        padding: 15px 34px;
-        border-radius: var(--radius-full);
-        font-size: 1.05rem;
-        font-weight: 600;
-        border: 1px solid var(--green-200);
-        transition:
-          border-color 0.2s var(--ease-base),
-          background 0.2s var(--ease-base);
-        cursor: pointer;
-      }
-      .btn-secondary:hover {
-        border-color: var(--green-400);
-        background: var(--green-50);
-      }
-
-      /* The menu, set as a menu: no card chrome, just the poster's
-         hairline rules and an ember head rule. A bordered box here
-         would be the generic card the brand should not be wearing. */
-      .hero-menu {
-        border-top: 2px solid var(--orange-500);
-        padding-top: 20px;
-      }
-      .hero-menu-title {
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: var(--tracking-wide);
-        text-transform: uppercase;
-        color: var(--gray-500);
-        margin-bottom: 12px;
-      }
-      .hero-menu-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .hero-menu-list li {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 12px 0;
-        border-top: 1px solid var(--green-100);
-      }
-      .hero-menu-list li:first-child {
-        border-top: 0;
-        padding-top: 0;
-      }
-      .hero-menu-name {
-        font-family: var(--font-display);
-        font-size: 1.08rem;
-        font-weight: 700;
-        font-stretch: 102%;
-        color: var(--green-900);
-        letter-spacing: -0.015em;
-      }
-      .hero-menu-price {
-        font-family: var(--font-display);
-        font-size: 1.08rem;
-        font-weight: 700;
-        color: var(--orange-600);
-        white-space: nowrap;
-      }
-      .hero-menu-price small {
-        font-family: var(--font);
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: var(--gray-500);
-        margin-left: 2px;
-      }
-      .hero-menu-note {
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid var(--green-100);
-        font-size: 0.78rem;
-        color: var(--gray-500);
-      }
-
-      .section {
-        padding: 80px 24px;
-      }
-      .section-alt {
-        background: var(--gray-50);
-      }
-      .section-green {
-        background: linear-gradient(180deg, var(--green-50), #fff);
-      }
-      .section-title {
-        text-align: center;
-        font-family: var(--font-display);
-        font-size: clamp(1.7rem, 3.4vw, 2.3rem);
-        font-weight: 800;
-        font-stretch: 103%;
-        color: var(--green-900);
-        margin-bottom: 10px;
-        letter-spacing: -0.025em;
-        line-height: 1.15;
-      }
-      .section-subtitle {
-        text-align: center;
-        color: var(--gray-500);
-        font-size: 1rem;
-        margin-bottom: 52px;
-        max-width: 520px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-
-      .steps {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-        max-width: 960px;
-        margin: 0 auto;
-      }
-      /* The steps are a real sequence, so a numeral is the honest
-         marker — it replaced an emoji in a rounded gradient tile. */
-      .step {
-        text-align: left;
-        border-top: 2px solid var(--green-200);
-        padding: 18px 0 0;
-      }
-      .step-num {
-        font-family: var(--font-display);
-        font-size: 2rem;
-        font-weight: 800;
-        font-stretch: 96%;
-        /* orange-600 clears the 3:1 bar for large text (3.7:1) */
-        color: var(--orange-600, #d96217);
-        letter-spacing: -0.02em;
-        line-height: 1;
-        margin-bottom: 12px;
-      }
-      .step h3 {
-        font-family: var(--font-display);
-        font-size: 1.12rem;
-        font-weight: 700;
-        font-stretch: 102%;
-        color: var(--green-900);
-        letter-spacing: -0.015em;
-        margin-bottom: 6px;
-      }
-      .step p {
-        font-size: 0.88rem;
-        color: var(--gray-600);
-        line-height: 1.55;
-      }
-
-      /* Pricing — a menu, not six cards. Each plan is listed once with
-         its veg / non-veg variants side by side, because two cards
-         sharing one name and differing only by a small pill made the
-         price difference look arbitrary. Order is a quiet text link so
-         the hero keeps the page's only filled button. */
-      .plans {
-        max-width: 880px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-      }
-      .plan {
-        border-top: 1px solid var(--green-200);
-        padding: 30px 0 26px;
-      }
-      .plan:last-child {
-        border-bottom: 1px solid var(--green-200);
-      }
-      .plan-top {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 24px;
-      }
-      .plan-title {
-        font-family: var(--font-display);
-        font-size: 1.55rem;
-        font-weight: 800;
-        font-stretch: 104%;
-        color: var(--green-900);
-        letter-spacing: -0.02em;
-        line-height: 1.15;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .plan-flag {
-        font-family: var(--font);
-        font-size: 0.66rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--orange-700);
-        border: 1px solid var(--orange-100);
-        background: var(--orange-50);
-        padding: 3px 9px;
-        border-radius: var(--radius-full);
-      }
-      .plan-desc {
-        color: var(--gray-600);
-        font-size: 0.95rem;
-        margin-top: 6px;
-        max-width: 46em;
-      }
-      .plan-order {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        flex-shrink: 0;
-        font-size: 0.92rem;
-        font-weight: 600;
-        color: var(--green-800);
-        border-bottom: 2px solid var(--green-200);
-        padding-bottom: 2px;
-        white-space: nowrap;
-        transition: border-color 0.2s var(--ease-base);
-      }
-      .plan-order:hover {
-        border-color: var(--green-600);
-      }
-      .plan-variants {
-        margin-top: 20px;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px 32px;
-      }
-      .plan-variant {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 18px;
-        padding: 9px 0;
-        border-top: 1px solid var(--green-100);
-      }
-      .variant-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        font-size: 0.74rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--gray-600);
-        white-space: nowrap;
-      }
-      .variant-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-      .variant-dot--veg {
-        background: var(--leaf);
-      }
-      .variant-dot--nonveg {
-        background: var(--amber-500);
-      }
-      .variant-prices {
-        display: flex;
-        gap: 18px;
-        font-family: var(--font-display);
-        font-size: 0.98rem;
-        font-weight: 700;
-        font-stretch: 102%;
-        color: var(--green-900);
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
-      }
-      .variant-prices span {
-        display: inline-flex;
-        align-items: baseline;
-        gap: 5px;
-      }
-      .variant-prices b {
-        font-family: var(--font);
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: var(--gray-500);
-        letter-spacing: 0.04em;
-      }
-      .plans-note {
-        text-align: center;
-        font-size: 0.8rem;
-        color: var(--gray-500);
-        margin: -36px auto 34px;
-        max-width: 46em;
-      }
-      .plans-single {
-        text-align: center;
-        font-size: 0.95rem;
-        color: var(--gray-600);
-        margin: 36px auto 0;
-      }
-      .plans-single a {
-        font-weight: 600;
-        color: var(--green-700);
-        border-bottom: 2px solid var(--green-200);
-        padding-bottom: 2px;
-        transition: border-color 0.2s var(--ease-base);
-      }
-      .plans-single a:hover {
-        border-color: var(--green-600);
-      }
-
-      .features-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        max-width: 960px;
-        margin: 0 auto;
-      }
-      /* Six reasons, set as an editorial list with a rule between
-         items — not six identical cards, and no decorative emoji. */
-      .feature {
-        border-top: 1px solid var(--green-200);
-        padding: 20px 0 18px;
-      }
-      .feature h3 {
-        font-family: var(--font-display);
-        font-size: 1.1rem;
-        font-weight: 700;
-        font-stretch: 102%;
-        color: var(--green-900);
-        letter-spacing: -0.015em;
-        margin-bottom: 6px;
-      }
-      .feature p {
-        font-size: 0.88rem;
-        color: var(--gray-600);
-        line-height: 1.55;
-        max-width: 34em;
-      }
-
-
-      .cta-banner {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(
-          135deg,
-          var(--green-800) 0%,
-          var(--green-700) 50%,
-          var(--green-600) 100%
-        );
-        padding: 80px 24px;
-        text-align: center;
-      }
-      .cta-banner::before {
-        content: "";
-        position: absolute;
-        top: -100px;
-        right: -100px;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(
-          circle,
-          rgba(255, 255, 255, 0.08) 0%,
-          transparent 70%
-        );
-        border-radius: 50%;
-        animation: float-orb 15s ease-in-out infinite;
-      }
-      .cta-banner::after {
-        content: "";
-        position: absolute;
-        bottom: -80px;
-        left: -80px;
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(
-          circle,
-          rgba(255, 255, 255, 0.06) 0%,
-          transparent 70%
-        );
-        border-radius: 50%;
-        animation: float-orb 18s ease-in-out infinite reverse;
-      }
-      .cta-banner h2 {
-        font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-        font-weight: 800;
-        color: #fff;
-        margin-bottom: 12px;
-        letter-spacing: -0.02em;
-        position: relative;
-        z-index: 1;
-      }
-      .cta-banner .cta-sub {
-        color: rgba(187, 247, 208, 0.9);
-        font-size: 1.05rem;
-        margin-bottom: 36px;
-        max-width: 480px;
-        margin-left: auto;
-        margin-right: auto;
-        position: relative;
-        z-index: 1;
-      }
-      .cta-banner .btn-primary {
-        background: #fff;
-        color: var(--green-800);
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-        position: relative;
-        z-index: 1;
-      }
-      .cta-banner .btn-primary:hover {
-        background: var(--green-50);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-      }
-      .cta-banner .btn-primary svg {
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+        *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+        .reveal { opacity: 1; transform: none; }
+        .hl-line path { stroke-dashoffset: 0; }
+        .marquee-track { transform: none; }
       }
 
       .footer {
@@ -793,135 +336,10 @@
         font-weight: 700;
       }
 
-      @media (max-width: 900px) {
-        .features-grid,
-      }
-      @media (max-width: 768px) {
-        .steps {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .features-grid,
-        .footer-inner {
-          grid-template-columns: 1fr;
-          gap: 28px;
-        }
-        .hero {
-          padding: 64px 20px 56px;
-        }
-        .hero-inner {
-          grid-template-columns: 1fr;
-          gap: 40px;
-        }
-        .plan-top {
-          flex-direction: column;
-          gap: 14px;
-        }
-        .section {
-          padding: 56px 20px;
-        }
-        .cta-banner {
-          padding: 56px 20px;
-        }
-        .footer-bottom {
-          flex-direction: column;
-          text-align: center;
-        }
-      }
-      @media (max-width: 480px) {
-        .steps {
-          grid-template-columns: 1fr;
-        }
-        .plan-variants {
-          grid-template-columns: 1fr;
-        }
-      }
 
-      /* ── Landing refresh ─────────────────────────────────────── */
-      @keyframes rise {
-        from { opacity: 0; transform: translateY(18px); }
-        to { opacity: 1; transform: none; }
-      }
-      .hero-copy > *, .hero-menu {
-        animation: rise 0.7s var(--ease-out) both;
-      }
-      .hero-copy > :nth-child(2) { animation-delay: 0.06s; }
-      .hero-copy > :nth-child(3) { animation-delay: 0.12s; }
-      .hero-copy > :nth-child(4) { animation-delay: 0.18s; }
-      .hero-copy > :nth-child(5) { animation-delay: 0.24s; }
-      .hero-menu { animation-delay: 0.3s; }
-      .hero-badge .pulse { animation: pulse 2.2s ease-in-out infinite; }
-      .hero h1 { text-wrap: balance; }
-      .hero-menu-list li { padding: 0; }
-      .hero-menu-list li:first-child { padding-top: 0; }
-      .hero-menu-row {
-        display: flex;
-        align-items: baseline;
-        gap: 16px;
-        padding: 14px 8px;
-        margin: 0 -8px;
-        border-radius: var(--radius-sm);
-        transition: background 0.2s var(--ease-base);
-      }
-      .hero-menu-row { flex: 1; }
-      .hero-menu-name { flex: 1; }
-      .hero-menu-arrow {
-        align-self: center;
-        color: var(--orange-600);
-        opacity: 0;
-        transform: translateX(-6px);
-        transition: opacity 0.2s var(--ease-base), transform 0.2s var(--ease-base);
-      }
-      .hero-menu-row:hover, .hero-menu-row:focus-visible { background: var(--orange-50); }
-      .hero-menu-row:hover .hero-menu-arrow,
-      .hero-menu-row:focus-visible .hero-menu-arrow { opacity: 1; transform: none; }
-      .hero-menu-row:focus-visible, .btn-primary:focus-visible, .hero-textlink:focus-visible {
-        outline: 3px solid var(--orange-500);
-        outline-offset: 2px;
-      }
-      .hero-trust {
-        grid-column: 1 / -1;
-        list-style: none;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px 28px;
-        padding-top: 28px;
-        border-top: 1px solid var(--green-100);
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--green-800);
-      }
-      .hero-trust li { display: inline-flex; align-items: center; gap: 8px; }
-      .hero-trust li::before {
-        content: "";
-        width: 14px; height: 14px;
-        background: var(--leaf);
-        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/contain no-repeat;
-        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/contain no-repeat;
-      }
-      .step { transition: border-color 0.25s var(--ease-base), transform 0.25s var(--ease-base); }
-      .step:hover { border-color: var(--orange-500); transform: translateY(-3px); }
-      .sticky-cta { display: none; }
       @media (max-width: 768px) {
-        .hero-menu-arrow { opacity: 1; transform: none; }
-        .sticky-cta {
-          display: block;
-          position: fixed;
-          left: 0; right: 0; bottom: 0;
-          z-index: 50;
-          padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-          background: rgba(255,255,255,0.94);
-          backdrop-filter: blur(10px);
-          border-top: 1px solid var(--green-100);
-          transform: translateY(110%);
-          transition: transform 0.3s var(--ease-out);
-        }
-        .sticky-cta.show { transform: none; }
-        .sticky-cta .btn-primary { width: 100%; justify-content: center; }
-        body { padding-bottom: 72px; }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .hero-copy > *, .hero-menu { animation: none; }
-        .step:hover { transform: none; }
+        .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+        .footer-bottom { flex-direction: column; text-align: center; }
       }
     </style>
     <!-- Start the auth check as early as possible. nav.js is deferred, so a
@@ -941,327 +359,168 @@
   <body>
     <div id="nav-placeholder"></div>
 
-    <section class="hero">
+    <header class="hero">
+      <div class="hero-bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span></div>
       <div class="hero-inner">
         <div class="hero-copy">
-          <p class="hero-badge">
-            <span class="pulse" aria-hidden="true"></span> Now delivering in
-            your city
-          </p>
-          <p class="hero-kicker">Nutrition made delicious</p>
-          <h1>Chef-prepared meals, built around your goals</h1>
-          <p class="hero-subtitle">
-            Macro-balanced plans, tailored to you and cooked fresh every day.
-            Choose a plan, set your meals, leave the rest to us.
-          </p>
+          <p class="hero-badge"><span class="pulse" aria-hidden="true"></span> Now delivering in your city</p>
+          <h1>Chef-prepared meals, built around <span class="hl">your goals<svg class="hl-line" viewBox="0 0 320 20" preserveAspectRatio="none" aria-hidden="true"><path d="M3 14 C 60 3, 120 3, 170 9 S 270 17, 317 5" /></svg></span></h1>
+          <p class="hero-subtitle">Macro-balanced plans, tailored to you and cooked fresh every day. Choose a plan, set your meals, leave the rest to us.</p>
           <div class="hero-buttons">
-            <a href="/order" class="btn-primary">
-              Start my plan
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
-                />
-              </svg>
-            </a>
+            <a href="/order" class="btn-primary btn-lg">Start my plan <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
             <a href="#plans" class="hero-textlink">See plans &amp; prices</a>
-            <a
-              href="https://order.fitfuelnutrition.in"
-              class="hero-textlink"
-              target="_blank"
-              rel="noopener"
-              >Single meals</a
-            >
+            <a href="https://order.fitfuelnutrition.in" class="hero-textlink" target="_blank" rel="noopener">Single meals</a>
           </div>
-        </div>
-        <aside class="hero-menu" aria-label="Plans and prices per day">
-          <p class="hero-menu-title">On the menu</p>
-          <ul class="hero-menu-list">
-            <li>
-              <a class="hero-menu-row" href="/order?plan=high-protein-nonveg">
-                <span class="hero-menu-name">High Protein Meal Plan</span>
-                <span class="hero-menu-price">₹290<small>/day</small></span>
-                <svg class="hero-menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-              </a>
-            </li>
-            <li>
-              <a class="hero-menu-row" href="/order?plan=healthy-nonveg">
-                <span class="hero-menu-name">Healthy Diet Meal Plan</span>
-                <span class="hero-menu-price">₹250<small>/day</small></span>
-                <svg class="hero-menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-              </a>
-            </li>
-            <li>
-              <a class="hero-menu-row" href="/order?plan=weight-loss-nonveg">
-                <span class="hero-menu-name">Weight Loss Meal Plan</span>
-                <span class="hero-menu-price">₹240<small>/day</small></span>
-                <svg class="hero-menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-              </a>
-            </li>
+          <ul class="hero-proof" aria-label="Plan highlights">
+            <li><b class="counter" data-target="3">3</b><span>meal plans</span></li>
+            <li><b><span class="counter" data-target="3">3</span>-<span class="counter" data-target="28">28</span></b><span>day subscriptions</span></li>
+            <li><b>₹175</b><span>lowest per meal</span></li>
           </ul>
-          <p class="hero-menu-note">
-            Per meal, per day, non-veg, 3-day plan. Longer plans cost less per
-            meal.
-          </p>
-        </aside>
-        <ul class="hero-trust" aria-label="Why people choose FitFuel">
-          <li>Cooked fresh daily</li>
-          <li>Order on WhatsApp</li>
-          <li>Skip or swap any meal</li>
-          <li>Secure Razorpay checkout</li>
-        </ul>
+        </div>
+        <div class="hero-visual" id="hero-visual">
+          <div class="arch"><img src="/img/hero.webp" alt="A FitFuel high-protein bowl with grilled chicken, brown rice and charred broccoli" width="960" height="1200" fetchpriority="high" /></div>
+          <svg class="seal" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="circ" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0"/></defs><circle cx="60" cy="60" r="58" fill="#0d2f1a"/><text><textPath href="#circ" startOffset="0">COOKED FRESH · EVERY SINGLE DAY · </textPath></text><path d="M60 38c0 0-13 11-13 22a13 13 0 0 0 26 0c0-11-13-22-13-22Z" fill="#2f9e44"/></svg>
+          <div class="chip chip-a"><i class="dot dot--veg"></i><span><b>Cooked fresh today</b><small>Never frozen</small></span></div>
+          <div class="chip chip-b"><span><b>Skip or swap</b><small>from WhatsApp</small></span></div>
+        </div>
       </div>
-    </section>
+    </header>
+
+    <div class="marquee" aria-hidden="true"><div class="marquee-track"><span>Cooked fresh daily</span><i aria-hidden="true"></i><span>Macro-balanced</span><i aria-hidden="true"></i><span>Order on WhatsApp</span><i aria-hidden="true"></i><span>Skip or swap any meal</span><i aria-hidden="true"></i><span>Veg &amp; non-veg</span><i aria-hidden="true"></i><span>Secure Razorpay checkout</span><i aria-hidden="true"></i><span>Cooked fresh daily</span><i aria-hidden="true"></i><span>Macro-balanced</span><i aria-hidden="true"></i><span>Order on WhatsApp</span><i aria-hidden="true"></i><span>Skip or swap any meal</span><i aria-hidden="true"></i><span>Veg &amp; non-veg</span><i aria-hidden="true"></i><span>Secure Razorpay checkout</span><i aria-hidden="true"></i><span>Cooked fresh daily</span><i aria-hidden="true"></i><span>Macro-balanced</span><i aria-hidden="true"></i><span>Order on WhatsApp</span><i aria-hidden="true"></i><span>Skip or swap any meal</span><i aria-hidden="true"></i><span>Veg &amp; non-veg</span><i aria-hidden="true"></i><span>Secure Razorpay checkout</span><i aria-hidden="true"></i><span>Cooked fresh daily</span><i aria-hidden="true"></i><span>Macro-balanced</span><i aria-hidden="true"></i><span>Order on WhatsApp</span><i aria-hidden="true"></i><span>Skip or swap any meal</span><i aria-hidden="true"></i><span>Veg &amp; non-veg</span><i aria-hidden="true"></i><span>Secure Razorpay checkout</span><i aria-hidden="true"></i></div></div>
 
     <div class="sticky-cta" id="sticky-cta" aria-hidden="true">
       <a href="/order" class="btn-primary" tabindex="-1">Start my plan</a>
     </div>
 
-    <section class="section section-alt" id="how-it-works">
-      <h2 class="section-title reveal">How FitFuel Works</h2>
-      <p class="section-subtitle reveal">
-        From first message to first bite, here's what to expect.
-      </p>
-      <div class="steps">
-        <div class="step reveal reveal-delay-1">
-          <div class="step-num">01</div>
+    <section class="section steps-sec" id="how-it-works">
+      <div class="wrap">
+        <p class="eyebrow reveal">How it works</p>
+        <h2 class="section-title reveal">From first message to first bite</h2>
+        <ol class="steps">
+        <li class="st reveal reveal-delay-1">
+          <span class="st-num">01</span>
           <h3>Say Hello</h3>
-          <p>
-            Message us on WhatsApp and our guided assistant sets up your account
-            in minutes.
-          </p>
-        </div>
-        <div class="step reveal reveal-delay-2">
-          <div class="step-num">02</div>
+          <p>Message us on WhatsApp and our guided assistant sets up your account in minutes.</p>
+        </li>
+        <li class="st reveal reveal-delay-2">
+          <span class="st-num">02</span>
           <h3>Build Your Plan</h3>
-          <p>
-            Choose from our macro-balanced meal plans, pick your subscription
-            length (3 to 28 days), and set your meals per day.
-          </p>
-        </div>
-        <div class="step reveal reveal-delay-3">
-          <div class="step-num">03</div>
+          <p>Choose from our macro-balanced meal plans, pick your subscription length (3 to 28 days), and set your meals per day.</p>
+        </li>
+        <li class="st reveal reveal-delay-3">
+          <span class="st-num">03</span>
           <h3>Check Out Securely</h3>
-          <p>
-            Pay through Razorpay with UPI, cards, or net banking. Fully
-            encrypted, fully supported.
-          </p>
-        </div>
-        <div class="step reveal reveal-delay-4">
-          <div class="step-num">04</div>
+          <p>Pay through Razorpay with UPI, cards, or net banking. Fully encrypted, fully supported.</p>
+        </li>
+        <li class="st reveal reveal-delay-4">
+          <span class="st-num">04</span>
           <h3>Eat Fresh, Daily</h3>
-          <p>
-            Confirm or skip each meal from a WhatsApp reminder. We cook and
-            deliver, every day, on time.
-          </p>
+          <p>Confirm or skip each meal from a WhatsApp reminder. We cook and deliver, every day, on time.</p>
+        </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section plans-sec" id="plans">
+      <div class="wrap">
+        <p class="eyebrow reveal">Meal plans &amp; pricing</p>
+        <h2 class="section-title reveal">Pick the plan that fits your goal</h2>
+        <p class="section-sub reveal">Every plan is macro-balanced and chef-designed, with a veg and a non-veg option. The longer you subscribe, the more you save per meal. Prices are per meal, per day: breakfast (1), lunch and dinner (2), or all three (3).</p>
+        <div class="pc-grid">
+        <article class="pc reveal reveal-delay-1">
+          <div class="pc-photo">
+            <img src="/img/plan-high-protein.webp" alt="High Protein Meal Plan meal" width="720" height="720" loading="lazy" decoding="async" />
+            <span class="pc-tag">Build &amp; recover</span>
+            <span class="pc-from">from <b>₹210</b>/meal</span>
+          </div>
+          <div class="pc-body">
+            <h3>High Protein Meal Plan</h3>
+            <p>Protein-forward meals engineered for recovery and strength, built for lean muscle and satiety.</p>
+            <div class="pc-variant"><span class="pc-label"><i class="dot dot--nonveg"></i>Non-veg</span><ul><li><span>3d</span><b>₹290</b></li><li><span>7d</span><b>₹260</b></li><li><span>14d</span><b>₹242</b></li><li><span>28d</span><b>₹220</b></li></ul></div><div class="pc-variant"><span class="pc-label"><i class="dot dot--veg"></i>Veg</span><ul><li><span>3d</span><b>₹280</b></li><li><span>7d</span><b>₹245</b></li><li><span>14d</span><b>₹230</b></li><li><span>28d</span><b>₹210</b></li></ul></div>
+            <a href="/order?plan=high-protein-nonveg" class="pc-cta">Start this plan <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+          </div>
+        </article>
+        <article class="pc reveal reveal-delay-2">
+          <div class="pc-photo">
+            <img src="/img/plan-healthy.webp" alt="Healthy Diet Meal Plan meal" width="720" height="720" loading="lazy" decoding="async" />
+            <span class="pc-tag">Everyday balance</span>
+            <span class="pc-from">from <b>₹175</b>/meal</span>
+          </div>
+          <div class="pc-body">
+            <h3>Healthy Diet Meal Plan</h3>
+            <p>Everyday nutrition, balanced across vegetarian and non-vegetarian dishes to keep your energy steady.</p>
+            <div class="pc-variant"><span class="pc-label"><i class="dot dot--nonveg"></i>Non-veg</span><ul><li><span>3d</span><b>₹250</b></li><li><span>7d</span><b>₹220</b></li><li><span>14d</span><b>₹207</b></li><li><span>28d</span><b>₹190</b></li></ul></div><div class="pc-variant"><span class="pc-label"><i class="dot dot--veg"></i>Veg</span><ul><li><span>3d</span><b>₹240</b></li><li><span>7d</span><b>₹210</b></li><li><span>14d</span><b>₹193</b></li><li><span>28d</span><b>₹175</b></li></ul></div>
+            <a href="/order?plan=healthy-nonveg" class="pc-cta">Start this plan <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+          </div>
+        </article>
+        <article class="pc reveal reveal-delay-3">
+          <div class="pc-photo">
+            <img src="/img/plan-weight-loss.webp" alt="Weight Loss Meal Plan meal" width="720" height="720" loading="lazy" decoding="async" />
+            <span class="pc-tag">Lean &amp; light</span>
+            <span class="pc-from">from <b>₹175</b>/meal</span>
+          </div>
+          <div class="pc-body">
+            <h3>Weight Loss Meal Plan</h3>
+            <p>Calorie-controlled meals with lean protein, low-oil cooking and portioned staples for steady fat loss.</p>
+            <div class="pc-variant"><span class="pc-label"><i class="dot dot--nonveg"></i>Non-veg</span><ul><li><span>3d</span><b>₹240</b></li><li><span>7d</span><b>₹210</b></li><li><span>14d</span><b>₹194</b></li><li><span>28d</span><b>₹175</b></li></ul></div><div class="pc-variant"><span class="pc-label"><i class="dot dot--veg"></i>Veg</span><ul><li><span>3d</span><b>₹240</b></li><li><span>7d</span><b>₹210</b></li><li><span>14d</span><b>₹197</b></li><li><span>28d</span><b>₹178</b></li></ul></div>
+            <a href="/order?plan=weight-loss-nonveg" class="pc-cta">Start this plan <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+          </div>
+        </article>
         </div>
+        <p class="plans-single reveal">Just want one meal? <a href="https://order.fitfuelnutrition.in" target="_blank" rel="noopener">Order single meals</a></p>
       </div>
     </section>
 
-    <section class="section" id="plans">
-      <h2 class="section-title reveal">Meal Plans & Pricing</h2>
-      <p class="section-subtitle reveal">
-        Every plan is macro-balanced and chef-designed, with a veg and a non-veg
-        option. The longer you subscribe, the more you save per meal.
-      </p>
-      <p class="plans-note reveal">
-        Price per meal, per day. Each day you can take breakfast (1), lunch and
-        dinner (2), or all three (3).
-      </p>
-      <div class="plans">
-        <article class="plan reveal">
-          <div class="plan-top">
-            <div>
-              <h3 class="plan-title">Healthy Diet Meal Plan</h3>
-              <p class="plan-desc">
-                Everyday nutrition, balanced across vegetarian and
-                non-vegetarian dishes to keep your energy steady.
-              </p>
-            </div>
-            <a href="/order?plan=healthy-nonveg" class="plan-order"
-              >Start this plan</a
-            >
-          </div>
-          <div class="plan-variants">
-            <div class="plan-variant">
-              <span class="variant-label"
-                ><span class="variant-dot variant-dot--nonveg"></span
-                >Non-veg</span
-              >
-              <span class="variant-prices"
-                ><span><b>3d</b> ₹250</span><span><b>7d</b> ₹220</span
-                ><span><b>14d</b> ₹207</span><span><b>28d</b> ₹190</span></span
-              >
-            </div>
-            <div class="plan-variant">
-              <span class="variant-label"
-                ><span class="variant-dot variant-dot--veg"></span>Veg</span
-              >
-              <span class="variant-prices"
-                ><span><b>3d</b> ₹240</span><span><b>7d</b> ₹210</span
-                ><span><b>14d</b> ₹193</span><span><b>28d</b> ₹175</span></span
-              >
-            </div>
-          </div>
-        </article>
-        <article class="plan reveal">
-          <div class="plan-top">
-            <div>
-              <h3 class="plan-title">High Protein Meal Plan</h3>
-              <span class="plan-flag">Most popular</span>
-              <p class="plan-desc">
-                Protein-forward meals engineered for recovery and strength,
-                built for lean muscle and satiety.
-              </p>
-            </div>
-            <a href="/order?plan=high-protein-nonveg" class="plan-order"
-              >Start this plan</a
-            >
-          </div>
-          <div class="plan-variants">
-            <div class="plan-variant">
-              <span class="variant-label"
-                ><span class="variant-dot variant-dot--nonveg"></span
-                >Non-veg</span
-              >
-              <span class="variant-prices"
-                ><span><b>3d</b> ₹290</span><span><b>7d</b> ₹260</span
-                ><span><b>14d</b> ₹242</span><span><b>28d</b> ₹220</span></span
-              >
-            </div>
-            <div class="plan-variant">
-              <span class="variant-label"
-                ><span class="variant-dot variant-dot--veg"></span>Veg</span
-              >
-              <span class="variant-prices"
-                ><span><b>3d</b> ₹280</span><span><b>7d</b> ₹245</span
-                ><span><b>14d</b> ₹230</span><span><b>28d</b> ₹210</span></span
-              >
-            </div>
-          </div>
-        </article>
-        <article class="plan reveal">
-          <div class="plan-top">
-            <div>
-              <h3 class="plan-title">Weight Loss Meal Plan</h3>
-              <p class="plan-desc">
-                Calorie-controlled meals with lean protein, low-oil cooking and
-                portioned staples for steady fat loss.
-              </p>
-            </div>
-            <a href="/order?plan=weight-loss-nonveg" class="plan-order"
-              >Start this plan</a
-            >
-          </div>
-          <div class="plan-variants">
-            <div class="plan-variant">
-              <span class="variant-label"
-                ><span class="variant-dot variant-dot--nonveg"></span
-                >Non-veg</span
-              >
-              <span class="variant-prices"
-                ><span><b>3d</b> ₹240</span><span><b>7d</b> ₹210</span
-                ><span><b>14d</b> ₹194</span><span><b>28d</b> ₹175</span></span
-              >
-            </div>
-            <div class="plan-variant">
-              <span class="variant-label"
-                ><span class="variant-dot variant-dot--veg"></span>Veg</span
-              >
-              <span class="variant-prices"
-                ><span><b>3d</b> ₹240</span><span><b>7d</b> ₹210</span
-                ><span><b>14d</b> ₹197</span><span><b>28d</b> ₹178</span></span
-              >
-            </div>
-          </div>
-        </article>
-      </div>
-      <p class="plans-single reveal">
-        Just want one meal?
-        <a
-          href="https://order.fitfuelnutrition.in"
-          target="_blank"
-          rel="noopener"
-          >Order single meals</a
-        >
-      </p>
-    </section>
-
-    <section class="section section-green" id="why">
-      <h2 class="section-title reveal">Why FitFuel?</h2>
-      <p class="section-subtitle reveal">
-        More than a meal delivery service. A dedicated partner in your
-        nutrition.
-      </p>
-      <div class="features-grid">
-        <div class="feature reveal reveal-delay-1">
+    <section class="section why-sec" id="why">
+      <div class="why-bg" aria-hidden="true"></div>
+      <div class="wrap">
+        <p class="eyebrow eyebrow--light reveal">Why FitFuel</p>
+        <h2 class="section-title section-title--light reveal">More than a meal delivery service</h2>
+        <p class="section-sub section-sub--light reveal">A dedicated partner in your nutrition.</p>
+        <div class="feat-grid">
+        <div class="feat reveal reveal-delay-1">
+          <div class="feat-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c0 0-6 5-6 10a6 6 0 0 0 12 0c0-5-6-10-6-10Z"/><path d="M12 21v-8"/></svg></div>
           <h3>Cooked Fresh, Every Day</h3>
-          <p>
-            Every meal is prepared the day it ships. Nothing frozen, nothing
-            reheated.
-          </p>
+          <p>Every meal is prepared the day it ships. Nothing frozen, nothing reheated.</p>
         </div>
-        <div class="feature reveal reveal-delay-2">
+        <div class="feat reveal reveal-delay-2">
+          <div class="feat-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.7-5.1A8.5 8.5 0 1 1 21 12Z"/></svg></div>
           <h3>WhatsApp-First Experience</h3>
-          <p>
-            No app to download. Message us on WhatsApp and our assistant handles
-            the rest.
-          </p>
+          <p>No app to download. Message us on WhatsApp and our assistant handles the rest.</p>
         </div>
-        <div class="feature reveal reveal-delay-3">
+        <div class="feat reveal reveal-delay-3">
+          <div class="feat-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></svg></div>
           <h3>Skip or Swap Anytime</h3>
-          <p>
-            Plans change. Skip or swap any meal directly from your WhatsApp
-            reminder, no penalties.
-          </p>
+          <p>Plans change. Skip or swap any meal directly from your WhatsApp reminder, no penalties.</p>
         </div>
-        <div class="feature reveal reveal-delay-4">
+        <div class="feat reveal reveal-delay-1">
+          <div class="feat-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></div>
           <h3>Plans Built Around Goals</h3>
-          <p>
-            Lose weight, build muscle, or simply eat better. Each plan is
-            designed around a clear outcome.
-          </p>
+          <p>Lose weight, build muscle, or simply eat better. Each plan is designed around a clear outcome.</p>
         </div>
-        <div class="feature reveal reveal-delay-5">
+        <div class="feat reveal reveal-delay-2">
+          <div class="feat-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg></div>
           <h3>Delivered Daily, On Time</h3>
-          <p>
-            Fresh meals reach your door every day of your subscription, rain or
-            shine.
-          </p>
+          <p>Fresh meals reach your door every day of your subscription, rain or shine.</p>
         </div>
-        <div class="feature reveal reveal-delay-6">
+        <div class="feat reveal reveal-delay-3">
+          <div class="feat-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
           <h3>Bank-Grade Payment Security</h3>
-          <p>
-            Every transaction runs through Razorpay, trusted by leading Indian
-            brands for secure checkout.
-          </p>
+          <p>Every transaction runs through Razorpay, trusted by leading Indian brands for secure checkout.</p>
+        </div>
         </div>
       </div>
     </section>
 
     <section class="cta-banner">
-      <h2 class="reveal">Ready to Eat Better?</h2>
-      <p class="cta-sub reveal">
-        Start your plan today. Chef-prepared, macro-balanced meals delivered to
-        your door every day.
-      </p>
-      <a href="/order" class="btn-primary reveal">
-        Start my plan
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
-        </svg>
-      </a>
+      <div class="cta-inner reveal">
+        <div class="cta-copy">
+          <h2>Ready to eat better?</h2>
+          <p class="cta-sub">Start your plan today. Chef-prepared, macro-balanced meals delivered to your door every day.</p>
+          <a href="/order" class="btn-primary btn-lg btn-light">Start my plan <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></a>
+        </div>
+        <img class="cta-img" src="/img/plan-healthy.webp" alt="" width="720" height="720" loading="lazy" decoding="async" />
+      </div>
     </section>
 
     <footer class="footer">
@@ -1354,69 +613,51 @@
         </p>
       </div>
     </footer>
+
     <script>
-      // ── Scroll Reveal (Intersection Observer) ─────────────────────
-      const prefersReduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-      if (!prefersReduced) {
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((e) => {
-              if (e.isIntersecting) {
-                e.target.classList.add("visible");
-                observer.unobserve(e.target);
-              }
-            });
-          },
-          { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
-        );
-        document
-          .querySelectorAll(".reveal")
-          .forEach((el) => observer.observe(el));
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // Scroll reveal
+      if (!prefersReduced && "IntersectionObserver" in window) {
+        const io = new IntersectionObserver((es) => es.forEach((e) => {
+          if (e.isIntersecting) { e.target.classList.add("visible"); io.unobserve(e.target); }
+        }), { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+        document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
       } else {
-        document
-          .querySelectorAll(".reveal")
-          .forEach((el) => el.classList.add("visible"));
+        document.querySelectorAll(".reveal").forEach((el) => el.classList.add("visible"));
       }
-
-      // ── Animated Counters ─────────────────────────────────────────
+      // Counters
       function animateCounter(el) {
-        const target = parseInt(el.dataset.target);
-        const suffix = el.dataset.suffix || "";
-        const duration = 1200;
-        const start = performance.now();
-        function tick(now) {
-          const elapsed = now - start;
-          const progress = Math.min(elapsed / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          el.textContent = Math.round(eased * target) + suffix;
-          if (progress < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
+        const target = parseInt(el.dataset.target, 10), t0 = performance.now(), d = 1200;
+        el.textContent = "0";
+        (function tick(now) {
+          const p = Math.min((now - t0) / d, 1);
+          el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+          if (p < 1) requestAnimationFrame(tick);
+        })(t0);
       }
-      if (!prefersReduced) {
-        const counterObserver = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((e) => {
-              if (e.isIntersecting) {
-                animateCounter(e.target);
-                counterObserver.unobserve(e.target);
-              }
-            });
-          },
-          { threshold: 0.5 },
-        );
-        document
-          .querySelectorAll(".counter")
-          .forEach((el) => counterObserver.observe(el));
-      } else {
-        document.querySelectorAll(".counter").forEach((el) => {
-          el.textContent = el.dataset.target + (el.dataset.suffix || "");
+      if (!prefersReduced && "IntersectionObserver" in window) {
+        const co = new IntersectionObserver((es) => es.forEach((e) => {
+          if (e.isIntersecting) { animateCounter(e.target); co.unobserve(e.target); }
+        }), { threshold: 0.5 });
+        document.querySelectorAll(".counter").forEach((el) => co.observe(el));
+      }
+      // Hero parallax on pointer move (desktop, motion allowed)
+      (function () {
+        const v = document.getElementById("hero-visual");
+        if (!v || prefersReduced || !window.matchMedia("(hover: hover)").matches) return;
+        let raf = 0;
+        v.addEventListener("pointermove", (e) => {
+          const r = v.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(() => {
+            v.style.setProperty("--px", x.toFixed(3));
+            v.style.setProperty("--py", y.toFixed(3));
+          });
         });
-      }
-
-      // ── Sticky mobile CTA: show once the hero CTA has scrolled away ──
+        v.addEventListener("pointerleave", () => { v.style.setProperty("--px", 0); v.style.setProperty("--py", 0); });
+      })();
+      // Sticky mobile CTA
       (function () {
         const bar = document.getElementById("sticky-cta");
         const heroBtn = document.querySelector(".hero .btn-primary");
@@ -1429,10 +670,7 @@
           bar.setAttribute("aria-hidden", on ? "false" : "true");
           bar.querySelector("a").tabIndex = on ? 0 : -1;
         };
-        new IntersectionObserver(([e]) => {
-          heroGone = !e.isIntersecting && e.boundingClientRect.top < 0;
-          update();
-        }).observe(heroBtn);
+        new IntersectionObserver(([e]) => { heroGone = !e.isIntersecting && e.boundingClientRect.top < 0; update(); }).observe(heroBtn);
         if (cta) new IntersectionObserver(([e]) => { ctaVisible = e.isIntersecting; update(); }).observe(cta);
       })();
     </script>
